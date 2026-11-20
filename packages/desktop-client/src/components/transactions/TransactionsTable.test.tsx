@@ -293,10 +293,14 @@ beforeEach(() => {
   schedules = [];
   createScheduleMock.mockClear();
   initBasicServer();
+  // The table runs in a focused app window. jsdom instead reports no focus
+  // whenever no element is focused, e.g. while a cell blurs to the page.
+  vi.spyOn(document, 'hasFocus').mockReturnValue(true);
 });
 
 afterEach(() => {
   global.__resetWorld();
+  vi.mocked(document.hasFocus).mockRestore();
 });
 
 // Not good, see `Autocomplete.js` for details
@@ -819,6 +823,50 @@ describe('Transactions', () => {
     after.remove();
   });
 
+  function countSelectedRows(container: HTMLElement) {
+    // The header checkbox shows a mark too while anything is selected
+    return Math.max(
+      0,
+      container.querySelectorAll('[data-testid=select] svg').length - 1,
+    );
+  }
+
+  test.each(['select', 'cleared'] as const)(
+    'escape clears the selection in one press after clicking the %s cell',
+    async field => {
+      const { container } = renderTransactions();
+      await userEvent.click(
+        queryField(container, 'select', '[data-testid=cell-button]', 2),
+      );
+      expect(countSelectedRows(container)).toBe(1);
+      if (field === 'cleared') {
+        await userEvent.click(
+          queryField(container, 'cleared', '[data-testid=cell-button]', 2),
+        );
+      }
+
+      await userEvent.keyboard('[Escape]');
+
+      expect(countSelectedRows(container)).toBe(0);
+      expect(document.activeElement).toBe(screen.getByTestId('table'));
+    },
+  );
+
+  test('escape leaves the cell being edited before clearing the selection', async () => {
+    const { container } = renderTransactions();
+    await userEvent.click(
+      queryField(container, 'select', '[data-testid=cell-button]', 2),
+    );
+    await editField(container, 'notes', 3);
+
+    await userEvent.keyboard('[Escape]');
+    expect(queryField(container, 'notes', 'input', 3)).toBeNull();
+    expect(countSelectedRows(container)).toBe(1);
+
+    await userEvent.keyboard('[Escape]');
+    expect(countSelectedRows(container)).toBe(0);
+  });
+
   test('keybinding escape resets the value', async () => {
     const { container, getTransactions } = renderTransactions();
 
@@ -953,6 +1001,136 @@ describe('Transactions', () => {
       expect(queryField(container, 'notes', 'input', 2)).toBeNull();
       expect(getTransactions()[2].notes).toBe(originalValue);
     }
+  });
+
+  test.each(['payee', 'category'] as const)(
+    'escape exits the %s cell after picking an item with the mouse',
+    async field => {
+      const { container, getTransactions } = renderTransactions();
+      await editField(container, field, 2);
+      const target =
+        field === 'payee'
+          ? screen.getByTestId('Alice-payee-item')
+          : within(screen.getByTestId('autocomplete')).getByText('General');
+      await userEvent.click(target);
+      const expectedValue =
+        field === 'payee'
+          ? 'alice-id'
+          : categories.find(category => category.name === 'General')?.id;
+      expect(getTransactions()[2][field]).toBe(expectedValue);
+      expect(queryField(container, field, 'input', 2)).not.toBeNull();
+
+      await userEvent.keyboard('[Escape]');
+
+      expect(queryField(container, field, 'input', 2)).toBeNull();
+      expect(document.activeElement).toBe(screen.getByTestId('table'));
+      expect(getTransactions()[2][field]).toBe(expectedValue);
+    },
+  );
+
+  test('escape exits the date cell after saving with enter while the picker is open', async () => {
+    const { container, getTransactions } = renderTransactions();
+    const input = await editField(container, 'date', 2);
+    await userEvent.clear(input);
+    await userEvent.type(input, '05/04/2016');
+    expect(screen.getByTestId('date-select-tooltip')).toBeInTheDocument();
+    await userEvent.keyboard('[Enter]');
+    expect(getTransactions()[2].date).toBe('2016-05-04');
+    expect(queryField(container, 'date', 'input', 2)).not.toBeNull();
+
+    await userEvent.keyboard('[Escape]');
+
+    expect(queryField(container, 'date', 'input', 2)).toBeNull();
+    expect(document.activeElement).toBe(screen.getByTestId('table'));
+    expect(getTransactions()[2].date).toBe('2016-05-04');
+  });
+
+  test('escape with the popup open after a mouse pick keeps the picked value', async () => {
+    const { container, getTransactions } = renderTransactions();
+    await editField(container, 'category', 2);
+    await userEvent.click(
+      within(screen.getByTestId('autocomplete')).getByText('General'),
+    );
+    await waitForAutocomplete();
+    const generalId = categories.find(c => c.name === 'General')?.id;
+    expect(getTransactions()[2].category).toBe(generalId);
+
+    // Reopen the popup by typing, then close it with Escape and leave
+    const input = queryField(container, 'category', 'input', 2);
+    await userEvent.type(input, 'Fo');
+    await userEvent.keyboard('[Escape]');
+    await editField(container, 'notes', 2);
+
+    expect(getTransactions()[2].category).toBe(generalId);
+  });
+
+  test('escape on an edited date reverts it and exits the cell', async () => {
+    const { container, getTransactions } = renderTransactions();
+    const originalDate = getTransactions()[2].date;
+    const input = await editField(container, 'date', 2);
+    await userEvent.clear(input);
+    await userEvent.type(input, '05/04/2016[Escape]');
+
+    expect(queryField(container, 'date', 'input', 2)).toBeNull();
+    expect(getTransactions()[2].date).toBe(originalDate);
+  });
+
+  test('escape in the new transaction amount exits the cell and keeps the row', async () => {
+    const { container, updateProps } = renderTransactions({
+      onCloseAddTransaction: () => {
+        updateProps({ isAdding: false });
+      },
+    });
+    updateProps({ isAdding: true });
+    const input = await editNewField(container, 'debit', 0);
+    await userEvent.type(input, '12[Escape]');
+
+    expect(queryNewField(container, 'debit', 'input', 0)).toBeNull();
+    expect(
+      container.querySelector('[data-testid="new-transaction"]'),
+    ).not.toBeNull();
+    expect(queryNewField(container, 'debit', '', 0).textContent).not.toBe(
+      '12.00',
+    );
+  });
+
+  test('escape on a focused button cell in the new transaction keeps the row', async () => {
+    const { container, updateProps } = renderTransactions({
+      onCloseAddTransaction: () => {
+        updateProps({ isAdding: false });
+      },
+    });
+    updateProps({ isAdding: true });
+    await userEvent.click(
+      queryNewField(container, 'cleared', '[data-testid=cell-button]', 0),
+    );
+
+    await userEvent.keyboard('[Escape]');
+    expect(
+      container.querySelector('[data-testid="new-transaction"]'),
+    ).not.toBeNull();
+
+    await userEvent.keyboard('[Escape]');
+    expect(container.querySelector('[data-testid="new-transaction"]')).toBe(
+      null,
+    );
+  });
+
+  test('a note is not saved when the window loses focus', async () => {
+    const { container, getTransactions } = renderTransactions();
+    const originalValue = getTransactions()[2].notes;
+    const input = await editField(container, 'notes', 2);
+    await userEvent.clear(input);
+    await userEvent.type(input, 'draft');
+
+    vi.mocked(document.hasFocus).mockReturnValue(false);
+    fireEvent.blur(input);
+    expect(getTransactions()[2].notes).toBe(originalValue);
+    vi.mocked(document.hasFocus).mockReturnValue(true);
+
+    // Returning to the app and then leaving the cell still saves the draft
+    await userEvent.type(input, '[Tab]');
+    expect(getTransactions()[2].notes).toBe('draft');
   });
 
   test('a note with line breaks is not changed by focusing it', async () => {

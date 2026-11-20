@@ -50,6 +50,7 @@ import { addDays, format, isValid, parse, parseISO, subDays } from 'date-fns';
 
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { InputField } from '#components/mobile/MobileForms';
+import type { CellEditSession } from '#components/useCellEditor';
 import { useLanguage } from '#hooks/useLocale';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -297,14 +298,6 @@ function defaultShouldSaveFromKey(e: KeyboardEvent<HTMLInputElement>) {
   return e.key === 'Enter';
 }
 
-export type DateSelectEditSession = {
-  committedValue: string;
-  onUpdateDraft?: (value: string) => void;
-  onCommit: (value: string) => void;
-  onCancel: () => void;
-  onExit?: () => void;
-};
-
 type DateSelectProps = {
   id?: string;
   containerProps?: ComponentProps<typeof View>;
@@ -321,7 +314,7 @@ type DateSelectProps = {
   onSelect: (selectedDate: string) => void;
   transferDateSyncChecked?: boolean;
   onTransferDateSyncChange?: (checked: boolean) => void;
-  editSession?: DateSelectEditSession;
+  editSession?: CellEditSession<string>;
 };
 
 function DateSelectDesktop({

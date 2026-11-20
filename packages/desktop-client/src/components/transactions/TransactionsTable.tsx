@@ -544,13 +544,7 @@ function StatusCell({
         }}
         disabled={isPreview || isChild}
         onEdit={() => onEdit(id, 'cleared')}
-        onFocus={() => {
-          if (onFocusCell) {
-            onFocusCell(id, 'cleared');
-          } else {
-            onEdit(id, 'cleared');
-          }
-        }}
+        onFocus={onFocusCell && (() => onFocusCell(id, 'cleared'))}
         onSelect={onSelect}
       >
         {createElement(statusProps.Icon, {
@@ -1624,13 +1618,7 @@ const Transaction = memo(function Transaction({
         });
       }}
       onEdit={() => onEdit(id, 'select')}
-      onFocus={() => {
-        if (onFocusCell) {
-          onFocusCell(id, 'select');
-        } else {
-          onEdit(id, 'select');
-        }
-      }}
+      onFocus={onFocusCell && (() => onFocusCell(id, 'select'))}
       selected={selected}
       style={{ ...(isChild && { borderLeftWidth: 1 }) }}
       value={
@@ -3015,9 +3003,14 @@ function TransactionTableInner({
             {...newNavigator.getNavigatorProps({
               onKeyDown: (e: KeyboardEvent) => {
                 props.onCheckNewEnter(e);
-                // Escape exits the focused cell first; only cancel the whole
-                // row once nothing is being edited, or typed values are lost.
-                if (e.key === 'Escape' && !newNavigator.isEditing) {
+                // Escape exits the focused cell first (including a focused
+                // button cell, which isn't editing); only cancel the whole
+                // row once the row itself has focus, or typed values are lost.
+                if (
+                  e.key === 'Escape' &&
+                  !newNavigator.isEditing &&
+                  e.target === e.currentTarget
+                ) {
                   props.onCloseAddTransaction();
                 }
               },

@@ -57,6 +57,8 @@ import {
   ConditionalPrivacyFilter,
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
+import { useCellEditor } from './useCellEditor';
+import type { CellEditSession } from './useCellEditor';
 
 export const ROW_HEIGHT = 32;
 
@@ -320,128 +322,6 @@ const readonlyInputStyle = {
   '::selection': { backgroundColor: theme.formInputTextReadOnlySelection },
 };
 
-type EditSessionState = 'active' | 'committed' | 'canceled';
-
-export type UseCellEditorOptions<T> = {
-  committedValue: T;
-  isEditing?: boolean;
-  onUpdate?: (value: T) => void;
-  onExit?: () => void;
-  onKeyDown?: (e: KeyboardEvent) => void;
-  onBlur?: (e: FocusEvent) => void;
-};
-
-export function useCellEditor<T>({
-  committedValue,
-  isEditing = true,
-  onUpdate,
-  onExit,
-  onKeyDown: userOnKeyDown,
-  onBlur: userOnBlur,
-}: UseCellEditorOptions<T>) {
-  const [value, setValue] = useState<T>(committedValue);
-  const [prevCommittedValue, setPrevCommittedValue] =
-    useState<T>(committedValue);
-  const [wasEditing, setWasEditing] = useState(isEditing);
-  const sessionState = useRef<EditSessionState>('active');
-  const valueRef = useRef<T>(committedValue);
-  valueRef.current = value;
-
-  const isStartingEdit = isEditing && !wasEditing;
-  if (wasEditing !== isEditing) {
-    setWasEditing(isEditing);
-  }
-  if (prevCommittedValue !== committedValue || isStartingEdit) {
-    setValue(committedValue);
-    setPrevCommittedValue(committedValue);
-    valueRef.current = committedValue;
-  }
-  // Cells stay mounted between edits. Only entering edit mode starts a
-  // fresh session; receiving a saved value must not enable another blur save.
-  if (isStartingEdit) {
-    sessionState.current = 'active';
-  }
-
-  const setValueWrapped = useCallback((next: T | ((prev: T) => T)) => {
-    sessionState.current = 'active';
-    setValue(prev => {
-      const resolved =
-        typeof next === 'function' ? (next as (prev: T) => T)(prev) : next;
-      valueRef.current = resolved;
-      return resolved;
-    });
-  }, []);
-
-  const cancelEdit = useCallback(() => {
-    if (sessionState.current !== 'active') {
-      return;
-    }
-    sessionState.current = 'canceled';
-    setValue(committedValue);
-    valueRef.current = committedValue;
-    onExit?.();
-  }, [committedValue, onExit]);
-
-  const commitEdit = useCallback(
-    (newValue?: T) => {
-      if (sessionState.current !== 'active') {
-        return;
-      }
-      sessionState.current = 'committed';
-      const val = newValue !== undefined ? newValue : valueRef.current;
-      setValue(val);
-      valueRef.current = val;
-      onUpdate?.(val);
-    },
-    [onUpdate],
-  );
-
-  const onKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      userOnKeyDown?.(e);
-      if (e.defaultPrevented || e.isPropagationStopped()) {
-        return;
-      }
-
-      if (e.key === 'Escape') {
-        if (e.target instanceof HTMLInputElement) {
-          e.target.value = String(committedValue ?? '');
-        }
-        cancelEdit();
-        if (onExit) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      }
-    },
-    [cancelEdit, committedValue, onExit, userOnKeyDown],
-  );
-
-  const onBlur = useCallback(
-    (e: FocusEvent) => {
-      if (sessionState.current === 'canceled') {
-        return;
-      }
-      if (sessionState.current === 'active') {
-        sessionState.current = 'committed';
-        onUpdate?.(valueRef.current);
-      }
-      userOnBlur?.(e);
-    },
-    [onUpdate, userOnBlur],
-  );
-
-  return {
-    value,
-    setValue: setValueWrapped,
-    onKeyDown,
-    onBlur,
-    cancelEdit,
-    commitEdit,
-    sessionState,
-  };
-}
-
 type InputValueProps = Omit<
   ComponentProps<typeof Input>,
   'value' | 'onUpdate'
@@ -461,17 +341,9 @@ function InputValue({
   onKeyDown: userOnKeyDown,
   ...props
 }: InputValueProps) {
-  const committedValue = defaultValue ?? '';
-  const [isEdited, setIsEdited] = useState(false);
-  const [prevCommittedValue, setPrevCommittedValue] = useState(committedValue);
-  if (prevCommittedValue !== committedValue) {
-    setIsEdited(false);
-    setPrevCommittedValue(committedValue);
-  }
-
   const cellEditor = useCellEditor({
-    committedValue,
-    onUpdate: newValue => onUpdate?.(newValue, isEdited),
+    committedValue: defaultValue ?? '',
+    onUpdate,
     onExit,
     onBlur: onBlur ? e => fireBlur(onBlur, e) : undefined,
   });
@@ -483,7 +355,6 @@ function InputValue({
   }
 
   function setValue_(text) {
-    setIsEdited(true);
     if (valueIsASingleOperator(text)) {
       cellEditor.setValue(defaultValue + text);
     } else {
@@ -498,7 +369,6 @@ function InputValue({
     }
 
     if (e.key === 'Escape') {
-      setIsEdited(false);
       cellEditor.onKeyDown(e);
       return;
     }
@@ -570,14 +440,6 @@ function shouldSaveFromKey(e: KeyboardEvent) {
   }
 }
 
-export type CellEditSession<T = string | undefined> = {
-  committedValue: T;
-  onUpdateDraft?: (value: T) => void;
-  onCommit: (value: T) => void;
-  onCancel: () => void;
-  onExit?: () => void;
-};
-
 export type CustomCellRenderProps<T = string | undefined> = {
   onBlur: (ev: FocusEvent) => void;
   onKeyDown: (ev: KeyboardEvent) => void;
@@ -616,7 +478,7 @@ export function CustomCell<T = string | undefined>({
   const cellEditor = useCellEditor<T>({
     committedValue,
     isEditing: props.exposed ?? false,
-    onUpdate,
+    onUpdate: onUpdate ? value => onUpdate(value) : undefined,
     onExit,
     onBlur: onBlur ? (e: FocusEvent) => fireBlur(onBlur, e) : undefined,
   });
@@ -629,6 +491,14 @@ export function CustomCell<T = string | undefined>({
 
     if (shouldSaveFromKey(e)) {
       cellEditor.commitEdit();
+    }
+  }
+
+  // Blur also fires when the app loses focus. The input is focused again
+  // when the app returns, so don't save or end the session then.
+  function onBlur_(e: FocusEvent) {
+    if (document.hasFocus()) {
+      cellEditor.onBlur(e);
     }
   }
 
@@ -648,7 +518,7 @@ export function CustomCell<T = string | undefined>({
     <Cell {...props} value={defaultValue as unknown as string}>
       {() =>
         children?.({
-          onBlur: cellEditor.onBlur,
+          onBlur: onBlur_,
           onKeyDown: onKeyDown_,
           onUpdate: val => cellEditor.setValue(val),
           onSave: val => {
@@ -726,6 +596,9 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
     // * The cell begins editing on focus. That means if the user does a
     //   mouse down, but moves out of the element and then does mouse
     //   up, it will properly still receive focus & being editing
+    // * Tables that track a focused cell separately from editing pass
+    //   `onFocus`, so focusing the button doesn't enter edit mode
+    const focusCell = onFocus ?? onEdit;
     return (
       <View
         innerRef={ref}
@@ -774,13 +647,7 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
               },
           ...style,
         }}
-        onFocus={() => {
-          if (onFocus) {
-            onFocus();
-          } else {
-            onEdit?.();
-          }
-        }}
+        onFocus={() => focusCell?.()}
         data-testid="cell-button"
         onClick={
           clickBehavior === 'none'
@@ -788,11 +655,7 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             : e => {
                 if (!disabled) {
                   onSelect?.(e);
-                  if (onFocus) {
-                    onFocus();
-                  } else {
-                    onEdit?.();
-                  }
+                  focusCell?.();
                 }
               }
         }
@@ -834,11 +697,7 @@ export function SelectCell({
       onClick={e => {
         e.stopPropagation();
         onSelect?.(e);
-        if (onFocus) {
-          onFocus();
-        } else {
-          onEdit?.();
-        }
+        (onFocus ?? onEdit)?.();
       }}
     >
       {() => (
@@ -1192,8 +1051,6 @@ export const Table = forwardRef(
     const {
       onEdit,
       onEditFirstField,
-      cursor,
-      beginEdit,
       exitEdit,
       focusCell,
       editingId,
@@ -1404,11 +1261,6 @@ export const Table = forwardRef(
           focusExit.current?.focus({ preventScroll: true });
         }
       } else if (e.key === 'Enter' || e.key === 'ArrowDown') {
-        // Resume where the user left off before falling back to the top row
-        if (cursor && items.some(item => item.id === cursor.id)) {
-          beginEdit(cursor.id, cursor.field);
-          return;
-        }
         const index =
           list.current && scrollContainer.current
             ? list.current.getStartIndexForOffset(
@@ -1561,13 +1413,8 @@ export function useTableNavigator<T extends TableItem>(
   const selectedDispatch = useSelectedDispatch();
 
   const focusCell = useCallback((id: T['id'] | null, field?: string) => {
-    if (id == null) {
-      setCursor(null);
-      setIsEditing(false);
-    } else {
-      setCursor({ id, field });
-      setIsEditing(false);
-    }
+    setCursor(id == null ? null : { id, field });
+    setIsEditing(false);
   }, []);
 
   const beginEdit = useCallback((id: T['id'], field?: string) => {
@@ -1699,13 +1546,16 @@ export function useTableNavigator<T extends TableItem>(
     }
   }
 
-  // Keys pressed on the container itself (nothing focused inside) are
-  // handled by the Table, which decides where editing starts.
+  // A focused button cell (see focusCell) counts as being in a cell even
+  // though it isn't editing. Other controls inside the table, e.g. header
+  // buttons, don't: the cursor may be left over from an earlier edit.
   function isInCell(e: KeyboardEvent) {
     return (
       isEditing ||
       isFlashing.current ||
-      (cursor != null && e.target !== e.currentTarget)
+      (cursor != null &&
+        e.target instanceof Element &&
+        e.target.closest('[data-testid="cell-button"]') != null)
     );
   }
 
@@ -1761,14 +1611,22 @@ export function useTableNavigator<T extends TableItem>(
             break;
 
           case 'Escape': {
-            if (isInCell(e)) {
-              e.preventDefault();
-              e.stopPropagation();
+            // Each press peels off one layer: editing first, then the
+            // selection. A focused button cell (e.g. the checkbox just
+            // clicked) isn't editing, so one press clears the selection
+            // and returns focus to the table.
+            const isFocusInCell = isInCell(e);
+            const hasSelection =
+              selectedItems != null && selectedItems.size > 0;
+            if (isFocusInCell) {
               exitEdit();
-            } else if (selectedItems && selectedItems.size > 0) {
+            }
+            if (!isEditing && hasSelection) {
+              selectedDispatch?.({ type: 'select-none' });
+            }
+            if (isFocusInCell || hasSelection) {
               e.preventDefault();
               e.stopPropagation();
-              selectedDispatch?.({ type: 'select-none' });
             }
             break;
           }
