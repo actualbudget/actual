@@ -18,6 +18,8 @@ If you prefer not to worry about setting up or configuring a server, the desktop
 
 If you already run your own server, you can connect the desktop app to it. In the server selection area at the bottom of the welcome screen, click **Set up sync**, choose **Use an external server**, enter the address of your server, and click **Connect**.
 
+If the desktop app is already connected to an external server, the link reads **Change** instead of **Set up sync**. Click it to go straight to the connection form, enter the address of your server, and click **Connect**.
+
 The desktop app does not need to be on the same version as your server. Devices running different versions of Actual can sync the same budget, so you can use the desktop app on your computer and the web client everywhere else.
 
 If another device makes a change with a newer version of Actual than the one installed on your computer, the desktop app keeps syncing.
