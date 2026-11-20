@@ -85,9 +85,9 @@ export type CreateRequisitionParams = {
   institutionId: GoCardlessInstitutionId;
 
   /**
-   * Host of your frontend app - on this host you will be redirected after linking with bank
+   * Where the bank sends the user after linking
    */
-  host: string;
+  redirectUrl: string;
 };
 
 export type GetBalances = {

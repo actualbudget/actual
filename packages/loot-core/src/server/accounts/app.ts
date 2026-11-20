@@ -1092,12 +1092,14 @@ async function enableBankingStartAuth({
   redirectUrl,
   maxConsentValidity,
   psuType = 'personal',
+  returnToApp,
 }: {
   aspspId: string;
   country: string;
   redirectUrl: string;
   maxConsentValidity?: number;
   psuType?: 'personal' | 'business';
+  returnToApp?: boolean;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -1124,9 +1126,14 @@ async function enableBankingStartAuth({
     serverConfig.ENABLEBANKING_SERVER + '/start-auth',
     {
       aspsp: { name: aspspId, country },
-      redirectUrl,
+      // The mobile apps have no web origin the bank could redirect to, so
+      // they finish on the server, which then sends the user back to the app.
+      redirectUrl: returnToApp
+        ? serverConfig.ENABLEBANKING_SERVER + '/auth_callback'
+        : redirectUrl,
       maxConsentValidity,
       psuType,
+      returnToApp,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -1252,9 +1259,11 @@ async function getGoCardlessBanks(country: string) {
 async function createGoCardlessWebToken({
   institutionId,
   accessValidForDays,
+  returnToApp,
 }: {
   institutionId: string;
   accessValidForDays: number;
+  returnToApp?: boolean;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -1273,6 +1282,7 @@ async function createGoCardlessWebToken({
       {
         institutionId,
         accessValidForDays,
+        returnToApp,
       },
       {
         'X-ACTUAL-TOKEN': userToken,
