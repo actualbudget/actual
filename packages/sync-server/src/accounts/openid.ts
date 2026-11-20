@@ -8,6 +8,7 @@ import {
   getAccountDb,
   listLoginMethods,
 } from '#account-db';
+import { normalizeBasePath } from '#base-path';
 import { config } from '#load-config';
 import {
   getUserByUsername,
@@ -94,7 +95,7 @@ async function setupOpenIdClient(configParameter) {
     client_id: configParameter.client_id,
     client_secret: configParameter.client_secret,
     redirect_uri: new URL(
-      '/openid/callback',
+      `${normalizeBasePath(config.get('basePath'))}/openid/callback`,
       configParameter.server_hostname,
     ).toString(),
     validate_id_token: true,

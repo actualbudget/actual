@@ -13,6 +13,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 
 import { useAuth } from '#auth/AuthProvider';
 import { Permissions } from '#auth/types';
+import { withBasePath } from '#base-path';
 import { Error as ErrorAlert } from '#components/alerts';
 import { Link } from '#components/common/Link';
 import {
@@ -156,7 +157,13 @@ export function EnableBankingInitialiseModal({
                 When setting up your application, use the following as the
                 redirect URL:
               </Trans>{' '}
-              <code>{window.location.origin}/enablebanking/auth_callback</code>
+              <code>
+                {window.location.origin}
+                {withBasePath(
+                  import.meta.env.BASE_URL,
+                  '/enablebanking/auth_callback',
+                )}
+              </code>
             </Text>
 
             {window.location.protocol === 'http:' && (

@@ -7,6 +7,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 import { isElectron } from '@actual-app/core/shared/environment';
 import type { Handlers } from '@actual-app/core/types/handlers';
 
+import { getCurrentDomainUrl } from '#base-path';
 import {
   useSetLoginMethods,
   useSetMultiuserEnabled,
@@ -55,7 +56,10 @@ export function useBootstrapped(redirect = true) {
       }
       if (url == null && !bootstrapped) {
         // A server hasn't been specified yet
-        const serverURL = window.location.origin;
+        const serverURL = getCurrentDomainUrl(
+          window.location.origin,
+          import.meta.env.BASE_URL,
+        );
         const result: Awaited<
           ReturnType<Handlers['subscribe-needs-bootstrap']>
         > = await send('subscribe-needs-bootstrap', {

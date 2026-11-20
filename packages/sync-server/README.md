@@ -55,6 +55,10 @@ Reset your password
 actual-server --reset-password
 ```
 
+### Hosting below a URL path
+
+Root hosting (`/`) is the default. For a source-built deployment below `/actual`, run `ACTUAL_BASE_PATH=/actual yarn build:server` from the repository root, then start the server with `ACTUAL_BASE_PATH=/actual` or `"basePath": "/actual"` in its JSON configuration. The web build and server must use the same prefix; changing the server setting alone does not rebuild the web client. Configure your reverse proxy to preserve the prefix and include it in client server URLs and authentication callback URLs. See the [reverse proxy documentation](https://actualbudget.org/docs/config/reverse-proxies/) for details.
+
 ### Documentation
 
 We have a wide range of documentation on how to use Actual. This is all available in our [Community Documentation](https://actualbudget.org/docs/), including topics on [installing](https://actualbudget.org/docs/install/), [Budgeting](https://actualbudget.org/docs/budgeting/), [Account Management](https://actualbudget.org/docs/accounts/), [Tips & Tricks](https://actualbudget.org/docs/getting-started/tips-tricks) and some documentation for developers.
