@@ -77,6 +77,7 @@ import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
+import { TagColorModal } from './modals/TagColorModal';
 import { TotpDisableModal } from './modals/TotpDisableModal';
 import { TotpEnableModal } from './modals/TotpEnableModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
@@ -320,6 +321,9 @@ export function Modals() {
 
         case 'category-group-menu':
           return <CategoryGroupMenuModal key={key} {...modal.options} />;
+
+        case 'tag-color':
+          return <TagColorModal key={key} {...modal.options} />;
 
         case 'notes':
           return <NotesModal key={key} {...modal.options} />;
