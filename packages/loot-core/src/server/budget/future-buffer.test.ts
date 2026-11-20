@@ -10,6 +10,7 @@ import { undo, withUndo } from '#server/undo';
 import * as monthUtils from '#shared/months';
 
 import {
+  coverOverspending,
   getSheetValue,
   holdForNextMonth,
   resetHold,
@@ -125,6 +126,60 @@ describe('future buffer', () => {
     await sheet.waitOnSpreadsheet();
     expect(await buffer('2026-10')).toBe(750000);
     expect(await toBudget('2026-10')).toBe(-530000);
+  });
+
+  it('covers overspending from "For next month" without moving To Budget', async () => {
+    await setup();
+    await db.insertTransaction({
+      date: '2026-10-15',
+      amount: -350000,
+      account: 'account',
+      category: 'bills',
+    });
+    await sheet.waitOnSpreadsheet();
+    // Oct holds the 50000 overspending for Nov's "Overspent in Oct"
+    expect(await buffer('2026-10')).toBe(250000);
+    const before = await Promise.all(WINDOW.map(toBudget));
+
+    const cover = () =>
+      coverOverspending({
+        month: '2026-10',
+        to: 'bills',
+        from: 'for-next-month',
+        amount: 80000,
+        currencyCode: 'USD',
+      });
+
+    // Rollover overspending isn't held, so there's nothing to take
+    await setCategoryCarryover({
+      startMonth: '2026-10',
+      category: 'bills',
+      flag: true,
+    });
+    await cover();
+    await sheet.waitOnSpreadsheet();
+    expect(
+      await getSheetValue(monthUtils.sheetForMonth('2026-10'), 'budget-bills'),
+    ).toBe(300000);
+
+    await setCategoryCarryover({
+      startMonth: '2026-10',
+      category: 'bills',
+      flag: false,
+    });
+    // Capped at the overspending, not the 80000 asked for
+    await cover();
+    await sheet.waitOnSpreadsheet();
+    expect(
+      await getSheetValue(monthUtils.sheetForMonth('2026-10'), 'budget-bills'),
+    ).toBe(350000);
+    expect(await buffer('2026-10')).toBe(200000);
+    expect(await Promise.all(WINDOW.map(toBudget))).toEqual(before);
+    expect(
+      db.firstSync<db.DbNote>('SELECT note FROM notes WHERE id = ?', [
+        'budget-2026-10',
+      ])?.note,
+    ).toMatch(/^- Reassigned 500\.00 from For next month → Bills on /);
   });
 
   it('keeps a closed month frozen through later edits, undo and repeated freezes', async () => {

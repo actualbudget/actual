@@ -15,6 +15,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { FieldLabel, TapField } from '#components/mobile/MobileForms';
 import { AmountInput } from '#components/util/AmountInput';
 import { useCategories } from '#hooks/useCategories';
+import { useForNextMonthCoverable } from '#hooks/useForNextMonthCoverable';
 import { useInitialMount } from '#hooks/useInitialMount';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
@@ -36,10 +37,11 @@ export function CoverModal({
 
   const { data: { grouped: originalCategoryGroups } = { grouped: [] } } =
     useCategories();
+  const forNextMonth = useForNextMonthCoverable(categoryId);
   const [categoryGroups, categories] = useMemo(() => {
     const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
     const categoryGroups = showToBeBudgeted
-      ? addToBeBudgetedGroup(expenseGroups)
+      ? addToBeBudgetedGroup(expenseGroups, { forNextMonth })
       : expenseGroups;
     const filteredCategoryGroups = categoryId
       ? removeCategoriesFromGroups(categoryGroups, categoryId)
@@ -48,7 +50,7 @@ export function CoverModal({
       g => g.categories || [],
     );
     return [filteredCategoryGroups, filteredCategoryies];
-  }, [categoryId, originalCategoryGroups, showToBeBudgeted]);
+  }, [categoryId, originalCategoryGroups, showToBeBudgeted, forNextMonth]);
 
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();

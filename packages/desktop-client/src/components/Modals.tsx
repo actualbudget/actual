@@ -382,7 +382,14 @@ export function Modals() {
           return <TransferModal key={key} {...modal.options} />;
 
         case 'cover':
-          return <CoverModal key={key} {...modal.options} />;
+          return (
+            <SheetNameProvider
+              key={key}
+              name={monthUtils.sheetForMonth(modal.options.month)}
+            >
+              <CoverModal {...modal.options} />
+            </SheetNameProvider>
+          );
 
         case 'scheduled-transaction-menu':
           return <ScheduledTransactionMenuModal key={key} {...modal.options} />;

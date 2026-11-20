@@ -23,7 +23,12 @@ import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
 import { getValidMonthBounds } from './MonthsContext';
 
-export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
+// A positive `forNextMonth` adds a "For next month" row offering that
+// amount, for covering a category's overspending in a managed month
+export function addToBeBudgetedGroup(
+  groups: CategoryGroupEntity[],
+  { forNextMonth = 0 }: { forNextMonth?: number } = {},
+) {
   return [
     {
       id: 'to-budget',
@@ -34,10 +39,33 @@ export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
           name: t('To Budget'),
           group: 'to-budget',
         },
+        ...(forNextMonth > 0
+          ? [
+              {
+                id: 'for-next-month',
+                name: t('For next month'),
+                group: 'to-budget',
+                balance: forNextMonth,
+              },
+            ]
+          : []),
       ],
     } as CategoryGroupEntity,
     ...groups,
   ];
+}
+
+export function getCoverSourceName(
+  fromCategoryId: CategoryEntity['id'],
+  categoriesById: Record<CategoryEntity['id'], CategoryEntity>,
+): string {
+  if (fromCategoryId === 'to-budget') {
+    return t('To Budget');
+  }
+  if (fromCategoryId === 'for-next-month') {
+    return t('For next month');
+  }
+  return categoriesById[fromCategoryId]?.name ?? '';
 }
 
 export function removeCategoriesFromGroups(

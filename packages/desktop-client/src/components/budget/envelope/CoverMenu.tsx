@@ -20,6 +20,7 @@ import {
   removeCategoriesFromGroups,
 } from '#components/budget/util';
 import { useCategories } from '#hooks/useCategories';
+import { useForNextMonthCoverable } from '#hooks/useForNextMonthCoverable';
 
 type CoverMenuProps = {
   showToBeBudgeted?: boolean;
@@ -42,16 +43,17 @@ export function CoverMenu({
     useCategories();
 
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
+  const forNextMonth = useForNextMonthCoverable(categoryId);
 
   const filteredCategoryGroups = useMemo(() => {
     const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
     const categoryGroups = showToBeBudgeted
-      ? addToBeBudgetedGroup(expenseGroups)
+      ? addToBeBudgetedGroup(expenseGroups, { forNextMonth })
       : expenseGroups;
     return categoryId
       ? removeCategoriesFromGroups(categoryGroups, categoryId)
       : categoryGroups;
-  }, [categoryId, showToBeBudgeted, originalCategoryGroups]);
+  }, [categoryId, showToBeBudgeted, originalCategoryGroups, forNextMonth]);
 
   const _initialAmount = integerToCurrency(Math.abs(initialAmount ?? 0));
   const [amount, setAmount] = useState<string>(_initialAmount);

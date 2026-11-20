@@ -18,6 +18,7 @@ import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { integerToCurrency } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
@@ -38,6 +39,8 @@ import { ItemHeader } from './ItemHeader';
 
 type CategoryAutocompleteItem = Omit<CategoryEntity, 'group'> & {
   group?: CategoryGroupEntity;
+  // Shown instead of the sheet balance, for rows that aren't categories
+  balance?: IntegerAmount;
 };
 
 type CategoryListProps = {
@@ -367,13 +370,15 @@ function CategoryItem({
     budgetType === 'envelope'
       ? envelopeBudget.catBalance(item.id)
       : trackingBudget.catBalance(item.id);
-  const balance = useSheetValue<
+  const sheetBalance = useSheetValue<
     'envelope-budget' | 'tracking-budget',
     typeof balanceBinding
   >(balanceBinding);
 
   const isToBudgetItem = item.id === 'to-budget';
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget);
+  const shownBalance =
+    item.balance ?? (isToBudgetItem ? toBudget : sheetBalance);
 
   return (
     <button
@@ -411,29 +416,20 @@ function CategoryItem({
             display: !showBalances ? 'none' : undefined,
             marginLeft: 5,
             flexShrink: 0,
-            ...makeAmountFullStyle((isToBudgetItem ? toBudget : balance) || 0, {
+            ...makeAmountFullStyle(shownBalance || 0, {
               positiveColor: theme.noticeTextMenu,
               negativeColor: theme.errorTextMenu,
             }),
           }}
         >
-          {isToBudgetItem
-            ? toBudget != null && (
-                <>
-                  {' '}
-                  <FinancialText>
-                    {integerToCurrency(toBudget || 0)}
-                  </FinancialText>
-                </>
-              )
-            : balance != null && (
-                <>
-                  {' '}
-                  <FinancialText>
-                    {integerToCurrency(balance || 0)}
-                  </FinancialText>
-                </>
-              )}
+          {shownBalance != null && (
+            <>
+              {' '}
+              <FinancialText>
+                {integerToCurrency(shownBalance || 0)}
+              </FinancialText>
+            </>
+          )}
         </TextOneLine>
       </View>
     </button>

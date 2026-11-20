@@ -4,6 +4,7 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
 import { batchMessages } from '#server/sync';
+import { getForNextMonthCoverable } from '#shared/future-buffer';
 import { getLocale } from '#shared/locale';
 import * as monthUtils from '#shared/months';
 import { integerToCurrencyWithDecimal, safeNumber } from '#shared/util';
@@ -644,16 +645,26 @@ export async function coverOverspending({
 }: {
   month: string;
   to: CategoryEntity['id'] | 'to-budget';
-  from: CategoryEntity['id'] | 'to-budget' | 'overbudgeted';
+  from: CategoryEntity['id'] | 'to-budget' | 'for-next-month' | 'overbudgeted';
   amount?: IntegerAmount;
   currencyCode: string;
 }): Promise<void> {
   const sheetName = monthUtils.sheetForMonth(month);
   const toBudgeted = await getSheetValue(sheetName, 'budget-' + to);
-  const leftoverFrom = await getSheetValue(
-    sheetName,
-    from === 'to-budget' ? 'to-budget' : 'leftover-' + from,
-  );
+  const leftoverFrom =
+    from === 'for-next-month'
+      ? to === 'to-budget'
+        ? 0
+        : getForNextMonthCoverable({
+            managed: isManagedMonth(month),
+            forNextMonth: await getSheetValue(sheetName, 'buffered-selected'),
+            balance: await getSheetValue(sheetName, 'leftover-' + to),
+            carryover: await getSheetBoolean(sheetName, 'carryover-' + to),
+          })
+      : await getSheetValue(
+          sheetName,
+          from === 'to-budget' ? 'to-budget' : 'leftover-' + from,
+        );
 
   // Cover provided amount (can be partial) or full overspending amount.
   const amountToCover = amount
@@ -669,8 +680,9 @@ export async function coverOverspending({
   const coverableAmount = Math.min(Math.abs(amountToCover), leftoverFrom);
 
   await batchMessages(async () => {
-    // If we are covering it from the to be budgeted amount, ignore this
-    if (from !== 'to-budget') {
+    // To Budget and "For next month" aren't categories, so there's no
+    // budget to take it from
+    if (from !== 'to-budget' && from !== 'for-next-month') {
       const fromBudgeted = await getSheetValue(sheetName, 'budget-' + from);
       await setBudget({
         category: from,
@@ -854,7 +866,7 @@ async function addMovementNotes({
   month: string;
   amount: number;
   to: CategoryEntity['id'] | 'to-budget' | 'overbudgeted';
-  from: CategoryEntity['id'] | 'to-budget';
+  from: CategoryEntity['id'] | 'to-budget' | 'for-next-month';
   currencyCode: string;
 }) {
   const displayAmount = integerToCurrencyWithDecimal(amount, currencyCode);
@@ -874,13 +886,17 @@ async function addMovementNotes({
     locale,
   );
   const categories = await db.getCategories(
-    [from, to].filter(c => c !== 'to-budget' && c !== 'overbudgeted'),
+    [from, to].filter(
+      c => c !== 'to-budget' && c !== 'for-next-month' && c !== 'overbudgeted',
+    ),
   );
 
   const fromCategoryName =
     from === 'to-budget'
       ? 'To Budget'
-      : categories.find(c => c.id === from)?.name;
+      : from === 'for-next-month'
+        ? 'For next month'
+        : categories.find(c => c.id === from)?.name;
 
   const toCategoryName =
     to === 'to-budget'
