@@ -2,7 +2,6 @@ import { createApp } from '#server/app';
 import * as db from '#server/db';
 import { payeeModel } from '#server/models';
 import { mutator } from '#server/mutators';
-import { getCompletedScheduleRuleIds } from '#server/schedules/app';
 import { batchMessages } from '#server/sync';
 import * as rules from '#server/transactions/transaction-rules';
 import { undoable } from '#server/undo';
@@ -74,7 +73,7 @@ async function getOrphanedPayees(): Promise<Array<Pick<PayeeEntity, 'id'>>> {
 
 async function getPayeeRuleCounts() {
   const payeeCounts: Record<PayeeEntity['id'], number> = {};
-  const completedScheduleRules = new Set(await getCompletedScheduleRuleIds());
+  const completedScheduleRules = await rules.getCompletedScheduleRuleIds();
 
   rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
     if (rule.id && completedScheduleRules.has(rule.id)) {

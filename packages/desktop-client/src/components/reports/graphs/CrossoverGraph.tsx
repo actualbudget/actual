@@ -191,7 +191,6 @@ export function CrossoverGraph({
           {!compact && <CartesianGrid strokeDasharray="3 3" />}
           <XAxis
             dataKey="x"
-            hide={compact}
             tick={{ fill: theme.pageText }}
             tickLine={{ stroke: theme.pageText }}
           />

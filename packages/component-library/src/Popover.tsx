@@ -8,6 +8,30 @@ import { styles } from './styles';
 
 type PopoverProps = ComponentProps<typeof ReactAriaPopover>;
 
+let safeAreaBoundary: HTMLElement | null = null;
+
+/**
+ * A hidden fixed element covering the part of the viewport outside the
+ * device safe-area insets (e.g. the iOS status bar and home indicator).
+ * Used as the popover boundary so react-aria keeps popovers clear of them.
+ * On platforms without insets it simply matches the viewport.
+ */
+function getSafeAreaBoundary(): HTMLElement | undefined {
+  if (typeof document === 'undefined' || !document.body) {
+    return undefined;
+  }
+  if (!safeAreaBoundary?.isConnected) {
+    safeAreaBoundary = document.createElement('div');
+    safeAreaBoundary.setAttribute('aria-hidden', 'true');
+    safeAreaBoundary.style.cssText =
+      'position:fixed;visibility:hidden;pointer-events:none;' +
+      'top:env(safe-area-inset-top);bottom:env(safe-area-inset-bottom);' +
+      'left:env(safe-area-inset-left);right:env(safe-area-inset-right);';
+    document.body.appendChild(safeAreaBoundary);
+  }
+  return safeAreaBoundary;
+}
+
 export const Popover = ({
   style = {},
   shouldCloseOnInteractOutside,
@@ -39,6 +63,7 @@ export const Popover = ({
       ref={ref}
       placement="bottom end"
       offset={1}
+      boundaryElement={getSafeAreaBoundary()}
       className={css({
         ...styles.tooltip,
         ...styles.lightScrollbar,

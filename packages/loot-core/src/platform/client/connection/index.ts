@@ -211,3 +211,6 @@ export const serverPush: T.ServerPush = async function () {
 export const clearServer: T.ClearServer = async function () {
   // clearServer is used in tests to mock the server
 };
+export function isOwnRequest(id: string): boolean {
+  return replyHandlers.has(id);
+}

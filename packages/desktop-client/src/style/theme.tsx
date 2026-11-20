@@ -1,9 +1,11 @@
 import { useEffect, useMemo } from 'react';
 
-import darkThemeCss from '@actual-app/components/themes/dark.css?inline';
-import lightThemeCss from '@actual-app/components/themes/light.css?inline';
-import midnightThemeCss from '@actual-app/components/themes/midnight.css?inline';
-import paletteCss from '@actual-app/components/themes/palette.css?inline';
+import {
+  darkThemeCss,
+  lightThemeCss,
+  midnightThemeCss,
+  paletteCss,
+} from '@actual-app/components/themes';
 import sidebarRedesignLightCss from '@actual-app/components/themes/sidebar-redesign-light.css?inline';
 import type { DarkTheme, Theme } from '@actual-app/core/types/prefs';
 

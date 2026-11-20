@@ -15,6 +15,11 @@ type PageHeaderProps = {
   style?: CSSProperties;
 };
 
+export const pageTitleStyle = {
+  fontSize: 25,
+  fontWeight: 500,
+} satisfies CSSProperties;
+
 export function PageHeader({ title, style }: PageHeaderProps) {
   return (
     <View
@@ -29,8 +34,7 @@ export function PageHeader({ title, style }: PageHeaderProps) {
       <View
         style={{
           flexDirection: 'row',
-          fontSize: 25,
-          fontWeight: 500,
+          ...pageTitleStyle,
         }}
       >
         {typeof title === 'string' ? <Text>{title}</Text> : title}

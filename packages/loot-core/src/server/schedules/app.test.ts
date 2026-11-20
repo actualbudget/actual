@@ -7,7 +7,11 @@ import { loadMappings } from '#server/db/mappings';
 import { app as mainApp } from '#server/main-app';
 import { runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
-import { loadRules, updateRule } from '#server/transactions/transaction-rules';
+import {
+  loadRules,
+  runRules,
+  updateRule,
+} from '#server/transactions/transaction-rules';
 import { q } from '#shared/query';
 import { getNextDate } from '#shared/schedules';
 import type { ServerEvents } from '#types/server-events';
@@ -475,6 +479,92 @@ describe('schedule app', () => {
       await deleteSchedule({ id });
       const { data: schedules2 } = await aqlQuery(q('schedules').select('*'));
       expect(schedules2.length).toBe(0);
+    });
+
+    describe('completed schedules and rules', () => {
+      async function createMatchingSchedule() {
+        const accountId = await db.insertAccount({
+          name: 'Checking',
+          offbudget: 0,
+          closed: 0,
+        });
+        const id = await createSchedule({
+          schedule: { name: 'Rent' },
+          conditions: [
+            { op: 'is', field: 'account', value: accountId },
+            { op: 'is', field: 'amount', value: -10000 },
+            {
+              op: 'is',
+              field: 'date',
+              value: {
+                start: '2016-12-01',
+                frequency: 'monthly',
+                patterns: [],
+                skipWeekend: false,
+                weekendSolveMode: 'after',
+                endMode: 'never',
+                endOccurrences: 1,
+                endDate: '2016-12-31',
+              },
+            },
+          ],
+        });
+        const transaction = {
+          account: accountId,
+          amount: -10000,
+          date: '2017-01-01',
+        };
+        return { id, transaction };
+      }
+
+      it('links a new transaction to an active schedule', async () => {
+        const { id, transaction } = await createMatchingSchedule();
+
+        const result = await runRules(transaction);
+
+        expect(result.schedule).toBe(id);
+      });
+
+      it('does not link a new transaction to a completed schedule', async () => {
+        const { id, transaction } = await createMatchingSchedule();
+
+        await updateSchedule({ schedule: { id, completed: true } });
+
+        const result = await runRules(transaction);
+
+        expect(result.schedule).toBeFalsy();
+      });
+
+      it('links again after a completed schedule is reopened', async () => {
+        const { id, transaction } = await createMatchingSchedule();
+
+        await updateSchedule({ schedule: { id, completed: true } });
+        await updateSchedule({ schedule: { id, completed: false } });
+
+        const result = await runRules(transaction);
+
+        expect(result.schedule).toBe(id);
+      });
+
+      it('still runs the rule of a completed schedule for a transaction already linked to it', async () => {
+        const { id, transaction } = await createMatchingSchedule();
+        const { data: ruleId } = await aqlQuery(
+          q('schedules').filter({ id }).calculate('rule'),
+        );
+        await updateRule({
+          id: ruleId,
+          actions: [
+            { op: 'set', field: 'notes', value: 'Monthly rent' },
+            { op: 'link-schedule', value: id },
+          ],
+        });
+        await updateSchedule({ schedule: { id, completed: true } });
+
+        const result = await runRules({ ...transaction, schedule: id });
+
+        expect(result.schedule).toBe(id);
+        expect(result.notes).toBe('Monthly rent');
+      });
     });
 
     it('setNextDate sets `next_date`', async () => {

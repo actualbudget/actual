@@ -6,6 +6,13 @@ import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
 import { regexp } from './regexp';
+import { BudgetInUseError, StorageUnavailableError } from './storage/errors';
+import { getSqliteFileRow } from './storage/files-store';
+import {
+  acquireWebLock,
+  BUDGET_LOCK_TIMEOUT_MS,
+  budgetLockName,
+} from './storage/locks';
 import type { SqlParam } from './types';
 import { unicodeLike } from './unicodeLike';
 
@@ -38,6 +45,12 @@ export type SqlJsModule = SqlJsStatic & {
 };
 
 let SQL: SqlJsModule | null = null;
+
+// The budget lock held while a file database is open. Shared, so other
+// legacy connections are unaffected; the sqlite-wasm storage waits for it
+// before migrating the file, and a legacy open waits while that storage
+// holds the budget.
+const budgetLocks = new Map<Database, () => void>();
 
 // Opt-in: when set, the wasm is instantiated from these bytes instead of being
 // fetched via `locateFile`. The browser build of `@actual-app/api` uses this to
@@ -160,25 +173,48 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
     } else {
       const path = pathOrBuffer;
       if (path !== ':memory:') {
-        if (typeof SharedArrayBuffer === 'undefined') {
-          const stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
-          await stream.node.contents.readIfFallback();
-          SQL.FS.close(stream);
-        }
+        const releaseLock = await acquireWebLock(
+          budgetLockName(path),
+          BUDGET_LOCK_TIMEOUT_MS,
+          'shared',
+        ).catch(() => {
+          throw new BudgetInUseError(
+            path,
+            'the storage lock is held exclusively elsewhere',
+          );
+        });
+        try {
+          // Another worker may have moved the budget to the new storage
+          // while this one waited: the copy here is then gone or stale
+          if ((await getSqliteFileRow(path))?.storage) {
+            throw new StorageUnavailableError(
+              `${path} has moved to the new storage; reload to open it`,
+            );
+          }
+          if (typeof SharedArrayBuffer === 'undefined') {
+            const stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
+            await stream.node.contents.readIfFallback();
+            SQL.FS.close(stream);
+          }
 
-        db = new SQL.Database(
-          path.includes('/blocked') ? path : SQL.FS.readlink(path),
-          // @ts-expect-error 2nd argument missed in sql.js types
-          { filename: true },
-        );
-        // absurd-sql serves every page cache miss with a synchronous
-        // round trip to IndexedDB, so allow the cache to hold a whole
-        // large budget file. SQLite allocates cache pages lazily, so
-        // small files don't pay for the ceiling. The value is in KiB.
-        db.exec(`
-          PRAGMA journal_mode=MEMORY;
-          PRAGMA cache_size=-64000;
-        `);
+          db = new SQL.Database(
+            path.includes('/blocked') ? path : SQL.FS.readlink(path),
+            // @ts-expect-error 2nd argument missed in sql.js types
+            { filename: true },
+          );
+          // absurd-sql serves every page cache miss with a synchronous
+          // round trip to IndexedDB, so allow the cache to hold a whole
+          // large budget file. SQLite allocates cache pages lazily, so
+          // small files don't pay for the ceiling. The value is in KiB.
+          db.exec(`
+            PRAGMA journal_mode=MEMORY;
+            PRAGMA cache_size=-64000;
+          `);
+        } catch (error) {
+          releaseLock();
+          throw error;
+        }
+        budgetLocks.set(db, releaseLock);
       }
     }
   }
@@ -202,7 +238,35 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
 }
 
 export function closeDatabase(db: Database) {
-  db.close();
+  try {
+    db.close();
+  } finally {
+    budgetLocks.get(db)?.();
+    budgetLocks.delete(db);
+  }
+}
+
+// Closes every database that holds a budget lock, for a page that is
+// leaving. The browser frees a destroyed worker's locks and connections
+// itself, but WebKit keeps those of a worker whose page went into the
+// back/forward cache, where they would block the next page's open until the
+// cached page is evicted. Releasing the lock alone is not enough: absurd-sql
+// keeps its IndexedDB connection in a worker that idles in `Atomics.wait`,
+// which never sees the version change the next page uses to close it, so
+// that page would wait forever. Closing the database makes absurd-sql close
+// the connection over its shared buffer, which works even then. Such a page
+// relaunches when it is restored, so a closed database is never used again.
+export function closeOpenDatabases() {
+  for (const db of Array.from(budgetLocks.keys())) {
+    try {
+      closeDatabase(db);
+    } catch (error) {
+      logger.warn(
+        'sqlite: could not close a database of a leaving page',
+        error,
+      );
+    }
+  }
 }
 
 export async function exportDatabase(db: Database) {

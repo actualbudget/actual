@@ -88,6 +88,47 @@ describe('Budgets', () => {
     expect(getClock()).toEqual(deserializeClock(row.clock));
   });
 
+  test('a second request for the budget being loaded waits for that load', async () => {
+    await createTestBudget('default-budget-template');
+
+    // Prefs are read before the database opens, so the budget looks loaded
+    // while its open is still running (slow when the storage moves a budget
+    // over); a tab joining then must not be answered before it is
+    let finishOpen: (() => void) | undefined;
+    const openGate = new Promise<void>(resolve => {
+      finishOpen = resolve;
+    });
+    const openDatabase = db.openDatabase;
+    const openSpy = vi
+      .spyOn(db, 'openDatabase')
+      .mockImplementation(async id => {
+        await openGate;
+        return openDatabase(id);
+      });
+    try {
+      const first = runHandler(handlers['load-budget'], { id: 'test-budget' });
+      await vi.waitFor(() => expect(openSpy).toHaveBeenCalledTimes(1));
+      expect(prefs.getPrefs().id).toBe('test-budget');
+
+      let isSecondSettled = false;
+      const second = runHandler(handlers['load-budget'], {
+        id: 'test-budget',
+      }).finally(() => {
+        isSecondSettled = true;
+      });
+      await new Promise(resolve => setTimeout(resolve, 20));
+      expect(isSecondSettled).toBe(false);
+
+      finishOpen?.();
+      expect((await first).error).toBe(undefined);
+      expect((await second).error).toBe(undefined);
+      expect(openSpy).toHaveBeenCalledTimes(1);
+      expect(db.getDatabase()).not.toBe(null);
+    } finally {
+      openSpy.mockRestore();
+    }
+  });
+
   test('budget detects out of sync migrations', async () => {
     await createTestBudget('default-budget-template');
 
@@ -623,7 +664,7 @@ describe('Budget shutdown', () => {
       });
     let savedPrefs;
     vi.spyOn(fs, 'writeFile').mockImplementation(async (_path, contents) => {
-      const metadata = JSON.parse(contents);
+      const metadata = JSON.parse(contents as string);
       if (metadata.lastScheduleRun) {
         writeStarted.resolve();
         await writeGate.promise;
