@@ -63,7 +63,7 @@
         "src/components/**/*.{ts,tsx,js,jsx}",
         "docs/**/*.{js,jsx}"
       ],
-      "ignore": ["docusaurus.netlify-config.js"]
+      "ignore": ["docusaurus.netlify-config.js", "scripts/bump-version.mjs"]
     },
     "packages/loot-core": {
       "entry": ["src/**/index-types.ts", "src/mocks/**"],
