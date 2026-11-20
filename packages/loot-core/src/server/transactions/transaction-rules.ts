@@ -672,13 +672,40 @@ export function conditionsToAQL(
       case 'isNot':
         return apply(field, '$ne', value);
 
-      case 'isbetween':
-        // This operator is only applicable to the specific `between`
-        // number type so we don't use `apply`
+      case 'isbetween': {
         const [low, high] = sortNumbers(value.num1, value.num2);
+        if (type === 'number') {
+          // The sign handling mirrors `Condition.eval`, which only rejects
+          // the opposite sign and so keeps a zero amount inside either an
+          // outflow or an inflow range. Outflows are negated first, so both
+          // bounds read as positive magnitudes.
+          if (options?.outflow) {
+            return {
+              $and: [
+                { amount: { $lte: 0 } },
+                { [field]: { $transform: '$neg', $gte: low } },
+                { [field]: { $transform: '$neg', $lte: high } },
+              ],
+            };
+          }
+          if (options?.inflow) {
+            return {
+              $and: [
+                { amount: { $gte: 0 } },
+                { [field]: { $gte: low } },
+                { [field]: { $lte: high } },
+              ],
+            };
+          }
+          return {
+            $and: [{ amount: { $gte: low } }, { amount: { $lte: high } }],
+          };
+        }
+        // Dates carry plain `YYYY-MM-DD` bounds, which compare directly
         return {
           [field]: [{ $gte: low }, { $lte: high }],
         };
+      }
       case 'contains':
         // Running contains with id will automatically reach into
         // the `name` of the referenced table and do a string match

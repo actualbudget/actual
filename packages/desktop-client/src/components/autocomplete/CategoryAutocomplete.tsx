@@ -416,6 +416,7 @@ function CategoryItem({
             ...makeAmountFullStyle((isToBudgetItem ? toBudget : balance) || 0, {
               positiveColor: theme.noticeTextMenu,
               negativeColor: theme.errorTextMenu,
+              zeroColor: 'inherit',
             }),
           }}
         >

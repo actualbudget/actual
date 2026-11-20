@@ -46,7 +46,7 @@ permissions:
 
 jobs:
   publish-ios:
-    runs-on: depot-macos-latest
+    runs-on: xcode-27
     environment: release
     # Includes up to 45 minutes waiting for Apple to process the build.
     timeout-minutes: 90
@@ -63,7 +63,7 @@ jobs:
 
       # Build before any signing material lands on the runner.
       - name: Build web app
-        run: yarn build:browser
+        run: yarn build:browser --mobile
 
       - name: Import signing certificates
         env:

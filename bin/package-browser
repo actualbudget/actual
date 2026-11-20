@@ -5,10 +5,16 @@ ROOT=`dirname $0`
 cd "$ROOT/.."
 
 SKIP_TRANSLATIONS=false
+# --mobile builds the variant shipped inside the iOS and Android apps.
+TASK=build:browser
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --skip-translations)
       SKIP_TRANSLATIONS=true
+      shift
+      ;;
+    --mobile)
+      TASK=build:mobile
       shift
       ;;
     *)
@@ -30,4 +36,4 @@ if [ "$SKIP_TRANSLATIONS" = false ]; then
   packages/desktop-client/bin/remove-untranslated-languages
 fi
 
-lage build:browser --to=@actual-app/web
+lage "$TASK" --to=@actual-app/web
