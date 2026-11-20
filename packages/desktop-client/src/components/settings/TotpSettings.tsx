@@ -60,7 +60,11 @@ export function TotpSettings() {
             Ask for a code from your authenticator app in addition to the server
             password.
           </Trans>{' '}
-          {enabled ? (
+          {enabled === null ? (
+            <Trans>
+              The two-factor authentication status could not be loaded.
+            </Trans>
+          ) : enabled ? (
             <Trans>Two-factor authentication is enabled.</Trans>
           ) : (
             <Trans>

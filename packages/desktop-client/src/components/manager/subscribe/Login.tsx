@@ -56,6 +56,9 @@ function PasswordLogin({ setError, dispatch }) {
     if (error) {
       setError(error);
     } else if (mfaRequired) {
+      // Dropped so a stale password cannot be resubmitted if the challenge
+      // expires and the password field comes back empty.
+      setPassword('');
       setMfaToken(mfaToken);
     } else {
       dispatch(loggedIn());

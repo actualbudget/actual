@@ -49,7 +49,11 @@ your password alone:
 yarn workspace @actual-app/sync-server disable-totp
 ```
 
-If you run Actual in Docker, run the same command inside the container.
+If you run Actual in Docker, run:
+
+```bash
+docker exec <container> node /app/scripts/disable-totp.js
+```
 
 ## Client and Server Versions
 
