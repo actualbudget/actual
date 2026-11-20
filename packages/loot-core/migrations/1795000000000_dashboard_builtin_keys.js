@@ -10,8 +10,8 @@ export default async function runMigration(db) {
     );
 
     const seeded = db.runQuery(
-      `SELECT id FROM dashboard_pages
-       WHERE rowid = (SELECT MIN(rowid) FROM dashboard_pages) AND name = 'Main'`,
+      `SELECT id, name FROM dashboard_pages
+       WHERE rowid = (SELECT MIN(rowid) FROM dashboard_pages)`,
       [],
       true,
     )[0];
@@ -20,10 +20,12 @@ export default async function runMigration(db) {
       return;
     }
 
-    db.runQuery('UPDATE dashboard_pages SET builtin_key = ? WHERE id = ?', [
-      'main',
-      seeded.id,
-    ]);
+    if (seeded.name === 'Main') {
+      db.runQuery('UPDATE dashboard_pages SET builtin_key = ? WHERE id = ?', [
+        'main',
+        seeded.id,
+      ]);
+    }
 
     for (const widget of DEFAULT_DASHBOARD_STATE) {
       if (!widget.meta || !('builtin_key' in widget.meta)) {
@@ -32,16 +34,8 @@ export default async function runMigration(db) {
 
       const existing = db.runQuery(
         `SELECT id, meta FROM dashboard
-         WHERE dashboard_page_id = ? AND type = ? AND width = ? AND height = ?
-           AND x = ? AND y = ? AND tombstone = 0`,
-        [
-          seeded.id,
-          widget.type,
-          widget.width,
-          widget.height,
-          widget.x,
-          widget.y,
-        ],
+         WHERE type = ? AND tombstone = 0`,
+        [widget.type],
         true,
       );
       const originalMeta = { ...widget.meta, builtin_key: undefined };
