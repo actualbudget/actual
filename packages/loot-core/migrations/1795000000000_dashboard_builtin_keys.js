@@ -16,11 +16,7 @@ export default async function runMigration(db) {
       true,
     )[0];
 
-    if (!seeded) {
-      return;
-    }
-
-    if (seeded.name === 'Main') {
+    if (seeded?.name === 'Main') {
       db.runQuery('UPDATE dashboard_pages SET builtin_key = ? WHERE id = ?', [
         'main',
         seeded.id,
