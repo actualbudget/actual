@@ -65,6 +65,8 @@ type CellsChangedEvent = Array<{
 type FallbackWriteErrorEvent = undefined;
 // The IndexedDB fallback could not store a file, retry included
 type StorageWriteFailedEvent = { path: string };
+// The browser dropped the private file system under the running app
+type StorageLostEvent = undefined;
 type FinishImportEvent = undefined;
 type FinishLoadEvent = undefined;
 type IndexeddbQuotaErrorEvent = undefined;
@@ -117,6 +119,7 @@ export type ServerEvents = {
   'cells-changed': CellsChangedEvent;
   'fallback-write-error': FallbackWriteErrorEvent;
   'storage-write-failed': StorageWriteFailedEvent;
+  'storage-lost': StorageLostEvent;
   'finish-import': FinishImportEvent;
   'finish-load': FinishLoadEvent;
   'import-progress': ImportProgressEvent;
