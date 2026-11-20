@@ -139,7 +139,6 @@ describe('future buffer', () => {
     await sheet.waitOnSpreadsheet();
     // Oct holds the 50000 overspending for Nov's "Overspent in Oct"
     expect(await buffer('2026-10')).toBe(250000);
-    const before = await Promise.all(WINDOW.map(toBudget));
 
     const cover = () =>
       coverOverspending({
@@ -174,11 +173,11 @@ describe('future buffer', () => {
       await getSheetValue(monthUtils.sheetForMonth('2026-10'), 'budget-bills'),
     ).toBe(350000);
     expect(await buffer('2026-10')).toBe(200000);
-    expect(await Promise.all(WINDOW.map(toBudget))).toEqual(before);
+    expect(await Promise.all(WINDOW.map(toBudget))).toEqual([
+      -30000, -30000, -30000,
+    ]);
     expect(
-      db.firstSync<db.DbNote>('SELECT note FROM notes WHERE id = ?', [
-        'budget-2026-10',
-      ])?.note,
+      (await handlers['notes-get']({ id: 'budget-2026-10' }))?.note,
     ).toMatch(/^- Reassigned 500\.00 from For next month → Bills on /);
   });
 
