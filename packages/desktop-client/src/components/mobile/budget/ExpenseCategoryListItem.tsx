@@ -336,9 +336,8 @@ export function ExpenseCategoryListItem({
               dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
               showUndoNotification({
                 message: t(
-                  `Covered {{amount}} {{toCategoryName}} overspending from {{fromCategoryName}}.`,
+                  `Covered {{toCategoryName}} overspending from {{fromCategoryName}}.`,
                   {
-                    amount: format(amount, 'financial'),
                     toCategoryName: category.name,
                     fromCategoryName: getCoverSourceName(
                       fromCategoryId,

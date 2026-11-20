@@ -16,7 +16,6 @@ import { FieldLabel, TapField } from '#components/mobile/MobileForms';
 import { AmountInput } from '#components/util/AmountInput';
 import { useCategories } from '#hooks/useCategories';
 import { useForNextMonthCoverable } from '#hooks/useForNextMonthCoverable';
-import { useInitialMount } from '#hooks/useInitialMount';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
@@ -41,7 +40,7 @@ export function CoverModal({
   const [categoryGroups, categories] = useMemo(() => {
     const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
     const categoryGroups = showToBeBudgeted
-      ? addToBeBudgetedGroup(expenseGroups, { forNextMonth })
+      ? addToBeBudgetedGroup(expenseGroups, { forNextMonth: forNextMonth ?? 0 })
       : expenseGroups;
     const filteredCategoryGroups = categoryId
       ? removeCategoriesFromGroups(categoryGroups, categoryId)
@@ -83,12 +82,15 @@ export function CoverModal({
     }
   };
 
-  const isInitialMount = useInitialMount();
+  // The picker gets a copy of the groups, so wait until the "For next
+  // month" row can be worked out before opening it
+  const [hasOpenedPicker, setHasOpenedPicker] = useState(false);
   useEffect(() => {
-    if (isInitialMount) {
+    if (!hasOpenedPicker && forNextMonth != null) {
+      setHasOpenedPicker(true);
       openCategoryModal();
     }
-  }, [isInitialMount, openCategoryModal]);
+  }, [hasOpenedPicker, forNextMonth, openCategoryModal]);
 
   return (
     <Modal name="cover">

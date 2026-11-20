@@ -6,10 +6,11 @@ import { useSheetValue } from '#hooks/useSheetValue';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 // How much of the current sheet's "For next month" can cover this
-// category's overspending. 0 when there's no category to cover.
+// category's overspending. 0 when there's no category to cover, null until
+// the cells have loaded.
 export function useForNextMonthCoverable(
   categoryId: CategoryEntity['id'] | undefined,
-): IntegerAmount {
+): IntegerAmount | null {
   const managed = useSheetValue<'envelope-budget', 'buffered-managed'>(
     envelopeBudget.managed,
   );
@@ -26,10 +27,18 @@ export function useForNextMonthCoverable(
   if (!categoryId) {
     return 0;
   }
+  if (
+    managed == null ||
+    forNextMonth == null ||
+    balance == null ||
+    carryover == null
+  ) {
+    return null;
+  }
   return getForNextMonthCoverable({
-    managed: managed === true,
-    forNextMonth: forNextMonth ?? 0,
-    balance: balance ?? 0,
+    managed,
+    forNextMonth,
+    balance,
     carryover: Boolean(carryover),
   });
 }
