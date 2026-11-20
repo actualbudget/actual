@@ -47,6 +47,27 @@ const mobileSheetContainerStyle: CSSProperties = {
 };
 
 const SHEET_EXIT_MS = 180;
+const KEYBOARD_FOLLOW_TRANSITION = '300ms cubic-bezier(0.22, 1, 0.36, 1)';
+
+// A registered length can be transitioned; unregistered variables cannot.
+const canTransitionViewportHeightVariable = registerViewportHeightVariable();
+
+function registerViewportHeightVariable() {
+  if (typeof CSS === 'undefined' || !('registerProperty' in CSS)) {
+    return false;
+  }
+  try {
+    CSS.registerProperty({
+      name: '--visual-viewport-height',
+      syntax: '<length>',
+      inherits: true,
+      initialValue: '0px',
+    });
+  } catch {
+    // Already registered.
+  }
+  return true;
+}
 
 const sheetSlideIn = keyframes({
   from: { transform: 'translateY(100%)' },
@@ -207,15 +228,20 @@ export const Modal = ({
           nativeStyle={{
             // React Aria's height removes pinch zoom scaling. Safari page zoom
             // needs CSS pixels, including keyboard resizing while zoomed.
-            '--visual-viewport-height': `${viewport.height}px`,
+            // Excludes the status bar area.
+            '--visual-viewport-height': `calc(${viewport.height}px - env(safe-area-inset-top, 0px))`,
             top: viewport.offsetTop,
           }}
           style={{
             display: 'flex',
-            ...(isSheet
-              ? { alignItems: 'stretch', justifyContent: 'flex-end' }
-              : { alignItems: 'center', justifyContent: 'center' }),
+            marginTop: 'env(safe-area-inset-top, 0px)',
+            alignItems: isSheet ? 'stretch' : 'center',
             height: 'var(--visual-viewport-height)',
+            // Follow the on-screen keyboard instead of snapping.
+            ...(isNarrowWidth &&
+              !prefersReducedMotion && {
+                transition: `${canTransitionViewportHeightVariable ? '--visual-viewport-height' : 'height'} ${KEYBOARD_FOLLOW_TRANSITION}, top ${KEYBOARD_FOLLOW_TRANSITION}`,
+              }),
             overflowY: 'auto',
             ...wrapperProps?.style,
           }}
@@ -223,6 +249,8 @@ export const Modal = ({
           <ReactAriaModal
             ref={sheetRef}
             className={isAnimatedSheet ? mobileSheetModalClassName : undefined}
+            // Auto margins never push an oversized modal above the container.
+            style={{ marginTop: 'auto', marginBottom: isSheet ? 0 : 'auto' }}
           >
             {modalProps => (
               <Dialog

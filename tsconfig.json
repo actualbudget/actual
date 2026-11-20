@@ -41,6 +41,7 @@
     "**/node_modules/*",
     "**/build/*",
     "**/build-electron/*",
+    "**/build-mobile/*",
     "**/client-build/*",
     "**/dist/*",
     "**/lib-dist/*",

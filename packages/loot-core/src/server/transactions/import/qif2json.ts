@@ -55,6 +55,9 @@ export function qif2json(qif, options: { dateFormat?: string } = {}) {
       case 'T':
         transaction.amount = line.substring(1);
         break;
+      case 'U':
+        // Quicken exports duplicate the transaction amount in U; T is canonical.
+        break;
       case 'N':
         transaction.number = line.substring(1);
         break;

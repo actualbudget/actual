@@ -216,6 +216,32 @@ jobs:
         with:
           path: packages/desktop-electron/e2e/test-results/junit.xml
 
+  functional-ios-app:
+    name: Functional iOS App
+    runs-on: xcode-27
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      # The native apps ship their own web build variant, which the shared
+      # build-web artifact does not contain.
+      - name: Build mobile web bundle
+        run: yarn build:browser --mobile --skip-translations
+      - name: Run iOS app tests
+        run: yarn workspace mobile-client test:ios
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: ios-app-test-results
+          path: packages/mobile-client/build/ios-test-results.xcresult
+          retention-days: 30
+          overwrite: true
+
   vrt:
     name: Visual regression (shard ${{ matrix.shard }}/${{ vars.E2E_SHARD_TOTAL || '3' }})
     runs-on: depot-ubuntu-latest

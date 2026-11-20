@@ -28,7 +28,14 @@ import * as transactionsSlice from './transactions/transactionsSlice';
 import { redo, undo } from './undo';
 import * as usersSlice from './users/usersSlice';
 
-const queryClient = new QueryClient();
+// Queries and mutations talk to the local backend, so they must run
+// regardless of internet connectivity.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { networkMode: 'always' },
+    mutations: { networkMode: 'always' },
+  },
+});
 window.__TANSTACK_QUERY_CLIENT__ = queryClient;
 
 const store = configureAppStore({ queryClient });
