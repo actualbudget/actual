@@ -358,7 +358,16 @@ export function Modals() {
           );
 
         case 'future-buffer-mode':
-          return <FutureBufferModeModal key={key} />;
+          // `useFutureBufferMode` also reads month cells, so it needs a
+          // month's sheet even though the picker only uses the mode
+          return (
+            <SheetNameProvider
+              key={key}
+              name={monthUtils.sheetForMonth(monthUtils.currentMonth())}
+            >
+              <FutureBufferModeModal />
+            </SheetNameProvider>
+          );
 
         case 'tracking-balance-menu':
           return (
