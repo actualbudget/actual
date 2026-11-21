@@ -15,7 +15,8 @@ import type { StorageSnapshot } from './page-models/storage-inspector';
 
 // Mirrors loot-core/src/platform/client/browser-preload/storage-backend.ts
 const STORAGE_BACKEND_KEY = 'actual:storage-backend';
-const requestedBackend = E2E_STORAGE_BACKEND ?? 'legacy';
+// Unset means the app's default, which is the sqlite-wasm engine
+const requestedBackend = E2E_STORAGE_BACKEND ?? 'opfs';
 const usesNewStorage = requestedBackend !== 'legacy';
 // The IndexedDB fallback persists on a one second debounce
 const PERSIST_WAIT_MS = 2000;
@@ -139,7 +140,7 @@ test.describe('Browser storage', () => {
     const settingsPage = await new Navigation(page).goToSettingsPage();
     await settingsPage.goToSection('Experimental');
     const toggle = page.getByRole('checkbox', {
-      name: 'New browser storage engine',
+      name: 'Browser storage engine',
     });
     await expect(toggle).not.toBeChecked();
     // Stores the choice and reloads; the budget is moved as it reopens
@@ -172,7 +173,7 @@ test.describe('Browser storage', () => {
     const settingsPage = await new Navigation(page).goToSettingsPage();
     await settingsPage.goToSection('Experimental');
     const toggle = page.getByRole('checkbox', {
-      name: 'New browser storage engine',
+      name: 'Browser storage engine',
     });
     await expect(toggle).toBeChecked();
     // Moves every budget back, then reloads into the legacy engine, which
