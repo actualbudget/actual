@@ -10,6 +10,7 @@
     "#styles": "./src/styles.ts",
     "#Text": "./src/Text.tsx",
     "#theme": "./src/theme.ts",
+    "#themes": "./src/themes/index.ts",
     "#View": "./src/View.tsx",
     "#hooks/*": "./src/hooks/*.ts",
     "#icons/v1": "./src/icons/v1/index.ts"
@@ -80,7 +81,6 @@
     "@vitejs/plugin-react": "^6.1.2",
     "babel-plugin-react-compiler": "^1.0.0",
     "culori": "^4.0.2",
-    "eslint-plugin-storybook": "^10.6.2",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "storybook": "^10.6.2",

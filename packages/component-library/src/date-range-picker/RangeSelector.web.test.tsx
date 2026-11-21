@@ -7,7 +7,7 @@ const defaultProps = {
   max: '2030-12',
   locale: 'en-US',
   labels: { previous: 'Previous', next: 'Next' },
-  onChange: () => {},
+  onChange: vi.fn(),
 };
 
 describe('RangeSelector', () => {
