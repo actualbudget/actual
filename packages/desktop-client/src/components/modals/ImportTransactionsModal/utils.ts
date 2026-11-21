@@ -1,5 +1,9 @@
 import { format as formatDate_ } from '@actual-app/core/shared/months';
-import { looselyParseAmount } from '@actual-app/core/shared/util';
+import {
+  amountToInteger,
+  looselyParseAmount,
+  MAX_SAFE_NUMBER,
+} from '@actual-app/core/shared/util';
 import * as d from 'date-fns';
 
 export type DateFormat =
@@ -201,6 +205,19 @@ function parseAmount(
   }
 
   return mapper(parsed);
+}
+
+export function isSafeImportAmount(amount: number): boolean {
+  if (!Number.isFinite(amount)) {
+    return false;
+  }
+
+  const integerAmount = amountToInteger(amount);
+
+  return (
+    Number.isInteger(integerAmount) &&
+    Math.abs(integerAmount) <= MAX_SAFE_NUMBER
+  );
 }
 
 export function parseAmountFields(

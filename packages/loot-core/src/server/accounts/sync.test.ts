@@ -275,6 +275,148 @@ describe('Account sync', () => {
     expect(transactions2.length).toBe(1);
     expect(transactions2).toMatchSnapshot();
   });
+  test('rejects imports that exceed the safe account balance limit', async () => {
+    const { id } = await prepareDatabase();
+
+    const amount = 1_500_000_000_000_000;
+
+    await expect(
+      reconcileTransactions(id, [
+        { date: '2020-01-02', payee_name: 'Large A', amount },
+        { date: '2020-01-03', payee_name: 'Large B', amount },
+      ]),
+    ).rejects.toThrow(
+      'Import would result in an account balance exceeding the supported numerical limit.',
+    );
+
+    const transactions = await getAllTransactions();
+    expect(transactions).toHaveLength(0);
+  });
+
+  test('rejects imports that exceed the global balance limit', async () => {
+    const { id } = await prepareDatabase();
+
+    const secondAccountId = await db.insertAccount({
+      id: 'two',
+      name: 'Second account',
+    });
+
+    const amount = 1_500_000_000_000_000;
+
+    await reconcileTransactions(id, [
+      { date: '2020-01-02', payee_name: 'Large A', amount },
+    ]);
+
+    await expect(
+      reconcileTransactions(secondAccountId, [
+        { date: '2020-01-03', payee_name: 'Large B', amount },
+      ]),
+    ).rejects.toThrow(
+      'Import would result in a global balance exceeding the supported numerical limit.',
+    );
+
+    const transactions = await getAllTransactions();
+
+    expect(transactions).toHaveLength(1);
+    expect(transactions[0].amount).toBe(amount);
+  });
+
+  test('allows transfers that keep the global balance within limits', async () => {
+    const { id } = await prepareDatabase();
+
+    const secondAccountId = await db.insertAccount({
+      id: 'two',
+      name: 'Second account',
+    });
+
+    const transferPayeeId = await db.insertPayee({
+      id: 'transfer-two',
+      name: '',
+      transfer_acct: secondAccountId,
+    });
+
+    const amount = 1_500_000_000_000_000;
+
+    await reconcileTransactions(id, [
+      { date: '2020-01-02', payee_name: 'Initial deposit', amount },
+    ]);
+
+    await reconcileTransactions(id, [
+      {
+        date: '2020-01-03',
+        payee: transferPayeeId,
+        amount: -amount,
+      },
+    ]);
+
+    const transactions = await getAllTransactions();
+    expect(transactions).toHaveLength(3);
+  });
+
+  test('allows transfers whose net global balance remains safe', async () => {
+    const { id } = await prepareDatabase();
+
+    const secondAccountId = await db.insertAccount({
+      id: 'two',
+      name: 'Second account',
+    });
+
+    const transferPayeeId = await db.insertPayee({
+      id: 'transfer-two',
+      name: '',
+      transfer_acct: secondAccountId,
+    });
+
+    const amount = 1_500_000_000_000_000;
+
+    // Initially, only the second account has a balance.
+    await reconcileTransactions(secondAccountId, [
+      {
+        date: '2020-01-02',
+        payee_name: 'Initial deposit',
+        amount,
+      },
+    ]);
+
+    // This transfers money from the second account to the first.
+    // The global balance should remain unchanged.
+    await reconcileTransactions(id, [
+      {
+        date: '2020-02-03',
+        payee: transferPayeeId,
+        amount,
+        forceAddTransaction: true,
+      },
+    ]);
+
+    const transactions = await getAllTransactions();
+    expect(transactions).toHaveLength(3);
+  });
+
+  test('rejects split transactions that exceed the safe balance limit', async () => {
+    const { id } = await prepareDatabase();
+
+    const amount = 1_500_000_000_000_000;
+
+    await expect(
+      reconcileTransactions(id, [
+        {
+          date: '2020-01-02',
+          payee_name: 'Large split transaction',
+          amount: amount * 2,
+          subtransactions: [
+            { amount, category: null },
+            { amount, category: null },
+          ],
+          forceAddTransaction: true,
+        },
+      ]),
+    ).rejects.toThrow(
+      'Import would result in an account balance exceeding the supported numerical limit.',
+    );
+
+    expect(await getAllTransactions()).toHaveLength(0);
+  });
 
   test('reconcile does rematch deleted transactions by default', async () => {
     const { id: acctId } = await prepareDatabase();
