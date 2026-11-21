@@ -27,6 +27,7 @@ import { resolveTagScope } from '#components/reports/tagScope';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
 import { calculateLegend } from './calculateLegend';
+import { countFilteredMonths } from './countFilteredMonths';
 import { fetchSpreadsheetQueryData } from './fetchSpreadsheetQueryData';
 import { filterEmptyRows } from './filterEmptyRows';
 import {
@@ -68,6 +69,10 @@ export type createCustomSpreadsheetProps = {
   dateFormat?: SyncedPrefs['dateFormat'];
 };
 
+type CustomSpreadsheetData = DataEntity & {
+  filteredMonthCount?: number;
+};
+
 export function createCustomSpreadsheet({
   startDate,
   endDate,
@@ -107,14 +112,29 @@ export function createCustomSpreadsheet({
     payees,
     accounts,
   );
+  const transactionConditions = conditions.filter(cond => !cond.customName);
+  const hasMonthlyDateFilter =
+    interval === 'Monthly' &&
+    balanceTypeOp !== 'totalBudgeted' &&
+    transactionConditions.some(cond => cond.field === 'date');
 
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: DataEntity) => void,
+    setData: (data: CustomSpreadsheetData) => void,
   ) => {
     let groupByList = initialGroups;
     let scopeTagNames: string[] | undefined;
-    const emptyData: DataEntity = {
+    const hasGroups = groupBy === 'Tag' || groupByList.length > 0;
+    const { filters } =
+      hasGroups || hasMonthlyDateFilter
+        ? await send('make-filters-from-conditions', {
+            conditions: transactionConditions,
+          })
+        : { filters: [] };
+    const filteredMonthCount = hasMonthlyDateFilter
+      ? countFilteredMonths(startDate, endDate, filters, conditionsOp)
+      : undefined;
+    const emptyData: CustomSpreadsheetData = {
       data: [],
       intervalData: [],
       legend: [],
@@ -126,16 +146,14 @@ export function createCustomSpreadsheet({
       netDebts: 0,
       totalTotals: 0,
       totalBudgeted: 0,
+      filteredMonthCount,
     };
 
-    if (groupBy !== 'Tag' && groupByList.length === 0) {
+    if (!hasGroups) {
       setData(emptyData);
       return;
     }
 
-    const { filters } = await send('make-filters-from-conditions', {
-      conditions: conditions.filter(cond => !cond.customName),
-    });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     let assets: QueryDataEntity[];
@@ -399,6 +417,7 @@ export function createCustomSpreadsheet({
       totalTotals: totalAssets + totalDebts,
       totalBudgeted: totalAssets + totalDebts,
       scopeTagNames,
+      filteredMonthCount,
     });
   };
 }

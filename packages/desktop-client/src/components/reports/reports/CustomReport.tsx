@@ -15,7 +15,6 @@ import type {
   balanceTypeOpType,
   CategoryEntity,
   CustomReportEntity,
-  DataEntity,
   RuleConditionEntity,
   sortByOpType,
   TransactionEntity,
@@ -614,9 +613,8 @@ function CustomReportInner({
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
 
-  const data: DataEntity | null = graphData
-    ? { ...graphData, groupedData }
-    : null;
+  const data = graphData ? { ...graphData, groupedData } : null;
+  const averageIntervalsCount = data?.filteredMonthCount ?? intervals.length;
 
   const customReportItems: CustomReportEntity = {
     id: '',
@@ -1080,7 +1078,7 @@ function CustomReportInner({
                     showHiddenCategories={showHiddenCategories}
                     showOffBudget={showOffBudget}
                     showTrendLines={showTrendLines}
-                    intervalsCount={intervals.length}
+                    intervalsCount={averageIntervalsCount}
                   />
                 ) : (
                   <LoadingIndicator message={t('Loading report...')} />
@@ -1102,7 +1100,7 @@ function CustomReportInner({
                     balanceTypeOp={balanceTypeOp}
                     data={data}
                     interval={interval}
-                    intervalsCount={intervals.length}
+                    intervalsCount={averageIntervalsCount}
                   />
                 )}
                 {viewLegend && (

@@ -155,7 +155,7 @@ export function ReportSummary({
           }}
         >
           <PrivacyFilter>
-            {!isNaN(average) && format(average, 'financial')}
+            {Number.isFinite(average) && format(average, 'financial')}
           </PrivacyFilter>
         </FinancialText>
         <Text style={{ fontWeight: 600 }}>
