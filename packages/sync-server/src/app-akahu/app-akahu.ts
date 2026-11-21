@@ -15,6 +15,7 @@ import {
   validateSessionMiddleware,
 } from '#util/middlewares';
 import { createMutex } from '#util/mutex';
+import { validateGlobalBankSyncSession } from '#util/validate-budget-session';
 
 type AkahuTransaction = {
   booked: boolean;
@@ -50,11 +51,15 @@ app.use(requestLoggerMiddleware);
 // server-wide (global) bank-sync credentials is admin-only, but every
 // signed-in user on that server may use them. This is a supported feature
 // and will remain; budgets with their own credentials use those instead.
+// API keys need explicit permission to sync shared connections.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
+const bankSync = express.Router();
+bankSync.use(validateGlobalBankSyncSession);
+app.use(bankSync);
 app.use(validateSessionMiddleware);
 
-app.post(
+bankSync.post(
   '/status',
   handleError(async (_req, res) => {
     const userToken = secretsService.get(SecretName.akahu_userToken);
@@ -111,7 +116,7 @@ app.post(
   }),
 );
 
-app.post(
+bankSync.post(
   '/transactions',
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};

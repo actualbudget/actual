@@ -73,6 +73,7 @@ describe('API key lifecycle', () => {
     expect(metadata).toEqual({
       id: expect.any(String),
       name: 'Import',
+      permissions: [],
       fileIds: [fileId],
       createdAt: expect.any(Number),
     });
@@ -243,6 +244,8 @@ describe('API key lifecycle', () => {
   });
 
   it.each([
+    { permissions: ['unknown'] },
+    { permissions: 'bank-sync-global' },
     { fileIds: undefined },
     { name: undefined },
     { name: '' },
@@ -256,6 +259,7 @@ describe('API key lifecycle', () => {
   ])('rejects invalid creation input: %j', async invalid => {
     const response = await createKey(session, {
       name: 'Import',
+      permissions: [],
       fileIds: [fileId],
       ...invalid,
     });

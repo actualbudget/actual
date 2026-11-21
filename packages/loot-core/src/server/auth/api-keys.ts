@@ -7,6 +7,7 @@ export type ApiKey = {
   name: string;
   fileIds: string[];
   createdAt: number;
+  permissions?: 'bank-sync-global'[];
 };
 
 async function request<T>(
@@ -40,6 +41,7 @@ export function listApiKeys(): Promise<ApiKey[]> {
 export function createApiKey(data: {
   name: string;
   fileIds: string[];
+  permissions?: 'bank-sync-global'[];
 }): Promise<ApiKey & { key: string }> {
   return request('POST', '', data);
 }
