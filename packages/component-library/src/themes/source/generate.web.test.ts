@@ -31,7 +31,10 @@ describe('built-in themes', () => {
 
   it('resolves palette colors, references and raw values', () => {
     expect(lightThemeCss).toContain(
-      '  --color-pageBackground: var(--palette-navy100);',
+      '  --color-backgroundPage: var(--palette-navy100);',
+    );
+    expect(lightThemeCss).toContain(
+      '  --color-pageBackground: var(--color-backgroundPage);',
     );
     expect(darkThemeCss).toContain(
       '  --color-budgetNumberZero: var(--color-tableTextSubdued);',

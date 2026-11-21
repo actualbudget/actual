@@ -1983,7 +1983,7 @@ describe('buildCustomThemeCss', () => {
       cssOverride: ':root { --color-accent: #0a7d5a; }',
     });
 
-    expect(result).toContain('--color-accentContrast: #ffffff;');
+    expect(result).toContain('--color-accentText: ');
     expect(result).toContain(':root { --color-accent: #0a7d5a; }');
   });
 
@@ -2022,7 +2022,7 @@ describe('buildCustomThemeCss', () => {
 
     expect(blocks.filter(line => line.startsWith('@media'))).toHaveLength(4);
     expect(result).toMatch(
-      /@media \(prefers-color-scheme: light\) \{ :root \{\n {2}--color-accentContrast: #ffffff;/,
+      /@media \(prefers-color-scheme: light\) \{ :root \{\n {2}--color-accentHover: /,
     );
     expect(result).toMatch(
       /@media \(prefers-color-scheme: dark\) \{ :root \{\n {2}--color-accentContrast: #000000;/,

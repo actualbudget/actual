@@ -15,8 +15,6 @@ import type { ThemeName, TokenDefinition } from './source/types';
 
 type Declarations = Map<string, string>;
 
-const inputTokens = ['accent', ...Object.values(accentSurfaceTokens)];
-const maxReferenceDepth = 10;
 const referencePattern = /^var\s*\(\s*--([a-zA-Z0-9_-]+)\s*\)$/i;
 const bareHexPattern = /^[0-9a-f]+$/i;
 const customPropertyPattern = /^--[A-Za-z0-9_-]+$/;
@@ -75,62 +73,64 @@ function parseColor(css: string): ResolvedColor | null {
     : { r: color.r, g: color.g, b: color.b, alpha: color.alpha ?? 1 };
 }
 
-function resolveBuiltIn(property: string, theme: ThemeName) {
-  const [kind, name] = property.split(/-(.*)/);
-  if (kind === 'color' && Object.hasOwn(colors, name)) {
-    return resolveToken(name, theme, colors, palette);
-  }
-  if (kind === 'palette' && Object.hasOwn(paletteColors, name)) {
-    return parseColor(paletteColors[name]);
-  }
-  return null;
-}
+function createResolver(theme: ThemeName, declarations: Declarations) {
+  const resolving = new Set<string>();
 
-function resolveProperty(
-  property: string,
-  theme: ThemeName,
-  declarations: Declarations,
-  depth = 0,
-): ResolvedColor | null {
-  const declared = declarations.get(property);
-  if (declared == null) {
-    return resolveBuiltIn(property, theme);
+  function resolveBuiltIn(property: string) {
+    const [kind, name] = property.split(/-(.*)/);
+    if (kind === 'color' && Object.hasOwn(colors, name)) {
+      return resolveToken(name, theme, colors, palette, other =>
+        declarations.has(`color-${other}`)
+          ? resolveProperty(`color-${other}`)
+          : undefined,
+      );
+    }
+    if (kind === 'palette' && Object.hasOwn(paletteColors, name)) {
+      return parseColor(paletteColors[name]);
+    }
+    return null;
   }
-  const reference = declared.match(referencePattern);
-  if (reference) {
-    return depth < maxReferenceDepth
-      ? resolveProperty(reference[1], theme, declarations, depth + 1)
-      : null;
+
+  function resolveProperty(property: string): ResolvedColor | null {
+    if (resolving.has(property)) {
+      return null;
+    }
+    resolving.add(property);
+    try {
+      const declared = declarations.get(property);
+      if (declared == null) {
+        return resolveBuiltIn(property);
+      }
+      const reference = declared.match(referencePattern);
+      return reference ? resolveProperty(reference[1]) : parseColor(declared);
+    } finally {
+      resolving.delete(property);
+    }
   }
-  return parseColor(declared);
+
+  return resolveProperty;
 }
 
 function derive(theme: ThemeName, css: string) {
   const declarations = readDeclarations(css);
-  const textOnTokens = accentTextOnTokens(theme);
-  const contrastTokens = contrastOnTokens(theme);
-  const inputs = [
-    ...inputTokens,
-    ...textOnTokens.map(token => token.surface),
-    ...contrastTokens.map(token => token.fill),
-  ];
-  if (!inputs.some(name => declarations.has(`color-${name}`))) {
+  if (![...declarations.keys()].some(name => name.startsWith('color-'))) {
     return null;
   }
 
+  const resolve = createResolver(theme, declarations);
+  const textOnTokens = accentTextOnTokens(theme);
+  const contrastTokens = contrastOnTokens(theme);
+  const builtIn = (token: string) =>
+    resolveToken(token, theme, colors, palette);
   const readSurface = (token: string) => {
-    const builtIn = resolveToken(token, theme, colors, palette);
-    const color = resolveProperty(`color-${token}`, theme, declarations);
-    if (color == null) {
-      return builtIn;
-    }
-    return color.alpha < 1 ? composite(color, builtIn) : color;
+    const color = resolve(`color-${token}`) ?? builtIn(token);
+    return color.alpha < 1 ? composite(color, builtIn(token)) : color;
   };
   const surface = readSurface(accentSurfaceTokens.surface);
   const page = readSurface(accentSurfaceTokens.page);
   const mobilePage = readSurface(accentSurfaceTokens.mobilePage);
 
-  const accent = resolveProperty('color-accent', theme, declarations);
+  const accent = resolve('color-accent');
   if (accent == null) {
     return null;
   }
@@ -143,20 +143,9 @@ function derive(theme: ThemeName, css: string) {
       mobilePage: toHex(mobilePage),
     },
   );
-  const themed: Record<string, TokenDefinition> = {
-    ...definitions,
-    accent: { all: { raw: accentSet.accent } },
-  };
   const readFill = (token: string, over?: string) => {
-    const declared = declarations.has(`color-${token}`)
-      ? resolveProperty(`color-${token}`, theme, declarations)
-      : null;
-    const fill = declared ?? resolveToken(token, theme, themed, palette);
-    const backdrop =
-      over == null
-        ? resolveToken(token, theme, colors, palette)
-        : readSurface(over);
-    return composite(fill, backdrop);
+    const fill = resolve(`color-${token}`) ?? builtIn(token);
+    return composite(fill, over == null ? builtIn(token) : readSurface(over));
   };
   const derived = [
     ...derivedAccentTokens.map(name => ({ name, value: accentSet[name] })),
@@ -174,6 +163,7 @@ function derive(theme: ThemeName, css: string) {
     })),
   ]
     .filter(({ name }) => !declarations.has(`color-${name}`))
+    .filter(({ name, value }) => value !== toHex(builtIn(name)))
     .map(({ name, value }) => `  --color-${name}: ${value};`);
   return derived.length > 0 ? `:root {\n${derived.join('\n')}\n}` : null;
 }

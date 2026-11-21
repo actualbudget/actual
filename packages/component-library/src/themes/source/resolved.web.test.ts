@@ -18,3 +18,29 @@ describe('resolved theme colors', () => {
     expect(resolved).toMatchSnapshot();
   });
 });
+
+describe('resolveToken overrides', () => {
+  const red = { r: 1, g: 0, b: 0, alpha: 1 };
+
+  it('uses an override for the token itself', () => {
+    expect(
+      resolveToken('pageText', 'light', colors, palette, name =>
+        name === 'pageText' ? red : undefined,
+      ),
+    ).toEqual(red);
+  });
+
+  it('uses an override anywhere along the reference chain', () => {
+    expect(
+      resolveToken('tableBackground', 'light', colors, palette, name =>
+        name === 'background' ? red : undefined,
+      ),
+    ).toEqual(red);
+  });
+
+  it('falls through to the built-in value when the override declines', () => {
+    expect(
+      resolveToken('tableBackground', 'light', colors, palette, () => null),
+    ).toEqual(resolveToken('tableBackground', 'light', colors, palette));
+  });
+});
