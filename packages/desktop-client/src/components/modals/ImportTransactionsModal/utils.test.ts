@@ -1,4 +1,16 @@
-import { filterByStartDate, parseCategoryFields, parseDate } from './utils';
+import {
+  amountToInteger,
+  MAX_SAFE_NUMBER,
+  safeNumber,
+} from '@actual-app/core/shared/util';
+
+import {
+  filterByStartDate,
+  isSafeImportAmount,
+  parseAmountFields,
+  parseCategoryFields,
+  parseDate,
+} from './utils';
 import type { ImportTransaction } from './utils';
 
 describe('Import transactions', () => {
@@ -303,6 +315,82 @@ describe('Import transactions', () => {
       expect(
         parseCategoryFields({ category: 'Missing category' }, categories),
       ).toBeNull();
+    });
+  });
+});
+
+describe('isSafeImportAmount', () => {
+  // Issue #9415: this imported amount overflows safeNumber and crashed the
+  // transaction list with "can't safely perform arithmetic".
+  const overflowAmount = -22541074903662;
+
+  it('documents the crash the guard prevents', () => {
+    expect(() => safeNumber(amountToInteger(overflowAmount))).toThrow(
+      /can't safely perform arithmetic/,
+    );
+  });
+
+  it.each([
+    ['the issue 9415 amount', overflowAmount],
+    ['a positive overflow', 22541074903662],
+    ['a multiplier-amplified overflow', 9e13],
+  ])('rejects %s', (_name, amount) => {
+    expect(isSafeImportAmount(amount)).toBe(false);
+  });
+
+  it('accepts amounts whose integer form stays within the safe range', () => {
+    const maxSafeAmount = Math.floor(MAX_SAFE_NUMBER / 100);
+    expect(isSafeImportAmount(maxSafeAmount)).toBe(true);
+    expect(isSafeImportAmount(-maxSafeAmount)).toBe(true);
+    expect(isSafeImportAmount(100.5)).toBe(true);
+  });
+});
+
+describe('parseAmountFields unparseable amounts', () => {
+  it('rejects a non-empty unparseable amount string', () => {
+    expect(
+      parseAmountFields(
+        { amount: 'abc' } as unknown as Partial<ImportTransaction>,
+        false,
+        false,
+        '',
+        false,
+        '',
+      ),
+    ).toEqual({ amount: null, outflow: null, inflow: null });
+  });
+
+  it('rejects a non-empty unparseable outflow in split mode', () => {
+    expect(
+      parseAmountFields(
+        { outflow: 'abc' } as unknown as Partial<ImportTransaction>,
+        true,
+        false,
+        '',
+        false,
+        '',
+      ),
+    ).toEqual({ amount: null, outflow: null, inflow: null });
+  });
+
+  it('keeps coercing an empty amount to 0', () => {
+    expect(
+      parseAmountFields(
+        { amount: '' } as unknown as Partial<ImportTransaction>,
+        false,
+        false,
+        '',
+        false,
+        '',
+      ),
+    ).toEqual({ amount: 0, outflow: null, inflow: null });
+  });
+
+  it('keeps coercing a missing amount to 0', () => {
+    expect(parseAmountFields({}, false, false, '', false, '')).toEqual({
+      amount: 0,
+      outflow: null,
+      inflow: null,
     });
   });
 });
