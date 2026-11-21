@@ -218,6 +218,7 @@ const sidebars = {
             'experimental/monte-carlo-analysis',
             'experimental/sankey-report',
             'experimental/redesigned-sidebar',
+            'experimental/bank-sync-transfer-detection',
           ],
         },
       ],
