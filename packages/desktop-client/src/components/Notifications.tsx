@@ -19,6 +19,7 @@ import { removeNotification } from '#notifications/notificationsSlice';
 import type { NotificationWithId } from '#notifications/notificationsSlice';
 import { useDispatch, useSelector } from '#redux';
 
+import { MOBILE_NAV_HEIGHT } from './mobile/MobileNavTabs';
 import { Link } from './common/Link';
 import { MODAL_Z_INDEX } from './common/Modal';
 
@@ -383,7 +384,10 @@ export function Notifications({ style }: { style?: CSSProperties }) {
     <View
       style={{
         position: 'fixed',
-        bottom: notificationInset?.bottom || 20,
+        bottom: Math.max(
+          notificationInset?.bottom ?? 0,
+          isNarrowWidth ? MOBILE_NAV_HEIGHT + 8 : 20,
+        ),
         top: notificationInset?.top,
         right: notificationInset?.right || 13,
         left: notificationInset?.left || (isNarrowWidth ? 13 : undefined),
