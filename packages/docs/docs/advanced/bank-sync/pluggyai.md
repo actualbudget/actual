@@ -49,9 +49,11 @@ Pluggy integration is experimental at this point, so before you can use it you n
 
    <img width="518" alt="The Add account dialog with the Set up bank sync button highlighted" src="/img/advanced/bank-sync/bank-sync-add-account-modal@2x.webp" />
 
-3. Under **Providers**, click **Set up** on the Pluggy.ai card.
+3. In the list of providers, click **Set up** next to Pluggy.ai.
 
-   <img width="640" alt="The Providers section of the Bank Sync page with Set up on the Pluggy.ai card highlighted" src="/img/advanced/bank-sync/pluggyai-set-up@2x.webp" />
+   <img width="640" alt="The Bank Sync page listing the providers, with Set up next to Pluggy.ai highlighted" src="/img/advanced/bank-sync/pluggyai-set-up@2x.webp" />
+
+   If another provider is already set up, the list is not shown on the page. Click the menu button (three dots) at the top right of the page, choose **Providers**, then click **Set up** next to Pluggy.ai.
 
 4. In the dialog that appears, enter:
    - **Client ID**: From your Pluggy Dashboard
@@ -71,13 +73,15 @@ Pluggy integration is experimental at this point, so before you can use it you n
 
      <img width="297" alt="The account menu with Link account highlighted" src="/img/advanced/bank-sync/bank-sync-link-account-menu@2x.webp" />
 
-   - For a **new account**, click **"+ Add account"** in the sidebar, then **Set up bank sync**.
+   - For a **new account**, click **"+ Add account"** in the sidebar, then **Set up bank sync**. On the Bank Sync page, click **Link bank account**.
 
      <img width="240" alt="The sidebar with the Add account button at the bottom highlighted" src="/img/advanced/bank-sync/bank-sync-add-account@2x.webp" />
 
-2. Click **Link bank account** on the Pluggy.ai card.
+     <img width="637" alt="The Bank Sync page with the Link bank account button highlighted" src="/img/advanced/bank-sync/bank-sync-link-bank-account@2x.webp" />
 
-   <img width="662" alt="The Link account dialog with Link bank account on the Pluggy.ai card highlighted" src="/img/advanced/bank-sync/pluggyai-link-bank-account@2x.webp" />
+2. If you have set up more than one provider, Actual asks which one to use. Choose **Pluggy.ai**. If Pluggy.ai is the only provider you have set up, Actual skips this step.
+
+   <img width="510" alt="The Link Capital One Checking dialog listing the providers, with Pluggy.ai highlighted" src="/img/advanced/bank-sync/pluggyai-choose-provider@2x.webp" />
 
 3. A list of accounts from your Pluggy connection will appear.
 4. Click **Set up bank sync** next to the one you want to sync.
@@ -98,8 +102,9 @@ Pluggy integration is experimental at this point, so before you can use it you n
 
 To reset your Pluggy connection:
 
-1. In Actual, click **Add Account**.
-2. Next to "Set-up Pluggy for bank-sync", open the three-dot menu.
-3. Click **Reset Pluggy credentials**.
+1. In Actual, open **Settings** and select **Bank Sync**.
+2. Click the menu button (three dots) at the top right of the page and choose **Providers**.
+3. In the **Providers** dialog, click the three-dot menu button next to Pluggy.ai and choose **Reset credentials**.
+4. Click **Reset credentials** to confirm.
 
 You'll then need to generate a new API key and obtain a new Item ID to reconnect.

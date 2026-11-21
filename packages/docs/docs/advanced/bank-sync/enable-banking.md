@@ -35,9 +35,11 @@ To set up Enable Banking, start by creating and signing in to your account: http
 
 ## Link Your Accounts in Actual
 
-Go to **More → Bank Sync**, choose **Set up Enable Banking**, paste the App ID, and upload the credential file. If Enable Banking does not accept the details, Actual shows the reason and you can correct them and try again.
+Go to **Settings → Bank Sync**. In the list of providers, click **Set up** next to **Enable Banking**, paste the App ID, and upload the credential file. If Enable Banking does not accept the details, Actual shows the reason and you can correct them and try again.
 
-Now go to an Actual Budget account and select **Link account → Enable Banking**. Select your country and bank, then follow the prompts to link your account.
+If another provider is already set up, the list is not shown on the page. Click the menu button (three dots) at the top right of the page and choose **Providers** to open it.
+
+Now go to an Actual Budget account, open the account menu (three dots) and select **Link account**. If you have set up more than one provider, Actual asks which one to use. Choose **Enable Banking**. Select your country and bank, then follow the prompts to link your account.
 
 ## Reauthorize Your Bank
 

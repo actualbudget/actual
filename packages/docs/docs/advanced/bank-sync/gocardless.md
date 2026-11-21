@@ -39,9 +39,11 @@ From July 2025 onwards, GoCardless has stopped accepting new Bank Account Data a
 
    <img width="518" alt="The Add account dialog with the Set up bank sync button highlighted" src="/img/advanced/bank-sync/bank-sync-add-account-modal@2x.webp" />
 
-8. Under **Providers**, click **Set up** on the GoCardless card.
+8. In the list of providers, click **Set up** next to GoCardless.
 
-   <img width="640" alt="The Providers section of the Bank Sync page with Set up on the GoCardless card highlighted" src="/img/advanced/bank-sync/gocardless-set-up@2x.webp" />
+   <img width="640" alt="The Bank Sync page listing the providers, with Set up next to GoCardless highlighted" src="/img/advanced/bank-sync/gocardless-set-up@2x.webp" />
+
+   If another provider is already set up, the list is not shown on the page. Click the menu button (three dots) at the top right of the page, choose **Providers**, then click **Set up** next to GoCardless.
 
 9. You will be asked to enter your GoCardless secret ID and secret key. These values will be saved on the server, so you will only need to enter them once.
 
@@ -54,13 +56,15 @@ From July 2025 onwards, GoCardless has stopped accepting new Bank Account Data a
 
      <img width="297" alt="The account menu with Link account highlighted" src="/img/advanced/bank-sync/bank-sync-link-account-menu@2x.webp" />
 
-   - **_To create a new account with bank syncing click on the '+ Add account' link in the left menu at the bottom, then click Set up bank sync_**
+   - **_To create a new account with bank syncing click on the '+ Add account' link in the left menu at the bottom, click Set up bank sync, then click Link bank account on the Bank Sync page_**
 
      <img width="240" alt="The sidebar with the Add account button at the bottom highlighted" src="/img/advanced/bank-sync/bank-sync-add-account@2x.webp" />
 
-2. Click the **Link bank account** button on the GoCardless card.
+     <img width="637" alt="The Bank Sync page with the Link bank account button highlighted" src="/img/advanced/bank-sync/bank-sync-link-bank-account@2x.webp" />
 
-   <img width="662" alt="The Link account dialog with Link bank account on the GoCardless card highlighted" src="/img/advanced/bank-sync/gocardless-link-bank-account@2x.webp" />
+2. If you have set up more than one provider, Actual asks which one to use. Choose **GoCardless**. If GoCardless is the only provider you have set up, Actual skips this step.
+
+   <img width="510" alt="The Link Capital One Checking dialog listing the providers, with GoCardless highlighted" src="/img/advanced/bank-sync/gocardless-choose-provider@2x.webp" />
 
 3. Select your country and bank from the list and click the Link bank in browser button.
 

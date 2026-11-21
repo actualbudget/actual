@@ -15,6 +15,8 @@ Once you have completed these steps your app will be created and your User Acces
 
 ### Link account with Akahu
 
-In Actual Budget, Go to **More → Bank Sync**, in the **Akahu** card, click **Set up** and paste in the App ID and User Access Tokens.
+In Actual Budget, go to **Settings → Bank Sync**. In the list of providers, click **Set up** next to **Akahu** and paste in the App ID and User Access Tokens.
 
-From the same Bank Sync screen, click on **Link bank account** under the **Akahu** card and follow the prompts to link your account.
+If another provider is already set up, the list is not shown on the page. Click the menu button (three dots) at the top right of the page and choose **Providers** to open it.
+
+From the same Bank Sync screen, click **Link bank account** and follow the prompts to link your account. If you have set up more than one provider, Actual asks which one to use. Choose **Akahu**.
