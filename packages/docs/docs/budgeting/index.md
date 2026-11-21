@@ -112,7 +112,7 @@ You can automate holding funds from specific income categories for future months
 <img width="724" alt="The Income category menu with Enable auto hold highlighted" src="/img/budgeting/budgeting-auto-hold@2x.webp" />
 
 When the _auto hold_ function has been enabled for an income category, this will be indicated by an arrow.
-The income category will be set for automatic holding starting from the current month and the following 12 months.
+The income category will be set for automatic holding from the current month until you turn it off.
 If wanted, the _auto hold_ functionality can be turned off by clicking the income balance and choosing "Disable auto hold".
 
 <img width="724" alt="The Income category with the auto hold arrow next to its amount" src="/img/budgeting/budgeting-auto-hold-indicator@2x.webp" />

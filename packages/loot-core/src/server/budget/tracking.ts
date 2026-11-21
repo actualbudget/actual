@@ -59,8 +59,6 @@ export async function createCategory(cat, sheetName, prevSheetName) {
         : sumAmount;
     },
   });
-
-  sheet.get().createStatic(sheetName, `carryover-${cat.id}`, false);
 }
 
 export function createCategoryGroup(group, sheetName) {

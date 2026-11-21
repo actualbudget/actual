@@ -71,11 +71,29 @@ async function getLatestAllocatedMonth(): Promise<string | null> {
      JOIN categories c ON c.id = b.category
      WHERE c.tombstone = 0 AND b.amount != 0`,
   );
-  if (!row?.month) {
+  return fromDbMonth(row?.month);
+}
+
+// Rollover stored as 2 reaches later months through each month's
+// `carryover-chain` cell, so the range has to start at or before it. A
+// deleted category keeps its rows but has no cells, so it doesn't count.
+async function getEarliestPersistentCarryoverMonth(): Promise<string | null> {
+  const table =
+    getBudgetType() === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
+  const row = await db.first<{ month: number | null }>(
+    `SELECT MIN(b.month) AS month FROM ${table} b
+     JOIN categories c ON c.id = b.category
+     WHERE c.tombstone = 0 AND b.carryover = 2`,
+  );
+  return fromDbMonth(row?.month);
+}
+
+function fromDbMonth(month: number | null | undefined): string | null {
+  if (!month) {
     return null;
   }
-  const month = String(row.month);
-  return `${month.slice(0, 4)}-${month.slice(4)}`;
+  const str = String(month);
+  return `${str.slice(0, 4)}-${str.slice(4)}`;
 }
 
 // The day range spanning the given months. They aren't guaranteed to be
@@ -189,6 +207,36 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
     },
   });
 
+  // `carryover-stored` holds the budget row's raw flag:
+  //   null: not set, so the month continues the previous month's chain
+  //   0:    off
+  //   1:    on for this month (older versions write this for every month up
+  //         to the last one created, so these runs end where they always did)
+  //   2:    on, and following months without a flag stay on
+  // A 1 also continues a chain, so an older version switching rollover on
+  // again doesn't end it. `carryover-chain` says whether the next month
+  // continues the chain, and `carryover` is the resolved flag that every
+  // other cell reads. Before the first month the chain is off.
+  sheet.get().createStatic(sheetName, `carryover-stored-${cat.id}`, null);
+  sheet.get().createDynamic(sheetName, `carryover-chain-${cat.id}`, {
+    initialValue: false,
+    dependencies: [
+      `carryover-stored-${cat.id}`,
+      `${prevSheetName}!carryover-chain-${cat.id}`,
+    ],
+    run: (stored, prevChain) =>
+      stored === 2 || (stored !== 0 && prevChain === true),
+  });
+  sheet.get().createDynamic(sheetName, `carryover-${cat.id}`, {
+    initialValue: false,
+    dependencies: [
+      `carryover-stored-${cat.id}`,
+      `${prevSheetName}!carryover-chain-${cat.id}`,
+    ],
+    run: (stored, prevChain) =>
+      stored == null ? prevChain === true : stored !== 0,
+  });
+
   if (getBudgetType() === 'envelope') {
     envelopeBudget.createCategory(cat, sheetName, prevSheetName);
   } else {
@@ -267,8 +315,8 @@ function handleBudgetChange(budget) {
     sheet
       .get()
       .set(
-        `${sheetName}!carryover-${budget.category}`,
-        budget.carryover === 1 ? true : false,
+        `${sheetName}!carryover-stored-${budget.category}`,
+        budget.carryover ?? null,
       );
     sheet.get().set(`${sheetName}!goal-${budget.category}`, budget.goal);
     sheet
@@ -377,18 +425,39 @@ export async function createBudget(months) {
   );
   const categories = groups.flatMap(group => group.categories);
 
-  sheet.startTransaction();
   const meta = sheet.get().meta();
   meta.createdMonths = meta.createdMonths || new Set();
-
   const budgetType = getBudgetType();
+
+  // Only months that don't already exist need to be created and seeded.
+  const monthsToCreate = months.filter(month => !meta.createdMonths.has(month));
+
+  // Moving an envelope budget's blank sheet clears it, so if the range moves
+  // back past it, that month loses the values `loadUserBudgets` set from the
+  // database. Read its rows now and set them again once it's created.
+  const blankMonth =
+    budgetType === 'envelope' && meta.blankSheet
+      ? `${meta.blankSheet.slice(6, 10)}-${meta.blankSheet.slice(10)}`
+      : null;
+  const blankMonthRows =
+    blankMonth && monthsToCreate.includes(blankMonth)
+      ? {
+          budgets: await db.all<db.DbZeroBudget>(
+            'SELECT * FROM zero_budgets WHERE month = ?',
+            [parseInt(blankMonth.replace('-', ''))],
+          ),
+          month: await db.first<db.DbZeroBudgetMonth>(
+            'SELECT * FROM zero_budget_months WHERE id = ?',
+            [blankMonth],
+          ),
+        }
+      : null;
+
+  sheet.startTransaction();
 
   if (budgetType === 'envelope') {
     envelopeBudget.createBudget(meta, categories, months);
   }
-
-  // Only months that don't already exist need to be created and seeded.
-  const monthsToCreate = months.filter(month => !meta.createdMonths.has(month));
 
   // Spend totals for every category in the months being created, computed
   // once via a single grouped query and used to seed the `sum-amount` cells so
@@ -448,6 +517,13 @@ export async function createBudget(months) {
     meta.createdMonths.add(month);
   });
 
+  if (blankMonthRows) {
+    blankMonthRows.budgets.forEach(handleBudgetChange);
+    if (blankMonthRows.month) {
+      handleBudgetMonthChange(blankMonthRows.month);
+    }
+  }
+
   sheet.get().setMeta(meta);
   sheet.endTransaction();
 
@@ -472,12 +548,17 @@ export async function createAllBudgets() {
   const earliestDate =
     earliestTransaction && db.fromDateRepr(earliestTransaction.date);
   const currentMonth = monthUtils.currentMonth();
+  let startMonth = monthUtils.getMonth(earliestDate || currentMonth);
+  const persistentMonth = await getEarliestPersistentCarryoverMonth();
+  if (persistentMonth && persistentMonth < startMonth) {
+    startMonth = persistentMonth;
+  }
 
-  // Get the range based off of the earliest transaction and the
-  // current month. If no transactions currently exist the current
-  // month is also used as the starting month
+  // Get the range based off of the earliest transaction (or persistent
+  // rollover) and the current month. If no transactions currently exist the
+  // current month is also used as the starting month
   const { start, end, range } = getBudgetRange(
-    earliestDate || currentMonth,
+    startMonth,
     currentMonth,
     await getLatestAllocatedMonth(),
   );
