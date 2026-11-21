@@ -3,45 +3,29 @@ import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
 import { TestProviders } from '#mocks';
-import {
-  getAppLockStatus,
-  isAppLockSupported,
-  setAppLockEnabled,
-} from '#util/appLock';
+import { getAppLockStatus, setAppLockEnabled } from '#util/appLock';
 import type { AppLockStatus } from '#util/appLock';
 
 import { AppLockSettings } from './AppLockSettings';
 
 vi.mock('#util/appLock', () => ({
-  isAppLockSupported: vi.fn(),
   getAppLockStatus: vi.fn(),
   setAppLockEnabled: vi.fn(),
 }));
 
+const baseStatus: AppLockStatus = {
+  isAvailable: true,
+  isEnabled: false,
+  biometry: 'faceId',
+};
+
 function mockStatus(status: Partial<AppLockStatus> = {}) {
-  vi.mocked(isAppLockSupported).mockReturnValue(true);
-  vi.mocked(getAppLockStatus).mockResolvedValue({
-    isAvailable: true,
-    isEnabled: false,
-    biometry: 'faceId',
-    ...status,
-  });
+  vi.mocked(getAppLockStatus).mockResolvedValue({ ...baseStatus, ...status });
 }
 
 describe('AppLockSettings', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  it('renders nothing where the app lock is not supported', () => {
-    vi.mocked(isAppLockSupported).mockReturnValue(false);
-
-    const { container } = render(<AppLockSettings />, {
-      wrapper: TestProviders,
-    });
-
-    expect(container.firstChild).toBeNull();
-    expect(getAppLockStatus).not.toHaveBeenCalled();
   });
 
   it('names the biometry the device offers', async () => {
@@ -58,9 +42,8 @@ describe('AppLockSettings', () => {
   it('turns the lock on once the user has authenticated', async () => {
     mockStatus();
     vi.mocked(setAppLockEnabled).mockResolvedValue({
-      isAvailable: true,
+      ...baseStatus,
       isEnabled: true,
-      biometry: 'faceId',
     });
 
     render(<AppLockSettings />, { wrapper: TestProviders });
@@ -76,11 +59,7 @@ describe('AppLockSettings', () => {
 
   it('leaves the lock off when authentication is cancelled', async () => {
     mockStatus();
-    vi.mocked(setAppLockEnabled).mockResolvedValue({
-      isAvailable: true,
-      isEnabled: false,
-      biometry: 'faceId',
-    });
+    vi.mocked(setAppLockEnabled).mockResolvedValue(baseStatus);
 
     render(<AppLockSettings />, { wrapper: TestProviders });
     const checkbox = await screen.findByRole('checkbox', { name: 'App lock' });

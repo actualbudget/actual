@@ -2,11 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Checkbox } from '#components/forms';
-import {
-  getAppLockStatus,
-  isAppLockSupported,
-  setAppLockEnabled,
-} from '#util/appLock';
+import { getAppLockStatus, setAppLockEnabled } from '#util/appLock';
 import type { AppLockStatus } from '#util/appLock';
 
 import { SettingsRow } from './SettingsRow';
@@ -17,18 +13,7 @@ export function AppLockSettings() {
   const [isChanging, setIsChanging] = useState(false);
 
   useEffect(() => {
-    if (!isAppLockSupported()) {
-      return;
-    }
-    let isCancelled = false;
-    void getAppLockStatus().then(newStatus => {
-      if (!isCancelled) {
-        setStatus(newStatus);
-      }
-    });
-    return () => {
-      isCancelled = true;
-    };
+    void getAppLockStatus().then(setStatus);
   }, []);
 
   if (!status) {

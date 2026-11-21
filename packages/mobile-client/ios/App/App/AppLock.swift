@@ -60,11 +60,11 @@ final class AppLock {
     // setting cannot be changed by someone who could not unlock the app.
     // Must be called on the main thread; `completion` is called there too.
     func setEnabled(_ enabled: Bool, reason: String, completion: @escaping () -> Void) {
-        guard enabled != isEnabled else {
+        guard enabled != isEnabled, let context = authenticationContext() else {
             completion()
             return
         }
-        LAContext().evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
+        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
             DispatchQueue.main.async {
                 if success {
                     self.isEnabled = enabled
@@ -74,13 +74,28 @@ final class AppLock {
         }
     }
 
+    // A context that can ask for authentication, if the device has a way to.
+    private func authenticationContext() -> LAContext? {
+        let context = LAContext()
+        var error: NSError?
+        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
+            return context
+        }
+        if error?.code == LAError.Code.passcodeNotSet.rawValue {
+            // The passcode was removed from the device, which leaves nothing
+            // to authenticate with. Removing it takes the passcode itself, so
+            // the lock is turned off instead of locking the user out of their
+            // budget.
+            isEnabled = false
+        }
+        return nil
+    }
+
     // MARK: - Scene life cycle (called by SceneDelegate)
 
     func sceneWillConnect(_ scene: UIScene) {
         guard isEnabled else { return }
-        isLocked = true
-        shouldPromptWhenActive = true
-        showCover(in: scene)
+        lock(in: scene)
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
@@ -90,11 +105,15 @@ final class AppLock {
 
     func sceneDidEnterBackground(_ scene: UIScene) {
         guard isEnabled else { return }
-        isLocked = true
-        shouldPromptWhenActive = true
         // The keyboard is drawn above every window of the app, including the
         // cover, so it has to be put away.
         (scene as? UIWindowScene)?.windows.forEach { $0.endEditing(true) }
+        lock(in: scene)
+    }
+
+    private func lock(in scene: UIScene) {
+        isLocked = true
+        shouldPromptWhenActive = true
         showCover(in: scene)
     }
 
@@ -114,15 +133,8 @@ final class AppLock {
     private func unlock() {
         guard isLocked, !isAuthenticating else { return }
 
-        let context = LAContext()
-        var error: NSError?
-        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
-            if error?.code == LAError.Code.passcodeNotSet.rawValue {
-                // The passcode was removed from the device, which leaves
-                // nothing to authenticate with. Removing it takes the passcode
-                // itself, so the lock is turned off instead of locking the
-                // user out of their budget.
-                isEnabled = false
+        guard let context = authenticationContext() else {
+            if !isEnabled {
                 isLocked = false
                 hideCover()
             }
@@ -147,16 +159,14 @@ final class AppLock {
     // MARK: - Cover
 
     private func showCover(in scene: UIScene) {
-        guard coverWindow == nil, let windowScene = scene as? UIWindowScene else {
-            updateCover()
-            return
+        if coverWindow == nil, let windowScene = scene as? UIWindowScene {
+            let window = UIWindow(windowScene: windowScene)
+            // Above alerts and share sheets, which would otherwise stay visible.
+            window.windowLevel = UIWindow.Level(rawValue: UIWindow.Level.alert.rawValue + 1)
+            window.rootViewController = AppLockViewController { [weak self] in self?.unlock() }
+            window.isHidden = false
+            coverWindow = window
         }
-        let window = UIWindow(windowScene: windowScene)
-        // Above alerts and share sheets, which would otherwise stay visible.
-        window.windowLevel = UIWindow.Level(rawValue: UIWindow.Level.alert.rawValue + 1)
-        window.rootViewController = AppLockViewController { [weak self] in self?.unlock() }
-        window.isHidden = false
-        coverWindow = window
         updateCover()
     }
 
