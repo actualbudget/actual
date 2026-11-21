@@ -91,15 +91,16 @@ export async function listSqliteFileRows(): Promise<
 }
 
 // Whether any sqlite file already moved off absurd-sql, or into `kind` when
-// given. Used at startup: once data lives in the new storage the legacy
-// engine must not be chosen, and once data lives in an OPFS pool the
-// fallback must not be, whatever the flag says. One store then serves every
-// budget: one still in absurd-sql's layout is migrated when opened, and the
-// OPFS store adopts the fallback's rows. Walks the rows with a cursor and
-// stops at the first match, so the fallback's whole-file rows are not all
-// read into memory.
+// given, leaving `exceptPath` out of the count. Used at startup: once data
+// lives in the new storage the legacy engine must not be chosen, and once
+// data lives in an OPFS pool the fallback must not be, whatever the flag
+// says. One store then serves every budget: one still in absurd-sql's
+// layout is migrated when opened, and the OPFS store adopts the fallback's
+// rows. Walks the rows with a cursor and stops at the first match, so the
+// fallback's whole-file rows are not all read into memory.
 export async function hasMigratedSqliteFiles(
   kind?: FileStoreKind,
+  exceptPath?: string,
 ): Promise<boolean> {
   const { store } = idb.getStore(await idb.openDatabase(), 'files');
   return new Promise((resolve, reject) => {
@@ -110,8 +111,12 @@ export async function hasMigratedSqliteFiles(
         resolve(false);
         return;
       }
-      const { storage } = cursor.value as Data;
-      if (storage && (kind == null || storage === kind)) {
+      const { filepath, storage } = cursor.value as Data;
+      if (
+        storage &&
+        filepath !== exceptPath &&
+        (kind == null || storage === kind)
+      ) {
         resolve(true);
       } else {
         cursor.continue();
