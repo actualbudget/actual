@@ -13,6 +13,7 @@ import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { listen } from '@actual-app/core/platform/client/connection';
 import { isElectron } from '@actual-app/core/shared/environment';
+import * as Platform from '@actual-app/core/shared/platform';
 
 import { getLatestAppVersion } from '#app/appSlice';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
@@ -40,6 +41,7 @@ import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
+import { ScheduleNotificationsSettings } from './ScheduleNotificationsSettings';
 import { SettingsBackButton } from './SettingsBackButton';
 import { SettingsGroup } from './SettingsGroup';
 import { SettingsNav } from './SettingsNav';
@@ -289,6 +291,7 @@ export function GeneralSettings() {
       <FormatSettings />
       {isCurrencyExperimentalEnabled && <CurrencySettings />}
       <LanguageSettings />
+      {Platform.isNativeMobileApp && <ScheduleNotificationsSettings />}
       <SettingsGroup title={t('Budget')}>
         <BudgetTypeSettings />
       </SettingsGroup>

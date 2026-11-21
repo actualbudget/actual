@@ -91,6 +91,7 @@
         "@capacitor/app",
         "@capacitor/filesystem",
         "@capacitor/haptics",
+        "@capacitor/local-notifications",
         "@capacitor/share",
         "@capacitor/splash-screen",
       ],

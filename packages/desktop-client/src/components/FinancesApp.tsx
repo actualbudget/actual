@@ -18,6 +18,7 @@ import { useLocalPref } from '#hooks/useLocalPref';
 import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
 import { useNavigate } from '#hooks/useNavigate';
 import { useNewsNotification } from '#hooks/useNewsNotification';
+import { useScheduleNotifications } from '#hooks/useScheduleNotifications';
 import { ScrollProvider } from '#hooks/useScrollListener';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch, useSelector } from '#redux';
@@ -120,6 +121,7 @@ export function FinancesApp() {
 
   useAutomaticBankSync();
   useNewsNotification();
+  useScheduleNotifications();
 
   const init = useEffectEvent(() => {
     // Wait a little bit to make sure the sync button will get the

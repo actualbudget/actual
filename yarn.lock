@@ -239,6 +239,7 @@ __metadata:
     "@capacitor/core": "npm:^8.4.2"
     "@capacitor/filesystem": "npm:^8.1.5"
     "@capacitor/haptics": "npm:^8.0.2"
+    "@capacitor/local-notifications": "npm:^8.3.1"
     "@capacitor/share": "npm:^8.0.3"
     "@codemirror/autocomplete": "npm:^6.20.3"
     "@codemirror/language": "npm:^6.13.1"
@@ -2165,6 +2166,15 @@ __metadata:
   peerDependencies:
     "@capacitor/core": ^8.5.0
   checksum: 10/e574fbe99a9339220f44859ea127abf1ae412542f668d92e7b935dc6a6cdeefbe0f75d77f74848323210727ba9b329ac42bda21f28d9a181967649fa99d15a80
+  languageName: node
+  linkType: hard
+
+"@capacitor/local-notifications@npm:^8.3.1":
+  version: 8.3.1
+  resolution: "@capacitor/local-notifications@npm:8.3.1"
+  peerDependencies:
+    "@capacitor/core": ">=8.0.0"
+  checksum: 10/e8442bbfbfaffe379256bad2e00704fa0049abedc1b439344e498cae9cc9da895cc4d47a041d55e9a0d726543d87f0e1351b0e5d3cc4828adc7829562a3e29e0
   languageName: node
   linkType: hard
 
@@ -20256,6 +20266,7 @@ __metadata:
     "@capacitor/filesystem": "npm:^8.1.5"
     "@capacitor/haptics": "npm:^8.0.2"
     "@capacitor/ios": "npm:^8.5.3"
+    "@capacitor/local-notifications": "npm:^8.3.1"
     "@capacitor/share": "npm:^8.0.3"
     "@capacitor/splash-screen": "npm:^8.0.2"
   languageName: unknown

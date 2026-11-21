@@ -113,6 +113,11 @@ export type LocalPrefs = Partial<{
   'mobile.showSpentColumn': boolean;
   'mobile.bankSyncProvidersCollapsed': boolean;
   /**
+   * Whether this device reminds about the budget's scheduled transactions
+   * with local notifications (iOS and Android apps only).
+   */
+  'mobile.scheduleNotifications': boolean;
+  /**
    * Timestamp (epoch ms) of the last automatic bank sync attempted by this
    * device. Tracked locally so a failing account can't cause repeated
    * back-to-back sync attempts.
