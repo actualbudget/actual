@@ -1,5 +1,6 @@
-import { converter, parse, wcagContrast } from 'culori';
-
+import { converter, formatHex, parse, wcagContrast } from './color';
+import { accentSurfaceTokens, deriveAccent } from './derive';
+import type { DerivedAccentToken } from './derive';
 import type { ThemeName, TokenDefinition, TokenValue } from './types';
 
 type Palette = Record<string, string>;
@@ -109,9 +110,24 @@ function resolveCss(input: string, context: Context): ResolvedColor {
   return { r: parsed.r, g: parsed.g, b: parsed.b, alpha: parsed.alpha ?? 1 };
 }
 
+function resolveDerived(
+  token: DerivedAccentToken,
+  context: Context,
+): ResolvedColor {
+  const input = (name: string) => toHex(resolveName(name, context));
+  const accentSet = deriveAccent(input('accent'), {
+    surface: input(accentSurfaceTokens.surface),
+    page: input(accentSurfaceTokens.page),
+  });
+  return resolveCss(accentSet[token], context);
+}
+
 function resolveValue(value: TokenValue, context: Context): ResolvedColor {
   if (typeof value === 'string') {
     return resolveCss(context.palette[value], context);
+  }
+  if ('derive' in value) {
+    return resolveDerived(value.derive, context);
   }
   if ('ref' in value) {
     return resolveName(value.ref, context);
@@ -132,6 +148,10 @@ function resolveName(name: string, context: Context): ResolvedColor {
   const value =
     'all' in definition ? definition.all : definition[context.theme];
   return resolveValue(value, { ...context, path: [...context.path, name] });
+}
+
+export function toHex(color: ResolvedColor) {
+  return formatHex({ mode: 'rgb', ...color });
 }
 
 export function resolveToken(

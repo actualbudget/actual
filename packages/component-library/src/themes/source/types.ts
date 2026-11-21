@@ -1,10 +1,15 @@
+import type { DerivedAccentToken } from './derive';
 import type { PaletteName } from './palette';
 
 export const themeNames = ['light', 'dark', 'midnight'] as const;
 
 export type ThemeName = (typeof themeNames)[number];
 
-export type TokenValue = PaletteName | { ref: string } | { raw: string };
+export type TokenValue =
+  | PaletteName
+  | { ref: string }
+  | { raw: string }
+  | { derive: DerivedAccentToken };
 
 type TokenValues = { all: TokenValue } | Record<ThemeName, TokenValue>;
 
