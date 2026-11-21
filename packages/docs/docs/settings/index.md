@@ -18,7 +18,11 @@ Themes change the user interface colors. Pick from the built-in **Light**, **Dar
 
 ### Sidebar
 
-By default the sidebar shows **Budget**, **Reports** and **Schedules**. The **Sidebar** section lets you choose which pages appear there, drag them into order, and pick the **Start page**, the page Actual shows when it opens or when you go to its home page. Pages that are switched off, such as Payees, Rules and Tags, are listed in the Settings navigation instead. These settings are stored in your budget file, so they apply on every device that opens it. The mobile layout does not use these settings yet, but support for it is planned.
+By default the sidebar shows **Budget**, **Reports** and **Schedules**. The **Sidebar** section lets you choose which pages appear there, drag them into order, and pick the **Start page**, the page Actual shows when it opens or when you go to its home page. Pages that are switched off, such as Payees, Rules and Tags, are listed in the Settings navigation instead. These settings are stored in your budget file, so they apply on every device that opens it. The mobile layout has its own start page setting, described below.
+
+### Mobile Start Page
+
+On a phone or other narrow screen, the **General** settings page shows a **Navigation** section instead of the **Sidebar** section. Its **Start page** option lets you choose which page of the tab bar Actual opens on: **Budget**, **Transaction**, **Accounts**, **Reports** or **Schedules**. **Transaction** opens the form for adding a new transaction, which is handy for quickly recording a purchase; after you add the transaction or press **Back**, Actual returns to the page you came from, or shows the budget if Actual opened straight to the form. It also applies when you open Actual from your home screen. Like the sidebar settings, this choice is stored in your budget file, so it applies to every phone that opens the budget. It is separate from the desktop start page, so you can keep the budget as your home page on a computer and start on your accounts on your phone. If you don't pick a page, Actual opens on **Budget**.
 
 ### Formatting
 
