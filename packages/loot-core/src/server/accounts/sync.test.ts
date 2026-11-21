@@ -671,6 +671,69 @@ describe('Account sync', () => {
     ).toBe(-1239);
   });
 
+  test('reconcile only imports the first transaction for a repeated imported_id', async () => {
+    const { id } = await prepareDatabase();
+
+    const { added, updated } = await reconcileTransactions(id, [
+      {
+        date: '2024-04-05',
+        amount: -1239,
+        imported_id: 'duplicate-import-id',
+        notes: 'first',
+      },
+      {
+        date: '2024-04-06',
+        amount: -1239,
+        imported_id: 'duplicate-import-id',
+        notes: 'second',
+      },
+    ]);
+
+    expect(added).toHaveLength(1);
+    expect(updated).toHaveLength(0);
+
+    const transactions = await getAllTransactions();
+    expect(transactions).toHaveLength(1);
+    expect(transactions[0]).toMatchObject({
+      date: 20240405,
+      amount: -1239,
+      imported_id: 'duplicate-import-id',
+      notes: 'first',
+    });
+  });
+
+  test('reconcile preview marks repeated imported_ids as ignored', async () => {
+    const { id } = await prepareDatabase();
+
+    const { added, updatedPreview } = await reconcileTransactions(
+      id,
+      [
+        {
+          date: '2024-04-05',
+          amount: -1239,
+          imported_id: 'duplicate-import-id',
+          notes: 'first',
+        },
+        {
+          date: '2024-04-06',
+          amount: -1239,
+          imported_id: 'duplicate-import-id',
+          notes: 'second',
+        },
+      ],
+      { isPreview: true },
+    );
+
+    expect(added).toHaveLength(1);
+    expect(updatedPreview).toEqual([
+      {
+        transaction: expect.objectContaining({ notes: 'second' }),
+        ignored: true,
+      },
+    ]);
+    expect(await getAllTransactions()).toHaveLength(0);
+  });
+
   describe('compareFuzzyMatchCandidates', () => {
     const transDate = '2024-04-05';
     const alreadyImported = {
