@@ -620,6 +620,12 @@ export type Modal =
       };
     }
   | {
+      name: 'defer-transaction';
+      options: {
+        transaction: TransactionEntity;
+      };
+    }
+  | {
       name: 'confirm-delete';
       options: {
         message: string;

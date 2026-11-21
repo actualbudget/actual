@@ -12,6 +12,7 @@ import type {
   TransactionEntity,
 } from '#types/models';
 
+import { deferTransaction } from './defer';
 import { exportQueryToCSV, exportToCSV } from './export/export-to-csv';
 import { parseFile } from './import/parse-file';
 import type { ParseFileOptions } from './import/parse-file';
@@ -29,6 +30,7 @@ export type TransactionHandlers = {
   'transactions-export': typeof exportTransactions;
   'transactions-export-query': typeof exportTransactionsQuery;
   'transactions-merge': typeof mergeTransactions;
+  'transaction-defer': typeof deferTransaction;
   'get-earliest-transaction': typeof getEarliestTransaction;
   'get-latest-transaction': typeof getLatestTransaction;
 };
@@ -157,6 +159,7 @@ app.method(
   mutator(undoable(handleBatchUpdateTransactions)),
 );
 app.method('transactions-merge', mutator(undoable(mergeTransactions)));
+app.method('transaction-defer', mutator(undoable(deferTransaction)));
 
 app.method('transaction-add', mutator(addTransaction));
 app.method('transaction-update', mutator(updateTransaction));
