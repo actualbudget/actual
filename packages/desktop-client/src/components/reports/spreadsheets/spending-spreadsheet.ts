@@ -32,6 +32,32 @@ type createSpendingSpreadsheetProps = {
   budgetType?: 'envelope' | 'tracking';
 };
 
+// What the currency lines of the given categories budgeted in a month, in
+// the default currency: their totals less their own budgets
+async function getCurrencyLineBudget(
+  budgetType: 'envelope' | 'tracking' | undefined,
+  month: string,
+  categoryIds: string[],
+): Promise<number> {
+  const monthData: Array<{ name: string; value: unknown }> =
+    (await send(
+      budgetType === 'tracking'
+        ? 'tracking-budget-month'
+        : 'envelope-budget-month',
+      { month },
+    )) ?? [];
+  return categoryIds.reduce((sum, id) => {
+    const total = monthData.find(cell =>
+      cell.name.endsWith(`!budget-total-${id}`),
+    );
+    if (!total) {
+      return sum;
+    }
+    const own = monthData.find(cell => cell.name.endsWith(`!budget-${id}`));
+    return sum + (Number(total.value) || 0) - (Number(own?.value) || 0);
+  }, 0);
+}
+
 export function getSpendingBudgetFilters({
   categories,
   categoryGroups,
@@ -226,9 +252,18 @@ export function createSpendingSpreadsheet({
       ).then(({ data }) => data),
     ]);
 
+    // Currency lines of the categories count at their value in the default
+    // currency
+    const currencyLineBudget = await getCurrencyLineBudget(
+      budgetType,
+      compareMonth,
+      budgetFilters.flatMap(filter => filter.category.$oneof),
+    );
+
     const dailyBudget =
       budgets &&
-      budgets.reduce((a, v) => a + v.amount, 0) / compareInterval.length;
+      (budgets.reduce((a, v) => a + v.amount, 0) + currencyLineBudget) /
+        compareInterval.length;
 
     const intervals = monthUtils.dayRangeInclusive(startDate, endDate);
     if (endDateTo < startDate || startDateTo > endDate) {

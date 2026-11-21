@@ -6,6 +6,7 @@ import * as sqlite from '#platform/server/sqlite';
 import { sheetForMonth } from '#shared/months';
 import * as Platform from '#shared/platform';
 
+import { BUDGET_CATEGORY_JOIN } from './budget/budget-category-join';
 import type * as DbModule from './db';
 import type {
   DbPreference,
@@ -227,9 +228,10 @@ export async function loadUserBudgets(db: typeof DbModule): Promise<void> {
     )) ?? {};
 
   const table = budgetType === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
+  // Amounts of currency lines too, which are budgeted like categories
   const budgets = await db.all<DbReflectBudget | DbZeroBudget>(`
-      SELECT * FROM ${table} b
-      LEFT JOIN categories c ON c.id = b.category
+      SELECT b.* FROM ${table} b
+      ${BUDGET_CATEGORY_JOIN}
       WHERE c.tombstone = 0
     `);
 

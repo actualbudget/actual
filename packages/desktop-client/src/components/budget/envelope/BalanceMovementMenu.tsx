@@ -3,6 +3,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { theme } from '@actual-app/components/theme';
 
 import { GoalStatus } from '#components/budget/GoalStatus';
+import { useBudgetLine } from '#hooks/useCategoryCurrencies';
 import { useFormat } from '#hooks/useFormat';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
@@ -25,6 +26,8 @@ export function BalanceMovementMenu({
   onClose,
 }: BalanceMovementMenuProps) {
   const format = useFormat();
+  // A currency line's amounts are in its currency
+  const { currencyCode } = useBudgetLine(categoryId);
 
   const catBalance =
     useEnvelopeSheetValue(envelopeBudget.catBalance(categoryId)) ?? 0;
@@ -80,6 +83,7 @@ export function BalanceMovementMenu({
       {menu === 'transfer' && (
         <TransferMenu
           categoryId={categoryId}
+          currencyCode={currencyCode}
           initialAmount={catBalance}
           showToBeBudgeted
           onClose={onClose}
@@ -97,6 +101,7 @@ export function BalanceMovementMenu({
       {menu === 'cover' && (
         <CoverMenu
           categoryId={categoryId}
+          currencyCode={currencyCode}
           initialAmount={catBalance}
           onClose={onClose}
           onSubmit={(amount, fromCategoryId) => {

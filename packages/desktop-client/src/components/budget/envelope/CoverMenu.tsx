@@ -20,9 +20,12 @@ import {
   removeCategoriesFromGroups,
 } from '#components/budget/util';
 import { useCategories } from '#hooks/useCategories';
+import { useFormat } from '#hooks/useFormat';
 
 type CoverMenuProps = {
   showToBeBudgeted?: boolean;
+  // The currency of the amount, when it is a currency line's
+  currencyCode?: string;
   initialAmount?: IntegerAmount | null;
   categoryId?: CategoryEntity['id'];
   onSubmit: (amount: IntegerAmount, categoryId: CategoryEntity['id']) => void;
@@ -31,6 +34,7 @@ type CoverMenuProps = {
 
 export function CoverMenu({
   showToBeBudgeted = true,
+  currencyCode,
   initialAmount = 0,
   categoryId,
   onSubmit,
@@ -53,7 +57,11 @@ export function CoverMenu({
       : categoryGroups;
   }, [categoryId, showToBeBudgeted, originalCategoryGroups]);
 
-  const _initialAmount = integerToCurrency(Math.abs(initialAmount ?? 0));
+  const format = useFormat();
+  // An amount in another currency has the decimal places of that currency
+  const _initialAmount = currencyCode
+    ? format.forEdit(Math.abs(initialAmount ?? 0), { currencyCode })
+    : integerToCurrency(Math.abs(initialAmount ?? 0));
   const [amount, setAmount] = useState<string>(_initialAmount);
 
   function _onSubmit() {
@@ -73,7 +81,11 @@ export function CoverMenu({
     >
       <View style={{ padding: 10 }}>
         <View style={{ marginBottom: 5 }}>
-          <Trans>Cover this amount:</Trans>
+          {currencyCode ? (
+            <Trans>Cover this amount ({{ currencyCode }}):</Trans>
+          ) : (
+            <Trans>Cover this amount:</Trans>
+          )}
         </View>
         <View>
           <Input
@@ -97,6 +109,7 @@ export function CoverMenu({
             placeholder: t('(none)'),
           }}
           showHiddenCategories={false}
+          showOwnBalances
         />
 
         <View

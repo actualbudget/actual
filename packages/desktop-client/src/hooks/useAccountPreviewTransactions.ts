@@ -17,6 +17,8 @@ import { usePreviewTransactions } from './usePreviewTransactions';
 import { useSheetValue } from './useSheetValue';
 import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
+import { useTransferAmountConverter } from './useTransferAmountConverter';
+import type { TransferAmountConverter } from './useTransferAmountConverter';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;
@@ -80,6 +82,7 @@ export function useAccountPreviewTransactions({
   );
 
   const [showBalances] = useSyncedPref(`show-balances-${accountId}`);
+  const convertTransferAmount = useTransferAmountConverter();
 
   const {
     previewTransactions: allPreviewTransactions,
@@ -114,6 +117,7 @@ export function useAccountPreviewTransactions({
       startingBalance: accountBalanceValue ?? 0,
       getPayeeByTransferAccount,
       getTransferAccountByPayee,
+      convertTransferAmount,
     });
 
     const transactionIds = new Set(previewTransactions.map(t => t.id));
@@ -134,6 +138,7 @@ export function useAccountPreviewTransactions({
     allPreviewTransactions,
     accountBalanceValue,
     allRunningBalances,
+    convertTransferAmount,
     getPayeeByTransferAccount,
     getTransferAccountByPayee,
     isLoading,
@@ -152,6 +157,9 @@ type InverseBasedOnAccountProps = {
   getTransferAccountByPayee: (
     payeeId?: PayeeEntity['id'] | null,
   ) => AccountEntity | null;
+  // The amount arriving in the other account of a transfer, in that
+  // account's currency; the same amount when omitted
+  convertTransferAmount?: TransferAmountConverter;
 };
 
 type AccountPreviewTransaction = TransactionEntity & {
@@ -207,9 +215,10 @@ function inverseTransferForAccount({
   previewStatus,
   transaction,
   getPayeeByTransferAccount,
+  convertTransferAmount,
 }: Pick<
   InverseBasedOnAccountProps,
-  'accountId' | 'getPayeeByTransferAccount'
+  'accountId' | 'getPayeeByTransferAccount' | 'convertTransferAmount'
 > & {
   previewStatus?: TransactionEntity['category'];
   transaction: TransactionEntity;
@@ -226,7 +235,15 @@ function inverseTransferForAccount({
   return {
     ...standaloneTransaction,
     inversed: true,
-    amount: -transaction.amount,
+    amount:
+      convertTransferAmount && accountId
+        ? convertTransferAmount(
+            -transaction.amount,
+            transaction.account,
+            accountId,
+            transaction.date,
+          )
+        : -transaction.amount,
     payee: getPayeeByTransferAccount(transaction.account)?.id || '',
     account: accountId || '',
     ...(previewStatus != null && { category: previewStatus }),
@@ -240,6 +257,7 @@ export function inverseBasedOnAccount({
   startingBalance,
   getPayeeByTransferAccount,
   getTransferAccountByPayee,
+  convertTransferAmount,
 }: InverseBasedOnAccountProps): {
   transactions: TransactionEntity[];
   runningBalances: Map<TransactionEntity['id'], IntegerAmount>;
@@ -274,6 +292,7 @@ export function inverseBasedOnAccount({
               : candidate.category,
             transaction: candidate,
             getPayeeByTransferAccount,
+            convertTransferAmount,
           }),
         );
     },

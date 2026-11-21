@@ -15,6 +15,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { FieldLabel, TapField } from '#components/mobile/MobileForms';
 import { AmountInput } from '#components/util/AmountInput';
 import { useCategories } from '#hooks/useCategories';
+import { useBudgetLine } from '#hooks/useCategoryCurrencies';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
@@ -31,6 +32,8 @@ export function TransferModal({
   onSubmit,
 }: TransferModalProps) {
   const { t } = useTranslation();
+  // A currency line's amounts are in its currency
+  const { currencyCode } = useBudgetLine(categoryId ?? '');
   const [hideFraction] = useSyncedPref('hideFraction');
 
   const { data: { grouped: originalCategoryGroups } = { grouped: [] } } =
@@ -63,6 +66,7 @@ export function TransferModal({
             categoryGroups,
             month,
             showHiddenCategories: true,
+            showOwnBalances: true,
             onSelect: categoryId => {
               setToCategoryId(categoryId);
             },
@@ -90,10 +94,19 @@ export function TransferModal({
           />
           <View>
             <View>
-              <FieldLabel title={t('Transfer this amount:')} />
+              <FieldLabel
+                title={
+                  currencyCode
+                    ? t('Transfer this amount ({{currencyCode}}):', {
+                        currencyCode,
+                      })
+                    : t('Transfer this amount:')
+                }
+              />
               <InitialFocus>
                 <AmountInput
                   value={amount}
+                  currencyCode={currencyCode}
                   autoDecimals={String(hideFraction) !== 'true'}
                   style={{
                     marginLeft: styles.mobileEditingPadding,

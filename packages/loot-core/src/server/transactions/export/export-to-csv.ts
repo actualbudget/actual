@@ -2,6 +2,11 @@
 import { stringify as csvStringify } from 'csv-stringify/sync';
 
 import { aqlQuery } from '#server/aql';
+import { getEffectiveCurrency } from '#shared/fx/currency';
+import {
+  getSqlDefaultCurrencyCode,
+  isSqlConversionEnabled,
+} from '#shared/fx/sql';
 import { integerToAmount } from '#shared/util';
 
 const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
@@ -24,6 +29,16 @@ export async function exportToCSV(
     reduced[id] = name;
     return reduced;
   }, {});
+  const accountCurrenciesById = accounts.reduce((reduced, { id, currency }) => {
+    reduced[id] = currency ?? null;
+    return reduced;
+  }, {});
+  // Only exports with accounts in their own currency get a Currency column,
+  // so other exports stay exactly as they were
+  const defaultCurrencyCode = getSqlDefaultCurrencyCode();
+  const hasCurrencies =
+    isSqlConversionEnabled() &&
+    transactions.some(({ account }) => accountCurrenciesById[account]);
 
   const categoryNamesById = categoryGroups.reduce(
     (reduced, { name, categories: subCategories }) => {
@@ -51,16 +66,22 @@ export async function exportToCSV(
       amount,
       cleared,
       reconciled,
-    }) => ({
-      Account: accountNamesById[account],
-      Date: date,
-      Payee: payeeNamesById[payee],
-      Notes: notes,
-      Category: categoryNamesById[category],
-      Amount: amount == null ? 0 : integerToAmount(amount),
-      Cleared: cleared,
-      Reconciled: reconciled,
-    }),
+    }) => {
+      const currency = accountCurrenciesById[account];
+      return {
+        Account: accountNamesById[account],
+        Date: date,
+        Payee: payeeNamesById[payee],
+        Notes: notes,
+        Category: categoryNamesById[category],
+        Amount: amount == null ? 0 : integerToAmount(amount),
+        ...(hasCurrencies && {
+          Currency: getEffectiveCurrency(currency, defaultCurrencyCode),
+        }),
+        Cleared: cleared,
+        Reconciled: reconciled,
+      };
+    },
   );
 
   return csvStringify(transactionsForExport, csvStringifyOptions);
@@ -82,11 +103,17 @@ export async function exportQueryToCSV(query) {
         { CategoryGroup: 'category.group.name' },
         { Category: 'category.name' },
         { Amount: 'amount' },
+        ...(isSqlConversionEnabled()
+          ? [{ AccountCurrency: 'account.currency' }]
+          : []),
         { Cleared: 'cleared' },
         { Reconciled: 'reconciled' },
       ])
       .options({ splits: 'all' }),
   );
+
+  const hasCurrencies = transactions.some(trans => trans.AccountCurrency);
+  const defaultCurrencyCode = getSqlDefaultCurrencyCode();
 
   // initialize a map to allow splits to have correct number of split from
   const parentsChildCount: Map<number, number> = new Map();
@@ -129,6 +156,12 @@ export async function exportQueryToCSV(query) {
           ? 0
           : integerToAmount(trans.Amount),
       Split_Amount: trans.IsParent ? integerToAmount(trans.Amount) : 0,
+      ...(hasCurrencies && {
+        Currency: getEffectiveCurrency(
+          trans.AccountCurrency,
+          defaultCurrencyCode,
+        ),
+      }),
       Cleared:
         trans.Reconciled === true
           ? 'Reconciled'

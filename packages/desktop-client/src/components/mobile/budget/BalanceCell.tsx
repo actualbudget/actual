@@ -33,6 +33,9 @@ type BalanceCellProps = {
     'leftover' | 'sum-amount'
   >;
   category: CategoryEntity;
+  // The currency of a currency line. Its row names the currency, so its
+  // amounts leave out the symbol.
+  currencyCode?: string;
   show3Columns?: boolean;
   onPress?: () => void;
   'aria-label'?: string;
@@ -41,6 +44,7 @@ type BalanceCellProps = {
 export function BalanceCell({
   binding,
   category,
+  currencyCode,
   show3Columns,
   onPress,
   'aria-label': ariaLabel,
@@ -109,7 +113,10 @@ export function BalanceCell({
                 }),
               )}
             >
-              {format(value, type)}
+              {format(value, type, {
+                currencyCode,
+                hideSymbol: !!currencyCode,
+              })}
             </AutoTextSize>
           </PrivacyFilter>
         );

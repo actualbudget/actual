@@ -1,4 +1,5 @@
 import { send } from '@actual-app/core/platform/client/connection';
+import { getEffectiveCurrency } from '@actual-app/core/shared/fx/currency';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
@@ -11,6 +12,7 @@ import type { Locale } from 'date-fns';
 import { keyBy } from 'es-toolkit';
 
 import { getIntervalFormat } from '#components/reports/ReportOptions';
+import type { AccountBalanceConverter } from '#hooks/useAccountBalanceConverter';
 import type { FormatType } from '#hooks/useFormat';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { aqlQuery } from '#queries/aqlQuery';
@@ -52,11 +54,27 @@ export function createSpreadsheet(
   firstDayOfWeekIdx: string = '0',
   format: (value: unknown, type?: FormatType) => string,
   dateFormat?: string,
+  {
+    convertBalance,
+    defaultCurrencyCode = '',
+  }: {
+    // Values balances of accounts in other currencies in the default one;
+    // null while the exchange rates are still loading
+    convertBalance?: AccountBalanceConverter | null;
+    // The currency of accounts without one of their own
+    defaultCurrencyCode?: string;
+  } = {},
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: ReturnType<typeof recalculate>) => void,
   ) => {
+    // Nothing is shown until the rates are known, rather than first
+    // adding all currencies up 1:1
+    if (convertBalance === null) {
+      return;
+    }
+
     const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
@@ -240,13 +258,26 @@ export function createSpreadsheet(
     }
 
     // Prevent paired internal transfers from changing net worth between their
-    // two posting dates.
-    alignInternalTransferDates(data, allTransferLegs, {
-      startDate,
-      endDate,
-      interval,
-      firstDayOfWeekIdx,
-    });
+    // two posting dates. Transfers only have a side in another currency
+    // while balances in other currencies are converted.
+    alignInternalTransferDates(
+      data,
+      allTransferLegs,
+      {
+        startDate,
+        endDate,
+        interval,
+        firstDayOfWeekIdx,
+      },
+      convertBalance
+        ? new Map(
+            accounts.map(account => [
+              account.id,
+              getEffectiveCurrency(account.currency, defaultCurrencyCode),
+            ]),
+          )
+        : null,
+    );
 
     setData(
       recalculate(
@@ -258,15 +289,37 @@ export function createSpreadsheet(
         firstDayOfWeekIdx,
         format,
         dateFormat,
+        convertBalance,
       ),
     );
   };
+}
+
+// The last day an interval covers; balances are valued on that day
+function getIntervalEndDate(
+  intervalItem: string,
+  interval: string,
+  endDate: string,
+): string {
+  let end: string;
+  if (interval === 'Daily') {
+    end = intervalItem;
+  } else if (interval === 'Weekly') {
+    end = monthUtils.addDays(intervalItem, 6);
+  } else if (interval === 'Yearly') {
+    end = `${intervalItem}-12-31`;
+  } else {
+    end = monthUtils.lastDayOfMonth(intervalItem);
+  }
+  return end > endDate ? endDate : end;
 }
 
 function alignInternalTransferDates(
   data: AccountBalanceData[],
   transferLegs: TransferLeg[],
   range: IntervalRange,
+  // Null while all accounts count in one currency
+  currencyByAccount: ReadonlyMap<string, string> | null,
 ) {
   const accountsById = new Map(data.map(account => [account.id, account]));
   const transfersById = new Map(transferLegs.map(leg => [leg.id, leg]));
@@ -278,11 +331,20 @@ function alignInternalTransferDates(
     }
 
     const counterpart = transfersById.get(leg.transfer_id);
+    // Between currencies each side keeps its own amount, so only the signs
+    // are opposite
+    const isCrossCurrency =
+      counterpart !== undefined &&
+      currencyByAccount !== null &&
+      currencyByAccount.get(leg.account) !==
+        currencyByAccount.get(counterpart.account);
     if (
       !counterpart ||
       counterpart.transfer_id !== leg.id ||
       counterpart.account === leg.account ||
-      counterpart.amount + leg.amount !== 0 ||
+      (isCrossCurrency
+        ? Math.sign(counterpart.amount) !== -Math.sign(leg.amount)
+        : counterpart.amount + leg.amount !== 0) ||
       !accountsById.has(leg.account) ||
       !accountsById.has(counterpart.account)
     ) {
@@ -370,6 +432,7 @@ function recalculate(
   firstDayOfWeekIdx: string = '0',
   format: (value: unknown, type?: FormatType) => string,
   dateFormat?: string,
+  convertBalance?: AccountBalanceConverter,
 ) {
   // Get intervals using the same pattern as other working spreadsheets
   const intervals =
@@ -384,18 +447,46 @@ function recalculate(
               monthUtils.getMonth(endDate),
             );
 
+  // Balances of accounts in other currencies are valued in the default
+  // currency on the last day of each interval
+  let hasApproximateConversion = false;
+  const toDefaultCurrency = (
+    amount: number,
+    accountId: string,
+    date: string,
+  ) => {
+    // A zero balance is zero in every currency, so it is never approximate
+    if (!convertBalance || amount === 0) {
+      return amount;
+    }
+    const converted = convertBalance(amount, accountId, date);
+    hasApproximateConversion =
+      hasApproximateConversion || converted.isApproximate;
+    return converted.amount;
+  };
+
   const accountBalances = data.map(account => {
     let balance = account.starting;
     return intervals.map(intervalItem => {
       if (account.balances[intervalItem]) {
         balance += account.balances[intervalItem].amount;
       }
-      return balance;
+      return toDefaultCurrency(
+        balance,
+        account.id,
+        getIntervalEndDate(intervalItem, interval, endDate),
+      );
     });
   });
 
   const priorPeriodNetWorth = data.reduce(
-    (sum, account) => sum + account.starting,
+    (sum, account) =>
+      sum +
+      toDefaultCurrency(
+        account.starting,
+        account.id,
+        monthUtils.subDays(startDate, 1),
+      ),
     0,
   );
 
@@ -505,6 +596,9 @@ function recalculate(
     },
     netWorth: endNetWorth,
     totalChange: endNetWorth - startNetWorth,
+    // Some balances used a rate from a later date, or counted 1:1 for lack
+    // of a rate
+    hasApproximateConversion,
     lowestNetWorth,
     highestNetWorth,
     accounts: data

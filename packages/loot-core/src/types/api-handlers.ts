@@ -9,6 +9,7 @@ import type {
   APIAccountGroupEntity,
   APICategoryEntity,
   APICategoryGroupEntity,
+  APIExchangeRateEntity,
   APIFileEntity,
   APIPayeeEntity,
   APIRuleEntity,
@@ -86,12 +87,18 @@ export type ApiHandlers = {
     month: string;
     categoryId: string;
     amount: number;
+    // A currency budgeted on its own line in the category; its default
+    // currency when omitted
+    currency?: string;
   }) => Promise<void>;
 
   'api/budget-set-carryover': (arg: {
     month: string;
     categoryId: string;
     flag: boolean;
+    // A currency budgeted on its own line in the category; its default
+    // currency when omitted
+    currency?: string;
   }) => Promise<void>;
 
   'api/budget-hold-for-next-month': (arg: {
@@ -197,6 +204,21 @@ export type ApiHandlers = {
 
   'api/account-group-delete': (arg: {
     id: APIAccountGroupEntity['id'];
+  }) => Promise<void>;
+
+  'api/exchange-rates-get': () => Promise<APIExchangeRateEntity[]>;
+
+  'api/exchange-rate-create': (arg: {
+    exchangeRate: Omit<APIExchangeRateEntity, 'id' | 'source'>;
+  }) => Promise<APIExchangeRateEntity['id']>;
+
+  'api/exchange-rate-update': (arg: {
+    id: APIExchangeRateEntity['id'];
+    fields: Partial<Omit<APIExchangeRateEntity, 'id' | 'source'>>;
+  }) => Promise<void>;
+
+  'api/exchange-rate-delete': (arg: {
+    id: APIExchangeRateEntity['id'];
   }) => Promise<void>;
 
   'api/categories-get': (arg: {

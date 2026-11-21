@@ -478,6 +478,22 @@ export function integerToCurrencyWithDecimal(
   return integerToCurrency(integerAmount);
 }
 
+// An amount in `currencyCode` as it is edited: with that currency's
+// decimal places, or two when the amount has a fraction they would hide,
+// so that editing never rounds it. Hiding decimals is a setting of the
+// default currency, so it doesn't apply here.
+export function integerToCurrencyForEdit(
+  integerAmount: IntegerAmount,
+  currencyCode: string,
+): CurrencyAmount {
+  const decimalPlaces =
+    integerAmount % 100 !== 0 ? 2 : getDecimalPlaces(currencyCode);
+  return integerToCurrency(
+    integerAmount,
+    getNumberFormat({ ...numberFormatConfig, decimalPlaces }).formatter,
+  );
+}
+
 export function amountToCurrency(amount: Amount): CurrencyAmount {
   return getNumberFormat().formatter.format(amount);
 }
