@@ -71,12 +71,11 @@ export const TagRow = memo(
 
     // Enter must be handled here: the navigator would otherwise move editing
     // to the next row's tag field, which after the list re-sorts is an
-    // unrelated tag
+    // unrelated tag. Exiting edit blurs the input and commits through onUpdate.
     const onRenameKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         e.stopPropagation();
-        onRename(e.currentTarget.value);
         onEdit(null);
       }
     };

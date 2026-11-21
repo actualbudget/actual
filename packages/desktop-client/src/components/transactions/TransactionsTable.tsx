@@ -1022,6 +1022,7 @@ type TransactionProps = {
     name: string,
   ) => void;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
+  onExit?: () => void;
   onDelete: (id: TransactionEntity['id']) => void;
   onBatchDelete?: (ids: TransactionEntity['id'][]) => void;
   onBatchDuplicate?: (ids: TransactionEntity['id'][]) => void;
@@ -1086,6 +1087,7 @@ const Transaction = memo(function Transaction({
   hideFraction,
   onSave,
   onEdit,
+  onExit,
   onDelete,
   onBatchDelete,
   onBatchDuplicate,
@@ -1661,6 +1663,7 @@ const Transaction = memo(function Transaction({
             onUpdate={value => {
               onUpdate('date', value);
             }}
+            onExit={onExit}
           >
             {({
               onBlur,
@@ -1669,6 +1672,7 @@ const Transaction = memo(function Transaction({
               onSave,
               shouldSaveFromKey,
               inputStyle,
+              editSession,
             }) => (
               <DateSelect
                 value={date || ''}
@@ -1678,6 +1682,7 @@ const Transaction = memo(function Transaction({
                 clearOnBlur
                 onUpdate={onUpdate}
                 onSelect={onSave}
+                editSession={editSession}
                 transferDateSyncChecked={syncTransferDate}
                 onTransferDateSyncChange={
                   transaction.transfer_id ||
@@ -1787,6 +1792,7 @@ const Transaction = memo(function Transaction({
               onUpdate('notes', value?.trim());
             }}
             onExpose={name => !isPreview && onEdit(id, name)}
+            onExit={onExit}
           />
         );
       case 'group':
@@ -1914,6 +1920,7 @@ const Transaction = memo(function Transaction({
             exposed={focusedField === 'category'}
             focused={focusedField === 'category'}
             onExpose={name => onEdit(id, name)}
+            onExit={onExit}
             value={
               isOffBudget
                 ? t('Off budget')
@@ -2019,6 +2026,7 @@ const Transaction = memo(function Transaction({
             textAlign="right"
             title={debit}
             onExpose={name => !isPreview && onEdit(id, name)}
+            onExit={onExit}
             style={{
               ...(isParent && { fontStyle: 'italic' }),
               ...styles.tnum,
@@ -2054,6 +2062,7 @@ const Transaction = memo(function Transaction({
             textAlign="right"
             title={credit}
             onExpose={name => !isPreview && onEdit(id, name)}
+            onExit={onExit}
             style={{
               ...(isParent && { fontStyle: 'italic' }),
               ...styles.tnum,
@@ -2277,6 +2286,7 @@ type NotesCellProps = {
   onUpdate: (value: string) => void;
   onClickTag: (tag: string) => void;
   onExpose: (name: string) => void;
+  onExit?: () => void;
 };
 
 function NotesCell({
@@ -2288,14 +2298,11 @@ function NotesCell({
   onUpdate,
   onClickTag,
   onExpose,
+  onExit,
 }: NotesCellProps) {
   // A single-line input drops line breaks from its value, so edit them as
   // spaces, which is also how the cell displays them.
   const editableNote = note.replace(/\r\n|\r|\n/g, ' ');
-  const [inputValue, setInputValue] = useState(editableNote);
-  useEffect(() => {
-    setInputValue(editableNote);
-  }, [editableNote, setInputValue]);
 
   // Only save when the text was edited, so that focusing the cell does not
   // rewrite a note that has line breaks.
@@ -2319,14 +2326,6 @@ function NotesCell({
     },
     [resizeRef],
   );
-
-  function onKeyDown(e: KeyboardEvent) {
-    if (e.key === 'Enter' || e.key === 'Tab') {
-      onUpdateNote(inputValue);
-    } else if (e.key === 'Escape') {
-      setInputValue(editableNote);
-    }
-  }
 
   const displayedNote = note || scheduleNote || '';
   // Tags can only be removed from the transaction's own note (not the
@@ -2353,8 +2352,9 @@ function NotesCell({
       focused={focused}
       exposed={focused}
       onExpose={onExpose}
-      onKeyDown={onKeyDown}
-      onBlur={() => onUpdateNote(inputValue)}
+      editValue={editableNote}
+      onUpdate={onUpdateNote}
+      onExit={onExit}
       unexposedContent={props => (
         <Tooltip
           content={
@@ -2376,14 +2376,13 @@ function NotesCell({
         </Tooltip>
       )}
     >
-      {({ inputStyle, onKeyDown, onBlur }) => (
+      {({ inputStyle, onKeyDown, onBlur, value, setValue }) => (
         <TagAutocomplete
-          inputValue={inputValue}
-          setInputValue={setInputValue}
+          inputValue={value}
+          setInputValue={setValue}
           inputStyle={inputStyle}
           onBlur={onBlur}
           onKeyDown={onKeyDown}
-          onUpdate={onUpdateNote}
         />
       )}
     </CustomCell>
@@ -2456,8 +2455,8 @@ type NewTransactionProps = {
   accounts: AccountEntity[];
   categoryGroups: CategoryGroupEntity[];
   dateFormat: string;
-  editingTransaction: TransactionEntity['id'];
-  focusedField: string;
+  editingTransaction: TransactionEntity['id'] | null;
+  focusedField: string | null;
   hideFraction: boolean;
   onSchedule: () => void;
   onAdd: () => void;
@@ -2469,6 +2468,7 @@ type NewTransactionProps = {
   onDelete: (id: TransactionEntity['id']) => void;
   onDistributeRemainder: (id: TransactionEntity['id']) => void;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
+  onExit?: () => void;
   onManagePayees: (id: PayeeEntity['id'] | undefined) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNavigateToTransferAccount: NavigateToTransferAccount;
@@ -2505,6 +2505,7 @@ function NewTransaction({
   onSplit,
   onToggleSplit,
   onEdit,
+  onExit,
   onDelete,
   onSave,
   onSchedule,
@@ -2551,11 +2552,6 @@ function NewTransaction({
         backgroundColor: theme.tableBackground,
       }}
       data-testid="new-transaction"
-      onKeyDown={e => {
-        if (e.key === 'Escape') {
-          onClose();
-        }
-      }}
     >
       {transactions.map((transaction, index) => (
         <Transaction
@@ -2568,7 +2564,9 @@ function NewTransaction({
           transferAccountsByTransaction={transferAccountsByTransaction}
           columns={columns}
           focusedField={
-            editingTransaction === transaction.id ? focusedField : undefined
+            editingTransaction === transaction.id
+              ? (focusedField ?? undefined)
+              : undefined
           }
           showZeroInDeposit={isDeposit}
           accounts={accounts}
@@ -2578,6 +2576,7 @@ function NewTransaction({
           hideFraction={!!hideFraction}
           expanded
           onEdit={onEdit}
+          onExit={onExit}
           onSave={onSave}
           onSplit={onSplit}
           onToggleSplit={onToggleSplit}
@@ -2904,13 +2903,16 @@ function TransactionTableInner({
         showZeroInDeposit={isChildDeposit}
         balance={balances?.[trans.id] ?? 0}
         amountColumnWidths={amountColumnWidths}
-        focusedField={editing ? tableNavigator.focusedField : undefined}
+        focusedField={
+          editing ? (tableNavigator.focusedField ?? undefined) : undefined
+        }
         accounts={accounts}
         categoryGroups={categoryGroups}
         payees={payees}
         dateFormat={dateFormat}
         hideFraction={hideFraction}
         onEdit={tableNavigator.onEdit}
+        onExit={tableNavigator.exitEdit}
         onSave={props.onSave}
         onDelete={props.onDelete}
         onBatchDelete={props.onBatchDelete}
@@ -2983,8 +2985,24 @@ function TransactionTableInner({
 
         {props.isAdding && (
           <View
+            // Focusable so exiting a cell can park focus here and keep
+            // routing keys to the navigator (same as Table does).
+            tabIndex={0}
+            style={{ outline: 'none' }}
             {...newNavigator.getNavigatorProps({
-              onKeyDown: (e: KeyboardEvent) => props.onCheckNewEnter(e),
+              onKeyDown: (e: KeyboardEvent) => {
+                props.onCheckNewEnter(e);
+                // Escape exits the focused cell first (including a focused
+                // button cell, which isn't editing); only cancel the whole
+                // row once the row itself has focus, or typed values are lost.
+                if (
+                  e.key === 'Escape' &&
+                  !newNavigator.isEditing &&
+                  e.target === e.currentTarget
+                ) {
+                  props.onCloseAddTransaction();
+                }
+              },
             })}
           >
             <NewTransaction
@@ -3009,6 +3027,7 @@ function TransactionTableInner({
               onToggleSplit={props.onToggleSplit}
               onSplit={props.onSplit}
               onEdit={newNavigator.onEdit}
+              onExit={newNavigator.exitEdit}
               onSave={props.onSave}
               onDelete={props.onDelete}
               onManagePayees={props.onManagePayees}
@@ -3716,6 +3735,9 @@ export const TransactionTable = forwardRef(
     function onCheckEnter(e: KeyboardEvent) {
       if (e.key === 'Enter' && !e.shiftKey) {
         const { editingId: id, focusedField } = tableNavigator;
+        if (id === null) {
+          return;
+        }
 
         afterSave(() => {
           const transactions = latestState.current.transactions;
@@ -3927,7 +3949,10 @@ export const TransactionTable = forwardRef(
           if (trans.amount === null) {
             tableNavigator.onEdit(trans.id, 'debit');
           } else {
-            tableNavigator.onEdit(newId, tableNavigator.focusedField);
+            tableNavigator.onEdit(
+              newId,
+              tableNavigator.focusedField ?? undefined,
+            );
           }
         }
       };
@@ -3948,13 +3973,13 @@ export const TransactionTable = forwardRef(
           setNewTransactions(data);
           newNavigator.onEdit(
             diff.added[0].id,
-            latestState.current.newNavigator.focusedField,
+            latestState.current.newNavigator.focusedField ?? undefined,
           );
         } else {
           const newId = onAddSplitProp(id);
           tableNavigator.onEdit(
             newId,
-            latestState.current.tableNavigator.focusedField,
+            latestState.current.tableNavigator.focusedField ?? undefined,
           );
         }
       },

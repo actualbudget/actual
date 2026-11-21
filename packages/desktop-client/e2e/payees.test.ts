@@ -84,8 +84,11 @@ test.describe('Payees', () => {
     await page.keyboard.press('Shift+Tab');
     await expect(selectButton).toBeFocused();
 
+    // Escape leaves the cell selected, where Tab moves across columns; a
+    // second Escape clears the selection so Tab leaves the table
     await page.keyboard.press('Escape');
     await expect(table).toBeFocused();
+    await page.keyboard.press('Escape');
 
     await page.keyboard.press('Tab');
     expect(await isFocusInTable()).toBe(false);
