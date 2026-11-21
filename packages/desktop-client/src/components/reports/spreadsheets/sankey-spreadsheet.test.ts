@@ -1324,6 +1324,97 @@ describe('sankey-spreadsheet', () => {
     });
   });
 
+  describe('percentage filtering via buildSankeyData', () => {
+    it('groups nodes below the percentage threshold and keeps the threshold value', () => {
+      const graph: Graph = new Map();
+      addNode(graph, 'account', GraphLayers.Account, 'Account');
+      addNode(graph, 'large-category', GraphLayers.Category, 'Large category');
+      addNode(graph, 'threshold-category', GraphLayers.Category, 'Threshold');
+      addNode(graph, 'small-category', GraphLayers.Category, 'Small category');
+      addNode(
+        graph,
+        'small-category-2',
+        GraphLayers.Category,
+        'Small category 2',
+      );
+      addValueToLink(graph, 'account', 'large-category', 895);
+      addValueToLink(graph, 'account', 'threshold-category', 100);
+      addValueToLink(graph, 'account', 'small-category', 3);
+      addValueToLink(graph, 'account', 'small-category-2', 2);
+
+      const sankeyData = buildSankeyData(
+        graph,
+        1,
+        [],
+        'global',
+        GraphLayers.Account,
+        GraphLayers.Category,
+      );
+
+      const nodeKeys = sankeyData.nodes.map(node => node.key);
+      expect(nodeKeys).toContain('large-category');
+      expect(nodeKeys).toContain('threshold-category');
+      expect(nodeKeys).toContain('category__OTHER_BUCKET');
+      expect(nodeKeys).not.toContain('small-category');
+      expect(nodeKeys).not.toContain('small-category-2');
+    });
+
+    it('keeps a single below-threshold node visible instead of grouping it', () => {
+      const graph: Graph = new Map();
+      addNode(graph, 'account', GraphLayers.Account, 'Account');
+      addNode(graph, 'large-category', GraphLayers.Category, 'Large category');
+      addNode(graph, 'small-category', GraphLayers.Category, 'Small category');
+      addValueToLink(graph, 'account', 'large-category', 999);
+      addValueToLink(graph, 'account', 'small-category', 1);
+
+      const sankeyData = buildSankeyData(
+        graph,
+        1,
+        [],
+        'global',
+        GraphLayers.Account,
+        GraphLayers.Category,
+      );
+
+      const nodeKeys = sankeyData.nodes.map(node => node.key);
+      expect(nodeKeys).toContain('small-category');
+      expect(nodeKeys).not.toContain('category__OTHER_BUCKET');
+    });
+
+    it('applies the render safety limit after percentage filtering', () => {
+      const graph: Graph = new Map();
+      addNode(graph, 'account', GraphLayers.Account, 'Account');
+      addNode(graph, 'large-category', GraphLayers.Category, 'Large category');
+      addNode(
+        graph,
+        'medium-category',
+        GraphLayers.Category,
+        'Medium category',
+      );
+      addNode(graph, 'small-category', GraphLayers.Category, 'Small category');
+      addValueToLink(graph, 'account', 'large-category', 70);
+      addValueToLink(graph, 'account', 'medium-category', 20);
+      addValueToLink(graph, 'account', 'small-category', 10);
+
+      const sankeyData = buildSankeyData(
+        graph,
+        100,
+        [],
+        'global',
+        GraphLayers.Account,
+        GraphLayers.Category,
+        2,
+      );
+
+      const categoryNodes = sankeyData.nodes.filter(
+        node =>
+          node.key === 'large-category' || node.key.endsWith('__OTHER_BUCKET'),
+      );
+      expect(categoryNodes).toHaveLength(2);
+      expect(categoryNodes.map(node => node.key)).toContain('large-category');
+    });
+  });
+
   describe('convertToSankeyData', () => {
     it('converts graph to sankey data format', () => {
       const graph: Graph = new Map();

@@ -193,12 +193,14 @@ function SankeyNode({
 type SankeyGraphProps = {
   style?: CSSProperties;
   data: SankeyData;
+  maxNodesPerLayer?: number;
   showTooltip?: boolean;
   showPercentages?: boolean;
 };
 export function SankeyGraph({
   style,
   data,
+  maxNodesPerLayer,
   showTooltip = true,
   showPercentages = false,
 }: SankeyGraphProps) {
@@ -237,118 +239,127 @@ export function SankeyGraph({
 
   return (
     <Container style={style}>
-      {(width, height) => (
-        <div ref={setViewportEl} style={{ width: '100%', height: '100%' }}>
-          <ResponsiveContainer>
-            <Sankey
-              data={data}
-              node={props => (
-                <SankeyNode
-                  {...props}
-                  containerWidth={width}
-                  phase={phase}
-                  showPercentages={showPercentages}
-                />
-              )}
-              link={props => (
-                <SankeyLink
-                  {...props}
-                  containerWidth={width}
-                  phase={phase}
-                  isHovered={hoveredLinkIndex === props.index}
-                  onMouseEnter={() => setHoveredLinkIndex(props.index)}
-                  onMouseLeave={() => setHoveredLinkIndex(null)}
-                />
-              )}
-              sort={false}
-              iterations={128}
-              nodePadding={23}
-              width={width}
-              height={height}
-              margin={{
-                left: 0,
-                right: 0,
-                top: 10,
-                bottom: 25,
-              }}
-            >
-              {showTooltip && (
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null;
-                    const { value = 0, name = '' } = payload[0];
-                    const tooltipInfo =
-                      hoveredLinkIndex !== null
-                        ? (
-                            data.links[hoveredLinkIndex] as {
-                              tooltipInfo?: Array<{
-                                name: string;
-                                value: number;
-                              }>;
-                            }
-                          )?.tooltipInfo
-                        : undefined;
-                    return (
-                      <div
-                        className={css({
-                          zIndex: 1000,
-                          pointerEvents: 'none',
-                          borderRadius: 2,
-                          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-                          backgroundColor: theme.menuBackground,
-                          color: theme.menuItemText,
-                          padding: 10,
-                        })}
-                      >
-                        <div style={{ lineHeight: 1.4 }}>
-                          {name && (
-                            <div style={{ marginBottom: 5 }}>{name}</div>
-                          )}
-                          <div
-                            style={{
-                              fontFamily: privacyMode
-                                ? t('Redacted Script')
-                                : undefined,
-                            }}
-                          >
-                            {format(value, 'financial')}
-                          </div>
-                          {tooltipInfo && tooltipInfo.length > 0 && (
+      {(width, height) => {
+        const contentHeight = Math.max(0, height - 35);
+        const nodesForLayout = maxNodesPerLayer ?? data.nodes.length;
+        const nodePadding =
+          nodesForLayout > 1
+            ? Math.min(23, contentHeight / (nodesForLayout - 1))
+            : 23;
+
+        return (
+          <div ref={setViewportEl} style={{ width: '100%', height: '100%' }}>
+            <ResponsiveContainer>
+              <Sankey
+                data={data}
+                node={props => (
+                  <SankeyNode
+                    {...props}
+                    containerWidth={width}
+                    phase={phase}
+                    showPercentages={showPercentages}
+                  />
+                )}
+                link={props => (
+                  <SankeyLink
+                    {...props}
+                    containerWidth={width}
+                    phase={phase}
+                    isHovered={hoveredLinkIndex === props.index}
+                    onMouseEnter={() => setHoveredLinkIndex(props.index)}
+                    onMouseLeave={() => setHoveredLinkIndex(null)}
+                  />
+                )}
+                sort={false}
+                iterations={128}
+                nodePadding={nodePadding}
+                width={width}
+                height={height}
+                margin={{
+                  left: 0,
+                  right: 0,
+                  top: 10,
+                  bottom: 25,
+                }}
+              >
+                {showTooltip && (
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null;
+                      const { value = 0, name = '' } = payload[0];
+                      const tooltipInfo =
+                        hoveredLinkIndex !== null
+                          ? (
+                              data.links[hoveredLinkIndex] as {
+                                tooltipInfo?: Array<{
+                                  name: string;
+                                  value: number;
+                                }>;
+                              }
+                            )?.tooltipInfo
+                          : undefined;
+                      return (
+                        <div
+                          className={css({
+                            zIndex: 1000,
+                            pointerEvents: 'none',
+                            borderRadius: 2,
+                            boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+                            backgroundColor: theme.menuBackground,
+                            color: theme.menuItemText,
+                            padding: 10,
+                          })}
+                        >
+                          <div style={{ lineHeight: 1.4 }}>
+                            {name && (
+                              <div style={{ marginBottom: 5 }}>{name}</div>
+                            )}
                             <div
                               style={{
-                                marginTop: 6,
-                                fontSize: 11,
-                                opacity: 0.7,
+                                fontFamily: privacyMode
+                                  ? t('Redacted Script')
+                                  : undefined,
                               }}
                             >
-                              {tooltipInfo.map(item => (
-                                <div key={item.name}>
-                                  {item.name} (
-                                  <span
-                                    style={{
-                                      fontFamily: privacyMode
-                                        ? t('Redacted Script')
-                                        : undefined,
-                                    }}
-                                  >
-                                    {format(item.value, 'financial')}
-                                  </span>
-                                  )
-                                </div>
-                              ))}
+                              {format(value, 'financial')}
                             </div>
-                          )}
+                            {tooltipInfo && tooltipInfo.length > 0 && (
+                              <div
+                                style={{
+                                  marginTop: 6,
+                                  fontSize: 11,
+                                  opacity: 0.7,
+                                }}
+                              >
+                                {tooltipInfo.map(item => (
+                                  <div key={item.name}>
+                                    {item.name} (
+                                    <span
+                                      style={{
+                                        fontFamily: privacyMode
+                                          ? t('Redacted Script')
+                                          : undefined,
+                                      }}
+                                    >
+                                      {format(item.value, 'financial')}
+                                    </span>
+                                    )
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  }}
-                  isAnimationActive={false}
-                />
-              )}
-            </Sankey>
-          </ResponsiveContainer>
-        </div>
-      )}
+                      );
+                    }}
+                    isAnimationActive={false}
+                  />
+                )}
+              </Sankey>
+            </ResponsiveContainer>
+          </div>
+        );
+      }}
     </Container>
   );
 }

@@ -21,7 +21,7 @@ import {
 } from '#components/reports/reportRanges';
 import {
   getDefaultLayerRange,
-  topNNodes,
+  maxRenderableNodes,
 } from '#components/reports/reports/Sankey';
 import {
   buildSankeyData,
@@ -82,12 +82,14 @@ export function SankeyCard({
   );
   const mode = meta?.mode ?? 'spent';
 
-  const [cardHeight, setCardHeight] = useState(0);
-  const throttledSetCardHeight = useMemo(
+  const categoryPercentage = meta?.categoryPercentage ?? 1;
+
+  const [chartHeight, setChartHeight] = useState(0);
+  const throttledSetChartHeight = useMemo(
     () =>
       debounce(
         (height: number) => {
-          setCardHeight(prev => (prev === height ? prev : height));
+          setChartHeight(prev => (prev === height ? prev : height));
         },
         200,
         { leading: true, trailing: true, maxWait: 100 },
@@ -97,17 +99,15 @@ export function SankeyCard({
 
   useEffect(() => {
     return () => {
-      throttledSetCardHeight.cancel();
+      throttledSetChartHeight.cancel();
     };
-  }, [throttledSetCardHeight]);
+  }, [throttledSetChartHeight]);
 
   const containerRef = useResizeObserver<HTMLDivElement>(rect => {
-    throttledSetCardHeight(rect.height);
+    throttledSetChartHeight(rect.height);
   });
 
-  const heightBasedTopN = topNNodes(cardHeight);
-  const configuredTopN = meta?.topNcategories ?? 15;
-  const topN = Math.min(configuredTopN, heightBasedTopN);
+  const maxNodesPerLayer = maxRenderableNodes(chartHeight);
 
   const defaultLayerRange = getDefaultLayerRange(mode);
   let layerFrom: GraphLayer;
@@ -175,15 +175,17 @@ export function SankeyCard({
 
     return buildSankeyData(
       displayBaseGraph,
-      topN,
+      categoryPercentage,
       groupedCategories,
       meta?.categorySort ?? 'per-group',
       layerFrom,
       layerTo,
+      maxNodesPerLayer,
     );
   }, [
     displayBaseGraph,
-    topN,
+    categoryPercentage,
+    maxNodesPerLayer,
     groupedCategories,
     meta?.categorySort,
     layerFrom,
@@ -242,6 +244,7 @@ export function SankeyCard({
           <View ref={containerRef} style={{ flexGrow: 1 }}>
             <SankeyGraph
               data={compactData}
+              maxNodesPerLayer={maxNodesPerLayer}
               showPercentages={meta?.showPercentages}
               showTooltip={!isEditing}
               style={{ flex: 1 }}

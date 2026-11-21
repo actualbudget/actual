@@ -77,13 +77,15 @@ export function Sankey() {
   return <SankeyInner widget={widget} />;
 }
 
-export function topNNodes(cardHeight: number): number {
-  const PX_PER_NODE = 35;
-  const heightBasedTopN = Math.max(2, Math.floor(cardHeight / PX_PER_NODE));
-  return heightBasedTopN;
-}
-
 type GraphMode = 'budgeted' | 'spent';
+
+export function maxRenderableNodes(chartHeight: number): number | undefined {
+  if (chartHeight <= 0) {
+    return undefined;
+  }
+
+  return Math.max(2, Math.floor(chartHeight / 45));
+}
 
 type LayerDirection = 'from' | 'to';
 type LayerRange = {
@@ -177,19 +179,20 @@ function getLayerMenuItems(
   return availableLayers.slice(otherIndex + 1);
 }
 
-// 1e5 is used as a sentinel value for 'All'
-const TOP_N_OPTIONS = [1e5, 10, 15, 20, 25, 30] as const;
+const PERCENTAGE_OPTIONS = [0.5, 1, 2.5, 5, 7.5, 10, 100] as const;
 
-type TopNSelectorProps = {
+type PercentageSelectorProps = {
   value: number;
   onChange: (value: number) => void;
 };
 
-function displayN(n: number, t: TFunction): string {
-  return n === 1e5 ? t('All') : String(n);
+function percentageOptionLabel(percentage: number, t: TFunction): string {
+  return percentage === 100
+    ? t('No grouping')
+    : t('Group below {{percentage}}', { percentage: `${percentage}%` });
 }
 
-function TopNSelector({ value, onChange }: TopNSelectorProps) {
+function PercentageSelector({ value, onChange }: PercentageSelectorProps) {
   const { t } = useTranslation();
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -200,12 +203,10 @@ function TopNSelector({ value, onChange }: TopNSelectorProps) {
         ref={triggerRef}
         variant="bare"
         onPress={() => setIsOpen(true)}
-        aria-label={t('Change category limit')}
+        aria-label={t('Change grouping percentage threshold')}
       >
         <SvgList style={{ width: 12, height: 12 }} />
-        <span style={{ marginLeft: 5 }}>
-          {t('Show up to {{n}}', { n: displayN(value, t) })}
-        </span>
+        <span style={{ marginLeft: 5 }}>{percentageOptionLabel(value, t)}</span>
       </Button>
       <Popover
         triggerRef={triggerRef}
@@ -218,9 +219,9 @@ function TopNSelector({ value, onChange }: TopNSelectorProps) {
             onChange(Number(item));
             setIsOpen(false);
           }}
-          items={TOP_N_OPTIONS.map(n => ({
-            name: String(n),
-            text: t('Show up to {{n}}', { n: displayN(n, t) }),
+          items={PERCENTAGE_OPTIONS.map(percentage => ({
+            name: String(percentage),
+            text: percentageOptionLabel(percentage, t),
           }))}
         />
       </Popover>
@@ -478,16 +479,14 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     widget?.meta?.mode ?? 'spent',
   );
 
-  const [topNcategories, settopNcategories] = useState<number>(
-    widget?.meta?.topNcategories ?? 15,
-  );
+  const [categoryPercentage, setCategoryPercentage] = useState<number>(1);
 
-  const [cardHeight, setCardHeight] = useState(0);
-  const throttledSetCardHeight = useMemo(
+  const [chartHeight, setChartHeight] = useState(0);
+  const throttledSetChartHeight = useMemo(
     () =>
       debounce(
         (height: number) => {
-          setCardHeight(prev => (prev === height ? prev : height));
+          setChartHeight(prev => (prev === height ? prev : height));
         },
         200,
         { leading: true, trailing: true, maxWait: 200 },
@@ -497,17 +496,15 @@ function SankeyInner({ widget }: SankeyInnerProps) {
 
   useEffect(() => {
     return () => {
-      throttledSetCardHeight.cancel();
+      throttledSetChartHeight.cancel();
     };
-  }, [throttledSetCardHeight]);
+  }, [throttledSetChartHeight]);
 
   const containerRef = useResizeObserver<HTMLDivElement>(rect => {
-    throttledSetCardHeight(rect.height);
+    throttledSetChartHeight(rect.height);
   });
 
-  const heightBasedTopN = topNNodes(cardHeight);
-
-  const topN = Math.min(topNcategories, heightBasedTopN);
+  const maxNodesPerLayer = maxRenderableNodes(chartHeight);
 
   const [categorySort, setCategorySort] = useState<
     'per-group' | 'global' | 'budget-order'
@@ -638,15 +635,17 @@ function SankeyInner({ widget }: SankeyInnerProps) {
 
     return buildSankeyData(
       displayBaseGraph,
-      topN,
+      categoryPercentage,
       groupedCategories,
       categorySort,
       layerFrom,
       layerTo,
+      maxNodesPerLayer,
     );
   }, [
     displayBaseGraph,
-    topN,
+    categoryPercentage,
+    maxNodesPerLayer,
     groupedCategories,
     categorySort,
     layerFrom,
@@ -719,7 +718,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
             conditions,
             conditionsOp,
             mode: graphMode,
-            topNcategories,
+            categoryPercentage,
             categorySort,
             showPercentages,
             showTransfers,
@@ -850,7 +849,10 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                 backgroundColor: theme.pillBorderDark,
               }}
             />
-            <TopNSelector value={topNcategories} onChange={settopNcategories} />
+            <PercentageSelector
+              value={categoryPercentage}
+              onChange={setCategoryPercentage}
+            />
             <CategorySortSelector
               value={categorySort}
               onChange={setCategorySort}
@@ -958,6 +960,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                     <SankeyGraph
                       style={{ flexGrow: 1 }}
                       data={displayData}
+                      maxNodesPerLayer={maxNodesPerLayer}
                       showPercentages={showPercentages}
                     />
                   </View>
