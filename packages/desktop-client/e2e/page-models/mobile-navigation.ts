@@ -35,7 +35,8 @@ export class MobileNavigation {
     this.page = page;
     this.heading = page.getByRole('heading');
     this.navbar = page.locator('[data-navbar-state]');
-    this.mainContentSelector = '[role=main]';
+    // Pages kept alive behind the current one are hidden; match the shown one.
+    this.mainContentSelector = '[role=main]:visible';
     this.navbarSelector = '[data-navbar-state]';
   }
 

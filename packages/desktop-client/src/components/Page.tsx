@@ -8,6 +8,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { useIsCurrentMobilePage } from './MobilePageStack';
+
 const HEADER_HEIGHT = 50;
 
 type PageHeaderProps = {
@@ -170,6 +172,7 @@ type PageProps = {
 export function Page({ header, style, padding, children, footer }: PageProps) {
   const { isNarrowWidth } = useResponsive();
   const mobileHeaderSlot = useContext(MobilePageHeaderSlotContext);
+  const isCurrentMobilePage = useIsCurrentMobilePage();
   const childrenPadding = padding != null ? padding : isNarrowWidth ? 10 : 20;
 
   const headerToRender =
@@ -206,7 +209,9 @@ export function Page({ header, style, padding, children, footer }: PageProps) {
         }}
       >
         {mobileHeaderSlot
-          ? createPortal(headerToRender, mobileHeaderSlot)
+          ? // Pages kept alive behind the shown one mustn't show their header.
+            isCurrentMobilePage &&
+            createPortal(headerToRender, mobileHeaderSlot)
           : headerToRender}
         {main}
         {footer}

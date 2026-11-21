@@ -19,7 +19,8 @@ export class SettingsPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.settings = page.getByTestId('settings');
+    // On mobile, earlier settings pages stay alive (hidden) behind this one.
+    this.settings = page.getByTestId('settings').filter({ visible: true });
     this.settingsNav = page.getByRole('navigation', { name: 'Settings' });
     this.backButton = page.getByRole('button', { name: 'Back' });
     this.exportDataButton = this.settings.getByRole('button', {
