@@ -268,7 +268,7 @@ export function GoCardlessExternalMsgModal({
             <Link
               variant="external"
               to="https://gocardless.com/privacy/"
-              linkColor="purple"
+              linkColor="muted"
             >
               Privacy Policy
             </Link>{' '}

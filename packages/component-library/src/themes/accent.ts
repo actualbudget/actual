@@ -84,6 +84,7 @@ function derive(theme: ThemeName, css: string) {
   };
   const surface = readSurface(accentSurfaceTokens.surface);
   const page = readSurface(accentSurfaceTokens.page);
+  const mobilePage = readSurface(accentSurfaceTokens.mobilePage);
 
   const accent = resolveProperty('color-accent', theme, declarations);
   if (accent == null) {
@@ -92,7 +93,11 @@ function derive(theme: ThemeName, css: string) {
 
   const accentSet = deriveAccent(
     toHex(accent.alpha < 1 ? composite(accent, surface) : accent),
-    { surface: toHex(surface), page: toHex(page) },
+    {
+      surface: toHex(surface),
+      page: toHex(page),
+      mobilePage: toHex(mobilePage),
+    },
   );
   const derived = derivedAccentTokens
     .filter(name => !declarations.has(`color-${name}`))

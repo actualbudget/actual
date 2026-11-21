@@ -118,6 +118,7 @@ function resolveDerived(
   const accentSet = deriveAccent(input('accent'), {
     surface: input(accentSurfaceTokens.surface),
     page: input(accentSurfaceTokens.page),
+    mobilePage: input(accentSurfaceTokens.mobilePage),
   });
   return resolveCss(accentSet[token], context);
 }

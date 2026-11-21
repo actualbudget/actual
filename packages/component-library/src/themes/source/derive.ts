@@ -19,11 +19,16 @@ export type AccentSet = {
 
 export type DerivedAccentToken = Exclude<keyof AccentSet, 'accent'>;
 
-export type AccentSurfaces = { surface: string; page: string };
+export type AccentSurfaces = {
+  surface: string;
+  page: string;
+  mobilePage: string;
+};
 
 export const accentSurfaceTokens: Record<keyof AccentSurfaces, string> = {
   surface: 'tableBackground',
   page: 'pageBackground',
+  mobilePage: 'mobilePageBackground',
 };
 
 export const derivedAccentTokens: DerivedAccentToken[] = [
@@ -124,9 +129,9 @@ function hoverFill(fill: string, contrast: string) {
 
 export function deriveAccent(
   accent: string,
-  { surface, page }: AccentSurfaces,
+  { surface, page, mobilePage }: AccentSurfaces,
 ): AccentSet {
-  const key = `${accent}|${surface}|${page}`;
+  const key = `${accent}|${surface}|${page}|${mobilePage}`;
   const cached = cache.get(key);
   if (cached != null) {
     return cached;
@@ -140,7 +145,11 @@ export function deriveAccent(
     interpolate([formatHex(toColor(surface)), fill], 'oklab')(subtleWeight),
   );
 
-  const text = nearestWithContrast(fill, [surface, page, subtle], textContrast);
+  const text = nearestWithContrast(
+    fill,
+    [surface, page, mobilePage, subtle],
+    textContrast,
+  );
 
   const accentSet = {
     accent: fill,

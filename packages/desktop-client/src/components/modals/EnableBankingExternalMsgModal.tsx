@@ -370,7 +370,7 @@ export function EnableBankingExternalMsgModal({
             <Link
               variant="external"
               to="https://enablebanking.com/privacy-policy/"
-              linkColor="purple"
+              linkColor="muted"
             >
               Privacy Policy
             </Link>{' '}

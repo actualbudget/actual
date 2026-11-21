@@ -19,6 +19,7 @@ function surfacesOf(theme: ThemeName) {
   return {
     surface: hex(accentSurfaceTokens.surface),
     page: hex(accentSurfaceTokens.page),
+    mobilePage: hex(accentSurfaceTokens.mobilePage),
   };
 }
 
@@ -87,6 +88,7 @@ describe('deriveAccent', () => {
     const accentSet = deriveAccent('#8719e0', {
       surface: '#ffffff',
       page: '#000000',
+      mobilePage: '#ffffff',
     });
     expect(wcagContrast(accentSet.accentText, '#ffffff')).toBeGreaterThan(3);
     expect(wcagContrast(accentSet.accentText, '#000000')).toBeGreaterThan(3);
@@ -114,10 +116,10 @@ describe('deriveAccent', () => {
   });
 
   describe.each(themeNames)('on the %s surfaces', theme => {
-    const { surface, page } = surfacesOf(theme);
+    const { surface, page, mobilePage } = surfacesOf(theme);
 
     it.each(sweep)('%s meets every target', accent => {
-      const accentSet = deriveAccent(accent, { surface, page });
+      const accentSet = deriveAccent(accent, { surface, page, mobilePage });
       const ratios = {
         contrastOnAccent: wcagContrast(
           accentSet.accentContrast,
@@ -129,6 +131,7 @@ describe('deriveAccent', () => {
         ),
         textOnSurface: wcagContrast(accentSet.accentText, surface),
         textOnPage: wcagContrast(accentSet.accentText, page),
+        textOnMobilePage: wcagContrast(accentSet.accentText, mobilePage),
         subtleTextOnSubtle: wcagContrast(
           accentSet.accentSubtleText,
           accentSet.accentSubtle,
@@ -141,6 +144,7 @@ describe('deriveAccent', () => {
       expect(ratios.contrastOnHover).toBeGreaterThanOrEqual(textContrast);
       expect(ratios.textOnSurface).toBeGreaterThanOrEqual(textContrast);
       expect(ratios.textOnPage).toBeGreaterThanOrEqual(textContrast);
+      expect(ratios.textOnMobilePage).toBeGreaterThanOrEqual(textContrast);
       expect(ratios.subtleTextOnSubtle).toBeGreaterThanOrEqual(textContrast);
       expect(ratios.borderOnSurface).toBeGreaterThanOrEqual(shapeContrast);
       expect(ratios.borderOnPage).toBeGreaterThanOrEqual(shapeContrast);
