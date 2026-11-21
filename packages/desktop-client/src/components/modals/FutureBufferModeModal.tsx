@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -92,16 +92,18 @@ type ModeChoiceProps = {
 };
 
 function ModeChoice({ isSelected, label, onPress, children }: ModeChoiceProps) {
+  const descriptionId = useId();
   return (
     <Button
       aria-pressed={isSelected}
       aria-label={label}
+      aria-describedby={descriptionId}
       variant={isSelected ? 'primary' : 'normal'}
       className={choiceStyle}
       onPress={onPress}
     >
       <Text style={{ fontWeight: 600 }}>{label}</Text>
-      <Text>{children}</Text>
+      <Text id={descriptionId}>{children}</Text>
     </Button>
   );
 }
