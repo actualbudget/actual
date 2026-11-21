@@ -9,6 +9,7 @@ import { getChangedValues } from '#shared/util';
 import type { CategoryGroupEntity } from '#types/models';
 
 import * as budgetActions from './actions';
+import { FUTURE_BUFFER_PREF, getFutureBufferStart } from './actions';
 import * as envelopeBudget from './envelope';
 import * as trackingBudget from './tracking';
 
@@ -86,6 +87,19 @@ async function getEarliestPersistentCarryoverMonth(): Promise<string | null> {
      WHERE c.tombstone = 0 AND b.carryover = 2`,
   );
   return fromDbMonth(row?.month);
+}
+
+// A frozen month keeps the buffer it closed with. The range has to keep it
+// once automatic "For next month" is off, when the start month no longer
+// reaches back to it.
+async function getEarliestFrozenMonth(): Promise<string | null> {
+  if (getBudgetType() === 'tracking') {
+    return null;
+  }
+  const row = await db.first<{ month: string | null }>(
+    'SELECT MIN(id) AS month FROM zero_budget_months WHERE frozen = 1',
+  );
+  return row?.month ?? null;
 }
 
 function fromDbMonth(month: number | null | undefined): string | null {
@@ -304,6 +318,26 @@ function handleCategoryMappingChange(months, oldValue, newValue) {
 function handleBudgetMonthChange(budget) {
   const sheetName = monthUtils.sheetForMonth(budget.id);
   sheet.get().set(`${sheetName}!buffered`, budget.buffered);
+  sheet.get().set(`${sheetName}!frozen`, budget.frozen === 1);
+}
+
+// Sets `__global!future-buffer-start` from the `futureBufferMode` preference
+function setFutureBufferStart(value: string | null | undefined) {
+  const startMonth = value ?? '';
+  if (
+    sheet.get().getCellValueLoose('__global', 'future-buffer-start') !==
+    startMonth
+  ) {
+    sheet.get().set(resolveName('__global', 'future-buffer-start'), startMonth);
+  }
+}
+
+// Runs on every budget open. A warm open restores the spreadsheet from its
+// cache and skips `loadUserBudgets`, so the preference is read here. Call it
+// after the months are created: setting the cell only recomputes the cells
+// that already depend on it.
+export async function loadFutureBufferStart() {
+  setFutureBufferStart(await getFutureBufferStart());
 }
 
 function handleBudgetChange(budget) {
@@ -388,6 +422,13 @@ export function triggerBudgetChanges(oldValues, newValues) {
           }
         } else if (table === 'accounts') {
           handleAccountChange(createdMonths, oldValue, newValue);
+        } else if (
+          table === 'preferences' &&
+          newValue.id === FUTURE_BUFFER_PREF
+        ) {
+          // Local and synced changes both arrive here, so another device
+          // turning the mode on or off applies without a reload
+          setFutureBufferStart(newValue.value);
         }
       });
     });
@@ -504,12 +545,7 @@ export async function createBudget(months) {
     });
 
     if (budgetType === 'envelope') {
-      envelopeBudget.createSummary(
-        groups,
-        categories,
-        prevSheetName,
-        sheetName,
-      );
+      envelopeBudget.createSummary(groups, categories, month);
     } else {
       trackingBudget.createSummary(groups, sheetName);
     }
@@ -556,7 +592,18 @@ export async function createAllBudgets() {
 
   // Get the range based off of the earliest transaction (or persistent
   // rollover) and the current month. If no transactions currently exist the
-  // current month is also used as the starting month
+  // current month is also used as the starting month. It also reaches back to
+  // automatic "For next month"'s start month, so every month it freezes
+  // has a sheet, and to the earliest frozen month, so turning the mode off
+  // doesn't drop those months from the next cold load.
+  for (const month of [
+    await getFutureBufferStart(),
+    await getEarliestFrozenMonth(),
+  ]) {
+    if (month && month < startMonth) {
+      startMonth = month;
+    }
+  }
   const { start, end, range } = getBudgetRange(
     startMonth,
     currentMonth,
@@ -568,7 +615,16 @@ export async function createAllBudgets() {
   const newMonths = range.filter(m => !createdMonths.has(m));
 
   if (newMonths.length > 0) {
-    await createBudget(range);
+    // The range can start after months already created, when the start
+    // month or the earliest transaction moves later. Keep those months in
+    // the range: the month before its first month becomes the blank sheet,
+    // and a real month there would lose its cells.
+    const firstCreated = [...createdMonths].sort()[0];
+    await createBudget(
+      firstCreated && firstCreated < start
+        ? monthUtils.rangeInclusive(firstCreated, end)
+        : range,
+    );
   }
 
   // The range only grows while the budget is open, so every created month

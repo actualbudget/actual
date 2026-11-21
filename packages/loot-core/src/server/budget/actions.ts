@@ -4,6 +4,7 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
 import { batchMessages } from '#server/sync';
+import { getForNextMonthCoverable } from '#shared/future-buffer';
 import { getLocale } from '#shared/locale';
 import * as monthUtils from '#shared/months';
 import { integerToCurrencyWithDecimal, safeNumber } from '#shared/util';
@@ -59,7 +60,27 @@ export function isTrackingBudget(): boolean {
   return val === 'tracking';
 }
 
-function dbMonth(month: string): number {
+export const FUTURE_BUFFER_PREF = 'futureBufferMode';
+
+// The month automatic mode was turned on, or empty in manual mode
+export async function getFutureBufferStart(): Promise<string> {
+  const row = await db.first<Pick<db.DbPreference, 'value'>>(
+    'SELECT value FROM preferences WHERE id = ?',
+    [FUTURE_BUFFER_PREF],
+  );
+  return row?.value ?? '';
+}
+
+// Automatic mode sets a managed month's buffer, so the manual hold controls
+// write nothing there
+function isManagedMonth(month: string): boolean {
+  const managed = sheet
+    .get()
+    .getCellValueLoose(monthUtils.sheetForMonth(month), 'buffered-managed');
+  return managed === true;
+}
+
+export function dbMonth(month: string): number {
   return parseInt(month.replace('-', ''));
 }
 
@@ -182,21 +203,46 @@ export function setGoal({ month, category, goal, long_goal }): Promise<void> {
   });
 }
 
-export function setBuffer(month: string, amount: unknown): Promise<void> {
-  const existing = db.firstSync<Pick<db.DbZeroBudget, 'id'>>(
-    `SELECT id FROM zero_budget_months WHERE id = ?`,
-    [month],
-  );
-  if (existing) {
-    return db.update('zero_budget_months', {
-      id: existing.id,
-      buffered: amount,
-    });
+export async function setBuffer(
+  month: string,
+  amount: unknown,
+  {
+    frozen,
+    overwrite = false,
+  }: {
+    frozen?: boolean;
+    // Write the amount even when it matches, so it also replaces an older
+    // hold from another device that hasn't synced here yet
+    overwrite?: boolean;
+  } = {},
+): Promise<void> {
+  const existing = db.firstSync<
+    Pick<db.DbZeroBudgetMonth, 'id' | 'buffered' | 'frozen'>
+  >(`SELECT id, buffered, frozen FROM zero_budget_months WHERE id = ?`, [
+    month,
+  ]);
+  const { buffered = 0, frozen: storedFrozen = 0 } = existing ?? {};
+
+  // Only write the columns that change, so this doesn't send a message that
+  // could overwrite another device's edit to the other column
+  const changes: Partial<db.DbZeroBudgetMonth> = {};
+  if (overwrite || amount !== buffered) {
+    changes.buffered = amount as number;
   }
-  return db.insert('zero_budget_months', { id: month, buffered: amount });
+  if (frozen !== undefined && (frozen ? 1 : 0) !== storedFrozen) {
+    changes.frozen = frozen ? 1 : 0;
+  }
+  if (Object.keys(changes).length === 0) {
+    return;
+  }
+
+  if (existing) {
+    return db.update('zero_budget_months', { id: existing.id, ...changes });
+  }
+  return db.insert('zero_budget_months', { id: month, ...changes });
 }
 
-function setCarryover(
+export function setCarryover(
   table: string,
   category: string,
   month: string,
@@ -552,6 +598,10 @@ export async function holdForNextMonth({
   month: string;
   amount: number;
 }): Promise<boolean> {
+  if (isManagedMonth(month)) {
+    return false;
+  }
+
   const row = await db.first<Pick<db.DbZeroBudgetMonth, 'buffered'>>(
     'SELECT buffered FROM zero_budget_months WHERE id = ?',
     [month],
@@ -573,8 +623,17 @@ export async function holdForNextMonth({
   return false;
 }
 
-export async function resetHold({ month }: { month: string }): Promise<void> {
+export async function resetHold({
+  month,
+}: {
+  month: string;
+}): Promise<boolean> {
+  if (isManagedMonth(month)) {
+    return false;
+  }
+
   await setBuffer(month, 0);
+  return true;
 }
 
 export async function coverOverspending({
@@ -586,16 +645,24 @@ export async function coverOverspending({
 }: {
   month: string;
   to: CategoryEntity['id'] | 'to-budget';
-  from: CategoryEntity['id'] | 'to-budget' | 'overbudgeted';
+  from: CategoryEntity['id'] | 'to-budget' | 'for-next-month' | 'overbudgeted';
   amount?: IntegerAmount;
   currencyCode: string;
 }): Promise<void> {
   const sheetName = monthUtils.sheetForMonth(month);
   const toBudgeted = await getSheetValue(sheetName, 'budget-' + to);
-  const leftoverFrom = await getSheetValue(
-    sheetName,
-    from === 'to-budget' ? 'to-budget' : 'leftover-' + from,
-  );
+  const leftoverFrom =
+    from === 'for-next-month'
+      ? getForNextMonthCoverable({
+          managed: isManagedMonth(month),
+          forNextMonth: await getSheetValue(sheetName, 'buffered-selected'),
+          balance: await getSheetValue(sheetName, 'leftover-' + to),
+          carryover: await getSheetBoolean(sheetName, 'carryover-' + to),
+        })
+      : await getSheetValue(
+          sheetName,
+          from === 'to-budget' ? 'to-budget' : 'leftover-' + from,
+        );
 
   // Cover provided amount (can be partial) or full overspending amount.
   const amountToCover = amount
@@ -611,8 +678,9 @@ export async function coverOverspending({
   const coverableAmount = Math.min(Math.abs(amountToCover), leftoverFrom);
 
   await batchMessages(async () => {
-    // If we are covering it from the to be budgeted amount, ignore this
-    if (from !== 'to-budget') {
+    // To Budget and "For next month" aren't categories, so there's no
+    // budget to take it from
+    if (from !== 'to-budget' && from !== 'for-next-month') {
       const fromBudgeted = await getSheetValue(sheetName, 'budget-' + from);
       await setBudget({
         category: from,
@@ -796,7 +864,7 @@ async function addMovementNotes({
   month: string;
   amount: number;
   to: CategoryEntity['id'] | 'to-budget' | 'overbudgeted';
-  from: CategoryEntity['id'] | 'to-budget';
+  from: CategoryEntity['id'] | 'to-budget' | 'for-next-month';
   currencyCode: string;
 }) {
   const displayAmount = integerToCurrencyWithDecimal(amount, currencyCode);
@@ -816,13 +884,17 @@ async function addMovementNotes({
     locale,
   );
   const categories = await db.getCategories(
-    [from, to].filter(c => c !== 'to-budget' && c !== 'overbudgeted'),
+    [from, to].filter(
+      c => c !== 'to-budget' && c !== 'for-next-month' && c !== 'overbudgeted',
+    ),
   );
 
   const fromCategoryName =
     from === 'to-budget'
       ? 'To Budget'
-      : categories.find(c => c.id === from)?.name;
+      : from === 'for-next-month'
+        ? 'For next month'
+        : categories.find(c => c.id === from)?.name;
 
   const toCategoryName =
     to === 'to-budget'
@@ -843,7 +915,11 @@ export async function resetIncomeCarryover({
   month,
 }: {
   month: string;
-}): Promise<void> {
+}): Promise<boolean> {
+  if (isManagedMonth(month)) {
+    return false;
+  }
+
   const table = getBudgetTable();
   const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE is_income = 1 AND tombstone = 0',
@@ -872,4 +948,5 @@ export async function resetIncomeCarryover({
       await setCarryover(table, category.id, dbMonth(month).toString(), false);
     }
   });
+  return true;
 }

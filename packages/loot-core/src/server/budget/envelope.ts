@@ -93,12 +93,16 @@ export function createCategoryGroup(group, sheetName) {
   }
 }
 
-export function createSummary(groups, categories, prevSheetName, sheetName) {
+export function createSummary(groups, categories, month) {
   const incomeGroup = groups.filter(group => group.is_income)[0];
   const expenseCategories = categories.filter(cat => !cat.is_income);
   const incomeCategories = categories.filter(cat => cat.is_income);
+  const sheetName = monthUtils.sheetForMonth(month);
+  const prevSheetName = monthUtils.sheetForMonth(monthUtils.prevMonth(month));
+  const nextSheetName = monthUtils.sheetForMonth(monthUtils.nextMonth(month));
 
   sheet.get().createStatic(sheetName, 'buffered', 0);
+  sheet.get().createStatic(sheetName, 'frozen', false);
 
   sheet.get().createDynamic(sheetName, 'from-last-month', {
     initialValue: 0,
@@ -177,10 +181,58 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
       );
     },
   });
+  sheet.get().createDynamic(sheetName, 'frozen', { initialValue: false });
+
+  // What the months after this one need from it: what's budgeted in the next
+  // month, less its income, plus overspending that reaches it, plus what the
+  // next month needs in turn. The last created month's next sheet doesn't
+  // exist, so its inputs read as 0. These forward references only work
+  // because every input is a dynamic cell.
+  sheet.get().createDynamic(sheetName, 'buffered-computed', {
+    initialValue: 0,
+    dependencies: [
+      `${nextSheetName}!total-income`,
+      `${nextSheetName}!last-month-overspent`,
+      `${nextSheetName}!total-budgeted`,
+      `${nextSheetName}!buffered-computed`,
+    ],
+    run: (income, lastOverspent, totalBudgeted, nextBuffered) => {
+      return safeNumber(
+        Math.max(
+          0,
+          -(number(income) + number(lastOverspent) + number(totalBudgeted)) +
+            number(nextBuffered),
+        ),
+      );
+    },
+  });
+
+  // Automatic mode manages the months from its start month on, until
+  // they're frozen. The UI and the server guards read this cell too.
+  sheet.get().createDynamic(sheetName, 'buffered-managed', {
+    initialValue: false,
+    dependencies: [`${sheetName}!frozen`, '__global!future-buffer-start'],
+    run: (frozen, startMonth) =>
+      !frozen && Boolean(startMonth) && month >= startMonth,
+  });
+
+  // A frozen month keeps its stored buffer and ignores income auto-hold
   sheet.get().createDynamic(sheetName, 'buffered-selected', {
     initialValue: 0,
-    dependencies: [`${sheetName}!buffered`, `${sheetName}!buffered-auto`],
-    run: (man, auto) => {
+    dependencies: [
+      `${sheetName}!buffered`,
+      `${sheetName}!buffered-auto`,
+      `${sheetName}!frozen`,
+      `${sheetName}!buffered-computed`,
+      `${sheetName}!buffered-managed`,
+    ],
+    run: (man, auto, frozen, computed, managed) => {
+      if (managed) {
+        return computed;
+      }
+      if (frozen) {
+        return number(man);
+      }
       if (man !== 0) {
         return man;
       }

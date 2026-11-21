@@ -26,13 +26,15 @@ export function useSheetValue<
   binding: Binding<SheetName, FieldName>,
   onChange?: (result: SheetValueResult<SheetName, FieldName>) => void,
 ): SheetValueResult<SheetName, FieldName>['value'] {
-  const { sheetName, fullSheetName } = useSheetName(binding);
+  const { sheetName, bindingName, fullSheetName } = useSheetName(binding);
 
+  // A binding may name its sheet (`__global!name`); `useSheetName` has split
+  // it, so observe the cell under that sheet rather than the current one.
   const memoizedBinding = useMemoizedBinding(
     () =>
       typeof binding === 'string'
-        ? { name: binding, value: undefined, query: undefined }
-        : binding,
+        ? { name: bindingName as FieldName, value: undefined, query: undefined }
+        : { ...binding, name: bindingName as FieldName },
     binding,
   );
 

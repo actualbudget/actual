@@ -227,6 +227,8 @@ export type DbReflectBudget = {
 export type DbZeroBudgetMonth = {
   id: string;
   buffered: number;
+  // 1 once the month's buffer is fixed. It never goes back to 0.
+  frozen: 1 | 0;
 };
 
 export type DbZeroBudget = {

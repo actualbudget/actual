@@ -1,18 +1,19 @@
 import * as asyncStorage from '#platform/server/asyncStorage';
 import * as fs from '#platform/server/fs';
 import { createApp } from '#server/app';
+import { turnOffFutureBuffer } from '#server/budget/future-buffer-mode';
 import * as db from '#server/db';
 import { PostError } from '#server/errors';
 import { resetFormulaPreferencesCache } from '#server/formulas/bootstrap';
 import { getDefaultDocumentDir } from '#server/main';
-import { mutator } from '#server/mutators';
+import { mutator, withMutatorContext } from '#server/mutators';
 import { post } from '#server/post';
 import {
   getPrefs as _getMetadataPrefs,
   savePrefs as _saveMetadataPrefs,
 } from '#server/prefs';
 import { getServer } from '#server/server-config';
-import { undoable } from '#server/undo';
+import { clearUndo, undoable } from '#server/undo';
 import { stringToInteger } from '#shared/util';
 import type { GlobalPrefs, MetadataPrefs, SyncedPrefs } from '#types/prefs';
 
@@ -53,6 +54,19 @@ async function saveSyncedPrefs({
 }) {
   if (!id) {
     return;
+  }
+
+  // Tracking budgets have no automatic "For next month", so turn it off
+  // while the envelope figures are still there to keep. That can't be
+  // undone, so it runs outside this action's undo entry.
+  if (id === 'budgetType' && value === 'tracking') {
+    const turnedOff = await withMutatorContext(
+      { undoListening: false },
+      turnOffFutureBuffer,
+    );
+    if (turnedOff) {
+      clearUndo();
+    }
   }
 
   await db.update('preferences', {

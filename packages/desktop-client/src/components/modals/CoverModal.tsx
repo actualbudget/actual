@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -15,7 +21,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { FieldLabel, TapField } from '#components/mobile/MobileForms';
 import { AmountInput } from '#components/util/AmountInput';
 import { useCategories } from '#hooks/useCategories';
-import { useInitialMount } from '#hooks/useInitialMount';
+import { useForNextMonthCoverable } from '#hooks/useForNextMonthCoverable';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
@@ -36,10 +42,11 @@ export function CoverModal({
 
   const { data: { grouped: originalCategoryGroups } = { grouped: [] } } =
     useCategories();
+  const forNextMonth = useForNextMonthCoverable(categoryId);
   const [categoryGroups, categories] = useMemo(() => {
     const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
     const categoryGroups = showToBeBudgeted
-      ? addToBeBudgetedGroup(expenseGroups)
+      ? addToBeBudgetedGroup(expenseGroups, forNextMonth)
       : expenseGroups;
     const filteredCategoryGroups = categoryId
       ? removeCategoriesFromGroups(categoryGroups, categoryId)
@@ -48,7 +55,7 @@ export function CoverModal({
       g => g.categories || [],
     );
     return [filteredCategoryGroups, filteredCategoryies];
-  }, [categoryId, originalCategoryGroups, showToBeBudgeted]);
+  }, [categoryId, originalCategoryGroups, showToBeBudgeted, forNextMonth]);
 
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
@@ -81,12 +88,15 @@ export function CoverModal({
     }
   };
 
-  const isInitialMount = useInitialMount();
+  // The picker gets a copy of the groups, so wait until the "For next
+  // month" row can be worked out before opening it
+  const hasOpenedPicker = useRef(false);
   useEffect(() => {
-    if (isInitialMount) {
+    if (!hasOpenedPicker.current && forNextMonth != null) {
+      hasOpenedPicker.current = true;
       openCategoryModal();
     }
-  }, [isInitialMount, openCategoryModal]);
+  }, [forNextMonth, openCategoryModal]);
 
   return (
     <Modal name="cover">

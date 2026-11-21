@@ -15,6 +15,7 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
+import { getCoverSourceName } from '#components/budget/util';
 import { useCategoriesById } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
@@ -335,11 +336,13 @@ export function ExpenseCategoryListItem({
               dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
               showUndoNotification({
                 message: t(
-                  `Covered {{amount}} {{toCategoryName}} overspending from {{fromCategoryName}}.`,
+                  `Covered {{toCategoryName}} overspending from {{fromCategoryName}}.`,
                   {
-                    amount: format(amount, 'financial'),
                     toCategoryName: category.name,
-                    fromCategoryName: categoriesById[fromCategoryId].name,
+                    fromCategoryName: getCoverSourceName(
+                      fromCategoryId,
+                      categoriesById,
+                    ),
                   },
                 ),
               });

@@ -1,12 +1,14 @@
+import { captureException } from '#platform/exceptions';
 import { createApp } from '#server/app';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { APIError } from '#server/errors';
 import { categoryGroupModel, categoryModel } from '#server/models';
-import { mutator } from '#server/mutators';
+import { mutator, runMutator } from '#server/mutators';
+import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
-import { batchMessages } from '#server/sync';
+import { batchMessages, checkSyncingMode } from '#server/sync';
 import { undoable } from '#server/undo';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
@@ -17,6 +19,8 @@ import * as budget from './base';
 import * as cleanupGroupActions from './cleanup-groups';
 import * as cleanupActions from './cleanup-template';
 import { storeNoteCleanups } from './cleanup-template-notes';
+import { freezeClosedMonths } from './freeze';
+import { setFutureBufferMode } from './future-buffer-mode';
 import * as goalActions from './goal-template';
 import { sortCategories } from './sort-categories';
 import * as goalNoteActions from './template-notes';
@@ -45,6 +49,7 @@ export type BudgetHandlers = {
   'budget/copy-until-year-end': typeof actions.copyUntilYearEnd;
   'budget/set-carryover': typeof actions.setCategoryCarryover;
   'budget/reset-income-carryover': typeof actions.resetIncomeCarryover;
+  'budget/set-future-buffer-mode': typeof setFutureBufferMode;
   'get-categories': typeof getCategories;
   'get-budget-bounds': typeof getBudgetBounds;
   'envelope-budget-month': typeof envelopeBudgetMonth;
@@ -142,6 +147,8 @@ app.method(
   'budget/reset-income-carryover',
   mutator(undoable(actions.resetIncomeCarryover)),
 );
+// Not undoable: see setFutureBufferMode
+app.method('budget/set-future-buffer-mode', mutator(setFutureBufferMode));
 app.method('get-categories', getCategories);
 app.method('get-budget-bounds', getBudgetBounds);
 app.method('envelope-budget-month', envelopeBudgetMonth);
@@ -181,6 +188,82 @@ app.method(
   mutator(undoable(cleanupGroupActions.createCleanupGroup)),
 );
 
+function openFile(): string | null {
+  const current = prefs.getPrefs();
+  return current && db.getDatabase()
+    ? `${current.id}/${current.groupId}`
+    : null;
+}
+
+type Spreadsheet = ReturnType<typeof sheet.get>;
+
+// Every load creates a new spreadsheet, so with the file it identifies the
+// load a sync started for. A reopened file waits for its own sync.
+let syncStartedFor: string | null = null;
+let syncStartedSpreadsheet: Spreadsheet | null = null;
+// The spreadsheet whose full sync has completed
+let syncedSpreadsheet: Spreadsheet | null = null;
+
+// With a sync server, freeze only after a full sync has pulled in
+// every other device's rows. Some syncs report success without fetching the
+// open file's rows: an offline sync, and one whose file or group changed
+// mid-request.
+app.events.on('sync', ({ type }) => {
+  if (type === 'start') {
+    syncStartedFor = openFile();
+    syncStartedSpreadsheet = sheet.get() ?? null;
+    return;
+  }
+
+  const file = openFile();
+  const spreadsheet = syncStartedSpreadsheet;
+  if (
+    type === 'success' &&
+    file != null &&
+    file === syncStartedFor &&
+    spreadsheet != null &&
+    spreadsheet === sheet.get() &&
+    checkSyncingMode('enabled') &&
+    !checkSyncingMode('offline')
+  ) {
+    syncedSpreadsheet = spreadsheet;
+    runMutator(async () => {
+      if (openFile() === file && sheet.get() === spreadsheet) {
+        await freezeClosedMonths();
+      }
+    }).catch(captureException);
+  }
+});
+
+app.events.on('load-budget', () => {
+  queueFreeze();
+});
+
+// A file that was never uploaded has no sync group, so it never fully syncs
+function canFreeze(): boolean {
+  const spreadsheet = sheet.get();
+  return (
+    spreadsheet != null &&
+    (checkSyncingMode('disabled') ||
+      !prefs.getPrefs()?.groupId ||
+      spreadsheet === syncedSpreadsheet)
+  );
+}
+
+// Queued behind any running mutator rather than awaited, because
+// `get-budget-bounds` is also called from inside API mutators. The check
+// runs again when it starts, in case the file was reopened in between.
+function queueFreeze() {
+  if (!canFreeze()) {
+    return;
+  }
+  void runMutator(async () => {
+    if (canFreeze()) {
+      await freezeClosedMonths();
+    }
+  }).catch(captureException);
+}
+
 // Server must return AQL entities not the raw DB data
 async function getCategories({ hidden }: { hidden?: boolean } = {}) {
   const categoryGroups = await getCategoryGroups({ hidden });
@@ -203,7 +286,9 @@ async function getCategories({ hidden }: { hidden?: boolean } = {}) {
 }
 
 async function getBudgetBounds() {
-  return await budget.createAllBudgets();
+  const bounds = await budget.createAllBudgets();
+  queueFreeze();
+  return bounds;
 }
 
 async function envelopeBudgetMonth({ month }: { month: string }) {
@@ -219,6 +304,9 @@ async function envelopeBudgetMonth({ month }: { month: string }) {
     value('available-funds'),
     value('last-month-overspent'),
     value('buffered'),
+    value('buffered-selected'),
+    value('frozen'),
+    value('buffered-managed'),
     value('total-budgeted'),
     value('to-budget'),
 

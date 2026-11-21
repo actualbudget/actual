@@ -49,6 +49,7 @@ import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuMo
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeIncomeBalanceMenuModal } from './modals/EnvelopeIncomeBalanceMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
+import { FutureBufferModeModal } from './modals/FutureBufferModeModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
@@ -356,6 +357,18 @@ export function Modals() {
             </SheetNameProvider>
           );
 
+        case 'future-buffer-mode':
+          // `useFutureBufferMode` also reads month cells, so it needs a
+          // month's sheet even though the picker only uses the mode
+          return (
+            <SheetNameProvider
+              key={key}
+              name={monthUtils.sheetForMonth(monthUtils.currentMonth())}
+            >
+              <FutureBufferModeModal />
+            </SheetNameProvider>
+          );
+
         case 'tracking-balance-menu':
           return (
             <SheetNameProvider
@@ -370,7 +383,14 @@ export function Modals() {
           return <TransferModal key={key} {...modal.options} />;
 
         case 'cover':
-          return <CoverModal key={key} {...modal.options} />;
+          return (
+            <SheetNameProvider
+              key={key}
+              name={monthUtils.sheetForMonth(modal.options.month)}
+            >
+              <CoverModal {...modal.options} />
+            </SheetNameProvider>
+          );
 
         case 'scheduled-transaction-menu':
           return <ScheduledTransactionMenuModal key={key} {...modal.options} />;
