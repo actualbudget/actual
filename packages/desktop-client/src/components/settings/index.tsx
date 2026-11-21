@@ -27,8 +27,10 @@ import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { loadPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
+import { isAppLockSupported } from '#util/appLock';
 
 import { ApiKeys } from './ApiKeys';
+import { AppLockSettings } from './AppLockSettings';
 import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
@@ -280,6 +282,8 @@ export function GeneralSettings() {
   const [fileId] = useMetadataPref('cloudFileId');
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
   const serverURL = useServerURL();
+  const isAppLockVisible =
+    useFeatureFlag('iosAppFeatures') && isAppLockSupported();
 
   return (
     <SettingsSections title={t('General')}>
@@ -292,11 +296,14 @@ export function GeneralSettings() {
       <SettingsGroup title={t('Budget')}>
         <BudgetTypeSettings />
       </SettingsGroup>
-      {serverURL && (
+      {(serverURL || isAppLockVisible) && (
         <SettingsGroup title={t('Security')}>
+          {isAppLockVisible && <AppLockSettings />}
           <AuthSettings />
           <EncryptionSettings />
-          {fileId && <ApiKeys key={`${serverURL}:${fileId}`} fileId={fileId} />}
+          {serverURL && fileId && (
+            <ApiKeys key={`${serverURL}:${fileId}`} fileId={fileId} />
+          )}
         </SettingsGroup>
       )}
       <SettingsGroup title={t('Data')}>

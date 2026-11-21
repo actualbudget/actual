@@ -6,6 +6,7 @@ import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { isElectron } from '@actual-app/core/shared/environment';
+import { isIOS, isNativeMobileApp } from '@actual-app/core/shared/platform';
 import type { FeatureFlag, ServerPrefs } from '@actual-app/core/types/prefs';
 
 import { useAuth } from '#auth/AuthProvider';
@@ -283,6 +284,11 @@ export function ExperimentalFeatures() {
           feedbackLink="https://github.com/actualbudget/actual/issues/7799"
         >
           <Trans>Enable Banking sync (EU banks)</Trans>
+        </FeatureToggle>
+      )}
+      {isNativeMobileApp && isIOS && (
+        <FeatureToggle flag="iosAppFeatures">
+          <Trans>iOS app features (app lock)</Trans>
         </FeatureToggle>
       )}
       {showServerPrefs && (

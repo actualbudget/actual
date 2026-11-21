@@ -35,6 +35,8 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Face ID is used to unlock the app when you turn on the app lock.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to suggest nearby payees when you add a transaction.</string>
 	<key>UIApplicationSceneManifest</key>
