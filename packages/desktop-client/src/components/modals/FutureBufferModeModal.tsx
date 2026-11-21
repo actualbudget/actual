@@ -54,16 +54,14 @@ export function FutureBufferModeModal() {
               label={t('Manual')}
               onPress={() => setChoice('manual')}
             >
-              <Trans>
-                You hold money for next month yourself, from the To Budget menu.
-              </Trans>
+              <Trans>Choose how much to hold using the To Budget menu.</Trans>
             </ModeChoice>
             <ModeChoice
               isSelected={selectedMode === 'automatic'}
               label={t('Automatic')}
               onPress={() => setChoice('automatic')}
             >
-              <Trans>Money you budget in future months is held for you.</Trans>
+              <Trans>Holds what you budget in future months.</Trans>
             </ModeChoice>
 
             <ModalButtons>
