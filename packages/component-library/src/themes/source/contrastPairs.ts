@@ -33,6 +33,23 @@ function secondary(
 }
 
 export const contrastPairs: ContrastPair[] = [
+  text('pageTextPositive', 'datePickerRangeBackground'),
+  text('calendarItemText', 'calendarSelectedBackground'),
+  text('formLabelText', 'errorBackground'),
+  text('formLabelText', 'warningBackground'),
+  text(
+    'settingsNavItemTextSelected',
+    'settingsNavItemBackgroundSelected',
+    'pageBackground',
+  ),
+  text('accentContrast', 'accent'),
+  text('accentContrast', 'accentHover'),
+  text('accentText', 'pageBackground'),
+  text('accentText', 'tableBackground'),
+  text('accentSubtleText', 'accentSubtle'),
+  text('tableRowBackgroundHighlightText', 'tableRowBackgroundHighlight'),
+  text('checkboxText', 'checkboxBackgroundSelected'),
+
   text('pageText', 'pageBackground'),
   text('pageText', 'tableBackground'),
   text('pageText', 'cardBackground'),
