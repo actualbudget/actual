@@ -120,6 +120,7 @@ export function transactionsSearch(
       'payee.name': { $like: `%${escapedSearch}%` },
       'payee.transfer_acct.name': { $like: `%${escapedSearch}%` },
       notes: { $like: `%${escapedSearch}%` },
+      number: { $like: `%${escapedSearch}%` },
       'category.name': { $like: `%${escapedSearch}%` },
       'account.name': { $like: `%${escapedSearch}%` },
       $or: [

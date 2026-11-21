@@ -61,6 +61,8 @@ export function mapField(field, opts?) {
       return t('category group');
     case 'notes':
       return t('notes');
+    case 'number':
+      return t('number');
     case 'payee':
       return t('payee');
     case 'saved':

@@ -40,6 +40,7 @@ Conditions can use the following fields:
 - category
 - date
 - notes
+- number
 - amount
 - amount (inflow)
 - amount (outflow)
@@ -58,6 +59,7 @@ Actions can set the following fields:
 - category
 - payee
 - notes
+- number
 - cleared
 - account
 - date

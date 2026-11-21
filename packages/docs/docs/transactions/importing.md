@@ -14,6 +14,8 @@ A quick way to import transactions is to login to your bank's website and downlo
 
 Actual supports importing CSV, QIF, OFX, QFX and CAMT files. Your bank probably allows you to download one of these formats (OFX/QFX is recommended).
 
+Check numbers in QIF, OFX, QFX and CAMT files are imported into the transaction's "Number" field.
+
 1. Open the account you want to import transactions into.
 2. Press the **Import** button and select the file.
 
@@ -26,6 +28,7 @@ If your bank doesn't support downloading financial files, you can import a CSV f
 3. Select the **CSV** option.
 4. Set up the fields to match the CSV file.
    - For the "CSV Fields" dropdowns, leave them as "Choose field…" to leave the related field blank. Otherwise select the column from your CSV that corresponds to each field.
+   - The "Number" field is selected automatically when your CSV has a column named exactly `Num`, `Number` or `Check`.
    - If the date is not being imported correctly (the green date is how Actual interprets the date), you can change the date format to match your CSV file. If your date format is not shown in the dropdown, check that the date column is correctly selected from your CSV file.
    - If the file can't be imported at all, try changing the CSV delimiter to match your file. (Let us know if your file uses a different delimiter that isn't listed!)
    - You can optionally toggle on "Flip amount" if you want to negate all of the amounts in the CSV file.
