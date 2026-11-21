@@ -20,6 +20,8 @@ import { useDrag } from '@use-gesture/react';
 
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useScrollListener } from '#hooks/useScrollListener';
+import { setNotificationInset } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 const COLUMN_COUNT = 3;
 const ROW_COUNT = 2;
@@ -29,6 +31,7 @@ const TOTAL_HEIGHT = ROW_HEIGHT * ROW_COUNT;
 const OPEN_FULL_Y = 1;
 const OPEN_DEFAULT_Y = TOTAL_HEIGHT - ROW_HEIGHT;
 const HIDDEN_Y = TOTAL_HEIGHT;
+const NOTIFICATION_GAP = 15;
 
 export const MOBILE_NAV_HEIGHT = ROW_HEIGHT + PILL_HEIGHT;
 
@@ -36,6 +39,7 @@ export function MobileNavTabs() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const isTestEnv = useIsTestEnv();
+  const dispatch = useDispatch();
   const [navbarState, setNavbarState] = useState<'default' | 'open' | 'hidden'>(
     'default',
   );
@@ -94,6 +98,29 @@ export function MobileNavTabs() {
   useEffect(() => {
     openDefault();
   }, [pathname, openDefault]);
+
+  useEffect(() => {
+    if (!isNarrowWidth) {
+      return;
+    }
+
+    const navHeight =
+      navbarState === 'open'
+        ? TOTAL_HEIGHT + PILL_HEIGHT
+        : navbarState === 'hidden'
+          ? PILL_HEIGHT
+          : MOBILE_NAV_HEIGHT;
+
+    dispatch(
+      setNotificationInset({
+        inset: { bottom: navHeight + NOTIFICATION_GAP },
+      }),
+    );
+
+    return () => {
+      dispatch(setNotificationInset(null));
+    };
+  }, [dispatch, isNarrowWidth, navbarState]);
 
   const navTabs = [
     {
