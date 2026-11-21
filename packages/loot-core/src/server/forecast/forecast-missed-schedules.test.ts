@@ -7,7 +7,7 @@ import {
   createSchedule as createScheduleBase,
   skipNextDate,
 } from '#server/schedules/app';
-import { loadRules } from '#server/transactions/transaction-rules';
+import { insertRule, loadRules } from '#server/transactions/transaction-rules';
 import type { RuleConditionEntity } from '#types/models';
 
 import { generateForecast } from './app';
@@ -179,7 +179,23 @@ describe('missed schedules in forecasts', () => {
       amount: -250,
       payee: transferPayee,
     });
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [
+        { op: 'is', field: 'account', value: savings },
+        { op: 'is', field: 'date', value: '2024-03-15' },
+      ],
+      actions: [{ op: 'set', field: 'date', value: '2024-05-25' }],
+    });
+    await loadRules();
     MockDate.set(new Date(2024, 4, 20, 12));
+
+    const excluded = await forecast({ accountIds: [checking, savings] });
+    expect(excluded.byAccountAndDate.get('savings:2024-05-25')).toMatchObject({
+      balance: 250,
+      transactions: [{ amount: 250, isTransfer: true }],
+    });
 
     const combined = await forecast({
       accountIds: [checking, savings],

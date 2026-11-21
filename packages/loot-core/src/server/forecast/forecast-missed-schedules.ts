@@ -120,14 +120,12 @@ export function settleMissedScheduleOccurrences({
     ) {
       return occurrence;
     }
-    // Keep a later date a rule already assigned; otherwise settle today.
-    const date =
-      occurrence.transaction.date < today ? today : occurrence.transaction.date;
+    // Apply the settlement date to both legs, even if a rule moved one of them.
     return {
       ...occurrence,
       isMissed: true,
-      transaction: { ...occurrence.transaction, date },
-      filterObject: { ...occurrence.filterObject, date },
+      transaction: { ...occurrence.transaction, date: today },
+      filterObject: { ...occurrence.filterObject, date: today },
     };
   });
 }
