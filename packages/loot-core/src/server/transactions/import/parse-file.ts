@@ -7,6 +7,7 @@ import { looselyParseAmount } from '#shared/util';
 
 import { ofx2json } from './ofx2json';
 import { qif2json } from './qif2json';
+import { xlsx2csv } from './xlsx2csv';
 import { xmlCAMT2json } from './xmlcamt2json';
 
 /**
@@ -122,6 +123,8 @@ export async function parseFile(
       case '.csv':
       case '.tsv':
         return parseCSV(filepath, options);
+      case '.xlsx':
+        return parseXLSX(filepath, options);
       case '.ofx':
       case '.qfx':
         return parseOFX(filepath, options);
@@ -156,6 +159,35 @@ async function parseCSV(
     return { errors, transactions: [] };
   }
 
+  return parseCSVContents(contents, options);
+}
+
+async function parseXLSX(
+  filepath: string,
+  options: ParseFileOptions,
+): Promise<ParseFileResult> {
+  const bytes = await fs.readFile(filepath, 'binary');
+
+  let contents: string;
+  try {
+    contents = await xlsx2csv(bytes);
+  } catch (err) {
+    return {
+      errors: [
+        { message: 'Failed parsing: ' + err.message, internal: err.stack },
+      ],
+      transactions: [],
+    };
+  }
+
+  return parseCSVContents(contents, { ...options, delimiter: ',' });
+}
+
+function parseCSVContents(
+  contents: string,
+  options: ParseFileOptions,
+): ParseFileResult {
+  const errors = Array<ParseError>();
   const skipStart = Math.max(0, options.skipStartLines || 0);
   const skipEnd = Math.max(0, options.skipEndLines || 0);
 
