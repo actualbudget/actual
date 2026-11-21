@@ -24,6 +24,10 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import type { ParseFileOptions } from '@actual-app/core/server/transactions/import/parse-file';
+import type {
+  XlsxImportMetadata,
+  XlsxImportOptions,
+} from '@actual-app/core/server/transactions/import/xlsx';
 import { amountToInteger } from '@actual-app/core/shared/util';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -56,6 +60,7 @@ import {
   parseDate,
   stripCsvImportTransaction,
 } from './utils';
+import { XlsxOptions } from './XlsxOptions';
 
 function CheckboxToggle({
   id,
@@ -182,6 +187,9 @@ const parseOptionKeys = [
   'skipStartLines',
   'skipEndLines',
   'importNotes',
+  'worksheet',
+  'headerRow',
+  'detectHeader',
 ] satisfies Array<keyof ParseFileOptions>;
 
 export function shouldPreserveImportSettingsForParse(
@@ -191,11 +199,11 @@ export function shouldPreserveImportSettingsForParse(
   options: ParseFileOptions,
 ) {
   return (
-    fileType === 'csv' &&
+    isTabularFile(fileType) &&
     lastParse?.filename === filename &&
     lastParse.fileType === fileType &&
     parseOptionKeys.every(key =>
-      key === 'skipEndLines'
+      key === 'skipEndLines' && fileType === 'csv'
         ? lastParse.options[key] !== options[key]
         : lastParse.options[key] === options[key],
     )
@@ -222,11 +230,20 @@ export function ImportTransactionsModal({
     message: string;
   } | null>(null);
   const [filename, setFilename] = useState(originalFileName);
+  const [fileSelectionVersion, setFileSelectionVersion] = useState(0);
   const [transactions, setTransactions] = useState<ImportTransaction[]>([]);
   const [parsedTransactions, setParsedTransactions] = useState<
     ImportTransaction[]
   >([]);
   const [filetype, setFileType] = useState('unknown');
+  const [xlsxOptions, setXlsxOptions] = useState<XlsxImportOptions>({
+    detectHeader: true,
+  });
+  const [xlsxMetadata, setXlsxMetadata] = useState<XlsxImportMetadata | null>(
+    null,
+  );
+  const parseRequestRef = useRef(0);
+  const previewRequestRef = useRef(0);
   const [fieldMappings, setFieldMappings] = useState<FieldMapping | null>(null);
   const [splitMode, setSplitMode] = useState(false);
   const [flipAmount, setFlipAmount] = useState(false);
@@ -259,7 +276,8 @@ export function ImportTransactionsModal({
     prefs[`csv-out-value-${accountId}`] ?? '',
   );
   const [hasHeaderRow, setHasHeaderRow] = useState(
-    String(prefs[`csv-has-header-${accountId}`]) !== 'false',
+    getFileType(originalFileName) === 'xlsx' ||
+      String(prefs[`csv-has-header-${accountId}`]) !== 'false',
   );
   const [fallbackMissingPayeeToMemo, setFallbackMissingPayeeToMemo] = useState(
     String(prefs[`ofx-fallback-missing-payee-${accountId}`]) !== 'false',
@@ -382,19 +400,26 @@ export function ImportTransactionsModal({
       options: ParseFileOptions,
       { preserveImportSettings = false } = {},
     ) => {
+      const request = ++parseRequestRef.current;
+      previewRequestRef.current++;
+      setTransactions([]);
       setLoadingState('parsing');
 
       const filetype = getFileType(filename);
       setFilename(filename);
       setFileType(filetype);
 
-      const { errors, transactions: parsedTransactions = [] } = await send(
-        'transactions-parse-file',
-        {
-          filepath: filename,
-          options,
-        },
-      );
+      const {
+        errors,
+        transactions: parsedTransactions = [],
+        xlsx,
+      } = await send('transactions-parse-file', {
+        filepath: filename,
+        options,
+      });
+
+      if (request !== parseRequestRef.current) return;
+      setXlsxMetadata(xlsx ?? null);
 
       let index = 0;
       const transactions = parsedTransactions.map(trans => {
@@ -411,6 +436,7 @@ export function ImportTransactionsModal({
 
       /// Do fine grained reporting between the old and new OFX importers.
       if (errors.length > 0) {
+        setParsedTransactions([]);
         setError({
           parsed: true,
           message: errors[0].message || 'Internal error',
@@ -418,16 +444,17 @@ export function ImportTransactionsModal({
       } else {
         if (
           !preserveImportSettings &&
-          (filetype === 'csv' || filetype === 'qif')
+          (isTabularFile(filetype) || filetype === 'qif')
         ) {
           const flipAmount =
             String(prefs[`flip-amount-${accountId}-${filetype}`]) === 'true';
           setFlipAmount(flipAmount);
         }
 
-        if (filetype === 'csv') {
+        if (isTabularFile(filetype)) {
           if (!preserveImportSettings) {
-            let mappings = prefs[`csv-mappings-${accountId}`];
+            let mappings =
+              filetype === 'xlsx' ? null : prefs[`csv-mappings-${accountId}`];
             mappings = mappings
               ? JSON.parse(mappings)
               : getInitialMappings(transactions);
@@ -480,6 +507,7 @@ export function ImportTransactionsModal({
   useEffect(() => {
     const fileType = getFileType(filename);
     const parseOptions = getParseOptions(fileType, {
+      ...xlsxOptions,
       delimiter,
       encoding: csvEncoding,
       hasHeaderRow,
@@ -513,6 +541,8 @@ export function ImportTransactionsModal({
     });
   }, [
     filename,
+    fileSelectionVersion,
+    xlsxOptions,
     delimiter,
     csvEncoding,
     hasHeaderRow,
@@ -557,37 +587,18 @@ export function ImportTransactionsModal({
       filters: [
         {
           name: 'Financial Files',
-          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
+          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml', 'xlsx'],
         },
       ],
     });
 
-    if (res?.[0]) {
-      const nextFilename = res[0];
-      if (nextFilename === filename) {
-        const fileType = getFileType(nextFilename);
-        const options = getParseOptions(fileType, {
-          delimiter,
-          encoding: csvEncoding,
-          hasHeaderRow,
-          skipStartLines,
-          skipEndLines,
-          fallbackMissingPayeeToMemo,
-          importNotes,
-          swapPayeeAndMemo: getSwapOption(
-            fileType,
-            ofxSwapPayeeAndMemo,
-            qifSwapPayeeAndMemo,
-            camtSwapPayeeAndMemo,
-          ),
-        });
-        void parse(nextFilename, options, {
-          preserveImportSettings: false,
-        });
-      } else {
-        setFilename(nextFilename);
-      }
-    }
+    if (!res?.[0]) return;
+    if (getFileType(res[0]) === 'xlsx') setHasHeaderRow(true);
+    setXlsxOptions({ detectHeader: true });
+    setXlsxMetadata(null);
+    lastParseRef.current = null;
+    setFilename(res[0]);
+    setFileSelectionVersion(version => version + 1);
   }
 
   function onUpdateFields(field, name) {
@@ -764,7 +775,7 @@ export function ImportTransactionsModal({
       savePrefs({ [`csv-out-value-${accountId}`]: String(outValue) });
     }
 
-    if (filetype === 'csv' || filetype === 'qif') {
+    if (isTabularFile(filetype) || filetype === 'qif') {
       savePrefs({
         [`flip-amount-${accountId}-${filetype}`]: String(flipAmount),
         [`import-notes-${accountId}-${filetype}`]: String(importNotes),
@@ -813,6 +824,7 @@ export function ImportTransactionsModal({
   const importPreviewTransactions = useImportPreviewTransactionsMutation();
 
   const onImportPreview = useEffectEvent(async () => {
+    const request = ++previewRequestRef.current;
     // Filter by start date before preview and deduplication
     const isPreParsed = isOfxFile(filetype) || isCamtFile(filetype);
     const filteredTransactions = filterByStartDate(
@@ -836,6 +848,8 @@ export function ImportTransactionsModal({
       multiplierAmount,
     );
 
+    if (request !== previewRequestRef.current) return;
+
     // Retreive the transactions that would be updated (along with the existing trx)
     importPreviewTransactions.mutate(
       {
@@ -845,6 +859,7 @@ export function ImportTransactionsModal({
       },
       {
         onSuccess: previewTrx => {
+          if (request !== previewRequestRef.current) return;
           const matchedUpdateMap = previewTrx.reduce((map, entry) => {
             // @ts-expect-error - entry.transaction might not have trx_id property
             map[entry.transaction.trx_id] = entry;
@@ -898,13 +913,15 @@ export function ImportTransactionsModal({
 
   useEffect(() => {
     if (parsedTransactions.length === 0 || loadingState === 'parsing') {
+      previewRequestRef.current++;
+      setTransactions([]);
       return;
     }
 
     void onImportPreview();
   }, [
     loadingState,
-    parsedTransactions.length,
+    parsedTransactions,
     startDate,
     fieldMappings,
     parseDateFormat,
@@ -1007,7 +1024,7 @@ export function ImportTransactionsModal({
                     <Transaction
                       transaction={item}
                       index={index}
-                      showParsed={filetype === 'csv' || filetype === 'qif'}
+                      showParsed={isTabularFile(filetype) || filetype === 'qif'}
                       parseDateFormat={parseDateFormat}
                       dateFormat={dateFormat}
                       fieldMappings={fieldMappings}
@@ -1077,11 +1094,20 @@ export function ImportTransactionsModal({
             )}
           </View>
 
-          {filetype === 'csv' && (
+          {filetype === 'xlsx' && (
+            <XlsxOptions
+              metadata={xlsxMetadata}
+              options={xlsxOptions}
+              onChange={setXlsxOptions}
+            />
+          )}
+
+          {isTabularFile(filetype) && (
             <View style={{ marginTop: 10 }}>
               <FieldMappings
                 transactions={transactions}
                 onChange={onUpdateFields}
+                title={filetype === 'xlsx' ? t('XLSX FIELDS') : undefined}
                 mappings={fieldMappings || undefined}
                 splitMode={splitMode}
                 inOutMode={inOutMode}
@@ -1109,7 +1135,7 @@ export function ImportTransactionsModal({
             </>
           )}
 
-          {filetype !== 'csv' && (
+          {!isTabularFile(filetype) && (
             <CheckboxToggle
               id="import_notes"
               checked={importNotes}
@@ -1160,7 +1186,7 @@ export function ImportTransactionsModal({
           )}
 
           {/*Import Options */}
-          {(filetype === 'qif' || filetype === 'csv') && (
+          {(filetype === 'qif' || isTabularFile(filetype)) && (
             <View style={{ marginTop: 10 }}>
               <SpaceBetween
                 gap={5}
@@ -1168,7 +1194,7 @@ export function ImportTransactionsModal({
               >
                 {/* Date Format */}
                 <View>
-                  {(filetype === 'qif' || filetype === 'csv') && (
+                  {(filetype === 'qif' || isTabularFile(filetype)) && (
                     <DateFormatSelect
                       transactions={transactions}
                       fieldMappings={fieldMappings || undefined}
@@ -1180,115 +1206,133 @@ export function ImportTransactionsModal({
                   )}
                 </View>
 
+                {filetype === 'xlsx' && (
+                  <CheckboxToggle
+                    id="xlsx-has-header"
+                    checked={hasHeaderRow}
+                    onChange={setHasHeaderRow}
+                  >
+                    <Trans>First row contains column names</Trans>
+                  </CheckboxToggle>
+                )}
+
                 {/* CSV Options */}
-                {filetype === 'csv' && (
+                {isTabularFile(filetype) && (
                   <View style={{ marginLeft: 10, gap: 5 }}>
-                    <SectionLabel title={t('CSV OPTIONS')} />
-                    <label
-                      htmlFor="csv-delimiter-select"
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        gap: 5,
-                        alignItems: 'baseline',
-                      }}
-                    >
-                      <Trans>Delimiter:</Trans>
-                      <Select
-                        id="csv-delimiter-select"
-                        options={[
-                          [',', ','],
-                          [';', ';'],
-                          ['|', '|'],
-                          ['\t', 'tab'],
-                          ['~', '~'],
-                        ]}
-                        value={delimiter}
-                        onChange={value => {
-                          setDelimiter(value);
-                        }}
-                        style={{ width: 50 }}
-                      />
-                    </label>
-                    <label
-                      htmlFor="csv-encoding-select"
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        gap: 5,
-                        alignItems: 'baseline',
-                      }}
-                    >
-                      <Trans>Encoding:</Trans>
-                      <Select
-                        id="csv-encoding-select"
-                        options={[
-                          ['auto', t('Auto (detect)')],
-                          ['utf-8', t('UTF-8')],
-                          ['utf-16le', t('UTF-16 LE')],
-                          ['utf-16be', t('UTF-16 BE')],
-                          ['windows-1252', t('Windows-1252')],
-                          ['windows-1250', t('Windows-1250')],
-                          ['iso-8859-2', t('ISO-8859-2')],
-                        ]}
-                        value={csvEncoding}
-                        onChange={value => {
-                          setCsvEncoding(value);
-                        }}
-                        style={{ width: 130 }}
-                      />
-                    </label>
-                    <label
-                      htmlFor="csv-skip-start-lines"
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        gap: 5,
-                        alignItems: 'baseline',
-                      }}
-                    >
-                      <Trans>Skip start lines:</Trans>
-                      <Input
-                        id="csv-skip-start-lines"
-                        type="number"
-                        value={skipStartLines}
-                        min="0"
-                        step="1"
-                        onChangeValue={value => {
-                          setSkipStartLines(Math.abs(parseInt(value, 10) || 0));
-                        }}
-                        style={{ width: 50 }}
-                      />
-                    </label>
-                    <label
-                      htmlFor="csv-skip-end-lines"
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        gap: 5,
-                        alignItems: 'baseline',
-                      }}
-                    >
-                      <Trans>Skip end lines:</Trans>
-                      <Input
-                        id="csv-skip-end-lines"
-                        type="number"
-                        value={skipEndLines}
-                        min="0"
-                        step="1"
-                        onChangeValue={value => {
-                          setSkipEndLines(Math.abs(parseInt(value, 10) || 0));
-                        }}
-                        style={{ width: 50 }}
-                      />
-                    </label>
-                    <CheckboxToggle
-                      id="form_has_header"
-                      checked={hasHeaderRow}
-                      onChange={setHasHeaderRow}
-                    >
-                      <Trans>File has header row</Trans>
-                    </CheckboxToggle>
+                    {filetype === 'csv' && (
+                      <>
+                        <SectionLabel title={t('CSV OPTIONS')} />
+                        <label
+                          htmlFor="csv-delimiter-select"
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            gap: 5,
+                            alignItems: 'baseline',
+                          }}
+                        >
+                          <Trans>Delimiter:</Trans>
+                          <Select
+                            id="csv-delimiter-select"
+                            options={[
+                              [',', ','],
+                              [';', ';'],
+                              ['|', '|'],
+                              ['\t', 'tab'],
+                              ['~', '~'],
+                            ]}
+                            value={delimiter}
+                            onChange={value => {
+                              setDelimiter(value);
+                            }}
+                            style={{ width: 50 }}
+                          />
+                        </label>
+                        <label
+                          htmlFor="csv-encoding-select"
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            gap: 5,
+                            alignItems: 'baseline',
+                          }}
+                        >
+                          <Trans>Encoding:</Trans>
+                          <Select
+                            id="csv-encoding-select"
+                            options={[
+                              ['auto', t('Auto (detect)')],
+                              ['utf-8', t('UTF-8')],
+                              ['utf-16le', t('UTF-16 LE')],
+                              ['utf-16be', t('UTF-16 BE')],
+                              ['windows-1252', t('Windows-1252')],
+                              ['windows-1250', t('Windows-1250')],
+                              ['iso-8859-2', t('ISO-8859-2')],
+                            ]}
+                            value={csvEncoding}
+                            onChange={value => {
+                              setCsvEncoding(value);
+                            }}
+                            style={{ width: 130 }}
+                          />
+                        </label>
+                        <label
+                          htmlFor="csv-skip-start-lines"
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            gap: 5,
+                            alignItems: 'baseline',
+                          }}
+                        >
+                          <Trans>Skip start lines:</Trans>
+                          <Input
+                            id="csv-skip-start-lines"
+                            type="number"
+                            value={skipStartLines}
+                            min="0"
+                            step="1"
+                            onChangeValue={value => {
+                              setSkipStartLines(
+                                Math.abs(parseInt(value, 10) || 0),
+                              );
+                            }}
+                            style={{ width: 50 }}
+                          />
+                        </label>
+                        <label
+                          htmlFor="csv-skip-end-lines"
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            gap: 5,
+                            alignItems: 'baseline',
+                          }}
+                        >
+                          <Trans>Skip end lines:</Trans>
+                          <Input
+                            id="csv-skip-end-lines"
+                            type="number"
+                            value={skipEndLines}
+                            min="0"
+                            step="1"
+                            onChangeValue={value => {
+                              setSkipEndLines(
+                                Math.abs(parseInt(value, 10) || 0),
+                              );
+                            }}
+                            style={{ width: 50 }}
+                          />
+                        </label>
+                        <CheckboxToggle
+                          id="form_has_header"
+                          checked={hasHeaderRow}
+                          onChange={setHasHeaderRow}
+                        >
+                          <Trans>File has header row</Trans>
+                        </CheckboxToggle>
+                      </>
+                    )}
                     <CheckboxToggle
                       id="clear_on_import"
                       checked={clearOnImport}
@@ -1335,7 +1379,7 @@ export function ImportTransactionsModal({
                     }}
                     onChangeAmount={onMultiplierChange}
                   />
-                  {filetype === 'csv' && (
+                  {isTabularFile(filetype) && (
                     <>
                       <LabeledCheckbox
                         id="form_split"
@@ -1404,6 +1448,22 @@ export function ImportTransactionsModal({
 }
 
 function getParseOptions(fileType: string, options: ParseFileOptions = {}) {
+  if (fileType === 'xlsx') {
+    const {
+      worksheet,
+      headerRow,
+      detectHeader,
+      requiredColumns,
+      hasHeaderRow,
+    } = options;
+    return {
+      worksheet,
+      headerRow,
+      detectHeader,
+      requiredColumns,
+      hasHeaderRow,
+    };
+  }
   if (fileType === 'csv') {
     const { delimiter, encoding, hasHeaderRow, skipStartLines, skipEndLines } =
       options;
@@ -1453,4 +1513,8 @@ function isOfxFile(fileType: string) {
 
 function isCamtFile(fileType: string) {
   return fileType === 'xml';
+}
+
+function isTabularFile(fileType: string) {
+  return fileType === 'csv' || fileType === 'xlsx';
 }
