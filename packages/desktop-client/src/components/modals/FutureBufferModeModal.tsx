@@ -64,7 +64,8 @@ export function FutureBufferModeModal() {
               <Trans>Holds what you budget in future months.</Trans>
             </ModeChoice>
 
-            <ModalButtons>
+            {/* With the column gap, 20px above Save like the confirm dialogs */}
+            <ModalButtons style={{ marginTop: spacing.md }}>
               <ButtonWithLoading
                 variant="primary"
                 isLoading={isSaving}
