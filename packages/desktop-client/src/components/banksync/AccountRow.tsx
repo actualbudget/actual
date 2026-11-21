@@ -112,7 +112,11 @@ export const AccountRow = memo(
               name="lastSync"
               width="100%"
               plain
-              style={{ padding: `${spacing.xs}px ${spacing.sm}px` }}
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                padding: `${spacing.xs}px ${spacing.sm}px`,
+              }}
               data-vrt-mask
             >
               <Button

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
@@ -8,13 +8,17 @@ import { Cell, Row } from '#components/table';
 
 import { accountsSubgridStyle } from './accountsTableLayout';
 
+const headerCellStyle = {
+  justifyContent: 'center',
+  padding: `0 ${spacing.sm}px`,
+  minWidth: 0,
+};
+
 type AccountsHeaderProps = {
   unlinked: boolean;
 };
 
 export function AccountsHeader({ unlinked }: AccountsHeaderProps) {
-  const { t } = useTranslation();
-
   return (
     <Row
       collapsed
@@ -27,23 +31,17 @@ export function AccountsHeader({ unlinked }: AccountsHeaderProps) {
         fontWeight: 500,
       }}
     >
-      <Cell
-        value={t('Account')}
-        width="flex"
-        style={{ paddingLeft: spacing.sm, minWidth: 0 }}
-      />
+      <Cell width="flex" plain style={headerCellStyle}>
+        <Trans>Account</Trans>
+      </Cell>
       {!unlinked && (
         <>
-          <Cell
-            value={t('Bank')}
-            width="flex"
-            style={{ paddingLeft: spacing.sm, minWidth: 0 }}
-          />
-          <Cell
-            value={t('Last sync')}
-            width="flex"
-            style={{ paddingLeft: spacing.sm, minWidth: 0 }}
-          />
+          <Cell width="flex" plain style={headerCellStyle}>
+            <Trans>Bank</Trans>
+          </Cell>
+          <Cell width="flex" plain style={headerCellStyle}>
+            <Trans>Last sync</Trans>
+          </Cell>
         </>
       )}
       <Cell value="" width="flex" />
