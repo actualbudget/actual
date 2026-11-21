@@ -8,6 +8,7 @@ import {
   validateSessionMiddleware,
 } from '#util/middlewares';
 import { MOBILE_APP_RETURN_PAGE_HTML } from '#util/mobile-app-return';
+import { validateGlobalBankSyncSession } from '#util/validate-budget-session';
 
 import {
   AccountNotLinkedToRequisition,
@@ -103,11 +104,15 @@ app.use(express.json());
 // server-wide (global) bank-sync credentials is admin-only, but every
 // signed-in user on that server may use them. This is a supported feature
 // and will remain; budgets with their own credentials use those instead.
+// API keys need explicit permission to sync shared connections.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
+const bankSync = express.Router();
+bankSync.use(validateGlobalBankSyncSession);
+app.use(bankSync);
 app.use(validateSessionMiddleware);
 
-app.post('/status', async (req, res) => {
+bankSync.post('/status', async (req, res) => {
   res.send({
     status: 'ok',
     data: {
@@ -247,7 +252,7 @@ app.post(
   }),
 );
 
-app.post(
+bankSync.post(
   '/transactions',
   ensureConfigured,
   handleError(async (req, res) => {

@@ -11,6 +11,14 @@ import { EnableBankingError } from '#app-enablebanking/utils/errors';
 
 // Mock all external dependencies before importing the app (mirrors
 // poll-auth.spec.ts).
+vi.mock('#util/validate-budget-session', () => ({
+  validateGlobalBankSyncSession: (
+    _req: unknown,
+    _res: unknown,
+    next: () => void,
+  ) => next(),
+}));
+
 vi.mock('../../services/secrets-service', () => ({
   SecretName: {
     enablebanking_applicationId: 'enablebanking_applicationId',
