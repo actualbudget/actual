@@ -126,9 +126,9 @@ describe('OAuth token endpoints', () => {
         code_verifier: verifier,
       });
     const responses = await Promise.all([exchange(), exchange()]);
-    expect(responses.map(response => response.status).sort()).toEqual([
-      200, 400,
-    ]);
+    expect(
+      responses.map(response => response.status).sort((a, b) => a - b),
+    ).toEqual([200, 400]);
     expect(
       responses.find(response => response.status === 400)?.body,
     ).toMatchObject({
