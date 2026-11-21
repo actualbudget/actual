@@ -223,6 +223,103 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
       .map(group => `group-leftover-${group.id}`),
     run: sumAmounts,
   });
+
+  sheet.get().createDynamic(sheetName, 'total-overspent', {
+    initialValue: 0,
+    dependencies: flatten2(
+      expenseCategories.map(cat => [
+        `leftover-${cat.id}`,
+        `carryover-${cat.id}`,
+      ]),
+    ),
+    run: (...data) =>
+      safeNumber(
+        unflatten2(data).reduce(
+          (total, [balance, carryover]) =>
+            total + (carryover ? 0 : Math.min(0, number(balance))),
+          0,
+        ),
+      ),
+  });
+}
+
+export function createFutureAwareToBudget(
+  months,
+  currentMonth,
+  replace = false,
+) {
+  const activeMonths = months.filter(month => month >= currentMonth);
+  const currentSheetName = monthUtils.sheetForMonth(currentMonth);
+  const budgetDependencies = activeMonths.map(budgetMonth =>
+    resolveName(monthUtils.sheetForMonth(budgetMonth), 'total-budgeted'),
+  );
+
+  activeMonths.forEach((month, index) => {
+    const sheetName = monthUtils.sheetForMonth(month);
+    if (replace) {
+      sheet.get().deleteCell(sheetName, 'assigned-in-future');
+      sheet.get().deleteCell(sheetName, 'ready-to-assign');
+      sheet.get().deleteCell(sheetName, 'available-funds-with-future');
+      sheet.get().deleteCell(sheetName, 'total-income-with-future');
+      sheet.get().deleteCell(sheetName, 'from-last-month-with-future');
+    }
+
+    sheet.get().createDynamic(sheetName, 'assigned-in-future', {
+      initialValue: 0,
+      dependencies: budgetDependencies.slice(index + 1),
+      run: (...futureBudgetedAmounts) => {
+        const futureBudgeted = sumAmounts(...futureBudgetedAmounts);
+        return futureBudgeted === 0 ? 0 : -futureBudgeted;
+      },
+    });
+    sheet.get().createDynamic(sheetName, 'ready-to-assign', {
+      initialValue: 0,
+      dependencies: [
+        resolveName(currentSheetName, 'to-budget'),
+        resolveName(currentSheetName, 'buffered-selected'),
+        resolveName(currentSheetName, 'total-overspent'),
+        ...budgetDependencies.slice(1),
+      ],
+      run: (toBudget, buffered, overspent, ...futureBudgetedAmounts) =>
+        safeNumber(
+          number(toBudget) +
+            number(buffered) +
+            (month > currentMonth ? number(overspent) : 0) +
+            sumAmounts(...futureBudgetedAmounts),
+        ),
+    });
+
+    // Reconcile the viewed month's summary with To Budget. That amount uses
+    // current funds only, so future income must not inflate Available funds.
+    sheet.get().createDynamic(sheetName, 'available-funds-with-future', {
+      initialValue: 0,
+      dependencies: [
+        'ready-to-assign',
+        'last-month-overspent',
+        'total-budgeted',
+        'assigned-in-future',
+      ],
+      run: (toBudget, overspent, budgeted, budgetedInFuture) =>
+        safeNumber(
+          number(toBudget) -
+            number(overspent) -
+            number(budgeted) +
+            number(budgetedInFuture),
+        ),
+    });
+
+    sheet.get().createDynamic(sheetName, 'total-income-with-future', {
+      initialValue: 0,
+      dependencies: ['total-income'],
+      run: income => (month === currentMonth ? number(income) : 0),
+    });
+    sheet.get().createDynamic(sheetName, 'from-last-month-with-future', {
+      initialValue: 0,
+      dependencies: ['available-funds-with-future', 'total-income-with-future'],
+      run: (available, income) =>
+        safeNumber(number(available) - number(income)),
+    });
+  });
 }
 
 export function createBudget(meta, categories, months) {
@@ -255,6 +352,10 @@ export function handleCategoryChange(months, oldValue, newValue) {
         ],
       ]);
     } else {
+      deps.push([
+        'total-overspent',
+        [`leftover-${cat.id}`, `carryover-${cat.id}`],
+      ]);
       deps.push([
         'last-month-overspent',
         [

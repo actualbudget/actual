@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import type { BudgetPage } from './page-models/budget-page';
 import { ConfigurationPage } from './page-models/configuration-page';
+import { Navigation } from './page-models/navigation';
 
 test.describe('Budget', () => {
   let page: Page;
@@ -86,6 +87,128 @@ test.describe('Budget', () => {
     await expect(menu).toBeVisible();
     await expect(
       menu.getByRole('button', { name: 'Switch file' }),
+    ).toBeVisible();
+  });
+
+  test('uses viewed month assignments in future-aware budget summaries', async () => {
+    await page.getByTitle('Today', { exact: true }).click();
+    const month = await budgetPage.getSelectedMonth();
+    const summary = page.locator(
+      `[data-testid="budget-summary"][data-month="${month}"]`,
+    );
+    const monthlyBreakdown = await summary
+      .locator('[data-cellname]')
+      .allTextContents();
+    const navigation = new Navigation(page);
+    await navigation.goToSettingsPage();
+    await page
+      .getByRole('button', { name: 'Include future assignments', exact: true })
+      .click();
+    await expect(
+      page.getByRole('button', {
+        name: 'Use default monthly calculation',
+        exact: true,
+      }),
+    ).toBeVisible();
+    budgetPage = await navigation.goToBudgetPage();
+
+    await expect(summary.getByText('For next month')).toHaveCount(0);
+    await expect(
+      summary.locator('[data-cellname$="!total-overspent"]'),
+    ).toHaveCount(0);
+    await expect(summary.getByText('Budgeted in future months')).toBeVisible();
+    await expect(summary.locator('[data-cellname]').last()).toHaveText('11.00');
+    const currentAvailable = summary.locator(
+      '[data-cellname$="!available-funds-with-future"]',
+    );
+    await currentAvailable.hover();
+    const tooltip = page.getByRole('tooltip');
+    await expect(tooltip.getByText('Income:', { exact: true })).toBeVisible();
+    await expect(
+      tooltip.getByText('From Last Month:', { exact: true }),
+    ).toBeVisible();
+    const currentBreakdownAmounts = (
+      await tooltip.locator('[data-cellname]').allTextContents()
+    ).map(value => Number(value.replaceAll(',', '')));
+    expect(
+      currentBreakdownAmounts.reduce((sum, amount) => sum + amount, 0),
+    ).toBe(Number((await currentAvailable.innerText()).replaceAll(',', '')));
+    await page.mouse.move(0, 0);
+    await expect(tooltip).not.toBeVisible();
+    await expect(summary).toMatchThemeScreenshots();
+
+    const categoryName = await budgetPage.getCategoryNameForRow(1);
+    await budgetPage.nextMonthButton.click();
+    await budgetPage.setBudgetedAmount(categoryName, '70');
+    const nextMonth = await budgetPage.getSelectedMonth();
+    const futureSummary = page.locator(
+      `[data-testid="budget-summary"][data-month="${nextMonth}"]`,
+    );
+    await expect(futureSummary.getByText(/^Overspent in /)).toHaveCount(1);
+    await expect(futureSummary.getByText('For next month')).toHaveCount(0);
+    await expect(
+      futureSummary.locator('[data-cellname$="!total-budgeted"]'),
+    ).toHaveText('-70.00');
+    await expect(
+      futureSummary.locator('[data-cellname$="!assigned-in-future"]'),
+    ).toHaveText('-0.00');
+    await expect(futureSummary.locator('[data-cellname]').last()).toHaveText(
+      '-119.00',
+    );
+    const futureAmounts = (
+      await futureSummary.locator('[data-cellname]').allTextContents()
+    ).map(value => Number(value.replaceAll(',', '')));
+    expect(
+      futureAmounts.slice(0, -1).reduce((sum, amount) => sum + amount, 0),
+    ).toBe(futureAmounts.at(-1));
+    await page.mouse.move(0, 0);
+    await expect(futureSummary).toMatchThemeScreenshots();
+    const futureAvailable = futureSummary.locator(
+      '[data-cellname$="!available-funds-with-future"]',
+    );
+    await futureAvailable.hover();
+    await expect(
+      tooltip.locator('[data-cellname$="!total-income-with-future"]'),
+    ).toHaveText('0.00');
+    await expect(
+      tooltip.locator('[data-cellname$="!from-last-month-with-future"]'),
+    ).toHaveText(await futureAvailable.innerText());
+    await expect(tooltip).toMatchThemeScreenshots();
+    await page.mouse.move(0, 0);
+    await expect(tooltip).not.toBeVisible();
+    await page.getByTitle('Today', { exact: true }).click();
+    await expect(
+      summary.locator('[data-cellname$="!assigned-in-future"]'),
+    ).toHaveText('-70.00');
+    await expect(summary.locator('[data-cellname]').last()).toHaveText(
+      '-59.00',
+    );
+
+    await navigation.goToSettingsPage();
+    await page
+      .getByRole('button', {
+        name: 'Use default monthly calculation',
+        exact: true,
+      })
+      .click();
+    await expect(
+      page.getByRole('button', {
+        name: 'Include future assignments',
+        exact: true,
+      }),
+    ).toBeVisible();
+    await navigation.goToBudgetPage();
+    await expect(summary.getByText('For next month')).toBeVisible();
+    await expect(summary.getByText('Budgeted in future months')).toHaveCount(0);
+    await expect(summary.locator('[data-cellname]')).toHaveText(
+      monthlyBreakdown,
+    );
+    await summary.locator('[data-cellname$="!available-funds"]').hover();
+    await expect(
+      tooltip.locator('[data-cellname$="!total-income"]'),
+    ).toBeVisible();
+    await expect(
+      tooltip.locator('[data-cellname$="!from-last-month"]'),
     ).toBeVisible();
   });
 });
