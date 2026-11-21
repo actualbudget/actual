@@ -52,6 +52,7 @@ const mappableFields: MappableField[] = [
     actualField: 'payee',
     syncFields: [
       'payeeName',
+      'notes',
       'creditorName',
       'debtorName',
       'remittanceInformationUnstructured',
@@ -78,6 +79,7 @@ const mappableFields: MappableField[] = [
     actualField: 'notes',
     syncFields: [
       'notes',
+      'payeeName',
       'remittanceInformationUnstructured',
       'remittanceInformationUnstructuredArrayString',
       'remittanceInformationStructured',
