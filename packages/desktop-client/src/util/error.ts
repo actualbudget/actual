@@ -210,6 +210,11 @@ export function getSyncError(error: string, id: string) {
       'Budget "{{id}}" is in storage this browser cannot reach right now. Nothing was deleted; reload the page and try again.',
       { id },
     );
+  } else if (error === 'storage-lost') {
+    return t(
+      'This browser no longer has the local copy of budget "{{id}}". Browsers can discard it, mostly in private windows. If the budget is on a sync server, delete this copy and download it again; otherwise restore it from a backup.',
+      { id },
+    );
   } else {
     return t('We had an unknown problem opening "{{id}}".', { id });
   }

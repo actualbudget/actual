@@ -86,6 +86,87 @@ describe('Condition', () => {
     }).toThrow('Invalid date value for');
   });
 
+  test('date validates `isbetween` value', () => {
+    new Condition(
+      'isbetween',
+      'date',
+      { num1: '2020-01-01', num2: '2020-01-31' },
+      null,
+    );
+
+    expect(() => {
+      new Condition('isbetween', 'date', '2020-01-01', null);
+    }).toThrow('Invalid between date value for');
+    expect(() => {
+      new Condition('isbetween', 'date', { num1: '2020-01-01' }, null);
+    }).toThrow('Invalid between date value for');
+    expect(() => {
+      new Condition(
+        'isbetween',
+        'date',
+        { num1: '2020-01-01', num2: 'hello' },
+        null,
+      );
+    }).toThrow('Invalid between date value for');
+
+    // Only exact dates make sense as bounds
+    expect(() => {
+      new Condition(
+        'isbetween',
+        'date',
+        { num1: '2020-01', num2: '2020-03' },
+        null,
+      );
+    }).toThrow('Invalid between date value for');
+
+    // The pair shape is rejected by the other operators
+    expect(() => {
+      new Condition(
+        'is',
+        'date',
+        { num1: '2020-01-01', num2: '2020-01-31' },
+        null,
+      );
+    }).toThrow('Invalid date format');
+  });
+
+  test('date conditions work with `isbetween` operator', () => {
+    let cond = new Condition(
+      'isbetween',
+      'date',
+      { num1: '2020-08-05', num2: '2020-08-10' },
+      null,
+    );
+    expect(cond.eval({ date: '2020-08-04' })).toBe(false);
+    // Both bounds are inclusive
+    expect(cond.eval({ date: '2020-08-05' })).toBe(true);
+    expect(cond.eval({ date: '2020-08-07' })).toBe(true);
+    expect(cond.eval({ date: '2020-08-10' })).toBe(true);
+    expect(cond.eval({ date: '2020-08-11' })).toBe(false);
+    expect(cond.eval({ date: null })).toBe(false);
+
+    // The bounds may be given in either order
+    cond = new Condition(
+      'isbetween',
+      'date',
+      { num1: '2020-08-10', num2: '2020-08-05' },
+      null,
+    );
+    expect(cond.eval({ date: '2020-08-07' })).toBe(true);
+    expect(cond.eval({ date: '2020-08-11' })).toBe(false);
+
+    // Ranges spanning a year boundary
+    cond = new Condition(
+      'isbetween',
+      'date',
+      { num1: '2019-12-28', num2: '2020-01-03' },
+      null,
+    );
+    expect(cond.eval({ date: '2019-12-31' })).toBe(true);
+    expect(cond.eval({ date: '2020-01-01' })).toBe(true);
+    expect(cond.eval({ date: '2020-01-04' })).toBe(false);
+  });
+
   test('date conditions work with `is` operator', () => {
     let cond = new Condition('is', 'date', '2020-08-10', null);
     expect(cond.eval({ date: '2020-08-05' })).toBe(false);

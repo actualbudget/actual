@@ -11,14 +11,18 @@ import type { MigrationProgress } from './types';
 // after the file path, with a single object store `data`: key -1 holds
 // `{ size }` and keys 0..N hold the file's blocks, one sqlite page each.
 // These helpers read that layout so a budget can be moved into the new
-// storage, and finish the move the same way for both stores.
+// storage, finish the move the same way for both stores, and write it back
+// so the opt-in can be reversed.
 
 const LEGACY_STORE = 'data';
 // absurd-sql opens its databases at this version
 const LEGACY_VERSION = 2;
 const BLOCKS_PER_CHUNK = 256;
 const DELETE_TIMEOUT_MS = 5000;
+// After `blocked`, how long a connection gets to close
 const EVICT_TIMEOUT_MS = 1000;
+// How long the version change gets when nothing answers it at all
+const EVICT_RESPONSE_TIMEOUT_MS = 5000;
 const SQLITE_HEADER = 'SQLite format 3\0';
 // The sqlite file header, whose change counter moves on every write
 const HEADER_BYTES = 100;
@@ -53,7 +57,13 @@ function matchesSnapshot(
 // longer matches it: absurd-sql reopens its database on the next
 // operation, so a tab on the previous release can write between the copy
 // and the cutover. Resolves whether the database exists, and rejects when
-// a connection will not close.
+// a connection will not close, or when nothing answers: the browser reports
+// `blocked` only once every connection has seen the version change, and
+// absurd-sql's connection lives in a worker that idles in `Atomics.wait`,
+// which never sees it, whether its tab is frozen in the back/forward cache
+// or still running. So the request as a whole gets a generous bound, as a
+// cold open of a fresh database can be slow, and a `blocked` event a short
+// one.
 function evictLegacyConnections(
   name: string,
   path: string,
@@ -63,10 +73,18 @@ function evictLegacyConnections(
     const request = indexedDB.open(name, LEGACY_VERSION + 1);
     let exists = true;
     let changed = false;
-    const timer = setTimeout(
-      () => reject(new BudgetInUseError(path)),
-      EVICT_TIMEOUT_MS,
+    const fail = (reason: string) => reject(new BudgetInUseError(path, reason));
+    let timer = setTimeout(
+      () => fail('a connection to the absurd-sql copy did not answer'),
+      EVICT_RESPONSE_TIMEOUT_MS,
     );
+    request.onblocked = () => {
+      clearTimeout(timer);
+      timer = setTimeout(
+        () => fail('a connection to the absurd-sql copy would not close'),
+        EVICT_TIMEOUT_MS,
+      );
+    };
     request.onupgradeneeded = event => {
       exists = event.oldVersion !== 0;
       const transaction = request.transaction;
@@ -91,7 +109,12 @@ function evictLegacyConnections(
     request.onerror = () => {
       clearTimeout(timer);
       if (changed) {
-        reject(new BudgetInUseError(path));
+        reject(
+          new BudgetInUseError(
+            path,
+            'the absurd-sql copy changed during the move',
+          ),
+        );
       } else {
         resolve(exists);
       }
@@ -252,6 +275,7 @@ export async function openLegacyDatabaseContents(
   onProgress?: (percent: number) => void,
 ): Promise<LegacyDatabaseContents | null> {
   const name = legacyDatabaseName(path);
+  logger.info('sqlite storage: looking for an absurd-sql copy', path);
   const database = await openLegacyDatabase(name, path);
   if (database == null) {
     return null;
@@ -304,6 +328,51 @@ export async function readLegacyDatabaseBytes(
   return bytes;
 }
 
+// Writes a sqlite file back into absurd-sql's layout so switching the
+// storage flag off again keeps the data. Any previous contents are cleared
+// in the same transaction as the new blocks are written, so the store is
+// never left with a mix of the two.
+export async function writeLegacyDatabaseBytes(
+  name: string,
+  bytes: Uint8Array,
+): Promise<void> {
+  const blockSize = pageSizeFromHeader(bytes) ?? 4096;
+  const database = await new Promise<IDBDatabase>((resolve, reject) => {
+    const request = indexedDB.open(name, LEGACY_VERSION);
+    request.onupgradeneeded = () => {
+      if (!request.result.objectStoreNames.contains(LEGACY_STORE)) {
+        request.result.createObjectStore(LEGACY_STORE);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+  try {
+    const transaction = database.transaction([LEGACY_STORE], 'readwrite');
+    const store = transaction.objectStore(LEGACY_STORE);
+    store.clear();
+    store.put({ size: bytes.length }, -1);
+    for (
+      let offset = 0, key = 0;
+      offset < bytes.length;
+      offset += blockSize, key++
+    ) {
+      const block = new Uint8Array(blockSize);
+      block.set(
+        bytes.subarray(offset, Math.min(offset + blockSize, bytes.length)),
+      );
+      store.put(block.buffer, key);
+    }
+    await new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
+    });
+  } finally {
+    database.close();
+  }
+}
+
 // What both stores check on a freshly copied database before trusting
 // it: structurally sound, and an Actual budget
 export function verifyMigratedDatabase(db: WasmDatabase) {
@@ -332,7 +401,10 @@ export async function completeMigration(
   const name = legacyDatabaseName(marker.filepath);
   await evictLegacyConnections(name, marker.filepath, snapshot);
   if (!(await putSqliteFileRowIfRev(marker, expectedRev))) {
-    throw new BudgetInUseError(marker.filepath);
+    throw new BudgetInUseError(
+      marker.filepath,
+      'another worker moved it first',
+    );
   }
   if (!(await deleteLegacyDatabase(name))) {
     logger.warn(

@@ -651,4 +651,77 @@ describe('runScheduleForecast against a real database', () => {
       expect(result.to_budget).toBe(20000);
     });
   });
+
+  describe('with a schedule whose rule has no amount condition', () => {
+    // Sep 15, budgeting September. Rent ($100 on the 25th) hasn't posted.
+    // Utilities lost its amount condition (it can be removed on the Rules
+    // page), so the Schedules page shows it as 0.
+    async function setUp() {
+      vi.mocked(monthUtils.currentDay).mockReturnValue('2024-09-15');
+      const { account, category, template } = await setUpRent();
+      const utilitiesId = await createSchedule({
+        schedule: { name: 'Utilities' },
+        conditions: [
+          { op: 'is', field: 'account', value: account },
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2024-01-07',
+              frequency: 'monthly',
+              interval: 1,
+              patterns: [],
+              skipWeekend: false,
+              weekendSolveMode: 'after',
+              endMode: 'never',
+            },
+          },
+        ],
+      });
+      const utilities = {
+        type: 'schedule',
+        name: 'Utilities',
+        scheduleId: utilitiesId,
+        priority: 0,
+        directive: 'template',
+      } as const;
+      return { category, template, utilities };
+    }
+
+    it('budgets it as 0 instead of failing', async () => {
+      const { category, template, utilities } = await setUp();
+
+      const result = await runScheduleForecast(
+        [template, utilities],
+        '2024-09',
+        0,
+        0,
+        category,
+      );
+
+      expect(result.to_budget).toBe(10000);
+      expect(result.perScheduleMonthly.get(utilities)).toBe(0);
+    });
+
+    it('does not apply a fixed adjustment to it', async () => {
+      const { category, template, utilities } = await setUp();
+      const adjusted = {
+        ...utilities,
+        adjustment: 5,
+        adjustmentType: 'fixed',
+      } as const;
+
+      const result = await runScheduleForecast(
+        [template, adjusted],
+        '2024-09',
+        0,
+        0,
+        category,
+      );
+
+      expect(result.to_budget).toBe(10000);
+      expect(result.perScheduleMonthly.get(template)).toBe(10000);
+      expect(result.perScheduleMonthly.get(adjusted)).toBe(0);
+    });
+  });
 });

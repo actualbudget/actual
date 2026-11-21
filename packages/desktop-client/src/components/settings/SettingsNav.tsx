@@ -10,8 +10,8 @@ import { View } from '@actual-app/components/view';
 import {
   getDefaultSidebarMenuItems,
   getSidebarMenuItemPath,
-  isInMobileSettingsNav,
   isSettingsSection,
+  isSettingsSectionOnMobile,
 } from '#components/sidebar/sidebarMenu';
 import { useSidebarMenuItemDetails } from '#components/sidebar/useSidebarMenuItemDetails';
 import { useSidebarMenu } from '#hooks/useSidebarMenu';
@@ -28,7 +28,7 @@ export function SettingsNav() {
     ? getDefaultSidebarMenuItems().filter(
         item =>
           isSettingsSection(item.id) &&
-          isInMobileSettingsNav(item.id) &&
+          isSettingsSectionOnMobile(item.id) &&
           isItemAvailable(item.id),
       )
     : settingsItems;

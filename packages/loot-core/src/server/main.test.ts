@@ -88,6 +88,47 @@ describe('Budgets', () => {
     expect(getClock()).toEqual(deserializeClock(row.clock));
   });
 
+  test('a second request for the budget being loaded waits for that load', async () => {
+    await createTestBudget('default-budget-template');
+
+    // Prefs are read before the database opens, so the budget looks loaded
+    // while its open is still running (slow when the storage moves a budget
+    // over); a tab joining then must not be answered before it is
+    let finishOpen: (() => void) | undefined;
+    const openGate = new Promise<void>(resolve => {
+      finishOpen = resolve;
+    });
+    const openDatabase = db.openDatabase;
+    const openSpy = vi
+      .spyOn(db, 'openDatabase')
+      .mockImplementation(async id => {
+        await openGate;
+        return openDatabase(id);
+      });
+    try {
+      const first = runHandler(handlers['load-budget'], { id: 'test-budget' });
+      await vi.waitFor(() => expect(openSpy).toHaveBeenCalledTimes(1));
+      expect(prefs.getPrefs().id).toBe('test-budget');
+
+      let isSecondSettled = false;
+      const second = runHandler(handlers['load-budget'], {
+        id: 'test-budget',
+      }).finally(() => {
+        isSecondSettled = true;
+      });
+      await new Promise(resolve => setTimeout(resolve, 20));
+      expect(isSecondSettled).toBe(false);
+
+      finishOpen?.();
+      expect((await first).error).toBe(undefined);
+      expect((await second).error).toBe(undefined);
+      expect(openSpy).toHaveBeenCalledTimes(1);
+      expect(db.getDatabase()).not.toBe(null);
+    } finally {
+      openSpy.mockRestore();
+    }
+  });
+
   test('budget detects out of sync migrations', async () => {
     await createTestBudget('default-budget-template');
 
@@ -439,6 +480,37 @@ describe('Categories', () => {
     categories = await db.getCategories();
     expect(categories.length).toBe(1);
     expect(categories.find(cat => cat.name === 'bar')).not.toBeNull();
+  });
+
+  test('requires a transfer when only a budgeted amount is left', async () => {
+    await sheet.loadSpreadsheet(db);
+
+    await runMutator(async () => {
+      await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+      await db.insertCategoryGroup({
+        id: 'group2',
+        name: 'group2',
+        is_income: 1,
+      });
+      await db.insertCategory({ id: 'foo', name: 'foo', cat_group: 'group1' });
+    });
+    await budget.createAllBudgets();
+
+    expect(
+      await runHandler(handlers['must-category-transfer'], { id: 'foo' }),
+    ).toBe(false);
+
+    // No transaction uses the category, yet a budgeted amount still makes
+    // the delete dialog ask for a transfer, so its message must mention
+    // budgeted amounts too (#9365).
+    await budgetActions.setBudget({
+      category: 'foo',
+      month: monthUtils.currentMonth(),
+      amount: 1000,
+    });
+    expect(
+      await runHandler(handlers['must-category-transfer'], { id: 'foo' }),
+    ).toBe(true);
   });
 
   test('transfers properly when deleted', async () => {

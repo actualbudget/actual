@@ -10,6 +10,7 @@ import { logger } from '#platform/server/log';
 import {
   BudgetInUseError,
   flushSqliteStorage,
+  StorageLostError,
   StorageMigrationError,
   StorageUnavailableError,
 } from '#platform/server/sqlite';
@@ -274,7 +275,29 @@ async function syncBudget() {
   return result;
 }
 
+// The load in progress: a second request for the same budget waits for it.
+// Prefs are set before the database opens, so the shortcut in
+// `loadBudgetOnce` would otherwise answer a tab that joins through the
+// coordinator while the storage is still moving the budget over
+let loading: {
+  id: Budget['id'];
+  result: ReturnType<typeof loadBudgetOnce>;
+} | null = null;
+
 async function loadBudget({ id }: { id: Budget['id'] }) {
+  if (loading?.id === id) {
+    return loading.result;
+  }
+  const result = loadBudgetOnce(id).finally(() => {
+    if (loading?.result === result) {
+      loading = null;
+    }
+  });
+  loading = { id, result };
+  return result;
+}
+
+async function loadBudgetOnce(id: Budget['id']) {
   const currentPrefs = prefs.getPrefs();
 
   if (currentPrefs) {
@@ -287,9 +310,7 @@ async function loadBudget({ id }: { id: Budget['id'] }) {
     }
   }
 
-  const res = await _loadBudget(id);
-
-  return res;
+  return _loadBudget(id);
 }
 
 async function createDemoBudget() {
@@ -609,7 +630,8 @@ async function _loadBudget(id: Budget['id']): Promise<{
     | 'opening-budget'
     | 'budget-in-use'
     | 'storage-migration-failed'
-    | 'storage-unavailable';
+    | 'storage-unavailable'
+    | 'storage-lost';
 }> {
   let dir: string;
   try {
@@ -646,6 +668,10 @@ async function _loadBudget(id: Budget['id']): Promise<{
     if (e instanceof StorageUnavailableError) {
       logger.error('Storage unavailable', e);
       return { error: 'storage-unavailable' };
+    }
+    if (e instanceof StorageLostError) {
+      logger.error('Storage lost', e);
+      return { error: 'storage-lost' };
     }
     captureException(e);
     return { error: 'opening-budget' };
