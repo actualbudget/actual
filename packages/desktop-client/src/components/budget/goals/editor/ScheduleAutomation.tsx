@@ -32,14 +32,19 @@ export const ScheduleAutomation = ({
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const fieldFlex = isNarrowWidth ? STACKED_FIELD_FLEX : 1;
-  // Match the filter applied to the Select options below — completed and
-  // tombstoned schedules aren't selectable, so a category whose only
-  // schedules are completed should fall through to the "no schedules" state
-  // instead of showing an empty picker.
+  // Completed and tombstoned schedules can't be picked for a new automation,
+  // so a category whose only schedules are completed falls through to the
+  // "no schedules" state instead of showing an empty picker. A completed
+  // schedule the automation already points at stays listed, though, so the
+  // picker shows what the automation is budgeting for.
+  const isSelected = (s: ScheduleEntity) =>
+    template.scheduleId
+      ? s.id === template.scheduleId
+      : s.name === template.name;
   const selectableSchedules = schedules
     .filter(
       (s): s is typeof s & { name: string } =>
-        !!s.name && !s.completed && !s.tombstone,
+        !!s.name && !s.tombstone && (!s.completed || isSelected(s)),
     )
     .sort((a, b) =>
       a.name.trim().localeCompare(b.name.trim(), undefined, {
@@ -73,7 +78,15 @@ export const ScheduleAutomation = ({
                 }),
               );
             }}
-            options={selectableSchedules.map(s => [s.id, s.name] as const)}
+            options={selectableSchedules.map(
+              s =>
+                [
+                  s.id,
+                  s.completed
+                    ? t('{{name}} (completed)', { name: s.name })
+                    : s.name,
+                ] as const,
+            )}
           />
         </FormField>
         <FormField style={{ flex: fieldFlex }}>
