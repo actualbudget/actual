@@ -85,6 +85,17 @@ function convertToNumberOrNull(value: string): number | null {
   return isNaN(number) ? null : number;
 }
 
+// A missing amount stays missing: `-null` would be -0 and import as 0.00.
+function signedAmount(amount: number | null, isDebit: boolean): number | null {
+  if (amount == null) return null;
+  return isDebit ? -amount : amount;
+}
+
+function getTxDtlsAmount(TxDtls: TxDtls): number | null {
+  const Amt = findKeys(TxDtls, 'Amt') as Amt[];
+  return Amt.length > 0 ? convertToNumberOrNull(Amt[0]._) : null;
+}
+
 function getDtOrDtTm(Date: DateRef | null): string | null {
   if (!Date) {
     return null;
@@ -140,16 +151,23 @@ export async function xmlCAMT2json(
 
     const date = getDtOrDtTm(entry.ValDt) || getDtOrDtTm(entry.BookgDt);
 
-    if (Array.isArray(entry.NtryDtls?.TxDtls)) {
+    // A batch entry is only split when every detail carries its own amount.
+    // Otherwise it is imported as one transaction with the entry amount, so
+    // details without an amount don't drop part of the entry total.
+    const batchDetails = Array.isArray(entry.NtryDtls?.TxDtls)
+      ? entry.NtryDtls.TxDtls
+      : null;
+    const hasAllDetailAmounts =
+      batchDetails?.every(TxDtls => getTxDtlsAmount(TxDtls) != null) ?? false;
+
+    if (batchDetails && hasAllDetailAmounts) {
       // we add subtransactions as normal transactions as importing split with subtransactions is not supported
       // amount, and payee_name are not processed correctly for subtransaction.
-      entry.NtryDtls.TxDtls.forEach((TxDtls: TxDtls) => {
+      batchDetails.forEach((TxDtls: TxDtls) => {
         const subPayee = getPayeeNameFromTxDtls(TxDtls, isDebit);
         const subNotes = getNotesFromTxDtls(TxDtls);
-        const Amt = findKeys(TxDtls, 'Amt') as Amt[];
-        const amount = Amt.length > 0 ? convertToNumberOrNull(Amt[0]._) : null;
         transactions.push({
-          amount: isDebit ? -amount : amount,
+          amount: signedAmount(getTxDtlsAmount(TxDtls), isDebit),
           date,
           payee_name: subPayee,
           imported_payee: subPayee,
@@ -157,13 +175,14 @@ export async function xmlCAMT2json(
         });
       });
     } else {
+      const TxDtls = batchDetails ? undefined : entry.NtryDtls?.TxDtls;
       let payee_name: string | null;
       let notes: string | null;
-      payee_name = getPayeeNameFromTxDtls(entry.NtryDtls?.TxDtls, isDebit);
+      payee_name = getPayeeNameFromTxDtls(TxDtls as TxDtls, isDebit);
       if (!payee_name && entry.AddtlNtryInf) {
         payee_name = entry.AddtlNtryInf;
       }
-      notes = getNotesFromTxDtls(entry.NtryDtls?.TxDtls);
+      notes = getNotesFromTxDtls(TxDtls as TxDtls);
       if (!notes && entry.AddtlNtryInf && entry.AddtlNtryInf !== payee_name) {
         notes = entry.AddtlNtryInf;
       }
@@ -175,7 +194,7 @@ export async function xmlCAMT2json(
       }
 
       const transaction: TransactionCAMT = {
-        amount: isDebit ? -amount : amount,
+        amount: signedAmount(amount, isDebit),
         date,
         payee_name,
         imported_payee: payee_name,
