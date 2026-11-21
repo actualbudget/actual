@@ -13,6 +13,7 @@ import { useBuiltInBankSyncProviders } from '#components/banksync/useBuiltInBank
 import { MobileSheet } from '#components/mobile/MobileSheet';
 import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
 import { useAccount } from '#hooks/useAccount';
+import { useModalState } from '#hooks/useModalState';
 
 type LinkAccountModalProps = {
   upgradingAccountId: AccountEntity['id'];
@@ -32,6 +33,10 @@ export function LinkAccountModal({
   );
   const isOnline = syncServerStatus === 'online';
   const hasDecidedShortcutRef = useRef(false);
+  const hasStartedOnlyProviderRef = useRef(false);
+  const wasCoveredRef = useRef(false);
+  const { isActive, modalStack, onClose } = useModalState();
+  const isChooserOnTop = modalStack.length > 0 && isActive('add-account');
   useEffect(() => {
     if (hasDecidedShortcutRef.current) {
       return;
@@ -45,9 +50,23 @@ export function LinkAccountModal({
     }
     hasDecidedShortcutRef.current = true;
     if (configuredProviders.length === 1) {
+      hasStartedOnlyProviderRef.current = true;
       void configuredProviders[0].onLink();
     }
   }, [isOnline, isLoading, configuredProviders]);
+
+  useEffect(() => {
+    if (!hasStartedOnlyProviderRef.current) {
+      return;
+    }
+    if (!isChooserOnTop) {
+      wasCoveredRef.current = true;
+      return;
+    }
+    if (wasCoveredRef.current) {
+      onClose();
+    }
+  }, [isChooserOnTop, onClose]);
 
   return (
     <MobileSheet

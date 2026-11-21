@@ -14,6 +14,8 @@ import {
   createTestQueryClient,
   TestProviders,
 } from '#mocks';
+import { popModal, pushModal } from '#modals/modalsSlice';
+import type { Modal } from '#modals/modalsSlice';
 
 import { CreateAccountModal } from './CreateAccountModal';
 
@@ -50,6 +52,7 @@ type ProvidersState = ReturnType<typeof useBuiltInBankSyncProviders>;
 function renderModal(
   state: Partial<ProvidersState>,
   upgradingAccountId: string | null = account.id,
+  modalStack: Modal[] = [],
 ) {
   let rerenderHook: () => void = () => undefined;
   let currentState: ProvidersState = {
@@ -68,6 +71,7 @@ function renderModal(
   const queryClient = createTestQueryClient();
   const store = configureTestAppStore({ queryClient });
   queryClient.setQueryData(accountQueries.list().queryKey, [account]);
+  modalStack.forEach(modal => store.dispatch(pushModal({ modal })));
   render(
     <TestProviders queryClient={queryClient} store={store}>
       <CreateAccountModal
@@ -76,6 +80,7 @@ function renderModal(
     </TestProviders>,
   );
   return {
+    store,
     update: (nextState: Partial<ProvidersState>) => {
       currentState = { ...currentState, ...nextState };
       act(() => rerenderHook());
@@ -132,6 +137,60 @@ describe('linking an existing account', () => {
 
     expect(simpleFin.onLink).toHaveBeenCalledTimes(1);
     expect(akahu.onLink).not.toHaveBeenCalled();
+  });
+
+  it("closes itself when the only provider's flow is closed", () => {
+    const simpleFin = makeProvider({ isConfigured: true });
+    const { store } = renderModal({ providers: [simpleFin] }, account.id, [
+      { name: 'add-account', options: { upgradingAccountId: account.id } },
+    ]);
+    expect(simpleFin.onLink).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      store.dispatch(
+        pushModal({
+          modal: {
+            name: 'simplefin-init',
+            options: { onSuccess: vi.fn(), credentialSource: 'global' },
+          },
+        }),
+      );
+    });
+    expect(store.getState().modals.modalStack).toHaveLength(2);
+
+    act(() => {
+      store.dispatch(popModal());
+    });
+    expect(store.getState().modals.modalStack).toHaveLength(0);
+  });
+
+  it('stays open when a provider was chosen by hand and its flow is closed', () => {
+    const simpleFin = makeProvider({ isConfigured: true });
+    const goCardless = makeProvider({
+      id: 'goCardless',
+      displayName: 'GoCardless',
+      isConfigured: true,
+    });
+    const { store } = renderModal(
+      { providers: [simpleFin, goCardless] },
+      account.id,
+      [{ name: 'add-account', options: { upgradingAccountId: account.id } }],
+    );
+
+    act(() => {
+      store.dispatch(
+        pushModal({
+          modal: {
+            name: 'simplefin-init',
+            options: { onSuccess: vi.fn(), credentialSource: 'global' },
+          },
+        }),
+      );
+    });
+    act(() => {
+      store.dispatch(popModal());
+    });
+    expect(store.getState().modals.modalStack).toHaveLength(1);
   });
 
   it('waits for provider status before starting the only provider', () => {
