@@ -66,15 +66,38 @@ Example using variables:
 }
 ```
 
+### Changing the Accent Color
+
+The accent is the color of primary buttons, links, checkboxes, the outline of a focused input and selected rows. You can change all of them by setting one variable:
+
+```css
+:root {
+  --color-accent: #0a7d5a;
+}
+```
+
+Actual works out the related colors from the accent and from your theme's `--color-tableBackground` and `--color-pageBackground`, so text and buttons stay readable on your backgrounds:
+
+- `--color-accentContrast` - Text and icons on an accent fill
+- `--color-accentHover` - Hovered accent fill
+- `--color-accentText` - The accent used as text, such as links
+- `--color-accentBorder` - Selected outlines and focus rings
+- `--color-accentSubtle` - Tinted background for selected rows and pills
+- `--color-accentSubtleText` - Accent text on the tinted background
+
+You can set any of these yourself. Actual keeps your value and only works out the ones you leave out. A more specific variable, such as `--color-buttonPrimaryBackground`, still takes priority over the accent for the thing it styles.
+
+A few details keep their own variables and do not follow the accent, such as the link hover color (`--color-pageTextLinkLight`) and the border of a hovered table row (`--color-tableBorderHover`).
+
 ### Available CSS Variables
 
-Custom themes can override any of the CSS variables defined in Actual's base themes. These variables correspond to the theme color keys found in the theme files:
-
-- `packages/desktop-client/src/style/themes/light.ts`
-- `packages/desktop-client/src/style/themes/dark.ts`
-- `packages/desktop-client/src/style/themes/midnight.ts`
+Custom themes can override any of the CSS variables defined in Actual's base themes. These variables correspond to the token names in the theme source file, `packages/component-library/src/themes/source/colors.ts`.
 
 Common variables include:
+
+**Accent Colors:**
+
+- `--color-accent` - Primary buttons, links, focus rings and selection. See [Changing the Accent Color](#changing-the-accent-color)
 
 **Page Colors:**
 
