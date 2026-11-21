@@ -1,4 +1,7 @@
 // @ts-strict-ignore
+import { createAccountHint } from './account-hint';
+import type { ImportAccountHint } from './account-hint';
+
 type Division = {
   category?: string;
   subcategory?: string;
@@ -22,13 +25,29 @@ type QIFTransaction = {
 export function qif2json(qif, options: { dateFormat?: string } = {}) {
   const lines = qif.split('\n').filter(Boolean);
   let line = lines.shift();
+
+  // Some exports start with an `!Account` block naming the account the
+  // transactions belong to: `!Account`, `N<name>`, optional `T<type>`, `^`.
+  let account: ImportAccountHint | null = null;
+  if (line && /^!Account\b/i.test(line.trim())) {
+    let name: string | undefined;
+    while ((line = lines.shift()) && line.trim() !== '^') {
+      if (line.trim()[0] === 'N') {
+        name = line.trim().substring(1);
+      }
+    }
+    account = createAccountHint('qif', name);
+    line = lines.shift();
+  }
   const type = /!Type:([^$]*)$/.exec(line.trim());
   const data: {
     dateFormat: string | undefined;
     type?;
+    account: ImportAccountHint | null;
     transactions: QIFTransaction[];
   } = {
     dateFormat: options.dateFormat,
+    account,
     transactions: [],
   };
   const transactions = data.transactions;
