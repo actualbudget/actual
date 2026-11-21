@@ -13,6 +13,7 @@ import { getScheduledAmount } from '@actual-app/core/shared/schedules';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
+import { ExperimentalMobileSettingsButton } from '#components/mobile/ExperimentalMobileSettingsButton';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccounts } from '#hooks/useAccounts';
 import { useDateFormat } from '#hooks/useDateFormat';
@@ -125,7 +126,12 @@ export function MobileSchedulesPage() {
               <Trans>Schedules</Trans>
             </Text>
           }
-          rightContent={<AddScheduleButton />}
+          rightContent={
+            <>
+              <AddScheduleButton />
+              <ExperimentalMobileSettingsButton />
+            </>
+          }
         />
       }
       padding={0}

@@ -247,6 +247,9 @@ export function ExperimentalFeatures() {
       >
         <Trans>Mobile calculator</Trans>
       </FeatureToggle>
+      <FeatureToggle flag="simpleMobileNavbar">
+        <Trans>Simplified mobile navigation bar</Trans>
+      </FeatureToggle>
       <FeatureToggle
         flag="newSidebarUI"
         feedbackLink="https://github.com/actualbudget/actual/issues/9007"

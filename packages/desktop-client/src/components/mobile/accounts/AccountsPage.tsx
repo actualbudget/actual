@@ -28,6 +28,7 @@ import { css } from '@emotion/css';
 import { useMoveAccountMutation, useSyncAndDownloadMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
 import { makeAmountFullStyle } from '#components/budget/util';
+import { ExperimentalMobileSettingsButton } from '#components/mobile/ExperimentalMobileSettingsButton';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import { MobilePageHeader, Page } from '#components/Page';
@@ -339,14 +340,17 @@ function AllAccountList({
         <MobilePageHeader
           title={t('Accounts')}
           rightContent={
-            <Button
-              variant="bare"
-              aria-label={t('Add account')}
-              style={{ margin: 10 }}
-              onPress={onAddAccount}
-            >
-              <SvgAdd width={20} height={20} />
-            </Button>
+            <>
+              <Button
+                variant="bare"
+                aria-label={t('Add account')}
+                style={{ margin: 10 }}
+                onPress={onAddAccount}
+              >
+                <SvgAdd width={20} height={20} />
+              </Button>
+              <ExperimentalMobileSettingsButton />
+            </>
           }
         />
       }

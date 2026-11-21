@@ -30,6 +30,7 @@ export class MobileNavigation {
   readonly navbar: Locator;
   readonly mainContentSelector: string;
   readonly navbarSelector: string;
+  readonly settingsHeaderButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -37,6 +38,7 @@ export class MobileNavigation {
     this.navbar = page.locator('[data-navbar-state]');
     this.mainContentSelector = '[role=main]';
     this.navbarSelector = '[data-navbar-state]';
+    this.settingsHeaderButton = page.getByRole('button', { name: 'Settings' });
   }
 
   async dragNavbarUp() {
@@ -111,6 +113,18 @@ export class MobileNavigation {
     }
 
     await this.navbar.waitFor();
+
+    // The simplified navbar is always fully visible and has no Settings tab;
+    // settings is opened from the gear button in the page header instead.
+    if (await this.hasNavbarState('fixed')) {
+      if (pageName === 'Settings') {
+        await this.settingsHeaderButton.click();
+      } else {
+        await this.navbar.getByRole('link', { name: pageName }).click();
+      }
+      await pageInstance.waitFor();
+      return pageInstance;
+    }
 
     const navbarStates = NAV_LINKS_HIDDEN_BY_DEFAULT.includes(pageName)
       ? ['default', 'hidden']
