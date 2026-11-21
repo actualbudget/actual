@@ -659,10 +659,10 @@ export async function reconcileTransactions(
   const existingPayeeMap = new Map<string, string>();
 
   // Transactions with the same `imported_id` must never be added more than
-  // once. Only the first occurrence is reconciled; the rest are duplicates
-  // from the same import and are not in the database yet, so they would all
-  // be added otherwise. Keep them around so the preview can mark them as
-  // ignored instead of silently dropping them.
+  // once. Only the first occurrence is reconciled; later duplicates are
+  // skipped unless the caller explicitly forces them to be added. Keep the
+  // skipped ones around so the preview can mark them as ignored instead of
+  // silently dropping them.
   const seenImportedIds = new Set<string>();
   const duplicateTransactions = [];
   const transactionsToReconcile = transactions.filter(trans => {
@@ -670,12 +670,14 @@ export async function reconcileTransactions(
       return true;
     }
 
-    if (seenImportedIds.has(trans.imported_id)) {
+    const isDuplicate = seenImportedIds.has(trans.imported_id);
+    seenImportedIds.add(trans.imported_id);
+
+    if (isDuplicate && !trans.forceAddTransaction) {
       duplicateTransactions.push(trans);
       return false;
     }
 
-    seenImportedIds.add(trans.imported_id);
     return true;
   });
 
