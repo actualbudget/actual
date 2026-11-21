@@ -2,6 +2,7 @@ import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
+import { isTemplateExpired } from '#shared/templates';
 import { amountToInteger, integerToAmount } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 import type {
@@ -80,16 +81,21 @@ export class CategoryTemplateContext {
 
     // run all checks
     CategoryTemplateContext.checkPeriodicInterval(templates);
-    await CategoryTemplateContext.checkByAndScheduleAndSpend(templates, month);
+    await CategoryTemplateContext.checkByAndSchedule(templates);
     await CategoryTemplateContext.checkPercentage(templates);
 
     const hideDecimal = await aqlQuery(
       q('preferences').filter({ id: 'hideFraction' }).select('*'),
     );
 
+    const expiredTemplates = templates.filter(
+      (t): t is ByTemplate | SpendTemplate => isTemplateExpired(t, month),
+    );
+    const activeTemplates = templates.filter(t => !isTemplateExpired(t, month));
+
     // call the private constructor
     return new CategoryTemplateContext(
-      templates,
+      activeTemplates,
       category,
       month,
       fromLastMonth,
@@ -98,6 +104,7 @@ export class CategoryTemplateContext {
         ? hideDecimal.data[0].value === 'true'
         : false,
       skipAvailableClamp,
+      expiredTemplates,
     );
   }
 
@@ -108,6 +115,19 @@ export class CategoryTemplateContext {
       this.remainder.length === 0 &&
       this.goals.length > 0
     );
+  }
+  // with nothing left to run, the category is treated as having no templates
+  hasOnlyExpiredTemplates(): boolean {
+    return (
+      this.expiredTemplates.length > 0 &&
+      this.templates.length === 0 &&
+      this.remainder.length === 0 &&
+      this.goals.length === 0 &&
+      !this.limitCheck
+    );
+  }
+  getExpiredTemplates(): (ByTemplate | SpendTemplate)[] {
+    return this.expiredTemplates;
   }
   getPriorities(): number[] {
     return Array.from(this.priorities);
@@ -383,6 +403,7 @@ export class CategoryTemplateContext {
   private templates: Template[] = [];
   private remainder: RemainderTemplate[] = [];
   private goals: GoalTemplate[] = [];
+  private expiredTemplates: (ByTemplate | SpendTemplate)[] = [];
   private priorities: Set<number> = new Set();
   readonly hideDecimal: boolean = false;
   readonly skipAvailableClamp: boolean = false;
@@ -408,6 +429,7 @@ export class CategoryTemplateContext {
     budgeted: number,
     hideDecimal: boolean = false,
     skipAvailableClamp: boolean = false,
+    expiredTemplates: (ByTemplate | SpendTemplate)[] = [],
   ) {
     this.category = category;
     this.month = month;
@@ -415,6 +437,7 @@ export class CategoryTemplateContext {
     this.previouslyBudgeted = budgeted;
     this.hideDecimal = hideDecimal;
     this.skipAvailableClamp = skipAvailableClamp;
+    this.expiredTemplates = expiredTemplates;
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
       templates.forEach(t => {
@@ -464,10 +487,7 @@ export class CategoryTemplateContext {
       });
   }
 
-  static async checkByAndScheduleAndSpend(
-    templates: Template[],
-    month: string,
-  ) {
+  static async checkByAndSchedule(templates: Template[]) {
     if (
       templates.filter(t => t.type === 'schedule' || t.type === 'by').length ===
       0
@@ -512,20 +532,6 @@ export class CategoryTemplateContext {
             `Schedule and By templates must be the same priority level. Fix by setting all Schedule and By templates to priority level ${lowestPriority}`,
           );
           //t.priority = lowestPriority;
-        }
-      });
-    // check if the target date is past and not repeating
-    templates
-      .filter(t => t.type === 'by' || t.type === 'spend')
-      .forEach(t => {
-        const range = monthUtils.differenceInCalendarMonths(
-          `${t.month}`,
-          month,
-        );
-        if (range < 0 && !(t.repeat || t.annual)) {
-          throw new Error(
-            `Target month has passed, remove or update the target month`,
-          );
         }
       });
   }
@@ -806,7 +812,11 @@ export class CategoryTemplateContext {
     if (numMonths < 0) {
       return 0;
     } else {
-      return Math.round((target - alreadyBudgeted) / (numMonths + 1));
+      // money already set aside beyond the target stays in the category
+      return Math.max(
+        0,
+        Math.round((target - alreadyBudgeted) / (numMonths + 1)),
+      );
     }
   }
 
@@ -971,8 +981,12 @@ export class CategoryTemplateContext {
       perTemplateNeed.set(template, amount);
       totalNeeded += amount;
     }
-    const toBudget = Math.round(
-      (totalNeeded - templateContext.fromLastMonth) / (shortNumMonths + 1),
+    // money already set aside beyond the targets stays in the category
+    const toBudget = Math.max(
+      0,
+      Math.round(
+        (totalNeeded - templateContext.fromLastMonth) / (shortNumMonths + 1),
+      ),
     );
     return { toBudget, perTemplateNeed };
   }

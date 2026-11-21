@@ -7,6 +7,10 @@ import { splitSqlitePath } from './paths';
 // worker that holds them ends. Where the API is missing (insecure contexts,
 // tests) they are no-ops.
 
+// How long a store waits for a budget's lock before it reports the budget
+// in use. Longer than a leaving leader gets to save and let go
+// (STORAGE_RELEASE_TIMEOUT_MS in the tab bridge), so a slow hand-over is
+// waited out
 export const BUDGET_LOCK_TIMEOUT_MS = 10_000;
 
 export function budgetLockName(path: string): string {

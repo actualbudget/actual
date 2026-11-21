@@ -108,6 +108,7 @@ export function Schedules() {
         search={
           <Search
             placeholder={t('Filter schedules…')}
+            width="100%"
             value={filter}
             onChange={setFilter}
           />

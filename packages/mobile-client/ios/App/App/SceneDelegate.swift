@@ -21,4 +21,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         SceneDelegateProxy.shared.scene(scene, continue: userActivity)
     }
 
+    // WKWebView ships with the edge-swipe back/forward gesture off. The web
+    // view only exists once the bridge view controller has loaded its view,
+    // which it has by the time the scene becomes active.
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        (window?.rootViewController as? CAPBridgeViewController)?.webView?.allowsBackForwardNavigationGestures = true
+    }
+
 }
