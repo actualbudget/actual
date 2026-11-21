@@ -21,6 +21,8 @@ import {
   sequentialNewlinesPlugin,
 } from '#util/markdown';
 
+import { translateBuiltInDashboardContent } from './defaultDashboardNames';
+
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
 
 const markdownStyles = css(markdownBaseStyles, {
@@ -47,6 +49,11 @@ export function MarkdownCard({
   onMetaChange,
 }: MarkdownCardProps) {
   const { t } = useTranslation();
+  const displayContent = translateBuiltInDashboardContent(
+    meta.content,
+    meta.builtin_key,
+    t,
+  );
 
   const [isVisibleTextArea, setIsVisibleTextArea] = useState(false);
 
@@ -127,12 +134,15 @@ export function MarkdownCard({
             }}
             className={NON_DRAGGABLE_AREA_CLASS_NAME}
             autoFocus
-            defaultValue={meta.content}
+            defaultValue={displayContent}
             onBlur={event => {
-              onMetaChange({
-                ...meta,
-                content: event.currentTarget.value,
-              });
+              if (event.currentTarget.value !== displayContent) {
+                onMetaChange({
+                  ...meta,
+                  builtin_key: undefined,
+                  content: event.currentTarget.value,
+                });
+              }
               setIsVisibleTextArea(false);
             }}
           />
@@ -147,7 +157,7 @@ export function MarkdownCard({
                 ],
               ]}
             >
-              {meta.content}
+              {displayContent}
             </ReactMarkdown>
           </Text>
         )}

@@ -43,6 +43,8 @@ import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useNavigate } from '#hooks/useNavigate';
 import { useResizeObserver } from '#hooks/useResizeObserver';
 
+import { translateBuiltInDashboardName } from './defaultDashboardNames';
+
 type CalendarCardProps = {
   widgetId: string;
   isEditing?: boolean;
@@ -60,6 +62,11 @@ export function CalendarCard({
 }: CalendarCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
+  const cardName = translateBuiltInDashboardName(
+    meta?.name || t('Calendar'),
+    meta?.builtin_key,
+    t,
+  );
 
   const [latestTransaction, setLatestTransaction] = useState<string>('');
 
@@ -177,13 +184,16 @@ export function CalendarCard({
         <View style={{ flexDirection: 'row', padding: 20, paddingBottom: 0 }}>
           <View style={{ flex: 1, marginBottom: -5 }}>
             <ReportCardName
-              name={meta?.name || t('Calendar')}
+              name={cardName}
               isEditing={nameMenuOpen}
               onChange={newName => {
-                onMetaChange({
-                  ...meta,
-                  name: newName,
-                });
+                if (newName !== cardName) {
+                  onMetaChange({
+                    ...meta,
+                    builtin_key: undefined,
+                    name: newName,
+                  });
+                }
                 setNameMenuOpen(false);
               }}
               onClose={() => setNameMenuOpen(false)}

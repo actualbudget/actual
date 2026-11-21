@@ -51,8 +51,8 @@ import {
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { DashboardHeader } from './DashboardHeader';
-import './overview.scss';
 import { DashboardSelector } from './DashboardSelector';
+import './overview.scss';
 import { LoadingIndicator } from './LoadingIndicator';
 import { AgeOfMoneyCard } from './reports/AgeOfMoneyCard';
 import { BalanceForecastCard } from './reports/BalanceForecastCard';
@@ -61,6 +61,7 @@ import { CalendarCard } from './reports/CalendarCard';
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CrossoverCard } from './reports/CrossoverCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
+import { translateBuiltInDashboardPageName } from './reports/defaultDashboardNames';
 import { FormulaCard } from './reports/FormulaCard';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { MissingReportCard } from './reports/MissingReportCard';
@@ -490,7 +491,12 @@ export function Overview({ dashboard }: OverviewProps) {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  <Trans>Reports</Trans>: {dashboard.name}
+                  <Trans>Reports</Trans>:{' '}
+                  {translateBuiltInDashboardPageName(
+                    dashboard.name,
+                    dashboard.builtin_key ?? undefined,
+                    t,
+                  )}
                 </View>
               }
             />

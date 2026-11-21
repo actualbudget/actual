@@ -203,6 +203,7 @@ export const schema = {
   dashboard_pages: {
     id: f('id'),
     name: f('string'),
+    builtin_key: f('string'),
     sort_order: f('float'),
     tombstone: f('boolean'),
   },

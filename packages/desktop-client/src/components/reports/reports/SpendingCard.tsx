@@ -25,6 +25,8 @@ import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
+import { translateBuiltInDashboardName } from './defaultDashboardNames';
+
 type SpendingCardProps = {
   widgetId: string;
   isEditing?: boolean;
@@ -50,6 +52,11 @@ export function SpendingCard({
   const spendingReportMode = meta?.mode ?? 'single-month';
   const averageRange = normalizeSpendingAverageRange(meta?.averageRange);
   const averageRangeLabel = getSpendingAverageRangeLabel(averageRange, t);
+  const cardName = translateBuiltInDashboardName(
+    meta?.name || t('Monthly Spending'),
+    meta?.builtin_key,
+    t,
+  );
 
   const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
 
@@ -103,13 +110,16 @@ export function SpendingCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={meta?.name || t('Monthly Spending')}
+              name={cardName}
               isEditing={nameMenuOpen}
               onChange={newName => {
-                onMetaChange({
-                  ...meta,
-                  name: newName,
-                });
+                if (newName !== cardName) {
+                  onMetaChange({
+                    ...meta,
+                    builtin_key: undefined,
+                    name: newName,
+                  });
+                }
                 setNameMenuOpen(false);
               }}
               onClose={() => setNameMenuOpen(false)}

@@ -5,9 +5,22 @@ import type { RuleConditionEntity } from './rule';
 export type DashboardPageEntity = {
   id: string;
   name: string;
+  builtin_key?: 'main';
   sort_order: number;
   tombstone: boolean;
 };
+
+export type BuiltinDashboardWidgetKey =
+  | 'total-income-ytd'
+  | 'total-expenses-ytd'
+  | 'average-per-month'
+  | 'average-per-transaction'
+  | 'this-month'
+  | 'budget-overview'
+  | 'three-month-average'
+  | 'transaction-calendar'
+  | 'recent-net-worth-change'
+  | 'dashboard-tips';
 
 export type TimeFrame = {
   start: string;
@@ -78,6 +91,7 @@ export type SpendingWidget = AbstractWidget<
   'spending-card',
   {
     name?: string;
+    builtin_key?: BuiltinDashboardWidgetKey;
     conditions?: RuleConditionEntity[];
     conditionsOp?: 'and' | 'or';
     compare?: string;
@@ -122,7 +136,11 @@ export type CrossoverWidget = AbstractWidget<
 >;
 export type MarkdownWidget = AbstractWidget<
   'markdown-card',
-  { content: string; text_align?: 'left' | 'right' | 'center' }
+  {
+    content: string;
+    text_align?: 'left' | 'right' | 'center';
+    builtin_key?: BuiltinDashboardWidgetKey;
+  }
 >;
 
 export type MonteCarloAllocationPreset =
@@ -433,6 +451,7 @@ export type SummaryWidget = AbstractWidget<
   'summary-card',
   {
     name?: string;
+    builtin_key?: BuiltinDashboardWidgetKey;
     conditions?: RuleConditionEntity[];
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
@@ -459,6 +478,7 @@ export type CalendarWidget = AbstractWidget<
   'calendar-card',
   {
     name?: string;
+    builtin_key?: BuiltinDashboardWidgetKey;
     conditions?: RuleConditionEntity[];
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
