@@ -27,6 +27,7 @@ import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { ExpenseCategoryList } from './ExpenseCategoryList';
+import { GroupBudgetCell } from './GroupBudgetCell';
 
 type ExpenseGroupListItemProps = ComponentPropsWithoutRef<
   typeof GridListItem<CategoryGroupEntity>
@@ -96,6 +97,7 @@ export function ExpenseGroupListItem({
           isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
           isHidden={isHidden}
+          onBudgetAction={onBudgetAction}
         />
 
         <ExpenseCategoryList
@@ -122,6 +124,7 @@ type ExpenseGroupHeaderProps = {
   show3Columns: boolean;
   showBudgetedColumn: boolean;
   isHidden: boolean;
+  onBudgetAction?: ExpenseGroupListItemProps['onBudgetAction'];
 };
 
 export function ExpenseGroupHeader({
@@ -133,6 +136,7 @@ export function ExpenseGroupHeader({
   isCollapsed,
   onToggleCollapse,
   isHidden,
+  onBudgetAction,
 }: ExpenseGroupHeaderProps) {
   return (
     <View
@@ -162,8 +166,10 @@ export function ExpenseGroupHeader({
       />
       <ExpenseGroupCells
         group={categoryGroup}
+        month={month}
         show3Columns={show3Columns}
         showBudgetedColumn={showBudgetedColumn}
+        onBudgetAction={onBudgetAction}
       />
     </View>
   );
@@ -270,14 +276,18 @@ function ExpenseGroupName({
 
 type ExpenseGroupCellsProps = {
   group: CategoryGroupEntity;
+  month: string;
   show3Columns: boolean;
   showBudgetedColumn: boolean;
+  onBudgetAction?: ExpenseGroupListItemProps['onBudgetAction'];
 };
 
 function ExpenseGroupCells({
   group,
+  month,
   show3Columns,
   showBudgetedColumn,
+  onBudgetAction,
 }: ExpenseGroupCellsProps) {
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const format = useFormat();
@@ -320,29 +330,44 @@ function ExpenseGroupCells({
       <View
         style={{
           ...(!show3Columns && !showBudgetedColumn && { display: 'none' }),
+          ...(onBudgetAction &&
+            !group.hidden && {
+              width: columnWidth,
+              alignItems: 'flex-end',
+            }),
         }}
       >
-        <CellValue<'envelope-budget' | 'tracking-budget', 'group-budget'>
-          binding={budgeted}
-          type="financial"
-        >
-          {({ type, value }) => (
-            <View>
-              <PrivacyFilter>
-                <AutoTextSize
-                  key={value}
-                  as={Text}
-                  minFontSizePx={6}
-                  maxFontSizePx={12}
-                  mode="oneline"
-                  style={amountStyle}
-                >
-                  {format(value, type)}
-                </AutoTextSize>
-              </PrivacyFilter>
-            </View>
-          )}
-        </CellValue>
+        {onBudgetAction && !group.hidden ? (
+          <GroupBudgetCell
+            binding={budgeted}
+            group={group}
+            month={month}
+            columnWidth={columnWidth}
+            onBudgetAction={onBudgetAction}
+          />
+        ) : (
+          <CellValue<'envelope-budget' | 'tracking-budget', 'group-budget'>
+            binding={budgeted}
+            type="financial"
+          >
+            {({ type, value }) => (
+              <View>
+                <PrivacyFilter>
+                  <AutoTextSize
+                    key={value}
+                    as={Text}
+                    minFontSizePx={6}
+                    maxFontSizePx={12}
+                    mode="oneline"
+                    style={amountStyle}
+                  >
+                    {format(value, type)}
+                  </AutoTextSize>
+                </PrivacyFilter>
+              </View>
+            )}
+          </CellValue>
+        )}
       </View>
       <View
         style={{

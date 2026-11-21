@@ -25,11 +25,13 @@ export type BudgetHandlers = {
   'budget/budget-amount': typeof actions.setBudget;
   'budget/copy-previous-month': typeof actions.copyPreviousMonth;
   'budget/copy-single-month': typeof actions.copySinglePreviousMonth;
+  'budget/copy-group-previous-month': typeof actions.copyGroupPreviousMonth;
   'budget/set-zero': typeof actions.setZero;
   'budget/set-3month-avg': typeof actions.set3MonthAvg;
   'budget/set-6month-avg': typeof actions.set6MonthAvg;
   'budget/set-12month-avg': typeof actions.set12MonthAvg;
   'budget/set-n-month-avg': typeof actions.setNMonthAvg;
+  'budget/set-group-n-month-avg': typeof actions.setGroupNMonthAvg;
   'budget/check-templates': typeof goalActions.runCheckTemplates;
   'budget/apply-goal-template': typeof goalActions.applyTemplate;
   'budget/apply-multiple-templates': typeof goalActions.applyMultipleCategoryTemplates;
@@ -43,6 +45,7 @@ export type BudgetHandlers = {
   'budget/cover-overbudgeted': typeof actions.coverOverbudgeted;
   'budget/transfer-category': typeof actions.transferCategory;
   'budget/copy-until-year-end': typeof actions.copyUntilYearEnd;
+  'budget/copy-group-until-year-end': typeof actions.copyGroupUntilYearEnd;
   'budget/set-carryover': typeof actions.setCategoryCarryover;
   'budget/reset-income-carryover': typeof actions.resetIncomeCarryover;
   'get-categories': typeof getCategories;
@@ -80,11 +83,19 @@ app.method(
   'budget/copy-single-month',
   mutator(undoable(actions.copySinglePreviousMonth)),
 );
+app.method(
+  'budget/copy-group-previous-month',
+  mutator(undoable(actions.copyGroupPreviousMonth)),
+);
 app.method('budget/set-zero', mutator(undoable(actions.setZero)));
 app.method('budget/set-3month-avg', mutator(undoable(actions.set3MonthAvg)));
 app.method('budget/set-6month-avg', mutator(undoable(actions.set6MonthAvg)));
 app.method('budget/set-12month-avg', mutator(undoable(actions.set12MonthAvg)));
 app.method('budget/set-n-month-avg', mutator(undoable(actions.setNMonthAvg)));
+app.method(
+  'budget/set-group-n-month-avg',
+  mutator(undoable(actions.setGroupNMonthAvg)),
+);
 app.method(
   'budget/check-templates',
   mutator(undoable(goalActions.runCheckTemplates)),
@@ -133,6 +144,10 @@ app.method(
 app.method(
   'budget/copy-until-year-end',
   mutator(undoable(actions.copyUntilYearEnd)),
+);
+app.method(
+  'budget/copy-group-until-year-end',
+  mutator(undoable(actions.copyGroupUntilYearEnd)),
 );
 app.method(
   'budget/set-carryover',
