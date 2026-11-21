@@ -40,7 +40,7 @@ type CommonAutocompleteProps<T extends AutocompleteItem> = {
   shouldSaveFromKey?: (e: KeyboardEvent) => boolean;
   filterSuggestions?: (suggestions: T[], value: string) => T[];
   openOnFocus?: boolean;
-  getHighlightedIndex?: (suggestions: T[]) => number | null;
+  getHighlightedIndex?: (suggestions: T[], value: string) => number | null;
   highlightFirst?: boolean;
   onUpdate?: (id: T['id'], value: string) => void;
   strict?: boolean;
@@ -421,7 +421,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
           };
           const highlightedIndex = (
             getHighlightedIndex || defaultGetHighlightedIndex
-          )(filteredSuggestions);
+          )(filteredSuggestions, value);
           // @ts-expect-error Types say there is no type
           if (changes.type !== Downshift.stateChangeTypes.clickItem) {
             fireUpdate(
