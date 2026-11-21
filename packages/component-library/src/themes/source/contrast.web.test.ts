@@ -31,8 +31,6 @@ const knownFailures = new Set<string>([
   'midnight: noticeTextDark on noticeBackground',
   'midnight: pillText on pillBackground',
   'light: calendarItemText on calendarSelectedBackground',
-  'dark: formLabelText on warningBackground',
-  'midnight: formLabelText on warningBackground',
   'midnight: settingsNavItemTextSelected on settingsNavItemBackgroundSelected',
 ]);
 

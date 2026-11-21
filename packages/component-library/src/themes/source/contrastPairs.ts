@@ -35,8 +35,6 @@ function secondary(
 export const contrastPairs: ContrastPair[] = [
   text('pageTextPositive', 'datePickerRangeBackground'),
   text('calendarItemText', 'calendarSelectedBackground'),
-  text('formLabelText', 'errorBackground'),
-  text('formLabelText', 'warningBackground'),
   text(
     'settingsNavItemTextSelected',
     'settingsNavItemBackgroundSelected',

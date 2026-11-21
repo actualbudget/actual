@@ -494,11 +494,7 @@ export const colors = {
   upcomingBackground: { all: { ref: 'accentSubtle' } },
   upcomingText: { all: { ref: 'accentSubtleText' } },
 
-  formLabelText: {
-    light: 'purple500',
-    dark: 'purple150',
-    midnight: 'purple150',
-  },
+  formLabelText: { all: { ref: 'accentText' } },
   formLabelBackground: { all: { ref: 'tableBackground' } },
   formInputBackground: {
     light: 'navy50',

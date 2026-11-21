@@ -2,7 +2,6 @@
 
 exports[`theme contrast > records the ratio of every known failure 1`] = `
 {
-  "dark: formLabelText on warningBackground": "4.03",
   "dark: menuItemTextHover on menuItemBackgroundHover": "4.08",
   "dark: noticeText on noticeBackground": "3.61",
   "dark: noticeTextLight on tableBackground": "3.97",
@@ -23,7 +22,6 @@ exports[`theme contrast > records the ratio of every known failure 1`] = `
   "light: warningText on tableBackground": "3.39",
   "light: warningText on warningBackground": "2.90",
   "midnight: buttonNormalTextHover on buttonNormalBackgroundHover": "2.98",
-  "midnight: formLabelText on warningBackground": "4.03",
   "midnight: menuAutoCompleteTextHover on menuAutoCompleteBackgroundHover": "3.09",
   "midnight: noticeText on noticeBackground": "2.13",
   "midnight: noticeTextDark on noticeBackground": "3.22",

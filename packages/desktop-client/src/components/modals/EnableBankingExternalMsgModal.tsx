@@ -296,7 +296,7 @@ export function EnableBankingExternalMsgModal({
               <Link
                 variant="text"
                 onClick={onEnableBankingInit}
-                style={{ color: theme.formLabelText, display: 'inline' }}
+                style={{ color: 'inherit', display: 'inline' }}
               >
                 set them up
               </Link>{' '}
