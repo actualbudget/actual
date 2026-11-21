@@ -788,7 +788,7 @@ describe('Transactions', () => {
     after.remove();
   });
 
-  test.each(['[Enter]', '[ArrowDown]'])(
+  test.each(['[Enter]'])(
     '%s on the focused table starts editing the first row',
     async key => {
       const { container } = renderTransactions();
@@ -805,27 +805,140 @@ describe('Transactions', () => {
     },
   );
 
+  function getTable() {
+    return screen.getByTestId('table');
+  }
+
+  // The selected cell is highlighted without an open input; the table
+  // itself keeps keyboard focus
+  function expectToBeSelectedField(
+    container: HTMLElement,
+    name: string,
+    rowIndex: number,
+  ) {
+    const field = queryField(container, name, '', rowIndex);
+    expect(
+      field.closest('[data-cursor-field]')?.getAttribute('data-cursor-field'),
+    ).toBe(name);
+    expect(field.querySelector('input')).toBeNull();
+    expect(document.activeElement).toBe(getTable());
+  }
+
+  function expectNothingSelected(container: HTMLElement) {
+    expect(container.querySelector('[data-cursor-field]')).toBeNull();
+  }
+
+  test('escape from a cell reverts it and leaves the cell selected', async () => {
+    const { container, getTransactions } = renderTransactions();
+    const originalNote = getTransactions()[2].notes;
+    const input = await editField(container, 'notes', 2);
+    await userEvent.type(input, 'draft[Escape]');
+
+    expectToBeSelectedField(container, 'notes', 2);
+    expect(getTransactions()[2].notes).toBe(originalNote);
+  });
+
   test.each([
     ['[ArrowDown]', 3],
     ['j', 3],
     ['[ArrowUp]', 1],
     ['k', 1],
-  ])(
-    '%s after escape moves from the row the user left',
-    async (key, expectedRow) => {
-      const { container } = renderTransactions();
-      await userEvent.click(
-        queryField(container, 'select', '[data-testid=cell-button]', 2),
-      );
+  ])('%s moves the selected cell without editing', async (key, expectedRow) => {
+    const { container } = renderTransactions();
+    await editField(container, 'notes', 2);
+    await userEvent.keyboard('[Escape]');
+
+    await userEvent.keyboard(key);
+
+    expectToBeSelectedField(container, 'notes', expectedRow);
+  });
+
+  test('arrow keys keep moving the selection, and enter edits it', async () => {
+    const { container } = renderTransactions();
+    await editField(container, 'debit', 0);
+    await userEvent.keyboard('[Escape]');
+
+    await userEvent.keyboard('[ArrowDown][ArrowDown]');
+    expectToBeSelectedField(container, 'debit', 2);
+
+    await userEvent.keyboard('[Enter]');
+    expectToBeEditingField(container, 'debit', 2);
+  });
+
+  test('tab and the side arrows move the selection across columns', async () => {
+    const { container } = renderTransactions();
+    await editField(container, 'notes', 2);
+    await userEvent.keyboard('[Escape]');
+
+    await userEvent.keyboard('[ArrowRight]');
+    expect(
+      queryField(container, 'notes', '', 2).closest('[data-cursor-field]'),
+    ).not.toHaveAttribute('data-cursor-field', 'notes');
+    await userEvent.keyboard('[ArrowLeft]');
+    expectToBeSelectedField(container, 'notes', 2);
+
+    await userEvent.keyboard('[Tab]');
+    expect(container.querySelector('[data-cursor-field]')).not.toHaveAttribute(
+      'data-cursor-field',
+      'notes',
+    );
+    await userEvent.keyboard('{Shift>}[Tab]{/Shift}');
+    expectToBeSelectedField(container, 'notes', 2);
+  });
+
+  test('space checks and unchecks the selected row', async () => {
+    const { container } = renderTransactions();
+    await editField(container, 'notes', 2);
+    await userEvent.keyboard('[Escape]');
+
+    await userEvent.keyboard('[Space]');
+    expect(countSelectedRows(container)).toBe(1);
+    expectToBeSelectedField(container, 'notes', 2);
+
+    await userEvent.keyboard('[Space]');
+    expect(countSelectedRows(container)).toBe(0);
+  });
+
+  test('escape on a selected cell clears checked rows first, then the selection', async () => {
+    const { container } = renderTransactions();
+    await editField(container, 'notes', 2);
+    await userEvent.keyboard('[Escape][Space]');
+    expect(countSelectedRows(container)).toBe(1);
+
+    await userEvent.keyboard('[Escape]');
+    expect(countSelectedRows(container)).toBe(0);
+    expectToBeSelectedField(container, 'notes', 2);
+
+    await userEvent.keyboard('[Escape]');
+    expectNothingSelected(container);
+    expect(document.activeElement).toBe(getTable());
+  });
+
+  test('arrow down on the focused table selects the first row without editing', async () => {
+    const { container } = renderTransactions();
+    getTable().focus();
+
+    await userEvent.keyboard('[ArrowDown]');
+
+    expectToBeSelectedField(container, 'select', 0);
+  });
+
+  test('clicking outside the table clears the selected cell', async () => {
+    const { container } = renderTransactions();
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    try {
+      await editField(container, 'notes', 2);
       await userEvent.keyboard('[Escape]');
-      expect(document.activeElement).toBe(screen.getByTestId('table'));
+      expectToBeSelectedField(container, 'notes', 2);
 
-      await userEvent.keyboard(key);
+      await userEvent.click(outside);
 
-      const cursor = expectToBeEditingField(container, 'select', expectedRow);
-      expect(cursor).not.toHaveClass('hover-visible');
-    },
-  );
+      expectNothingSelected(container);
+    } finally {
+      outside.remove();
+    }
+  });
 
   test('enter after escape goes back into the cell the user left', async () => {
     const { container } = renderTransactions();
@@ -850,6 +963,9 @@ describe('Transactions', () => {
     await userEvent.keyboard('[Escape]');
     expect(document.activeElement).toBe(table);
 
+    // The first Escape leaves the cell selected, where Tab moves across
+    // columns; once nothing is selected Tab leaves the table
+    await userEvent.keyboard('[Escape]');
     await userEvent.tab();
     expect(document.activeElement).toBe(after);
 

@@ -33,7 +33,9 @@ test.describe('Keyboard navigation', () => {
       await page?.close();
     });
 
-    test('escape on a $0 cell exits edit mode without committing the typed value', async () => {
+    // The budget grid keeps master's behaviour: Escape reverts the draft but
+    // stays in the cell
+    test('escape on a $0 cell reverts the typed value without committing it', async () => {
       const firstCategoryRow = budgetPage.budgetTable.getByTestId('row').nth(1);
       const budgetCell = firstCategoryRow.getByTestId('budget').first();
       const totalBefore = await budgetPage.getTotalBudgeted();
@@ -45,7 +47,9 @@ test.describe('Keyboard navigation', () => {
       await page.keyboard.type('123');
       await page.keyboard.press('Escape');
 
-      await expect(input).toBeHidden();
+      await expect(input).toBeVisible();
+      await expect(input).not.toHaveValue('123');
+      await page.keyboard.press('Enter');
       expect(await budgetPage.getTotalBudgeted()).toBe(totalBefore);
     });
 
@@ -71,15 +75,18 @@ test.describe('Keyboard navigation', () => {
       await page.keyboard.type('123');
       await page.keyboard.press('Escape');
 
+      await expect(input).toBeVisible();
+      await expect(input).not.toHaveValue('123');
+      await page.keyboard.press('Enter');
       await expect(input).toBeHidden();
       expect(await budgetCell.textContent()).toBe(committedText);
 
-      // Canceling must leave the next unchanged edit usable too.
+      // Canceling must leave the next edit usable too.
       await budgetCell.click();
       await expect(input).toBeVisible();
-      await page.keyboard.press('Escape');
-      await expect(input).toBeHidden();
-      expect(await budgetCell.textContent()).toBe(committedText);
+      await page.keyboard.type('450');
+      await page.keyboard.press('Enter');
+      await expect(budgetCell).toContainText('450');
     });
   });
 
@@ -185,6 +192,39 @@ test.describe('Keyboard navigation', () => {
       await expect(transaction.notes).toHaveText('');
     });
 
+    test('escape leaves the cell selected, arrows move it and enter edits', async () => {
+      const accountPage = await navigation.createAccount({
+        name: 'Test Selected Cell',
+        offBudget: false,
+        balance: 100,
+      });
+      for (const debit of ['1.00', '2.00', '3.00']) {
+        await accountPage.createSingleTransaction({ payee: 'Shop', debit });
+      }
+      await expect(accountPage.getNthTransaction(2).payee).toBeVisible();
+
+      const table = page.getByTestId('table');
+      const selectedRow = table.locator('[data-cursor-field="debit"]');
+      const first = accountPage.getNthTransaction(0);
+      await first.debit.click();
+      await expect(first.debit.locator('input')).toBeVisible();
+
+      await page.keyboard.press('Escape');
+      await expect(first.debit.locator('input')).toBeHidden();
+      await expect(table).toBeFocused();
+      await expect(selectedRow).toContainText('3.00');
+
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.press('ArrowDown');
+      await expect(selectedRow).toContainText('1.00');
+      await expect(table.locator('input')).toHaveCount(0);
+
+      await page.keyboard.press('Enter');
+      await expect(
+        accountPage.getNthTransaction(2).debit.locator('input'),
+      ).toBeFocused();
+    });
+
     test('escape clears the multi-selected rows in a single press', async () => {
       const accountPage = await navigation.createAccount({
         name: 'Test Savings',
@@ -213,9 +253,9 @@ test.describe('Keyboard navigation', () => {
       await accountPage.selectNthTransaction(1);
       await expect(accountPage.selectButton).toBeVisible();
 
-      // Press Escape immediately after the last checkbox click; focus
-      // is still on that checkbox. The handler must treat checkbox-cell
-      // focus as "not editing" so a single Escape clears the selection.
+      // Press Escape immediately after the last checkbox click; focus is
+      // still on that checkbox. A checkbox has no draft to revert, so a
+      // single Escape leaves it and clears the selection.
       await page.keyboard.press('Escape');
 
       await expect(accountPage.selectButton).toBeHidden();

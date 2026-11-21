@@ -2,6 +2,8 @@
 import React, {
   forwardRef,
   useCallback,
+  useEffect,
+  useEffectEvent,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
@@ -1031,7 +1033,7 @@ export const Table = forwardRef(
         exitEdit: () => {},
         onEdit: () => {},
         onEditFirstField: () => {},
-        resumeEdit: () => null,
+        onSelectFirstField: () => {},
         editingId: null,
         focusedField: null,
         getNavigatorProps: (props =>
@@ -1042,7 +1044,9 @@ export const Table = forwardRef(
     const {
       onEdit,
       onEditFirstField,
-      resumeEdit,
+      onSelectFirstField,
+      cursor,
+      isEditing,
       exitEdit,
       editingId,
       focusedField,
@@ -1118,6 +1122,20 @@ export const Table = forwardRef(
       );
     }
 
+    // Keep the selected cell in view as the arrow keys move it
+    const selectedId = isEditing ? undefined : cursor?.id;
+    const scrollToSelected = useEffectEvent((id: TableItem['id']) => {
+      const index = items.findIndex(item => item.id === id);
+      if (index !== -1) {
+        list.current?.scrollToItem(index, 'smart');
+      }
+    });
+    useEffect(() => {
+      if (selectedId != null) {
+        scrollToSelected(selectedId);
+      }
+    }, [selectedId]);
+
     useLayoutEffect(() => {
       // We wait for the list to mount because AutoSizer needs to run
       // before it's mounted
@@ -1139,6 +1157,11 @@ export const Table = forwardRef(
       const item = items[index];
       const editing = editingId === item.id;
       const selected = isSelected && isSelected(item.id);
+      // Compare against a real cursor: some tables have rows without ids
+      const selectedField =
+        !isEditing && cursor != null && cursor.id === item.id
+          ? cursor.field
+          : undefined;
 
       const row = renderItem({
         item,
@@ -1161,9 +1184,12 @@ export const Table = forwardRef(
             zIndex: editing || selected ? 101 : 'auto',
             transform: 'translateY(var(--pos))',
             backgroundColor,
+            ...(selectedField != null &&
+              selectedCellStyle(selectedField, !!selected)),
           }}
           nativeStyle={{ '--pos': `${style.top - 1}px` }}
           data-focus-key={item.id}
+          data-cursor-field={selectedField}
         >
           {row}
         </View>
@@ -1241,31 +1267,22 @@ export const Table = forwardRef(
         return;
       }
 
-      // The navigator owns keys while editing, including Escape
-      if (editingId != null || e.target !== e.currentTarget) {
+      // The navigator owns keys while editing or while a cell is selected
+      if (
+        editingId != null ||
+        e.target !== e.currentTarget ||
+        e.isDefaultPrevented()
+      ) {
         return;
       }
 
-      // Pick up where the user left off (e.g. after Escape), falling back
-      // to the first visible row when nothing was edited yet
-      const resumeDir = RESUME_KEYS[e.key];
-      if (resumeDir !== undefined) {
-        const id = resumeEdit(resumeDir);
-        if (id != null) {
-          e.preventDefault();
-          const index = items.findIndex(item => item.id === id);
-          if (index !== -1) {
-            list.current?.scrollToItem(index, 'smart');
-          }
-          return;
-        }
-      }
-
       if (e.key === 'Tab') {
-        if (!e.shiftKey && !e.isDefaultPrevented()) {
+        if (!e.shiftKey) {
           focusExit.current?.focus({ preventScroll: true });
         }
-      } else if (e.key === 'Enter' || e.key === 'ArrowDown') {
+      } else if (e.key === 'Enter' || e.key === 'ArrowDown' || e.key === 'j') {
+        // Nothing selected yet: start from the first visible row. Enter
+        // edits it (#9494); arrows only select it
         const index =
           list.current && scrollContainer.current
             ? list.current.getStartIndexForOffset(
@@ -1274,8 +1291,13 @@ export const Table = forwardRef(
             : 0;
         const item = items[index];
         if (item != null) {
+          e.preventDefault();
           list.current?.scrollToItem(index, 'smart');
-          onEditFirstField(item.id);
+          if (e.key === 'Enter') {
+            onEditFirstField(item.id);
+          } else {
+            onSelectFirstField(item.id);
+          }
         }
       }
     }
@@ -1372,14 +1394,23 @@ export const Table = forwardRef(
 // @ts-expect-error fix me
 Table.displayName = 'Table';
 
-// Keys on the focused table that resume editing from the remembered cell
-const RESUME_KEYS: Record<string, -1 | 0 | 1> = {
-  Enter: 0,
-  ArrowDown: 1,
-  j: 1,
-  ArrowUp: -1,
-  k: -1,
-};
+// Highlights the row and outlines the selected cell. Rows paint their own
+// background, so this targets them from the wrapper.
+function selectedCellStyle(field: string, isChecked: boolean): CSSProperties {
+  const cell = `& [data-testid="${field}"]`;
+  return {
+    // A checked row keeps its own highlight
+    ...(!isChecked && {
+      '& [data-testid="row"]': {
+        backgroundColor: theme.tableRowBackgroundHover,
+      },
+    }),
+    [cell]: {
+      boxShadow: `inset 0 0 0 2px ${theme.formInputBorderSelected}`,
+    },
+    [`${cell} .hover-visible`]: { opacity: 1 },
+  };
+}
 
 export type TableCursor<T extends TableItem = TableItem> = {
   id: T['id'];
@@ -1393,7 +1424,7 @@ export type TableNavigator<T extends TableItem = TableItem> = {
   exitEdit: () => void;
   onEdit: (id: T['id'] | null, field?: string) => void;
   onEditFirstField: (id: T['id']) => void;
-  resumeEdit: (dir: -1 | 0 | 1) => T['id'] | null;
+  onSelectFirstField: (id: T['id']) => void;
   editingId: T['id'] | null;
   focusedField: string | null;
   getNavigatorProps: <P extends object>(
@@ -1536,29 +1567,102 @@ export function useTableNavigator<T extends TableItem>(
     }
   }
 
-  // Starts editing again from the cell the user left: the same cell for
-  // dir 0, otherwise the nearest row above or below that has the same field.
-  // Returns the row it moved to, or null when there's nothing to resume.
-  function resumeEdit(dir: -1 | 0 | 1): T['id'] | null {
+  // Highlights a cell without editing it (the "selected" state). The table
+  // keeps keyboard focus, so arrows move the selection and Enter edits it.
+  function selectCell(id: T['id'], field?: string) {
+    setCursor({ id, field });
+    setIsEditing(false);
+  }
+
+  function onSelectFirstField(id: T['id']) {
+    const item = data.find(item => item.id === id);
+    const [field] = item ? getFields(item) : [];
+    if (field != null) {
+      selectCell(id, field);
+    }
+  }
+
+  // Moves the selected cell like the edit cursor, but without editing and
+  // without wrapping past the first or last row
+  function moveSelection(dir: 'left' | 'right' | 'up' | 'down') {
     if (!cursor) {
-      return null;
+      return;
     }
     const idx = data.findIndex(item => item.id === cursor.id);
     if (idx === -1) {
-      return null;
+      return;
     }
 
-    let nextIdx = idx;
-    for (let i = idx + dir; dir !== 0 && i >= 0 && i < data.length; i += dir) {
-      if (getFields(data[i]).includes(cursor.field)) {
-        nextIdx = i;
-        break;
+    if (dir === 'up' || dir === 'down') {
+      const step = dir === 'up' ? -1 : 1;
+      for (let i = idx + step; i >= 0 && i < data.length; i += step) {
+        if (getFields(data[i]).includes(cursor.field)) {
+          selectCell(data[i].id, cursor.field);
+          return;
+        }
       }
+      return;
     }
 
-    const next = data[nextIdx];
-    beginEdit(next.id, cursor.field);
-    return next.id;
+    const fields = getFields(data[idx]);
+    const fieldIdx = fields.indexOf(cursor.field) + (dir === 'left' ? -1 : 1);
+    if (fieldIdx >= 0 && fieldIdx < fields.length) {
+      selectCell(cursor.id, fields[fieldIdx]);
+    } else if (dir === 'left' && idx > 0) {
+      const prevFields = getFields(data[idx - 1]);
+      selectCell(data[idx - 1].id, prevFields[prevFields.length - 1]);
+    } else if (dir === 'right' && idx < data.length - 1) {
+      selectCell(data[idx + 1].id, getFields(data[idx + 1])[0]);
+    }
+  }
+
+  // Keys while a cell is selected (not edited) and the table has focus
+  function onSelectedKeyDown(e: KeyboardEvent): boolean {
+    if (!cursor) {
+      return false;
+    }
+    switch (e.key) {
+      case 'ArrowUp':
+      case 'k':
+        moveSelection('up');
+        return true;
+      case 'ArrowDown':
+      case 'j':
+        moveSelection('down');
+        return true;
+      case 'ArrowLeft':
+        moveSelection('left');
+        return true;
+      case 'ArrowRight':
+        moveSelection('right');
+        return true;
+      case 'Tab':
+        moveSelection(e.shiftKey ? 'left' : 'right');
+        return true;
+      case 'Enter':
+        beginEdit(cursor.id, cursor.field);
+        return true;
+      case ' ':
+        if (!selectedDispatch) {
+          return false;
+        }
+        selectedDispatch({
+          type: 'select',
+          id: String(cursor.id),
+          isRangeSelect: e.shiftKey,
+        });
+        return true;
+      case 'Escape':
+        // Checked rows go first, then the selected cell itself
+        if (selectedItems && selectedItems.size > 0) {
+          selectedDispatch?.({ type: 'select-none' });
+        } else {
+          setCursor(null);
+        }
+        return true;
+      default:
+        return false;
+    }
   }
 
   function onMove(dir: 'left' | 'right' | 'up' | 'down') {
@@ -1596,6 +1700,16 @@ export function useTableNavigator<T extends TableItem>(
       onKeyDown: (e: KeyboardEvent) => {
         userProps?.onKeyDown?.(e);
         if (e.isPropagationStopped()) {
+          return;
+        }
+
+        if (
+          !isInCell() &&
+          e.target === e.currentTarget &&
+          onSelectedKeyDown(e)
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
           return;
         }
 
@@ -1690,6 +1804,11 @@ export function useTableNavigator<T extends TableItem>(
           // Let the clicked control receive focus. exitEdit also focuses
           // this table, which is appropriate for Escape but not for blur.
           setIsEditing(false);
+          // Focus moving to the table itself keeps the selected cell;
+          // leaving the table drops it so no stale highlight is left
+          if (containerRef.current !== e.relatedTarget) {
+            setCursor(null);
+          }
         }
       },
     };
@@ -1702,7 +1821,7 @@ export function useTableNavigator<T extends TableItem>(
     exitEdit,
     onEdit,
     onEditFirstField,
-    resumeEdit,
+    onSelectFirstField,
     editingId,
     focusedField,
     getNavigatorProps,
