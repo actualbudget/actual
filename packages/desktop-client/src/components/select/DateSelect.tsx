@@ -347,6 +347,11 @@ function DateSelectDesktop({
   const [open, setOpen] = useState(embedded || isOpen || false);
   const innerRef = useRef<HTMLInputElement | null>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(innerRef, ref);
+  // True while programmatic focus restoration from a day selection is in
+  // progress, so the input's focus-open below doesn't re-open the picker
+  // that selection just closed (the picker can be open without the input
+  // ever having been focused, e.g. via isOpen).
+  const isRestoringFocusRef = useRef(false);
 
   const [selectedValue, setSelectedValue] = useState(value);
 
@@ -478,7 +483,7 @@ function DateSelectDesktop({
         onKeyDown={onKeyDown}
         onChange={onChange}
         onFocus={e => {
-          if (!embedded && openOnFocus) {
+          if (!embedded && openOnFocus && !isRestoringFocusRef.current) {
             setOpen(true);
           }
           inputProps?.onFocus?.(e);
@@ -494,6 +499,10 @@ function DateSelectDesktop({
             innerRef.current?.focus();
             return;
           }
+          // Focus left the field for somewhere outside the calendar: the
+          // selection-restoration window is over, so the next focus on the
+          // input may open the picker again.
+          isRestoringFocusRef.current = false;
           if (!embedded) {
             setOpen(false);
           }
@@ -545,6 +554,18 @@ function DateSelectDesktop({
               setValue(format(date, dateFormat));
               onSelect(format(date, 'yyyy-MM-dd'));
               setOpen(false);
+              if (!embedded) {
+                // react-aria leaves focus on the (now unmounting) calendar
+                // cell when a day is clicked; return it to the input so Tab
+                // continues from the date field instead of restarting from
+                // the top of the page (#9370). Focus-open stays suppressed
+                // until the next blur: if the picker was opened without
+                // input focus (isOpen), both this restoration AND any
+                // delayed focus react-aria performs while closing the
+                // popover must not re-open it.
+                isRestoringFocusRef.current = true;
+                innerRef.current?.focus();
+              }
             }}
           />
           {onTransferDateSyncChange && (
