@@ -7,6 +7,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
+import { MOBILE_APP_RETURN_PAGE_HTML } from '#util/mobile-app-return';
 
 import {
   AccountNotLinkedToRequisition,
@@ -45,10 +46,12 @@ function validateOrigin(origin: string | undefined) {
   return url.origin;
 }
 
-function resolveRedirectHost(req: Request) {
+// The desktop and mobile apps have no web origin the bank could redirect back
+// to, so they land on this server's own completion page instead.
+function resolveRedirectHost(req: Request, returnToApp: boolean) {
   const { origin } = req.headers;
   const host = req.get('host');
-  if (origin === ELECTRON_APP_ORIGIN && host) {
+  if ((origin === ELECTRON_APP_ORIGIN || returnToApp) && host) {
     return `${req.protocol}://${host}`;
   }
   return validateOrigin(origin);
@@ -86,6 +89,10 @@ app.use(requestLoggerMiddleware);
 
 app.get('/link', function (req, res) {
   res.send(LINK_PAGE_HTML);
+});
+
+app.get('/link/app', function (req, res) {
+  res.send(MOBILE_APP_RETURN_PAGE_HTML);
 });
 
 export { app as handlers };
@@ -133,11 +140,13 @@ app.post(
   handleError(async (req, res) => {
     const { institutionId: rawInstitutionId } = req.body || {};
     const institutionId = sanitizeId<GoCardlessInstitutionId>(rawInstitutionId);
-    const host = resolveRedirectHost(req);
+    const returnToApp = req.body?.returnToApp === true;
+    const host = resolveRedirectHost(req, returnToApp);
 
     const { link, requisitionId } = await goCardlessService.createRequisition({
       institutionId,
-      host,
+      redirectUrl:
+        host + (returnToApp ? '/gocardless/link/app' : '/gocardless/link'),
     });
 
     res.send({

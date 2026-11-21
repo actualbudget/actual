@@ -10,6 +10,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
+import * as Platform from '@actual-app/core/shared/platform';
 
 import { useAuth } from '#auth/AuthProvider';
 import { Permissions } from '#auth/types';
@@ -22,6 +23,7 @@ import {
   ModalHeader,
 } from '#components/common/Modal';
 import { FormField, FormLabel } from '#components/forms';
+import { useServerURL } from '#components/ServerContext';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { getSecretsError } from '#util/error';
 
@@ -36,6 +38,12 @@ export function EnableBankingInitialiseModal({
   const { t } = useTranslation();
   const { hasPermission } = useAuth();
   const isAdmin = hasPermission(Permissions.ADMINISTRATOR);
+  const serverUrl = useServerURL();
+  // The mobile apps have no web origin, so the bank redirects to the server.
+  const redirectBase =
+    Platform.isNativeMobileApp && serverUrl
+      ? serverUrl.replace(/\/+$/, '')
+      : window.location.origin;
   const [applicationId, setApplicationId] = useState('');
   const [secretKey, setSecretKey] = useState('');
   const [isValid, setIsValid] = useState(true);
@@ -156,10 +164,10 @@ export function EnableBankingInitialiseModal({
                 When setting up your application, use the following as the
                 redirect URL:
               </Trans>{' '}
-              <code>{window.location.origin}/enablebanking/auth_callback</code>
+              <code>{redirectBase}/enablebanking/auth_callback</code>
             </Text>
 
-            {window.location.protocol === 'http:' && (
+            {redirectBase.startsWith('http:') && (
               <ErrorAlert>
                 <Trans>
                   Enable Banking requires HTTPS for the redirect URL. Your

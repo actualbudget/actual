@@ -188,6 +188,39 @@ describe('Enable Banking Express routes', () => {
     });
   });
 
+  describe('GET /auth_callback', () => {
+    async function startAndFinishAuth(returnToApp: boolean) {
+      mockFetchResponse({ url: 'https://enablebanking.com/auth/redirect' });
+      const start = await request(app)
+        .post('/start-auth')
+        .send({
+          aspsp: { name: 'Nordea', country: 'FI' },
+          redirectUrl: 'https://app.example.com/callback',
+          returnToApp,
+        });
+
+      mockFetchResponse({ session_id: 'session-123', accounts: [] });
+      return request(app)
+        .get('/auth_callback')
+        .query({ code: 'auth-code-123', state: start.body.data.state });
+    }
+
+    it('closes the window for a browser flow', async () => {
+      const res = await startAndFinishAuth(false);
+
+      expect(res.status).toBe(200);
+      expect(res.text).toContain('window.close()');
+      expect(res.text).not.toContain('actualbudget://');
+    });
+
+    it('sends a mobile app flow back to the app', async () => {
+      const res = await startAndFinishAuth(true);
+
+      expect(res.status).toBe(200);
+      expect(res.text).toContain('actualbudget://localhost');
+    });
+  });
+
   describe('POST /complete-auth', () => {
     it('returns error when code is missing', async () => {
       const res = await request(app).post('/complete-auth').send({});
