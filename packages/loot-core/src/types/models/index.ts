@@ -22,6 +22,7 @@ export type * from './schedule';
 export type * from './simplefin';
 export type * from './transaction';
 export type * from './transaction-filter';
+export type * from './truelayer';
 export type * from './user';
 export type * from './user-access';
 export type * from './tags';
