@@ -163,12 +163,14 @@ function MobileCarryoverIndicator({ style }: { style?: CSSProperties }) {
         right: '-3px',
         top: '-5px',
         borderRadius: '50%',
+        // oxlint-disable-next-line actual/theme-token-roles
         backgroundColor: style?.color ?? theme.pillText,
       }}
     >
       <SvgArrowThickRight
         width={11}
         height={11}
+        // oxlint-disable-next-line actual/theme-token-roles
         style={{ color: theme.pillBackgroundLight }}
       />
     </View>
