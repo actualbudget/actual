@@ -421,6 +421,11 @@ export default defineConfig(async ({ mode, command }) => {
                 /^\/kcab\/.*$/,
                 /^\/plugin-data\/.*$/,
                 /^\/enablebanking\/.*$/,
+                // Auth-proxy callbacks (Cloudflare Access, oauth2-proxy,
+                // Authentik) must reach the network to set their cookies.
+                /^\/cdn-cgi\/.*$/,
+                /^\/oauth2\/.*$/,
+                /^\/outpost\.goauthentik\.io\/.*$/,
               ],
             },
           }),
