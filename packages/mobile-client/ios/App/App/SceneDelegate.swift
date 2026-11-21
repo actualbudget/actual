@@ -11,6 +11,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
+        AppLock.shared.sceneWillConnect(scene)
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
@@ -26,6 +27,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     // which it has by the time the scene becomes active.
     func sceneDidBecomeActive(_ scene: UIScene) {
         (window?.rootViewController as? CAPBridgeViewController)?.webView?.allowsBackForwardNavigationGestures = true
+        AppLock.shared.sceneDidBecomeActive(scene)
+    }
+
+    func sceneWillResignActive(_ scene: UIScene) {
+        AppLock.shared.sceneWillResignActive(scene)
+    }
+
+    func sceneDidEnterBackground(_ scene: UIScene) {
+        AppLock.shared.sceneDidEnterBackground(scene)
     }
 
 }
