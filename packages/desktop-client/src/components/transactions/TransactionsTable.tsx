@@ -1027,6 +1027,7 @@ type TransactionProps = {
   onBatchDuplicate?: (ids: TransactionEntity['id'][]) => void;
   onBatchLinkSchedule?: (ids: TransactionEntity['id'][]) => void;
   onBatchUnlinkSchedule?: (ids: TransactionEntity['id'][]) => void;
+  onBatchUnlinkTransfer?: (id: TransactionEntity['id']) => void;
   onCreateRule?: (ids: TransactionEntity['id'][]) => void;
   onScheduleAction?: (
     name: 'skip' | 'post-transaction' | 'post-transaction-today' | 'complete',
@@ -1091,6 +1092,7 @@ const Transaction = memo(function Transaction({
   onBatchDuplicate,
   onBatchLinkSchedule,
   onBatchUnlinkSchedule,
+  onBatchUnlinkTransfer,
   onCreateRule,
   onScheduleAction,
   onMakeAsNonSplitTransactions,
@@ -1562,6 +1564,7 @@ const Transaction = memo(function Transaction({
     onDuplicate: ids => onBatchDuplicate?.(ids),
     onLinkSchedule: ids => onBatchLinkSchedule?.(ids),
     onUnlinkSchedule: ids => onBatchUnlinkSchedule?.(ids),
+    onUnlinkTransfer: onBatchUnlinkTransfer,
     onCreateRule: ids => onCreateRule?.(ids),
     onScheduleAction: (name, ids) => onScheduleAction?.(name, ids),
     onMakeAsNonSplitTransactions: ids => onMakeAsNonSplitTransactions?.(ids),
@@ -2711,6 +2714,7 @@ type TransactionTableInnerProps = {
   onBatchDuplicate: (ids: TransactionEntity['id'][]) => void;
   onBatchLinkSchedule: (ids: TransactionEntity['id'][]) => void;
   onBatchUnlinkSchedule: (ids: TransactionEntity['id'][]) => void;
+  onBatchUnlinkTransfer?: (id: TransactionEntity['id']) => void;
   onCheckNewEnter: (e: KeyboardEvent) => void;
   onCheckEnter: (e: KeyboardEvent) => void;
   onScheduleTemporary: (id?: TransactionEntity['id']) => void;
@@ -2917,6 +2921,7 @@ function TransactionTableInner({
         onBatchDuplicate={props.onBatchDuplicate}
         onBatchLinkSchedule={props.onBatchLinkSchedule}
         onBatchUnlinkSchedule={props.onBatchUnlinkSchedule}
+        onBatchUnlinkTransfer={props.onBatchUnlinkTransfer}
         onCreateRule={props.onCreateRule}
         onScheduleAction={props.onScheduleAction}
         onMakeAsNonSplitTransactions={props.onMakeAsNonSplitTransactions}
@@ -3122,6 +3127,7 @@ export type TransactionTableProps = {
   onBatchDuplicate: (ids: TransactionEntity['id'][]) => void;
   onBatchLinkSchedule: (ids: TransactionEntity['id'][]) => void;
   onBatchUnlinkSchedule: (ids: TransactionEntity['id'][]) => void;
+  onBatchUnlinkTransfer?: (id: TransactionEntity['id']) => void;
   onCreateRule: (ids: RuleEntity['id'][]) => void;
   onScheduleAction: (
     name: 'skip' | 'post-transaction' | 'post-transaction-today' | 'complete',
@@ -4135,6 +4141,7 @@ export const TransactionTable = forwardRef(
             onBatchDuplicate={onBatchDuplicate}
             onBatchLinkSchedule={onBatchLinkSchedule}
             onBatchUnlinkSchedule={onBatchUnlinkSchedule}
+            onBatchUnlinkTransfer={props.onBatchUnlinkTransfer}
             onCreateRule={onCreateRule}
             onScheduleAction={onScheduleAction}
             onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}

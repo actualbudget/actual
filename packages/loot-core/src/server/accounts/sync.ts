@@ -37,6 +37,7 @@ import type {
 
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
+import { linkImportedTransfers } from './transfer-detection';
 
 function BankSyncError(type: string, code: string, details?: object) {
   return { type: 'BankSyncError', category: type, code, details };
@@ -1218,9 +1219,12 @@ async function processBankSyncDownload(
         strictIdChecking: useStrictIdChecking,
         updateDates,
       });
+      // The other side of a new transfer was updated too
+      const linked = await linkImportedTransfers(result.added);
       return {
         ...result,
         added: initialId === null ? result.added : [initialId, ...result.added],
+        updated: [...result.updated, ...linked],
       };
     });
   }
@@ -1245,7 +1249,9 @@ async function processBankSyncDownload(
       await updateAccountBalance(id, currentBalance);
     }
 
-    return result;
+    // The other side of a new transfer was updated too
+    const linked = await linkImportedTransfers(result.added);
+    return { ...result, updated: [...result.updated, ...linked] };
   });
 }
 

@@ -601,6 +601,15 @@ export type Modal =
       };
     }
   | {
+      name: 'confirm-transfer-link';
+      options: {
+        fromAccount: AccountEntity['id'];
+        match: TransactionEntity;
+        onLink: () => void;
+        onCreateNew: () => void;
+      };
+    }
+  | {
       name: 'transaction-table-columns';
       options: {
         columns: TransactionTableColumn[];
