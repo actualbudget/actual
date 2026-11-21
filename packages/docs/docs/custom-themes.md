@@ -101,7 +101,7 @@ Common variables include:
 
 **Base Colors:**
 
-A few of the variables below follow these base colors when a theme does not set them: the page and table backgrounds, the menu and tooltip backgrounds, table borders, and page and table text. Many other variables keep their own colors, including most cards and buttons, modals, form inputs and menu text, so a theme still needs to set those.
+A few of the variables below follow these base colors when a theme does not set them: the page and table backgrounds, the menu and tooltip backgrounds, table borders, and page and table text. The [Theme Variable Reference](./custom-themes-variables.md) shows which variable follows which. Many other variables keep their own colors, including most cards and buttons, modals, form inputs and menu text, so a theme still needs to set those.
 
 Do not point a base color at a variable that follows it, such as `--color-background: var(--color-tableBackground)`. The two would refer to each other and neither would work.
 
@@ -157,7 +157,7 @@ These color palette impact custom report series colors in all variations - bar, 
 - `--color-chartQual8`
 - `--color-chartQual9`
 
-And many more! To see all available variables, check the theme files in the source code or look at an existing theme.
+The [Theme Variable Reference](./custom-themes-variables.md) lists every variable with its color in each built-in theme.
 
 ### Validation Rules
 
