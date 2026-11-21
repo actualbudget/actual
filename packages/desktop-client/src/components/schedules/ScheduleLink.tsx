@@ -48,9 +48,7 @@ export function ScheduleLink({
 
   async function onSelect(scheduleId: string) {
     if (ids?.length > 0) {
-      await send('transactions-batch-update', {
-        updated: ids.map(id => ({ id, schedule: scheduleId })),
-      });
+      await send('schedule/link-transactions', { ids, scheduleId });
       onScheduleLinked?.(schedules.find(s => s.id === scheduleId));
     }
   }

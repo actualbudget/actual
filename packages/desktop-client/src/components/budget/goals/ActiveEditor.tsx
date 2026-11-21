@@ -16,6 +16,7 @@ import { RemainderAutomation } from './editor/RemainderAutomation';
 import { ScheduleAutomation } from './editor/ScheduleAutomation';
 
 type ActiveEditorProps = {
+  categoryId: string;
   state: ReducerState;
   dispatch: (action: Action) => void;
   schedules: readonly ScheduleEntity[];
@@ -26,6 +27,7 @@ type ActiveEditorProps = {
 };
 
 export function ActiveEditor({
+  categoryId,
   state,
   dispatch,
   schedules,
@@ -55,6 +57,7 @@ export function ActiveEditor({
     case 'schedule':
       return (
         <ScheduleAutomation
+          categoryId={categoryId}
           schedules={schedules}
           template={state.template}
           dispatch={dispatch}
