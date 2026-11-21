@@ -970,7 +970,6 @@ function MonthSelector({
   const { t } = useTranslation();
   const prevEnabled = month > monthBounds.start;
   const nextEnabled = month < monthBounds.end;
-
   const arrowButtonStyle = {
     padding: 10,
     margin: 2,

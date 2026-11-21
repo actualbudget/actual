@@ -102,6 +102,20 @@ describe('Button size', () => {
     );
   });
 
+  it('applies touch size styles and resets the min height above narrow', () => {
+    render(<Button size="touch">Touch</Button>);
+
+    const button = screen.getByRole('button', { name: 'Touch' });
+    const computed = getComputedStyle(button);
+
+    // Base (narrow): 40px touch target with default text size.
+    expect(computed.fontSize).toBe('13px');
+    expect(computed.minHeight).toBe('40px');
+
+    // The 40px minimum must not survive past the narrow breakpoint.
+    expectMediaDeclaration(button, '@media (min-width: 512px)', 'min-height:0');
+  });
+
   it('uses uniform padding for bare buttons with an explicit size', () => {
     render(
       <Button size="large" variant="bare">
