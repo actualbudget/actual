@@ -177,6 +177,8 @@ Custom ESLint rules specific to Actual.
 - `prefer-logger-over-console`: Enforces using logger instead of console in `packages/loot-core/`
 - `typography`: Typography rules
 - `prefer-if-statement`: Prefers explicit if statements
+- `no-color-literals`, `no-raw-color-variables`, `theme-token-roles`: Keep colors
+  on theme tokens used for their role
 
 #### 10. **docs** (`packages/docs/`)
 

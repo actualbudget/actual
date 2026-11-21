@@ -309,6 +309,7 @@ function SplitTransactionButton({
         color: theme.noticeTextMenu,
         padding: '6px 8px',
         ':active': {
+          // oxlint-disable-next-line actual/no-color-literals
           backgroundColor: 'rgba(100, 100, 100, .25)',
         },
         ...style,
