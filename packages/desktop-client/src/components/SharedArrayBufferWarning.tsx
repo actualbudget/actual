@@ -5,6 +5,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { isElectron } from '@actual-app/core/shared/environment';
+import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
 
 import { Link } from '#components/common/Link';
@@ -12,8 +13,10 @@ import { Link } from '#components/common/Link';
 export function SharedArrayBufferWarning() {
   const hasSharedArrayBuffer = typeof SharedArrayBuffer !== 'undefined';
 
-  // Only show warning if SharedArrayBuffer is required and not supported
-  if (isElectron() || hasSharedArrayBuffer) {
+  // Only show warning if SharedArrayBuffer is required and not supported.
+  // The native mobile apps always run in the fallback mode (see
+  // browser-preload/start.ts), so the warning is noise there.
+  if (isElectron() || Platform.isNativeMobileApp || hasSharedArrayBuffer) {
     return null;
   }
 

@@ -39,7 +39,7 @@ You can control how far in advance scheduled transactions _appear_ in the Schedu
 
 For example, in the image at the top of this page, the upcoming length is set to _1 week_.
 
-By clicking on the **Change upcoming length** button, you can select how far in advance you want to see forthcoming transactions (e.g., 1 day, 1 week, 2 weeks, 1 month, End of the current month, or Custom length).
+By choosing **Change upcoming length** from the menu at the top right of the Schedules page, you can select how far in advance you want to see forthcoming transactions (e.g., 1 day, 1 week, 2 weeks, 1 month, End of the current month, or Custom length).
 
 <img width="598" alt="The Change upcoming length dialog" src="/img/schedules/schedules-upcoming-length-dialog@2x.webp" />
 
@@ -56,7 +56,7 @@ Changing the upcoming length only affects how schedules are displayed in your le
 
 ## Creating a Schedule
 
-Clicking on the **Add new schedule** button in the bottom right of the Schedules screen will add a new schedule.
+Clicking on the **Add new schedule** button above the list of schedules will add a new schedule.
 
 Some of the available options to tailor schedules to your needs are:
 
@@ -123,7 +123,7 @@ On mobile, a **Schedule** button also appears in the transaction editor when you
 
 Instead of manually entering each schedule, you can let Actual find and suggest schedules for you.
 
-Click the **Find schedules** button in the bottom left corner of the Schedules page to let Actual automatically search for transactions that appear to be recurring.
+Choose **Find schedules** from the menu at the top right of the Schedules page to let Actual automatically search for transactions that appear to be recurring.
 
 <img width="848" alt="The Found Schedules dialog with three suggested schedules" src="/img/schedules/schedules-find-matches@2x.webp" />
 

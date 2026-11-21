@@ -1,6 +1,7 @@
 import createDebug from 'debug';
 import type { Request, Response } from 'express';
 import express from 'express';
+import ipaddr from 'ipaddr.js';
 import { v4 as uuidv4 } from 'uuid';
 
 import { isAdmin } from '#account-db';
@@ -10,6 +11,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
+import { MOBILE_APP_RETURN_PAGE_HTML } from '#util/mobile-app-return';
 import { isBlockedIp } from '#util/ssrf';
 
 import type {
@@ -21,7 +23,7 @@ import {
   isImportableTransaction,
   normalizeAccount,
   normalizeBalance,
-  normalizeTransaction,
+  normalizeTransactions,
 } from './services/enablebanking-service';
 import { EnableBankingError } from './utils/errors';
 
@@ -37,7 +39,12 @@ app.use(express.json());
 // --- Shared helpers ---
 
 function extractPsuHeaders(req: Request): PsuHeaders {
-  const ip = req.ip;
+  // Node reports an IPv4 client on a dual-stack socket as `::ffff:1.2.3.4`,
+  // and some banks reject the PSU address in that form. Send plain IPv4.
+  const ip =
+    req.ip && ipaddr.isValid(req.ip)
+      ? ipaddr.process(req.ip).toString()
+      : req.ip;
   const ua =
     typeof req.headers['user-agent'] === 'string'
       ? req.headers['user-agent']
@@ -118,6 +125,11 @@ async function buildSessionResult(
   };
 }
 
+// Marks an auth started from the mobile app. The callback URL has to match the
+// one registered with Enable Banking exactly, so the state is the only thing
+// that can carry this through the bank redirect.
+const APP_STATE_SUFFIX = '-app';
+
 // Auth callback from bank redirect — must be before validateSessionMiddleware
 // since the bank redirects here directly (no auth token available)
 app.get('/auth_callback', async (req: Request, res: Response) => {
@@ -160,6 +172,11 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
       cleanupPendingAuth(state);
     }
 
+    if (state.endsWith(APP_STATE_SUFFIX)) {
+      res.send(MOBILE_APP_RETURN_PAGE_HTML);
+      return;
+    }
+
     res.send(
       '<html><body><p>Authorization successful. This window will close.</p>' +
         '<script>setTimeout(function(){window.close()},1000)</script></body></html>',
@@ -188,6 +205,14 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
   }
 });
 
+// SECURITY NOTE (intended behaviour - not a vulnerability):
+// Routes below that read bank data with stored credentials only require a
+// valid session; they deliberately do NOT check the user's role. Setting
+// server-wide (global) bank-sync credentials is admin-only, but every
+// signed-in user on that server may use them. This is a supported feature
+// and will remain; budgets with their own credentials use those instead.
+// All users on one server are trusted; roles are not a security boundary.
+// See SECURITY.md ("Threat model" and "Out of scope").
 app.use(validateSessionMiddleware);
 
 // --- Poll/complete-auth coordination ---
@@ -245,7 +270,13 @@ app.post(
       return;
     }
 
-    const { applicationId, secretKey } = req.body || {};
+    const { secretKey } = req.body || {};
+    // A copy-pasted id often carries stray whitespace, which Enable Banking
+    // rejects as an unknown application.
+    const applicationId =
+      typeof req.body?.applicationId === 'string'
+        ? req.body.applicationId.trim()
+        : '';
 
     if (!applicationId || !secretKey) {
       res.send({
@@ -322,7 +353,8 @@ app.post(
 app.post(
   '/start-auth',
   handleError(async (req: Request, res: Response) => {
-    const { aspsp, redirectUrl, maxConsentValidity, psuType } = req.body || {};
+    const { aspsp, redirectUrl, maxConsentValidity, psuType, returnToApp } =
+      req.body || {};
 
     if (!aspsp || !redirectUrl) {
       res.send({
@@ -335,7 +367,7 @@ app.post(
       return;
     }
 
-    const state = uuidv4();
+    const state = uuidv4() + (returnToApp === true ? APP_STATE_SUFFIX : '');
 
     try {
       const authResponse = await enableBankingService.startAuth(
@@ -549,15 +581,28 @@ app.post(
         extractPsuHeaders(req),
       );
 
-      // Fetch balances
-      const balanceResult = await enableBankingService.getBalances(
-        accountId,
-        psuHeaders,
-      );
-      const balances = balanceResult.balances.map(normalizeBalance);
+      // Some banks reject the balances call outright. Carry on without a
+      // balance rather than giving up on the transactions, as account
+      // discovery already does.
+      let balances: ReturnType<typeof normalizeBalance>[] = [];
+      try {
+        const balanceResult = await enableBankingService.getBalances(
+          accountId,
+          psuHeaders,
+        );
+        balances = balanceResult.balances.map(normalizeBalance);
+      } catch (err) {
+        debug('Failed to fetch account balances');
+        debugSensitive(
+          'Failed to fetch balances for account %s: %O',
+          accountId,
+          err,
+        );
+      }
 
-      // Determine starting balance, preferring CLAV balance type
-      let startingBalance = 0;
+      // Determine starting balance, preferring CLAV balance type. `null`
+      // when the bank reported none, so the client does not treat it as 0.
+      let startingBalance: number | null = null;
       if (balances.length > 0) {
         const preferredBalance =
           balances.find(b => b.balanceType === 'CLAV') ?? balances[0];
@@ -572,13 +617,11 @@ app.post(
         psuHeaders,
       );
 
-      const all: ReturnType<typeof normalizeTransaction>[] = [];
-      const booked: ReturnType<typeof normalizeTransaction>[] = [];
-      const pending: ReturnType<typeof normalizeTransaction>[] = [];
+      const all: ReturnType<typeof normalizeTransactions> = [];
+      const booked: ReturnType<typeof normalizeTransactions> = [];
+      const pending: ReturnType<typeof normalizeTransactions> = [];
 
-      for (const tx of rawTransactions) {
-        const normalized = normalizeTransaction(tx);
-
+      for (const normalized of normalizeTransactions(rawTransactions)) {
         // Drop records Actual's client can't insert (empty/non-ISO date or
         // non-numeric amount) — one of them would otherwise abort the entire
         // account sync. Pending transactions that carry a date are unaffected.

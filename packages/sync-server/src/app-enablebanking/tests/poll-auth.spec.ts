@@ -188,6 +188,39 @@ describe('Enable Banking Express routes', () => {
     });
   });
 
+  describe('GET /auth_callback', () => {
+    async function startAndFinishAuth(returnToApp: boolean) {
+      mockFetchResponse({ url: 'https://enablebanking.com/auth/redirect' });
+      const start = await request(app)
+        .post('/start-auth')
+        .send({
+          aspsp: { name: 'Nordea', country: 'FI' },
+          redirectUrl: 'https://app.example.com/callback',
+          returnToApp,
+        });
+
+      mockFetchResponse({ session_id: 'session-123', accounts: [] });
+      return request(app)
+        .get('/auth_callback')
+        .query({ code: 'auth-code-123', state: start.body.data.state });
+    }
+
+    it('closes the window for a browser flow', async () => {
+      const res = await startAndFinishAuth(false);
+
+      expect(res.status).toBe(200);
+      expect(res.text).toContain('window.close()');
+      expect(res.text).not.toContain('actualbudget://');
+    });
+
+    it('sends a mobile app flow back to the app', async () => {
+      const res = await startAndFinishAuth(true);
+
+      expect(res.status).toBe(200);
+      expect(res.text).toContain('actualbudget://localhost');
+    });
+  });
+
   describe('POST /complete-auth', () => {
     it('returns error when code is missing', async () => {
       const res = await request(app).post('/complete-auth').send({});
@@ -482,7 +515,7 @@ describe('Enable Banking Express routes', () => {
       expect(mockFetch).toHaveBeenCalledTimes(3);
     });
 
-    it('returns startingBalance 0 when no balances available', async () => {
+    it('returns a null startingBalance when no balances are reported', async () => {
       mockFetchResponse({ balances: [] });
       mockFetchResponse({ transactions: [] });
 
@@ -490,10 +523,13 @@ describe('Enable Banking Express routes', () => {
         .post('/transactions')
         .send({ accountId: 'uid-1', startDate: '2026-01-01' });
 
-      expect(res.body.data.startingBalance).toBe(0);
+      expect(res.body.data.startingBalance).toBeNull();
     });
 
     it('handles API error gracefully', async () => {
+      // A balance failure is tolerated, so the error has to come from the
+      // transactions call.
+      mockFetchResponse({ balances: [] });
       mockFetchResponse({ message: 'Session expired' }, false, 401);
 
       const res = await request(app)
@@ -506,6 +542,9 @@ describe('Enable Banking Express routes', () => {
     });
 
     it('returns structured error for rate limit (429)', async () => {
+      // A balance failure is tolerated, so the error has to come from the
+      // transactions call.
+      mockFetchResponse({ balances: [] });
       mockFetchResponse({ message: 'Rate limit exceeded' }, false, 429);
 
       const res = await request(app)
@@ -518,6 +557,9 @@ describe('Enable Banking Express routes', () => {
     });
 
     it('maps 404 to INVALID_INPUT category in error_type', async () => {
+      // A balance failure is tolerated, so the error has to come from the
+      // transactions call.
+      mockFetchResponse({ balances: [] });
       mockFetchResponse({ message: 'Account not found' }, false, 404);
 
       const res = await request(app)

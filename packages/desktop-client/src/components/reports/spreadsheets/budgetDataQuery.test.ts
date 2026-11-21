@@ -21,6 +21,25 @@ const categories = [
 ] as CategoryEntity[];
 
 describe('filterCategoriesByConditions', () => {
+  describe.each(['category', 'category_group'] as const)(
+    '%s regex length',
+    field => {
+      it.each([
+        { length: 256, expected: [] },
+        { length: 257, expected: categories },
+      ])('handles a $length-character pattern', ({ length, expected }) => {
+        const result = filterCategoriesByConditions(
+          categories,
+          categoryGroups,
+          [{ field, op: 'matches', value: '^' + 'x'.repeat(length - 2) + '$' }],
+          'and',
+        );
+
+        expect(result).toEqual(expected);
+      });
+    },
+  );
+
   it('filters budget categories by category group', () => {
     const result = filterCategoriesByConditions(
       categories,

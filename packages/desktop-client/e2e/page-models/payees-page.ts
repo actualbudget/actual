@@ -7,7 +7,7 @@ export class PayeesPage {
   constructor(page: Page) {
     this.page = page;
 
-    this.searchBox = page.getByPlaceholder('Filter payees...');
+    this.searchBox = page.getByPlaceholder('Filter payees…');
   }
 
   async searchFor(payeeName: string) {

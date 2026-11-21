@@ -1,19 +1,21 @@
 import { useMemo } from 'react';
 
+import { theme } from '@actual-app/components/theme';
+
 import { useReducedMotion } from '#hooks/useReducedMotion';
 
 export function getColorScale(name: string): string[] {
   const scales: Record<string, string[]> = {
     qualitative: [
-      'var(--color-chartQual1)', // Dark Teal
-      'var(--color-chartQual2)', // Yellow
-      'var(--color-chartQual3)', // Orange
-      'var(--color-chartQual4)', // Light Red
-      'var(--color-chartQual5)', // Blue
-      'var(--color-chartQual6)', // Peach
-      'var(--color-chartQual7)', // Light Teal
-      'var(--color-chartQual8)', // Light Yellow
-      'var(--color-chartQual9)', // Light Red
+      theme.chartQual1, // Dark Teal
+      theme.chartQual2, // Yellow
+      theme.chartQual3, // Orange
+      theme.chartQual4, // Light Red
+      theme.chartQual5, // Blue
+      theme.chartQual6, // Peach
+      theme.chartQual7, // Light Teal
+      theme.chartQual8, // Light Yellow
+      theme.chartQual9, // Light Red
     ],
   };
   return name ? scales[name] : scales.qualitative;

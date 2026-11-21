@@ -618,6 +618,7 @@ export function BudgetFileSelection({
         maxHeight: '100%',
         flex: 1,
         justifyContent: 'center',
+        width: '100%',
         ...(quickSwitchMode
           ? {
               marginTop: 20,
@@ -626,7 +627,6 @@ export function BudgetFileSelection({
           : { marginBottom: 20 }),
         [`@media (min-width: ${tokens.breakpoint_small})`]: {
           maxWidth: tokens.breakpoint_small,
-          width: '100%',
         },
       }}
     >
