@@ -50,6 +50,7 @@
     "generate:i18n": "yarn workspace @actual-app/web generate:i18n",
     "generate:release-notes": "node ./bin/release-note-generator.mts",
     "generate:news-feed": "yarn workspace @actual-app/ci-actions tsx bin/generate-news-feed.ts",
+    "generate:theme-reference": "yarn workspace @actual-app/ci-actions tsx bin/generate-theme-reference.ts",
     "test": "lage test --continue",
     "test:debug": "lage test --no-cache --continue",
     "e2e": "yarn workspace @actual-app/web run e2e",
