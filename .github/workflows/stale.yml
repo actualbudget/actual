@@ -32,6 +32,19 @@ jobs:
           any-of-labels: ':construction: WIP'
           days-before-close: 7
           days-before-issue-stale: -1
+  stale-changes-requested:
+    permissions:
+      pull-requests: write
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/stale@b5d41d4e1d5dceea10e7104786b73624c18a190f # v10.2.0
+        with:
+          stale-pr-message: ':wave: Hi! A maintainer requested changes on this PR and it has not had any activity for a week now. Are you still working on this? Please push your changes or leave a comment to let us know, or this will be closed in 3 days.'
+          close-pr-message: 'This PR was closed because the requested changes were not addressed and there has been no activity for 10 days. If you would like to resume working on this, please reach out to the maintainer team on Discord or leave a comment here to have it reopened.'
+          days-before-stale: 7
+          only-labels: ':warning: changes requested'
+          days-before-close: 3
+          days-before-issue-stale: -1
 
   stale-needs-info:
     permissions:
