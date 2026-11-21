@@ -1,4 +1,9 @@
-import type { ForecastSeries, ForecastSource } from './forecast';
+import type {
+  ForecastMissedOccurrences,
+  ForecastMissedSchedules,
+  ForecastSeries,
+  ForecastSource,
+} from './forecast';
 import type { CustomReportEntity } from './reports';
 import type { RuleConditionEntity } from './rule';
 
@@ -521,5 +526,8 @@ export type BalanceForecastWidget = AbstractWidget<
     series?: ForecastSeries[];
     // Opt-in rolling duration for schedules; absent means the saved timeFrame applies.
     monthsFromToday?: number;
+    // Experimental; absent means overdue schedules stay out of the forecast.
+    missedSchedules?: ForecastMissedSchedules;
+    missedOccurrences?: ForecastMissedOccurrences;
   } | null
 >;
