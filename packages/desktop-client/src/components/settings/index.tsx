@@ -283,7 +283,7 @@ export function GeneralSettings() {
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
   const serverURL = useServerURL();
   const isAppLockVisible =
-    useFeatureFlag('iosAppFeatures') && isAppLockSupported();
+    useFeatureFlag('nativeAppFeatures') && isAppLockSupported();
 
   return (
     <SettingsSections title={t('General')}>

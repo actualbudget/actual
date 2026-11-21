@@ -45,6 +45,8 @@ export function AppLockSettings() {
         return t('Require Touch ID or the device passcode to open Actual.');
       case 'opticId':
         return t('Require Optic ID or the device passcode to open Actual.');
+      case 'biometrics':
+        return t('Require biometrics or the device passcode to open Actual.');
       default:
         return t('Require the device passcode to open Actual.');
     }

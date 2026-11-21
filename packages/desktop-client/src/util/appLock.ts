@@ -1,7 +1,13 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 
 // The biometry the device would offer before falling back to its passcode.
-export type AppLockBiometry = 'faceId' | 'touchId' | 'opticId' | 'none';
+// Android does not say which kind it has, so it reports 'biometrics'.
+export type AppLockBiometry =
+  | 'faceId'
+  | 'touchId'
+  | 'opticId'
+  | 'biometrics'
+  | 'none';
 
 export type AppLockStatus = {
   /** False when the device has no passcode, so there is nothing to ask for. */
@@ -18,8 +24,8 @@ type AppLockPlugin = {
   }): Promise<AppLockStatus>;
 };
 
-// Implemented natively in the iOS app (packages/mobile-client), which is also
-// what enforces the lock. Nothing else registers the plugin.
+// Implemented natively in the iOS and Android apps (packages/mobile-client),
+// which are also what enforce the lock. Nothing else registers the plugin.
 const AppLock = registerPlugin<AppLockPlugin>('AppLock');
 
 export function isAppLockSupported() {

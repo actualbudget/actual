@@ -12,7 +12,7 @@ export type FeatureFlag =
   | 'sankeyReport'
   | 'mobileCalculator'
   | 'monteCarloReport'
-  | 'iosAppFeatures';
+  | 'nativeAppFeatures';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
