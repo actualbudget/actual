@@ -11,6 +11,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
+import { MOBILE_APP_RETURN_PAGE_HTML } from '#util/mobile-app-return';
 import { isBlockedIp } from '#util/ssrf';
 
 import type {
@@ -124,6 +125,11 @@ async function buildSessionResult(
   };
 }
 
+// Marks an auth started from the mobile app. The callback URL has to match the
+// one registered with Enable Banking exactly, so the state is the only thing
+// that can carry this through the bank redirect.
+const APP_STATE_SUFFIX = '-app';
+
 // Auth callback from bank redirect — must be before validateSessionMiddleware
 // since the bank redirects here directly (no auth token available)
 app.get('/auth_callback', async (req: Request, res: Response) => {
@@ -164,6 +170,11 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
     if (pending) {
       pending.resolve(result);
       cleanupPendingAuth(state);
+    }
+
+    if (state.endsWith(APP_STATE_SUFFIX)) {
+      res.send(MOBILE_APP_RETURN_PAGE_HTML);
+      return;
     }
 
     res.send(
@@ -342,7 +353,8 @@ app.post(
 app.post(
   '/start-auth',
   handleError(async (req: Request, res: Response) => {
-    const { aspsp, redirectUrl, maxConsentValidity, psuType } = req.body || {};
+    const { aspsp, redirectUrl, maxConsentValidity, psuType, returnToApp } =
+      req.body || {};
 
     if (!aspsp || !redirectUrl) {
       res.send({
@@ -355,7 +367,7 @@ app.post(
       return;
     }
 
-    const state = uuidv4();
+    const state = uuidv4() + (returnToApp === true ? APP_STATE_SUFFIX : '');
 
     try {
       const authResponse = await enableBankingService.startAuth(
