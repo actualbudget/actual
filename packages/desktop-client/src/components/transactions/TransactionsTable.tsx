@@ -55,6 +55,7 @@ import { DEFAULT_UPCOMING_SCHEDULE_DAYS } from '@actual-app/core/shared/schedule
 import {
   addSplitTransaction,
   deleteTransaction,
+  distributeAmount,
   groupTransaction,
   isPreviewId,
   isTemporaryId,
@@ -3999,94 +4000,35 @@ export const TransactionTable = forwardRef(
           parentTransaction.amount -
           siblingTransactions.reduce((acc, t) => acc + t.amount, 0);
 
-        let amounts: number[] = [];
-        if (emptyTransactions.length > 0) {
-          const amountPerTransaction = Math.floor(
-            remainingAmount / emptyTransactions.length,
-          );
-          let remainingCents =
-            remainingAmount - amountPerTransaction * emptyTransactions.length;
-
-          amounts = new Array(emptyTransactions.length).fill(
-            amountPerTransaction,
-          );
-
-          for (const [amountIndex] of amounts.entries()) {
-            if (remainingCents === 0) break;
-
-            amounts[amountIndex] += 1;
-            remainingCents--;
-          }
-
-          if (isTemporaryId(id)) {
-            newNavigator.onEdit(null);
-          } else {
-            tableNavigator.onEdit(null);
-          }
-
-          for (const [
-            transactionIndex,
-            transaction,
-          ] of emptyTransactions.entries()) {
-            await onSave({
-              ...transaction,
-              amount: amounts[transactionIndex],
-            });
-          }
-        } else if (
-          emptyTransactions.length === 0 &&
-          siblingTransactions.length > 0
-        ) {
-          const siblingTotal = siblingTransactions.reduce(
-            (acc, t) => acc + t.amount,
-            0,
-          );
-          const siblingProportions = siblingTransactions.map(
-            t => t.amount / siblingTotal,
-          );
-
-          for (const [
-            transactionIndex,
-            transaction,
-          ] of siblingTransactions.entries()) {
-            amounts[transactionIndex] =
-              Math.floor(
-                siblingProportions[transactionIndex] * remainingAmount,
-              ) + transaction.amount;
-          }
-
-          let remainingCents =
-            parentTransaction.amount - amounts.reduce((acc, a) => acc + a, 0);
-
-          let amountIndex = 0;
-          while (remainingCents !== 0) {
-            amountIndex = amountIndex % amounts.length;
-            if (remainingCents > 0) {
-              amounts[amountIndex] += 1;
-              remainingCents--;
-            } else {
-              amounts[amountIndex] -= 1;
-              remainingCents++;
-            }
-            amountIndex++;
-          }
-
-          if (isTemporaryId(id)) {
-            newNavigator.onEdit(null);
-          } else {
-            tableNavigator.onEdit(null);
-          }
-
-          for (const [
-            transactionIndex,
-            transaction,
-          ] of siblingTransactions.entries()) {
-            await onSave({
-              ...transaction,
-              amount: amounts[transactionIndex],
-            });
-          }
+        if (siblingTransactions.length === 0) {
+          return;
         }
+
+        // Fill the empty splits evenly if there are any, otherwise spread the
+        // remainder across all splits proportionally to their amounts.
+        const increments = distributeAmount(
+          remainingAmount,
+          emptyTransactions.length > 0
+            ? siblingTransactions.map(t => (t.amount === 0 ? 1 : 0))
+            : siblingTransactions.map(t => t.amount),
+        );
+
+        if (isTemporaryId(id)) {
+          newNavigator.onEdit(null);
+        } else {
+          tableNavigator.onEdit(null);
+        }
+
+        // Save the whole split at once. Saving each child separately races:
+        // every save is built from a snapshot of the split, so later saves
+        // can overwrite the amounts written by earlier ones.
+        await onSave(
+          parentTransaction,
+          siblingTransactions.map((t, index) => ({
+            ...t,
+            amount: t.amount + increments[index],
+          })),
+        );
       },
       [latestState, onSave],
     );
