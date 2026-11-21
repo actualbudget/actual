@@ -42,11 +42,6 @@ yarn start:desktop
 - Use `yarn workspace <workspace-name> run <command>` for workspace-specific tasks
 - Tests run once and exit by default (using `vitest --run`)
 
-### ⚠️ PR titles must start with `[AI]`
-
-Every pull request title must be prefixed with `[AI]` — you have to apply it
-yourself. See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md).
-
 ### Task Orchestration with Lage
 
 The project uses **[lage](https://microsoft.github.io/lage/)** (a task runner for JavaScript monorepos) to efficiently run tests and other tasks across multiple workspaces:
@@ -525,7 +520,7 @@ Before committing changes, ensure:
 
 ## Pull Request Guidelines
 
-See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete PR creation rules, including title prefix requirements, labeling, the GitHub comment/review/issue 🤖 prefix, and PR template handling.
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete PR creation rules, including the PR description format and the GitHub comment/review/issue 🤖 prefix.
 
 ## Code Review Guidelines
 

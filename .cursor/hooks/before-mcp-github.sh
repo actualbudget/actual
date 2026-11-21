@@ -4,8 +4,8 @@
 # Dispatches github MCP calls to the matching shared guard(s) in
 # scripts/agent-hooks/: comment/review/issue writers must be 🤖-prefixed
 # (github-comment-style.sh), issue_write must not create issues
-# (no-issue-create.sh), and create_pull_request must leave the PR template
-# blank (pr-template-blank.sh).
+# (no-issue-create.sh), and create_pull_request must follow the PR template
+# (pr-description.sh).
 # Cursor input on stdin: { tool_name, tool_input, ... }. Output on stdout:
 # { permission: "allow" | "deny", userMessage, agentMessage }.
 
@@ -47,7 +47,7 @@ case "$tool" in
     mcp__github__sub_issue_write)
     guards=github-comment-style.sh ;;
   mcp__github__create_pull_request)
-    guards=pr-template-blank.sh ;;
+    guards=pr-description.sh ;;
   *) allow ;;
 esac
 
