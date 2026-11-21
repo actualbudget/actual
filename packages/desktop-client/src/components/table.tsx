@@ -1308,14 +1308,17 @@ export const Table = forwardRef(
           flex: 1,
           outline: 'none',
           overflow: 'hidden',
-          ':focus-visible::after': {
-            content: '""',
-            position: 'absolute',
-            inset: 0,
-            border: `2px solid ${theme.formInputBorderSelected}`,
-            pointerEvents: 'none',
-            zIndex: 201,
-          },
+          // The selected cell's outline already shows where focus is
+          ...(selectedId == null && {
+            ':focus-visible::after': {
+              content: '""',
+              position: 'absolute',
+              inset: 0,
+              border: `2px solid ${theme.formInputBorderSelected}`,
+              pointerEvents: 'none',
+              zIndex: 201,
+            },
+          }),
           ...style,
         }}
         tabIndex={0}
@@ -1716,17 +1719,14 @@ export function useTableNavigator<T extends TableItem>(
         switch (e.key) {
           case 'ArrowUp':
           case 'k':
-            if (isInCell() && !(e.target instanceof HTMLInputElement)) {
-              e.preventDefault();
-              onMove('up');
-            }
-            break;
-
           case 'ArrowDown':
           case 'j':
+            // While editing, arrows never move between rows, whether the
+            // cell is an input or a button such as the checkbox; Escape to
+            // the selected state first. Only stop a focused button from
+            // scrolling the list.
             if (isInCell() && !(e.target instanceof HTMLInputElement)) {
               e.preventDefault();
-              onMove('down');
             }
             break;
 
@@ -1751,20 +1751,14 @@ export function useTableNavigator<T extends TableItem>(
             break;
 
           case 'Escape': {
-            // Each press peels off one layer: editing first, then the
-            // selection. A button cell (e.g. the checkbox just clicked) has
-            // nothing to revert, so one press leaves it and clears the
-            // selection.
+            // Each press peels off one layer. Leaving the cell keeps any
+            // checked rows; the selected state clears them next.
             const isActive = isInCell();
-            const isOnButtonCell =
-              e.target instanceof Element &&
-              e.target.closest('[data-testid="cell-button"]') != null;
             const hasSelection =
               selectedItems != null && selectedItems.size > 0;
             if (isActive) {
               exitEdit();
-            }
-            if (hasSelection && (!isActive || isOnButtonCell)) {
+            } else if (hasSelection) {
               selectedDispatch?.({ type: 'select-none' });
             }
             if (isActive || hasSelection) {

@@ -963,9 +963,10 @@ describe('Transactions', () => {
     await userEvent.keyboard('[Escape]');
     expect(document.activeElement).toBe(table);
 
-    // The first Escape leaves the cell selected, where Tab moves across
-    // columns; once nothing is selected Tab leaves the table
-    await userEvent.keyboard('[Escape]');
+    // Escape peels one layer per press: the cell (now selected, where Tab
+    // moves across columns), the checked row, then the selection. With
+    // nothing selected Tab leaves the table.
+    await userEvent.keyboard('[Escape][Escape]');
     await userEvent.tab();
     expect(document.activeElement).toBe(after);
 
@@ -981,7 +982,7 @@ describe('Transactions', () => {
   }
 
   test.each(['select', 'cleared'] as const)(
-    'escape clears the selection in one press after clicking the %s cell',
+    'escape after clicking the %s cell keeps checked rows, then clears them',
     async field => {
       const { container } = renderTransactions();
       await userEvent.click(
@@ -994,33 +995,45 @@ describe('Transactions', () => {
         );
       }
 
+      // A checkbox has nothing to revert: the first Escape only leaves it
       await userEvent.keyboard('[Escape]');
+      expect(countSelectedRows(container)).toBe(1);
+      expectToBeSelectedField(container, field, 2);
 
+      await userEvent.keyboard('[Escape]');
       expect(countSelectedRows(container)).toBe(0);
-      expect(document.activeElement).toBe(screen.getByTestId('table'));
+      expectToBeSelectedField(container, field, 2);
     },
   );
 
-  test('arrow keys move a visible cursor between row checkboxes', async () => {
+  test.each(['[ArrowDown]', '[ArrowUp]', 'j', 'k'])(
+    '%s does nothing on a checkbox being edited, like in a text cell',
+    async key => {
+      const { container } = renderTransactions();
+      const checkbox = queryField(
+        container,
+        'select',
+        '[data-testid=cell-button]',
+        2,
+      );
+      await userEvent.click(checkbox);
+
+      await userEvent.keyboard(key);
+
+      expect(document.activeElement).toBe(checkbox);
+      expect(container.querySelector('[data-cursor-field]')).toBeNull();
+    },
+  );
+
+  test('rows can be checked from the keyboard after leaving a checkbox', async () => {
     const { container } = renderTransactions();
     await userEvent.click(
       queryField(container, 'select', '[data-testid=cell-button]', 2),
     );
 
-    await userEvent.keyboard('[ArrowDown]');
+    await userEvent.keyboard('[Escape][ArrowDown][Space]');
 
-    // The unchecked checkbox of the row under the cursor must be shown, not
-    // only revealed on hover, so the user can see where they are
-    const cursor = queryField(
-      container,
-      'select',
-      '[data-testid=cell-button]',
-      3,
-    );
-    expect(document.activeElement).toBe(cursor);
-    expect(cursor).not.toHaveClass('hover-visible');
-
-    await userEvent.keyboard('[Space]');
+    expectToBeSelectedField(container, 'select', 3);
     expect(countSelectedRows(container)).toBe(2);
   });
 

@@ -213,6 +213,12 @@ test.describe('Keyboard navigation', () => {
       await expect(first.debit.locator('input')).toBeHidden();
       await expect(table).toBeFocused();
       await expect(selectedRow).toContainText('3.00');
+      // Only the cell is outlined, not the whole table
+      expect(
+        await table.evaluate(
+          el => getComputedStyle(el, '::after').borderTopStyle,
+        ),
+      ).not.toBe('solid');
 
       await page.keyboard.press('ArrowDown');
       await page.keyboard.press('ArrowDown');
@@ -225,7 +231,7 @@ test.describe('Keyboard navigation', () => {
       ).toBeFocused();
     });
 
-    test('escape clears the multi-selected rows in a single press', async () => {
+    test('escape leaves the clicked checkbox, then clears the checked rows', async () => {
       const accountPage = await navigation.createAccount({
         name: 'Test Savings',
         offBudget: false,
@@ -254,10 +260,12 @@ test.describe('Keyboard navigation', () => {
       await expect(accountPage.selectButton).toBeVisible();
 
       // Press Escape immediately after the last checkbox click; focus is
-      // still on that checkbox. A checkbox has no draft to revert, so a
-      // single Escape leaves it and clears the selection.
+      // still on that checkbox. The first Escape only leaves the cell, so
+      // the checks survive; the second clears them.
       await page.keyboard.press('Escape');
+      await expect(accountPage.selectButton).toBeVisible();
 
+      await page.keyboard.press('Escape');
       await expect(accountPage.selectButton).toBeHidden();
     });
 
@@ -470,7 +478,7 @@ test.describe('Keyboard navigation', () => {
       await expect(accountPage.newTransactionRow).toBeHidden();
     });
 
-    test('escape clears the selection in one press after clicking the cleared checkbox', async () => {
+    test('escape after clicking the cleared icon keeps the checked rows, then clears them', async () => {
       const accountPage = await navigation.createAccount({
         name: 'Test Cleared Escape',
         offBudget: false,
@@ -488,11 +496,11 @@ test.describe('Keyboard navigation', () => {
       await accountPage.selectNthTransaction(0);
       await expect(accountPage.selectButton).toBeVisible();
 
-      // The cleared icon focuses the cell (setting editingId) without
-      // actually editing anything, so one Escape must still clear.
       await accountPage.getNthTransaction(0).cleared.click();
       await page.keyboard.press('Escape');
+      await expect(accountPage.selectButton).toBeVisible();
 
+      await page.keyboard.press('Escape');
       await expect(accountPage.selectButton).toBeHidden();
     });
   });
