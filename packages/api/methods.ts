@@ -4,6 +4,7 @@ import type {
   APIAccountGroupEntity,
   APICategoryEntity,
   APICategoryGroupEntity,
+  APIExchangeRateEntity,
   APIFileEntity,
   APIPayeeEntity,
   APIRuleEntity,
@@ -155,20 +156,34 @@ export function getBudgetMonth(month: string) {
   return send('api/budget-month', { month });
 }
 
+// `currency` names a currency budgeted on its own line in the category
 export function setBudgetAmount(
   month: string,
   categoryId: APICategoryEntity['id'],
   value: number,
+  currency?: string,
 ) {
-  return send('api/budget-set-amount', { month, categoryId, amount: value });
+  return send('api/budget-set-amount', {
+    month,
+    categoryId,
+    amount: value,
+    currency,
+  });
 }
 
+// `currency` names a currency budgeted on its own line in the category
 export function setBudgetCarryover(
   month: string,
   categoryId: APICategoryEntity['id'],
   flag: boolean,
+  currency?: string,
 ) {
-  return send('api/budget-set-carryover', { month, categoryId, flag });
+  return send('api/budget-set-carryover', {
+    month,
+    categoryId,
+    flag,
+    currency,
+  });
 }
 
 export function addTransactions(
@@ -287,6 +302,27 @@ export function updateAccountGroup(
 
 export function deleteAccountGroup(id: APIAccountGroupEntity['id']) {
   return send('api/account-group-delete', { id });
+}
+
+export function getExchangeRates() {
+  return send('api/exchange-rates-get');
+}
+
+export function createExchangeRate(
+  exchangeRate: Omit<APIExchangeRateEntity, 'id' | 'source'>,
+) {
+  return send('api/exchange-rate-create', { exchangeRate });
+}
+
+export function updateExchangeRate(
+  id: APIExchangeRateEntity['id'],
+  fields: Partial<Omit<APIExchangeRateEntity, 'id' | 'source'>>,
+) {
+  return send('api/exchange-rate-update', { id, fields });
+}
+
+export function deleteExchangeRate(id: APIExchangeRateEntity['id']) {
+  return send('api/exchange-rate-delete', { id });
 }
 
 export function getCategoryGroups(options: { hidden?: boolean } = {}) {

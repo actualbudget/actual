@@ -53,6 +53,10 @@ export type Spreadsheets = {
     carryover: number;
     goal: number;
     'long-goal': number;
+    // A category with currency lines, all of them in the default currency
+    'budget-total': number;
+    'sum-amount-total': number;
+    'leftover-total': number;
   };
   'tracking-budget': {
     // Common fields
@@ -76,6 +80,10 @@ export type Spreadsheets = {
     carryover: number;
     goal: number;
     'long-goal': number;
+    // A category with currency lines, all of them in the default currency
+    'budget-total': number;
+    'sum-amount-total': number;
+    'leftover-total': number;
   };
   [`balance`]: {
     // Common fields

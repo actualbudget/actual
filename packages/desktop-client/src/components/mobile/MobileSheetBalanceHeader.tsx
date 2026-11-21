@@ -8,11 +8,14 @@ import { View } from '@actual-app/components/view';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
 import { CellValueText } from '#components/spreadsheet/CellValue';
+import { useFormat } from '#hooks/useFormat';
 
 import { MobileSheetCarryoverIndicator } from './MobileSheetCarryoverIndicator';
 
 type MobileSheetBalanceHeaderProps = {
   label: ReactNode;
+  // The currency of a currency line, which its balance is in
+  currencyCode?: string;
 } & Pick<
   ComponentPropsWithoutRef<typeof BalanceWithCarryover>,
   'carryover' | 'balance' | 'goal' | 'budgeted' | 'longGoal' | 'isIncome'
@@ -20,8 +23,10 @@ type MobileSheetBalanceHeaderProps = {
 
 export function MobileSheetBalanceHeader({
   label,
+  currencyCode,
   ...bindings
 }: MobileSheetBalanceHeaderProps) {
+  const format = useFormat();
   return (
     <View
       style={{
@@ -48,6 +53,11 @@ export function MobileSheetBalanceHeader({
         {props => (
           <CellValueText
             {...props}
+            formatter={
+              currencyCode
+                ? value => format(value, 'financial', { currencyCode })
+                : undefined
+            }
             style={{ textAlign: 'center', ...styles.veryLargeText }}
           />
         )}

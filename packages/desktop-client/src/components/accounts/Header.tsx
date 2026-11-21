@@ -26,6 +26,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import type { Query } from '@actual-app/core/shared/query';
 import { tsToRelativeTime } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
@@ -38,6 +39,7 @@ import { format as formatDate } from 'date-fns';
 import { isAccountFailedSync } from '#accounts/syncStatus';
 import { AnimatedRefresh } from '#components/AnimatedRefresh';
 import { Search } from '#components/common/Search';
+import { MissingRatesBanner } from '#components/currency/MissingRatesBanner';
 import { FilterButton } from '#components/filters/FiltersMenu';
 import { FiltersStack } from '#components/filters/FiltersStack';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
@@ -47,6 +49,7 @@ import { useDateFormat } from '#hooks/useDateFormat';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
+import { useMultiCurrency } from '#hooks/useMultiCurrency';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
@@ -75,6 +78,8 @@ type AccountHeaderProps = {
   reconcileAmount?: number | null;
   isFiltered: boolean;
   filteredAmount?: number | null;
+  // The query behind `filteredAmount`, to convert other currencies
+  filteredQuery?: Query | null;
   isSorted: boolean;
   search: string;
   filterConditions: RuleConditionEntity[];
@@ -147,6 +152,7 @@ export function AccountHeader({
   reconcileAmount,
   isFiltered,
   filteredAmount,
+  filteredQuery,
   isSorted,
   search,
   filterConditions,
@@ -317,6 +323,7 @@ export function AccountHeader({
               account={account}
               isFiltered={isFiltered}
               filteredAmount={filteredAmount}
+              filteredQuery={filteredQuery}
             />
           </View>
 
@@ -330,6 +337,7 @@ export function AccountHeader({
             }}
           />
         </View>
+        {account && <MissingRatesBanner account={account} />}
         <SpaceBetween gap={10} style={{ marginTop: 12 }}>
           {canSync && (
             <Button
@@ -580,6 +588,7 @@ export function AccountHeader({
         <ReconcilingMessage
           targetBalance={reconcileAmount}
           balanceQuery={balanceQuery}
+          currencyCode={account?.currency}
           onDone={onDoneReconciling}
           onCreateTransaction={onCreateReconciliationTransaction}
         />
@@ -740,7 +749,8 @@ type AccountMenuProps = {
       | 'toggle-reconciled'
       | 'toggle-net-worth-chart'
       | 'manage-columns'
-      | 'account-group',
+      | 'account-group'
+      | 'account-settings',
   ) => void;
 };
 
@@ -755,6 +765,7 @@ function AccountMenu({
   const { t } = useTranslation();
   const syncServerStatus = useSyncServerStatus();
   const newSidebarUIEnabled = useFeatureFlag('newSidebarUI');
+  const { isEnabled: isMultiCurrencyEnabled } = useMultiCurrency();
 
   return (
     <Menu
@@ -786,6 +797,14 @@ function AccountMenu({
               {
                 name: 'account-group',
                 text: t('Set account group'),
+              } as const,
+            ]
+          : []),
+        ...(isMultiCurrencyEnabled
+          ? [
+              {
+                name: 'account-settings',
+                text: t('Account settings'),
               } as const,
             ]
           : []),

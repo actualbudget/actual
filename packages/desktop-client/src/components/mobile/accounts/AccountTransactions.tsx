@@ -23,10 +23,12 @@ import {
 } from '#accounts';
 import { markAccountRead } from '#accounts/accountsSlice';
 import * as reconciliation from '#accounts/reconciliation';
+import { MissingRatesBanner } from '#components/currency/MissingRatesBanner';
 import { ReconcilingBanner } from '#components/mobile/accounts/ReconcilingBanner';
 import { TransactionListWithBalances } from '#components/mobile/transactions/TransactionListWithBalances';
 import { useAccountPreviewTransactions } from '#hooks/useAccountPreviewTransactions';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
+import { useCurrencyFormatter } from '#hooks/useCurrencyFormatter';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { getSchedulesQuery } from '#hooks/useSchedules';
@@ -67,6 +69,7 @@ function TransactionListWithPreviews({
 }) {
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const { formatAccountAmount } = useCurrencyFormatter();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -307,6 +310,7 @@ function TransactionListWithPreviews({
 
   return (
     <>
+      <MissingRatesBanner account={account} />
       {isReconciling && (
         <ReconcilingBanner
           account={account}
@@ -325,6 +329,7 @@ function TransactionListWithPreviews({
         balance={balanceBindings.balance}
         balanceCleared={balanceBindings.cleared}
         balanceUncleared={balanceBindings.uncleared}
+        balanceFormatter={value => formatAccountAmount(value ?? 0, account)}
         runningBalances={allBalances}
         showRunningBalances={shouldCalculateRunningBalances}
         isLoadingMore={isLoadingMoreTransactions}

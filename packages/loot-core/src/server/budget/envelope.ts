@@ -5,7 +5,12 @@ import { resolveName } from '#server/spreadsheet/util';
 import * as monthUtils from '#shared/months';
 import { safeNumber } from '#shared/util';
 
-import { createCategory as createCategoryFromBase } from './base';
+import {
+  createCategory as createCategoryFromBase,
+  createCurrencyLinesOf,
+} from './base';
+import { getCurrencyLines } from './category-currencies';
+import type { CurrencyLine } from './category-currencies';
 import { flatten2, number, sumAmounts, unflatten2 } from './util';
 
 function getBlankSheet(months) {
@@ -19,6 +24,85 @@ export function createBlankCategory(cat, months) {
     sheet.get().createStatic(sheetName, `carryover-${cat.id}`, false);
     sheet.get().createStatic(sheetName, `leftover-${cat.id}`, 0);
     sheet.get().createStatic(sheetName, `leftover-pos-${cat.id}`, 0);
+    for (const line of getCurrencyLines(cat.id)) {
+      createBlankCurrencyLine(line, months);
+    }
+  }
+}
+
+export function createBlankCurrencyLine(line: CurrencyLine, months: string[]) {
+  if (months.length > 0) {
+    const sheetName = getBlankSheet(months);
+    sheet.get().createStatic(sheetName, `carryover-${line.id}`, false);
+    sheet.get().createStatic(sheetName, `leftover-${line.id}`, 0);
+    sheet.get().createStatic(sheetName, `leftover-pos-${line.id}`, 0);
+    sheet.get().createStatic(sheetName, `leftover-fx-${line.id}`, 0);
+  }
+}
+
+// What group totals and To Budget add up for a currency line, in the default
+// currency, like for a category: income held for next month when it rolls
+// over, and overspending returned to To Budget unless its balance rolls
+// over. Both at the rate of the month they happened in.
+function getCurrencyLineDependencies(
+  sheetName: string,
+  prevSheetName: string,
+  groupId: string,
+  line: CurrencyLine,
+): Array<[string, string[]]> {
+  return [
+    [`group-sum-amount-${groupId}`, [`sum-amount-fx-${line.id}`]],
+    [`group-budget-${groupId}`, [`budget-fx-${line.id}`]],
+    [`group-leftover-${groupId}`, [`leftover-fx-${line.id}`]],
+    line.isIncome
+      ? [
+          'buffered-auto',
+          [
+            `${sheetName}!sum-amount-fx-${line.id}`,
+            `${sheetName}!carryover-${line.id}`,
+          ],
+        ]
+      : [
+          'last-month-overspent',
+          [
+            `${prevSheetName}!leftover-fx-${line.id}`,
+            `${prevSheetName}!carryover-${line.id}`,
+          ],
+        ],
+  ];
+}
+
+export function addCurrencyLineDependencies(
+  month: string,
+  groupId: string,
+  line: CurrencyLine,
+) {
+  const sheetName = monthUtils.sheetForMonth(month);
+  const prevSheetName = monthUtils.sheetForMonth(monthUtils.prevMonth(month));
+  for (const [cellName, deps] of getCurrencyLineDependencies(
+    sheetName,
+    prevSheetName,
+    groupId,
+    line,
+  )) {
+    sheet.get().addDependencies(sheetName, cellName, deps);
+  }
+}
+
+export function removeCurrencyLineDependencies(
+  month: string,
+  groupId: string,
+  line: CurrencyLine,
+) {
+  const sheetName = monthUtils.sheetForMonth(month);
+  const prevSheetName = monthUtils.sheetForMonth(monthUtils.prevMonth(month));
+  for (const [cellName, deps] of getCurrencyLineDependencies(
+    sheetName,
+    prevSheetName,
+    groupId,
+    line,
+  )) {
+    sheet.get().removeDependencies(sheetName, cellName, deps);
   }
 }
 
@@ -73,23 +157,32 @@ export function createCategory(cat, sheetName, prevSheetName) {
   }
 }
 
+// The cells of a group's categories, and of their currency lines in the
+// default currency
+function getGroupCells(group, own: string, lineValue: string): string[] {
+  return group.categories.flatMap(cat => [
+    own + cat.id,
+    ...getCurrencyLines(cat.id).map(line => lineValue + line.id),
+  ]);
+}
+
 export function createCategoryGroup(group, sheetName) {
   sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
     initialValue: 0,
-    dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
+    dependencies: getGroupCells(group, 'sum-amount-', 'sum-amount-fx-'),
     run: sumAmounts,
   });
 
   if (!group.is_income) {
     sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
       initialValue: 0,
-      dependencies: group.categories.map(cat => `budget-${cat.id}`),
+      dependencies: getGroupCells(group, 'budget-', 'budget-fx-'),
       run: sumAmounts,
     });
 
     sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
       initialValue: 0,
-      dependencies: group.categories.map(cat => `leftover-${cat.id}`),
+      dependencies: getGroupCells(group, 'leftover-', 'leftover-fx-'),
       run: sumAmounts,
     });
   }
@@ -129,9 +222,15 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
   sheet.get().createDynamic(sheetName, 'last-month-overspent', {
     initialValue: 0,
     dependencies: flatten2(
-      expenseCategories.map(cat => [
-        `${prevSheetName}!leftover-${cat.id}`,
-        `${prevSheetName}!carryover-${cat.id}`,
+      expenseCategories.flatMap(cat => [
+        [
+          `${prevSheetName}!leftover-${cat.id}`,
+          `${prevSheetName}!carryover-${cat.id}`,
+        ],
+        ...getCurrencyLines(cat.id).map(line => [
+          `${prevSheetName}!leftover-fx-${line.id}`,
+          `${prevSheetName}!carryover-${line.id}`,
+        ]),
       ]),
     ),
     run: (...data) => {
@@ -162,9 +261,12 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
   sheet.get().createDynamic(sheetName, 'buffered-auto', {
     initialValue: 0,
     dependencies: flatten2(
-      incomeCategories.map(c => [
-        `${sheetName}!sum-amount-${c.id}`,
-        `${sheetName}!carryover-${c.id}`,
+      incomeCategories.flatMap(c => [
+        [`${sheetName}!sum-amount-${c.id}`, `${sheetName}!carryover-${c.id}`],
+        ...getCurrencyLines(c.id).map(line => [
+          `${sheetName}!sum-amount-fx-${line.id}`,
+          `${sheetName}!carryover-${line.id}`,
+        ]),
       ]),
     ),
     run: (...data) => {
@@ -263,6 +365,11 @@ export function handleCategoryChange(months, oldValue, newValue) {
         ],
       ]);
     }
+    for (const line of getCurrencyLines(cat.id)) {
+      deps.push(
+        ...getCurrencyLineDependencies(sheetName, prevSheetName, groupId, line),
+      );
+    }
 
     return deps;
   }
@@ -305,6 +412,7 @@ export function handleCategoryChange(months, oldValue, newValue) {
       const { start, end } = monthUtils.bounds(month);
 
       createCategoryFromBase(newValue, sheetName, prevSheetName, start, end);
+      createCurrencyLinesOf(newValue.id, month);
 
       addDeps(sheetName, prevSheetName, newValue.cat_group, newValue);
     });
