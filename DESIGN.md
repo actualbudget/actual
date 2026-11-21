@@ -112,6 +112,7 @@ All hex values in this file (frontmatter included) are the light-theme palette m
 - **Positive Green** (#147d64): Positive amounts and funded budgets.
 - **Negative Red** (#e12d39): Negative amounts, overspending, failures.
 - **Warning Gold** (#b88115): Underfunded templates, pending states.
+- **Message text**: Error and warning messages use darker steps of the same hues (#cf1124 and #87540d) so they pass contrast as text.
 
 ### Named Rules
 
