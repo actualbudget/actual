@@ -1,13 +1,19 @@
 import { createApp } from '#server/app';
 import * as db from '#server/db';
+import { validateForecastAssumptions } from '#shared/forecast-assumptions';
 import type { RuleConditionEntity } from '#types/models';
-import type { ForecastResult, ForecastSource } from '#types/models/forecast';
+import type {
+  ForecastAssumptions,
+  ForecastResult,
+  ForecastSource,
+} from '#types/models/forecast';
 
 import { resolveForecastAccounts } from './forecast-accounts';
 import type {
   AccountWithComputedBalance,
   DbAccountForRules,
 } from './forecast-accounts';
+import { applyForecastIncomeGrowth } from './forecast-assumptions';
 import { buildFilterInfo, getTransactions } from './forecast-filters';
 import {
   buildForecastDateContext,
@@ -30,6 +36,7 @@ export type ForecastRequestParams = {
   endDate?: string;
   includeAccountlessSchedules?: boolean;
   source?: ForecastSource;
+  assumptions?: ForecastAssumptions;
 };
 
 function createUnassignedForecastAccount(): AccountWithComputedBalance {
@@ -63,7 +70,11 @@ export async function generateForecast({
   endDate,
   includeAccountlessSchedules,
   source = 'schedules',
+  assumptions,
 }: ForecastRequestParams): Promise<ForecastResult> {
+  if (assumptions) {
+    validateForecastAssumptions(assumptions);
+  }
   const includeUnassigned = includeAccountlessSchedules ?? false;
   const dateContext = buildForecastDateContext(startDate, endDate);
 
@@ -94,6 +105,7 @@ export async function generateForecast({
     return {
       dataPoints,
       lowestBalance,
+      ...(assumptions ? { scenario: { assumptions, dataPoints } } : {}),
       forecastStartDate: dateContext.forecastStartDate,
       forecastEndDate: dateContext.forecastEndDate,
     };
@@ -165,21 +177,33 @@ export async function generateForecast({
   return {
     dataPoints,
     lowestBalance,
+    ...(assumptions
+      ? {
+          scenario: {
+            assumptions,
+            dataPoints: projectForecastData({
+              accounts,
+              transactions,
+              futureOccurrences: applyForecastIncomeGrowth(
+                futureOccurrences,
+                schedules,
+                assumptions,
+              ),
+              filterInfo,
+              dateContext,
+            }).dataPoints,
+          },
+        }
+      : {}),
     forecastStartDate: dateContext.forecastStartDate,
     forecastEndDate: dateContext.forecastEndDate,
   };
 }
 
 export type ForecastHandlers = {
-  'forecast/generate': (params: {
-    accountIds?: string[];
-    conditions?: RuleConditionEntity[];
-    conditionsOp?: 'and' | 'or';
-    startDate?: string;
-    endDate?: string;
-    includeAccountlessSchedules?: boolean;
-    source?: ForecastSource;
-  }) => Promise<ForecastResult>;
+  'forecast/generate': (
+    params: ForecastRequestParams,
+  ) => Promise<ForecastResult>;
 };
 
 export const app = createApp<ForecastHandlers>();

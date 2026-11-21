@@ -23,6 +23,21 @@ vi.mock(
 );
 
 describe('buildBalanceForecastRequest', () => {
+  it('includes the saved assumptions in the forecast request', () => {
+    const assumptions = {
+      anchorDate: '2024-03-01',
+      inflationRate: 0.03,
+      salaryGrowthRate: 0.05,
+      incomeScheduleIds: ['salary'],
+    };
+    expect(
+      buildBalanceForecastRequest({
+        startDate: '2024-03-01',
+        endDate: '2029-03-01',
+        assumptions,
+      }),
+    ).toMatchObject({ assumptions });
+  });
   it('keeps schedule forecast filters and account selection', () => {
     expect(
       buildBalanceForecastRequest({
@@ -135,6 +150,38 @@ describe('buildBalanceForecastSeriesRequests', () => {
       conditionsOp: 'or',
       includeAccountlessSchedules: true,
     });
+  });
+
+  it('applies the widget assumptions to every independently filtered line', () => {
+    const assumptions = {
+      anchorDate: '2026-10-01',
+      inflationRate: 0.03,
+      salaryGrowthRate: 0.05,
+      incomeScheduleIds: ['salary'],
+    };
+    const lines: ForecastSeries[] = ['cash', 'card'].map(id => ({
+      id,
+      name: id,
+      accounts: [id],
+      conditions: [],
+      conditionsOp: 'and',
+    }));
+    const requests = buildBalanceForecastSeriesRequests(lines, {
+      ...params,
+      assumptions,
+    });
+    expect(requests.map(({ request }) => request)).toEqual(
+      lines.map(line => ({
+        startDate: params.startDate,
+        endDate: params.endDate,
+        source: 'schedules',
+        accountIds: line.accounts,
+        conditions: [],
+        conditionsOp: 'and',
+        includeAccountlessSchedules: false,
+        assumptions,
+      })),
+    );
   });
 
   it('leaves tracking forecasts as one whole-budget forecast', () => {

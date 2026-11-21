@@ -20,6 +20,10 @@ export function ForecastSeriesSummary({
   isHovered?: boolean;
 }) {
   const format = useFormat();
+  const hasAssumptions = lines.some(
+    line => line.endingPoint?.baselineBalance != null,
+  );
+  const showBaseline = hasAssumptions && !compact;
   return (
     <View style={{ overflow: 'auto', marginBottom: compact ? 4 : 16 }}>
       <table
@@ -45,8 +49,24 @@ export function ForecastSeriesSummary({
                 paddingBottom: compact ? 4 : 8,
               }}
             >
-              <Trans>Ending Balance</Trans>
+              {hasAssumptions ? (
+                <Trans>Ending purchasing power</Trans>
+              ) : (
+                <Trans>Ending Balance</Trans>
+              )}
             </th>
+            {showBaseline && (
+              <th
+                scope="col"
+                style={{
+                  textAlign: 'right',
+                  fontWeight: 400,
+                  paddingBottom: 8,
+                }}
+              >
+                <Trans>Baseline (nominal)</Trans>
+              </th>
+            )}
             {!compact && (
               <th
                 scope="col"
@@ -93,6 +113,19 @@ export function ForecastSeriesSummary({
                   <Trans>No data</Trans>
                 )}
               </td>
+              {showBaseline && (
+                <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                  {line.endingPoint?.baselineBalance != null ? (
+                    <FinancialText>
+                      <PrivacyFilter>
+                        {format(line.endingPoint.baselineBalance, 'financial')}
+                      </PrivacyFilter>
+                    </FinancialText>
+                  ) : (
+                    <Trans>No data</Trans>
+                  )}
+                </td>
+              )}
               {!compact && (
                 <td
                   style={{
