@@ -95,6 +95,53 @@ describe('budget access with an API key', () => {
     }
   });
 
+  it('accepts Bearer tokens with the same budget restrictions', async () => {
+    const response = await request(app)
+      .get('/sync/list-user-files')
+      .set('Authorization', `Bearer ${key}`)
+      .expect(200);
+    expect(
+      response.body.data.map((file: { fileId: string }) => file.fileId),
+    ).toEqual([budget.fileId]);
+    await request(app)
+      .get('/sync/download-user-file')
+      .set('Authorization', `Bearer ${key}`)
+      .set('X-ACTUAL-FILE-ID', otherBudget.fileId)
+      .expect(403);
+  });
+
+  it('rejects revoked Bearer tokens with a challenge', async () => {
+    db.mutate('DELETE FROM api_keys WHERE id = ?', [keyId]);
+    const response = await request(app)
+      .get('/sync/list-user-files')
+      .set('Authorization', `Bearer ${key}`)
+      .expect(401);
+    expect(response.headers['www-authenticate']).toBe(
+      'Bearer error="invalid_token"',
+    );
+  });
+
+  it('rejects ambiguous token headers', async () => {
+    const response = await request(app)
+      .get('/sync/list-user-files')
+      .set('Authorization', `Bearer ${key}`)
+      .set('X-ACTUAL-TOKEN', session)
+      .expect(400);
+    expect(response.headers['www-authenticate']).toBe(
+      'Bearer error="invalid_request"',
+    );
+  });
+
+  it('rejects malformed Bearer credentials', async () => {
+    const response = await request(app)
+      .get('/sync/list-user-files')
+      .set('Authorization', 'Bearer')
+      .expect(400);
+    expect(response.headers['www-authenticate']).toBe(
+      'Bearer error="invalid_request"',
+    );
+  });
+
   function get(path: string, fileId = budget.fileId, token = key) {
     return request(app)
       .get(path)

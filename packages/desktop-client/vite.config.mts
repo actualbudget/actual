@@ -258,6 +258,31 @@ const pluginsServiceAssets = (): Plugin => ({
   },
 });
 
+const oauthConsentDevRoute = (): Plugin => ({
+  name: 'oauth-consent-dev-route',
+  configureServer(server) {
+    server.middlewares.use(async (req, res, next) => {
+      if (
+        req.method !== 'GET' ||
+        req.url?.split('?')[0] !== '/oauth/authorize'
+      ) {
+        return next();
+      }
+      try {
+        const html = await server.transformIndexHtml(
+          req.url,
+          readFileSync(path.resolve(__dirname, 'oauth-consent.html'), 'utf8'),
+        );
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/html');
+        res.end(html);
+      } catch (error) {
+        next(error);
+      }
+    });
+  },
+});
+
 export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isVitest = process.env.VITEST === 'true';
@@ -328,6 +353,13 @@ export default defineConfig(async ({ mode, command }) => {
       assetsInlineLimit: 0,
       chunkSizeWarningLimit: 1500,
       rolldownOptions: {
+        input:
+          mode === 'desktop'
+            ? path.resolve(__dirname, 'index.html')
+            : {
+                index: path.resolve(__dirname, 'index.html'),
+                'oauth-consent': path.resolve(__dirname, 'oauth-consent.html'),
+              },
         output: {
           // Users debug from raw stack traces, so compress and strip
           // whitespace but never mangle identifiers (overrides the
@@ -409,6 +441,7 @@ export default defineConfig(async ({ mode, command }) => {
               globPatterns: [
                 '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
               ],
+              globIgnores: ['oauth-consent.html'],
               ignoreURLParametersMatching: [/^v$/],
               navigateFallback: '/index.html',
               maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
@@ -426,6 +459,8 @@ export default defineConfig(async ({ mode, command }) => {
                 /^\/cdn-cgi\/.*$/,
                 /^\/oauth2\/.*$/,
                 /^\/outpost\.goauthentik\.io\/.*$/,
+                // Actual's OAuth authorization routes are served by the sync server.
+                /^\/oauth\/.*$/,
               ],
             },
           }),
@@ -433,6 +468,7 @@ export default defineConfig(async ({ mode, command }) => {
       addWatchers(),
       mode === 'desktop' || isVitest ? undefined : lootCoreBackend(),
       mode === 'desktop' ? undefined : pluginsServiceAssets(),
+      mode === 'desktop' ? undefined : oauthConsentDevRoute(),
       react(),
       babel({
         include: [reactCompilerInclude],

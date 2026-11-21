@@ -10,6 +10,11 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares';
+import {
+  browserLoginCookieForState,
+  readBrowserCookie,
+  setBrowserSession,
+} from './util/oauth-browser-session';
 
 const app = express();
 app.use(express.json());
@@ -97,10 +102,34 @@ app.post('/config', openIdConfigRateLimiter, async (req, res) => {
 });
 
 app.get('/callback', async (req, res) => {
-  const { error, url } = await loginWithOpenIdFinalize(req.query);
+  const loginCookie =
+    typeof req.query.state === 'string'
+      ? browserLoginCookieForState(req.query.state)
+      : null;
+  const { error, url, browserSessionToken } = await loginWithOpenIdFinalize(
+    req.query,
+    loginCookie ? readBrowserCookie(req, loginCookie) : undefined,
+  );
+
+  if (loginCookie) {
+    res.clearCookie(loginCookie, {
+      path: '/openid/callback',
+      secure: true,
+      httpOnly: true,
+      sameSite: 'lax',
+    });
+  }
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
+    return;
+  }
+
+  if (browserSessionToken && url?.startsWith('/oauth/authorize?')) {
+    setBrowserSession(res, browserSessionToken);
+    res.set('Cache-Control', 'no-store');
+    res.set('Referrer-Policy', 'no-referrer');
+    res.redirect(url);
     return;
   }
 

@@ -7,16 +7,41 @@ import { config } from '#load-config';
 export const TOKEN_EXPIRATION_NEVER = -1;
 const MS_PER_SECOND = 1000;
 
-export function validateSession(req: Request, res: Response) {
-  let { token } = req.body || {};
+function sendInvalidBearerRequest(res: Response) {
+  res.setHeader('WWW-Authenticate', 'Bearer error="invalid_request"');
+  res.status(400).send({ status: 'error', reason: 'invalid_request' });
+}
 
-  if (!token) {
-    token = req.headers['x-actual-token'];
+// Keep legacy token transport available for existing Actual clients.
+export function getRequestToken(req: Request, res: Response) {
+  const authorization = req.headers.authorization;
+  const legacyToken = req.body?.token || req.headers['x-actual-token'];
+  if (authorization !== undefined) {
+    if (legacyToken) {
+      sendInvalidBearerRequest(res);
+      return undefined;
+    }
+    const match = /^Bearer +([A-Za-z0-9\-._~+/]+=*)$/i.exec(authorization);
+    if (!match) {
+      sendInvalidBearerRequest(res);
+      return undefined;
+    }
+    return match[1];
   }
+  return legacyToken;
+}
+
+export function validateSession(req: Request, res: Response) {
+  const token = getRequestToken(req, res);
+  if (res.headersSent) return null;
 
   const session = getSession(token);
 
   if (!session) {
+    res.setHeader(
+      'WWW-Authenticate',
+      token ? 'Bearer error="invalid_token"' : 'Bearer',
+    );
     res.status(401);
     res.send({
       status: 'error',
@@ -30,6 +55,10 @@ export function validateSession(req: Request, res: Response) {
     session.expires_at !== TOKEN_EXPIRATION_NEVER &&
     session.expires_at * MS_PER_SECOND <= Date.now()
   ) {
+    res.setHeader(
+      'WWW-Authenticate',
+      token ? 'Bearer error="invalid_token"' : 'Bearer',
+    );
     res.status(401);
     res.send({
       status: 'error',
