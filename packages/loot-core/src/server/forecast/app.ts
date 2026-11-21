@@ -1,7 +1,12 @@
 import { createApp } from '#server/app';
 import * as db from '#server/db';
 import type { RuleConditionEntity } from '#types/models';
-import type { ForecastResult, ForecastSource } from '#types/models/forecast';
+import type {
+  ForecastMissedOccurrences,
+  ForecastMissedSchedules,
+  ForecastResult,
+  ForecastSource,
+} from '#types/models/forecast';
 
 import { resolveForecastAccounts } from './forecast-accounts';
 import type {
@@ -9,6 +14,10 @@ import type {
   DbAccountForRules,
 } from './forecast-accounts';
 import { buildFilterInfo, getTransactions } from './forecast-filters';
+import {
+  getMissedScheduleIds,
+  settleMissedScheduleOccurrences,
+} from './forecast-missed-schedules';
 import {
   buildForecastDateContext,
   createEmptyForecastResult,
@@ -30,6 +39,8 @@ export type ForecastRequestParams = {
   endDate?: string;
   includeAccountlessSchedules?: boolean;
   source?: ForecastSource;
+  missedSchedules?: ForecastMissedSchedules;
+  missedOccurrences?: ForecastMissedOccurrences;
 };
 
 function createUnassignedForecastAccount(): AccountWithComputedBalance {
@@ -63,6 +74,8 @@ export async function generateForecast({
   endDate,
   includeAccountlessSchedules,
   source = 'schedules',
+  missedSchedules = 'exclude',
+  missedOccurrences = 'one',
 }: ForecastRequestParams): Promise<ForecastResult> {
   const includeUnassigned = includeAccountlessSchedules ?? false;
   const dateContext = buildForecastDateContext(startDate, endDate);
@@ -147,13 +160,37 @@ export async function generateForecast({
     );
   }
 
-  const futureOccurrences = await buildFutureScheduleOccurrences(
+  const postedScheduleTransactions =
+    await getPostedScheduleTransactions(schedules);
+  const scheduleOccurrences = await buildFutureScheduleOccurrences(
     schedules,
     dateContext.endDateObj,
     accountsById,
     ruleAccountsById,
-    await getPostedScheduleTransactions(schedules),
+    postedScheduleTransactions,
   );
+  // Included missed schedules settle today, so the visible projection must
+  // start today for them to have anywhere to land.
+  const canSettleMissedToday =
+    dateContext.firstForecastDate === dateContext.today;
+  const futureOccurrences =
+    missedSchedules !== 'exclude' && canSettleMissedToday
+      ? settleMissedScheduleOccurrences({
+          occurrences: scheduleOccurrences,
+          missedScheduleIds: getMissedScheduleIds(
+            schedules,
+            postedScheduleTransactions,
+            dateContext.today,
+          ),
+          missedSchedules,
+          missedOccurrences,
+          today: dateContext.today,
+        })
+      : scheduleOccurrences;
+  const missedSchedulesUnsupported: ForecastResult['missedSchedulesUnsupported'] =
+    missedSchedules !== 'exclude' && !canSettleMissedToday
+      ? 'today-outside-range'
+      : undefined;
   const { dataPoints, lowestBalance } = projectForecastData({
     accounts,
     transactions,
@@ -167,6 +204,7 @@ export async function generateForecast({
     lowestBalance,
     forecastStartDate: dateContext.forecastStartDate,
     forecastEndDate: dateContext.forecastEndDate,
+    ...(missedSchedulesUnsupported ? { missedSchedulesUnsupported } : {}),
   };
 }
 
@@ -179,6 +217,8 @@ export type ForecastHandlers = {
     endDate?: string;
     includeAccountlessSchedules?: boolean;
     source?: ForecastSource;
+    missedSchedules?: ForecastMissedSchedules;
+    missedOccurrences?: ForecastMissedOccurrences;
   }) => Promise<ForecastResult>;
 };
 

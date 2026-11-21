@@ -1,6 +1,9 @@
 import type { RuleConditionEntity } from './rule';
 
 export type ForecastSource = 'schedules' | 'tracking-budget';
+/** Experimental, report-only treatment of overdue schedules; absent means 'exclude'. */
+export type ForecastMissedSchedules = 'exclude' | 'payments' | 'all';
+export type ForecastMissedOccurrences = 'one' | 'all';
 
 export type ForecastSeries = {
   id: string;
@@ -29,6 +32,8 @@ export type ForecastTransaction = {
   occurrenceDate?: string;
   isTransfer?: boolean;
   isAccountless?: boolean;
+  /** Overdue occurrence the report assumes settles today. */
+  isMissed?: boolean;
 };
 
 export type BalanceForecastConfig = {
@@ -52,4 +57,6 @@ export type ForecastResult = {
   };
   forecastStartDate: string;
   forecastEndDate: string;
+  /** Set when missed schedules were requested but could not settle today. */
+  missedSchedulesUnsupported?: 'today-outside-range';
 };

@@ -27,6 +27,7 @@ type PostedTransactionSummary = {
 };
 
 export type ForecastDateContext = {
+  today: string;
   forecastStartDate: string;
   forecastEndDate: string;
   forecastDays: string[];
@@ -58,6 +59,7 @@ export function buildForecastDateContext(
   const todayString = format(today, 'yyyy-MM-dd');
 
   return {
+    today: todayString,
     forecastStartDate,
     forecastEndDate,
     forecastDays: monthUtils.dayRangeInclusive(
@@ -138,6 +140,7 @@ export function indexScheduleOccurrences(
         isTransfer: occurrence.transaction.transfer_id != null,
         isAccountless:
           occurrence.transaction.account === FORECAST_UNASSIGNED_ACCOUNT_ID,
+        ...(occurrence.isMissed ? { isMissed: true } : {}),
       },
     );
   }
