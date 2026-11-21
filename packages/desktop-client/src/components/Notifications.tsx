@@ -19,9 +19,9 @@ import { removeNotification } from '#notifications/notificationsSlice';
 import type { NotificationWithId } from '#notifications/notificationsSlice';
 import { useDispatch, useSelector } from '#redux';
 
-import { MOBILE_NAV_HEIGHT } from './mobile/MobileNavTabs';
 import { Link } from './common/Link';
 import { MODAL_Z_INDEX } from './common/Modal';
+import { MOBILE_NAV_HEIGHT } from './mobile/MobileNavTabs';
 
 // Notification stacking configuration
 const MAX_VISIBLE_NOTIFICATIONS = 3; // Maximum number of notifications visible in the stack
