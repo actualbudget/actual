@@ -21,13 +21,13 @@ import { Checkbox, FormField, FormLabel } from '#components/forms';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useServerURL, useServerVersion } from '#components/ServerContext';
+import { useAppLockStatus } from '#hooks/useAppLockStatus';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { loadPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
-import { isAppLockSupported } from '#util/appLock';
 
 import { ApiKeys } from './ApiKeys';
 import { AppLockSettings } from './AppLockSettings';
@@ -282,8 +282,7 @@ export function GeneralSettings() {
   const [fileId] = useMetadataPref('cloudFileId');
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
   const serverURL = useServerURL();
-  const isAppLockVisible =
-    useFeatureFlag('nativeAppFeatures') && isAppLockSupported();
+  const [appLockStatus, setAppLockStatus] = useAppLockStatus();
 
   return (
     <SettingsSections title={t('General')}>
@@ -296,9 +295,14 @@ export function GeneralSettings() {
       <SettingsGroup title={t('Budget')}>
         <BudgetTypeSettings />
       </SettingsGroup>
-      {(serverURL || isAppLockVisible) && (
+      {(serverURL || appLockStatus) && (
         <SettingsGroup title={t('Security')}>
-          {isAppLockVisible && <AppLockSettings />}
+          {appLockStatus && (
+            <AppLockSettings
+              status={appLockStatus}
+              onStatusChange={setAppLockStatus}
+            />
+          )}
           <AuthSettings />
           <EncryptionSettings />
           {serverURL && fileId && (

@@ -22,6 +22,9 @@ final class AppLock {
     // again, so prompting on every activation would bring it straight back
     // after the user cancels it; from then on they use the Unlock button.
     private var shouldPromptWhenActive = false
+    // Counts the times the app was locked, so that the answer to a prompt
+    // from before the latest lock cannot unlock it.
+    private var lockGeneration = 0
 
     private init() {}
 
@@ -113,6 +116,7 @@ final class AppLock {
 
     private func lock(in scene: UIScene) {
         isLocked = true
+        lockGeneration += 1
         shouldPromptWhenActive = true
         showCover(in: scene)
     }
@@ -143,10 +147,11 @@ final class AppLock {
 
         isAuthenticating = true
         updateCover()
+        let generation = lockGeneration
         context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Unlock Actual Budget") { success, _ in
             DispatchQueue.main.async {
                 self.isAuthenticating = false
-                if success {
+                if success, generation == self.lockGeneration {
                     self.isLocked = false
                     self.hideCover()
                 } else {

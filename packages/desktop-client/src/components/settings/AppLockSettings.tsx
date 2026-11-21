@@ -1,29 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Checkbox } from '#components/forms';
-import { getAppLockStatus, setAppLockEnabled } from '#util/appLock';
+import { setAppLockEnabled } from '#util/appLock';
 import type { AppLockStatus } from '#util/appLock';
 
 import { SettingsRow } from './SettingsRow';
 
-export function AppLockSettings() {
+type AppLockSettingsProps = {
+  status: AppLockStatus;
+  onStatusChange: (status: AppLockStatus) => void;
+};
+
+export function AppLockSettings({
+  status,
+  onStatusChange,
+}: AppLockSettingsProps) {
   const { t } = useTranslation();
-  const [status, setStatus] = useState<AppLockStatus | null>(null);
   const [isChanging, setIsChanging] = useState(false);
-
-  useEffect(() => {
-    void getAppLockStatus().then(setStatus);
-  }, []);
-
-  if (!status) {
-    return null;
-  }
 
   async function onChange(enabled: boolean) {
     setIsChanging(true);
     try {
-      setStatus(
+      onStatusChange(
         await setAppLockEnabled(
           enabled,
           enabled ? t('Turn on app lock') : t('Turn off app lock'),

@@ -13,18 +13,25 @@ public class MainActivity extends BridgeActivity {
         // written in this app are added here.
         registerPlugin(AppLockPlugin.class);
         super.onCreate(savedInstanceState);
-        appLock = new AppLock(this, getBridge().getWebView());
+        // There is no bridge when the device has no web view to show the app in.
+        if (getBridge() != null) {
+            appLock = new AppLock(this, getBridge().getWebView());
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        appLock.onStart();
+        if (appLock != null) {
+            appLock.onStart();
+        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        appLock.onStop();
+        if (appLock != null) {
+            appLock.onStop();
+        }
     }
 }

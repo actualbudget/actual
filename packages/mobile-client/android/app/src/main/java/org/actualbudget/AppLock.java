@@ -158,6 +158,12 @@ class AppLock {
 
     // Anyone who authenticates is the device owner, so success always unlocks.
     private void authenticate(String title, Consumer<Boolean> completion) {
+        // The prompt silently does nothing once the activity has saved its
+        // state, which would leave this waiting for an answer forever.
+        if (activity.getSupportFragmentManager().isStateSaved()) {
+            completion.accept(false);
+            return;
+        }
         isAuthenticating = true;
         updateCover();
         BiometricPrompt.AuthenticationCallback callback = new BiometricPrompt.AuthenticationCallback() {
