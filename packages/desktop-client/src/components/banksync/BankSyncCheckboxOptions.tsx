@@ -11,6 +11,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { ToggleField } from '#components/mobile/MobileForms';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 type CheckboxOptionProps = {
   id: string;
@@ -155,6 +156,8 @@ type BankSyncCheckboxOptionsProps = {
   setImportTransactions: (value: boolean) => void;
   updateDates: boolean;
   setUpdateDates: (value: boolean) => void;
+  reverseAmounts: boolean;
+  setReverseAmounts: (value: boolean) => void;
   helpMode?: 'desktop' | 'mobile';
 };
 
@@ -169,9 +172,12 @@ export function BankSyncCheckboxOptions({
   setImportTransactions,
   updateDates,
   setUpdateDates,
+  reverseAmounts,
+  setReverseAmounts,
   helpMode = 'desktop',
 }: BankSyncCheckboxOptionsProps) {
   const { t } = useTranslation();
+  const isReverseAmountsEnabled = useFeatureFlag('bankSyncReverseAmounts');
 
   return (
     <>
@@ -220,6 +226,20 @@ export function BankSyncCheckboxOptions({
       >
         <Trans>Update Dates</Trans>
       </CheckboxOptionWithHelp>
+
+      {isReverseAmountsEnabled && (
+        <CheckboxOptionWithHelp
+          id="form_reverse_amounts"
+          checked={reverseAmounts}
+          onChange={() => setReverseAmounts(!reverseAmounts)}
+          helpText={t(
+            'Invert the sign of imported transaction amounts for this bank connection.',
+          )}
+          helpMode={helpMode}
+        >
+          <Trans>Reverse transaction amounts</Trans>
+        </CheckboxOptionWithHelp>
+      )}
 
       <CheckboxOptionWithHelp
         id="form_import_transactions"

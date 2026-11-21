@@ -160,6 +160,8 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     setImportTransactions,
     updateDates,
     setUpdateDates,
+    reverseAmounts,
+    setReverseAmounts,
     mappings,
     setMapping,
     fields,
@@ -241,6 +243,8 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             setImportTransactions={setImportTransactions}
             updateDates={updateDates}
             setUpdateDates={setUpdateDates}
+            reverseAmounts={reverseAmounts}
+            setReverseAmounts={setReverseAmounts}
             helpMode="desktop"
           />
 
