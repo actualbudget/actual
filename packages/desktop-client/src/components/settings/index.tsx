@@ -282,6 +282,8 @@ export function GeneralSettings() {
   const [fileId] = useMetadataPref('cloudFileId');
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
   const serverURL = useServerURL();
+  const isAppLockVisible =
+    useFeatureFlag('iosAppFeatures') && isAppLockSupported();
 
   return (
     <SettingsSections title={t('General')}>
@@ -294,9 +296,9 @@ export function GeneralSettings() {
       <SettingsGroup title={t('Budget')}>
         <BudgetTypeSettings />
       </SettingsGroup>
-      {(serverURL || isAppLockSupported()) && (
+      {(serverURL || isAppLockVisible) && (
         <SettingsGroup title={t('Security')}>
-          <AppLockSettings />
+          {isAppLockVisible && <AppLockSettings />}
           <AuthSettings />
           <EncryptionSettings />
           {serverURL && fileId && (
