@@ -1031,6 +1031,7 @@ export const Table = forwardRef(
         exitEdit: () => {},
         onEdit: () => {},
         onEditFirstField: () => {},
+        resumeEdit: () => null,
         editingId: null,
         focusedField: null,
         getNavigatorProps: (props =>
@@ -1041,6 +1042,7 @@ export const Table = forwardRef(
     const {
       onEdit,
       onEditFirstField,
+      resumeEdit,
       exitEdit,
       editingId,
       focusedField,
@@ -1244,6 +1246,21 @@ export const Table = forwardRef(
         return;
       }
 
+      // Pick up where the user left off (e.g. after Escape), falling back
+      // to the first visible row when nothing was edited yet
+      const resumeDir = RESUME_KEYS[e.key];
+      if (resumeDir !== undefined) {
+        const id = resumeEdit(resumeDir);
+        if (id != null) {
+          e.preventDefault();
+          const index = items.findIndex(item => item.id === id);
+          if (index !== -1) {
+            list.current?.scrollToItem(index, 'smart');
+          }
+          return;
+        }
+      }
+
       if (e.key === 'Tab') {
         if (!e.shiftKey && !e.isDefaultPrevented()) {
           focusExit.current?.focus({ preventScroll: true });
@@ -1355,6 +1372,15 @@ export const Table = forwardRef(
 // @ts-expect-error fix me
 Table.displayName = 'Table';
 
+// Keys on the focused table that resume editing from the remembered cell
+const RESUME_KEYS: Record<string, -1 | 0 | 1> = {
+  Enter: 0,
+  ArrowDown: 1,
+  j: 1,
+  ArrowUp: -1,
+  k: -1,
+};
+
 export type TableCursor<T extends TableItem = TableItem> = {
   id: T['id'];
   field?: string;
@@ -1367,6 +1393,7 @@ export type TableNavigator<T extends TableItem = TableItem> = {
   exitEdit: () => void;
   onEdit: (id: T['id'] | null, field?: string) => void;
   onEditFirstField: (id: T['id']) => void;
+  resumeEdit: (dir: -1 | 0 | 1) => T['id'] | null;
   editingId: T['id'] | null;
   focusedField: string | null;
   getNavigatorProps: <P extends object>(
@@ -1507,6 +1534,31 @@ export function useTableNavigator<T extends TableItem>(
         }
       }
     }
+  }
+
+  // Starts editing again from the cell the user left: the same cell for
+  // dir 0, otherwise the nearest row above or below that has the same field.
+  // Returns the row it moved to, or null when there's nothing to resume.
+  function resumeEdit(dir: -1 | 0 | 1): T['id'] | null {
+    if (!cursor) {
+      return null;
+    }
+    const idx = data.findIndex(item => item.id === cursor.id);
+    if (idx === -1) {
+      return null;
+    }
+
+    let nextIdx = idx;
+    for (let i = idx + dir; dir !== 0 && i >= 0 && i < data.length; i += dir) {
+      if (getFields(data[i]).includes(cursor.field)) {
+        nextIdx = i;
+        break;
+      }
+    }
+
+    const next = data[nextIdx];
+    beginEdit(next.id, cursor.field);
+    return next.id;
   }
 
   function onMove(dir: 'left' | 'right' | 'up' | 'down') {
@@ -1650,6 +1702,7 @@ export function useTableNavigator<T extends TableItem>(
     exitEdit,
     onEdit,
     onEditFirstField,
+    resumeEdit,
     editingId,
     focusedField,
     getNavigatorProps,

@@ -805,6 +805,39 @@ describe('Transactions', () => {
     },
   );
 
+  test.each([
+    ['[ArrowDown]', 3],
+    ['j', 3],
+    ['[ArrowUp]', 1],
+    ['k', 1],
+  ])(
+    '%s after escape moves from the row the user left',
+    async (key, expectedRow) => {
+      const { container } = renderTransactions();
+      await userEvent.click(
+        queryField(container, 'select', '[data-testid=cell-button]', 2),
+      );
+      await userEvent.keyboard('[Escape]');
+      expect(document.activeElement).toBe(screen.getByTestId('table'));
+
+      await userEvent.keyboard(key);
+
+      const cursor = expectToBeEditingField(container, 'select', expectedRow);
+      expect(cursor).not.toHaveClass('hover-visible');
+    },
+  );
+
+  test('enter after escape goes back into the cell the user left', async () => {
+    const { container } = renderTransactions();
+    await editField(container, 'notes', 2);
+    await userEvent.keyboard('[Escape]');
+    expect(document.activeElement).toBe(screen.getByTestId('table'));
+
+    await userEvent.keyboard('[Enter]');
+
+    expectToBeEditingField(container, 'notes', 2);
+  });
+
   test('escape on a cell button stops editing and focuses the table', async () => {
     const { container } = renderTransactions();
     const table = container.querySelector<HTMLElement>(
