@@ -1,0 +1,149 @@
+name: Deploy Netlify Docs Release
+
+# Runs on both the tag push and the release-notes merge; deploys after the later one.
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI: true
+
+on:
+  push:
+    tags:
+      - v**
+    branches:
+      - master
+    paths:
+      - 'packages/docs/docs/releases.md'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to redeploy, e.g. 26.10.0'
+        required: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    if: github.repository_owner == 'actualbudget'
+    runs-on: depot-ubuntu-latest
+    environment: release
+    steps:
+      - name: Check the tag and release notes are both published
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == 'tag' ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          elif [[ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]]; then
+            VERSION="$INPUT_VERSION"
+          else
+            notes_branch=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" \
+              --jq '[.[].head.ref | select(startswith("release-notes/"))][0] // ""')
+            if [[ -z "$notes_branch" ]]; then
+              echo "Not a release-notes merge; nothing to deploy."
+              exit 0
+            fi
+            VERSION="${notes_branch#release-notes/}"
+          fi
+
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version: $VERSION"
+            exit 1
+          fi
+
+          if ! gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v$VERSION" --silent 2>/dev/null; then
+            echo "::notice::Tag v$VERSION is not pushed yet; the tag push will deploy the docs."
+            exit 0
+          fi
+
+          notes_sha=$(gh pr list --repo "$GITHUB_REPOSITORY" \
+            --head "release-notes/$VERSION" --base master --state merged \
+            --json mergeCommit --jq '.[0].mergeCommit.oid // ""')
+          if [[ -z "$notes_sha" ]]; then
+            echo "::notice::Release notes for $VERSION are not merged yet; merging them will deploy the docs."
+            exit 0
+          fi
+
+          current=$(gh api "repos/$GITHUB_REPOSITORY/contents/packages/docs/doc-versions.json?ref=master" \
+            -H 'Accept: application/vnd.github.raw' | jq -r '.current')
+
+          {
+            echo "version=$VERSION"
+            echo "notes_sha=$notes_sha"
+            echo "production=$([[ "$current" == "$VERSION" ]] && echo true || echo false)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Repository Checkout
+        if: steps.release.outputs.version
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: v${{ steps.release.outputs.version }}
+          persist-credentials: false
+
+      - name: Use published release notes
+        if: steps.release.outputs.version
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+          NOTES_SHA: ${{ steps.release.outputs.notes_sha }}
+        run: |
+          git fetch --depth=1 origin "$NOTES_SHA"
+          git checkout FETCH_HEAD -- packages/docs/docs/releases.md packages/docs/blog
+          if ! grep -Fxq -- "## $VERSION" packages/docs/docs/releases.md; then
+            echo "::error::releases.md has no section for $VERSION"
+            exit 1
+          fi
+          find upcoming-release-notes -name '*.md' ! -name README.md -delete
+
+      - name: Set up environment
+        if: steps.release.outputs.version
+        uses: ./.github/actions/setup
+        with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
+          download-translations: 'false'
+
+      - name: Install Netlify
+        if: steps.release.outputs.version
+        run: npm install netlify-cli@17.10.1 -g
+
+      - name: Build Docs
+        if: steps.release.outputs.version
+        run: yarn workspace docs run build
+
+      - name: Deploy Docs to Netlify (Version)
+        if: steps.release.outputs.version
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_API_TOKEN }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          netlify deploy \
+            --site actualbudget-website \
+            --dir packages/docs/build \
+            --alias "v${VERSION//./-}"
+
+      - name: Build Docs (Production)
+        if: steps.release.outputs.production == 'true'
+        env:
+          DOCS_PRODUCTION: 'true'
+        run: yarn workspace docs run build
+
+      - name: Deploy Docs to Netlify (Production)
+        if: steps.release.outputs.production == 'true'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_API_TOKEN }}
+        run: |
+          netlify deploy \
+            --site actualbudget-website \
+            --dir packages/docs/build \
+            --prod

@@ -1,0 +1,60 @@
+name: Deploy Netlify Docs Next
+
+# Production docs are deployed from release tags (see netlify-docs-release.yml).
+# Unreleased docs from master are deployed to the next-- alias.
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI: true
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'packages/docs/**'
+      - 'packages/ci-actions/src/release-notes/**'
+      - 'upcoming-release-notes/**'
+      - '.github/workflows/netlify-docs-next.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    if: github.repository_owner == 'actualbudget'
+    runs-on: depot-ubuntu-latest
+    steps:
+      - name: Repository Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+
+      - name: Install Netlify
+        run: npm install netlify-cli@17.10.1 -g
+
+      - name: Build Docs
+        env:
+          DOCS_NEXT: 'true'
+        run: yarn workspace docs run build
+
+      - name: Deploy Docs to Netlify (Next)
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_API_TOKEN }}
+        run: |
+          netlify deploy \
+            --site actualbudget-website \
+            --dir packages/docs/build \
+            --alias next
