@@ -98,7 +98,44 @@ export function getScheduleOccurrenceMatchStartDate(
   if (schedule.posts_transaction) {
     return occurrenceDate;
   }
-  return monthUtils.subDays(occurrenceDate, 2);
+  const lookbackStart = monthUtils.subDays(occurrenceDate, 2);
+
+  // A posted transaction may only cover the occurrence it belongs to. For a
+  // recurring schedule whose period is at most 2 days (e.g. daily `isapprox`),
+  // an unclamped lookback lets a transaction posted for the *previous*
+  // occurrence mark the current one as paid, hiding it from the due/missed
+  // lists (#8558). Clamp the window to start after the previous occurrence.
+  if (dateCond) {
+    const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
+    const value = cond.getValue();
+    if (value.type === 'recur') {
+      const previous = value.schedule
+        .occurrences({
+          end: d.endOfDay(monthUtils.parseDate(occurrenceDate)),
+          reverse: true,
+          take: 2,
+        })
+        .toArray()
+        .map(occurrence => {
+          const date =
+            value.schedule.data.skipWeekend && value.schedule.data.weekendSolve
+              ? getDateWithSkippedWeekend(
+                  occurrence.date,
+                  value.schedule.data.weekendSolve,
+                )
+              : occurrence.date;
+          return monthUtils.dayFromDate(date);
+        })
+        .filter(day => day < occurrenceDate)[0];
+      if (previous != null) {
+        const floor = monthUtils.addDays(previous, 1);
+        if (floor > lookbackStart) {
+          return floor;
+        }
+      }
+    }
+  }
+  return lookbackStart;
 }
 
 export type PostedScheduleTransaction = {
