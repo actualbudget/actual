@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
 import { ErrorBoundary } from 'react-error-boundary';
 import ReactGridLayout from 'react-grid-layout';
@@ -143,11 +143,37 @@ export function Overview({ dashboard }: OverviewProps) {
   sessionStorage.setItem('url', location.pathname);
 
   const [containerWidth, setContainerWidth] = useState(0);
+  // While dragging, lock the overview's min-height so a shorter layout can't
+  // collapse the scroll container and jump the pointer (#9377).
+  const [dragLockMinHeight, setDragLockMinHeight] = useState<number | null>(
+    null,
+  );
+  const overviewElRef = useRef<HTMLDivElement | null>(null);
   const handleResize = useCallback((contentRect: DOMRectReadOnly) => {
     setContainerWidth(Math.floor(contentRect.width));
   }, []);
-  const containerRef = useResizeObserver<HTMLDivElement>(handleResize);
+  const resizeObserverRef = useResizeObserver<HTMLDivElement>(handleResize);
+  const containerRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      overviewElRef.current = el;
+      // Disconnect when unmounted; the observer callback ignores a falsy node.
+      resizeObserverRef(el as HTMLDivElement);
+    },
+    [resizeObserverRef],
+  );
   const isMounted = containerWidth > 0;
+
+  const unlockDragMinHeight = useCallback(() => {
+    setDragLockMinHeight(null);
+  }, []);
+
+  const lockDragMinHeight = useCallback(() => {
+    const el = overviewElRef.current;
+    if (!el) {
+      return;
+    }
+    setDragLockMinHeight(el.offsetHeight);
+  }, []);
 
   const mobileLayout = useMemo(() => {
     if (!widgets || widgets.length === 0) {
@@ -765,7 +791,13 @@ export function Overview({ dashboard }: OverviewProps) {
           <View
             data-testid="reports-overview"
             innerRef={containerRef}
-            style={{ userSelect: 'none', paddingBottom: MOBILE_NAV_HEIGHT }}
+            style={{
+              userSelect: 'none',
+              paddingBottom: MOBILE_NAV_HEIGHT,
+              ...(dragLockMinHeight != null
+                ? { minHeight: dragLockMinHeight }
+                : null),
+            }}
           >
             {isMounted && (
               <ReactGridLayout
@@ -782,6 +814,16 @@ export function Overview({ dashboard }: OverviewProps) {
                 resizeConfig={{
                   enabled: currentBreakpoint === 'desktop' && isEditing,
                 }}
+                onDragStart={
+                  currentBreakpoint === 'desktop'
+                    ? lockDragMinHeight
+                    : undefined
+                }
+                onDragStop={
+                  currentBreakpoint === 'desktop'
+                    ? unlockDragMinHeight
+                    : undefined
+                }
                 onLayoutChange={
                   currentBreakpoint === 'desktop' ? onLayoutChange : undefined
                 }
