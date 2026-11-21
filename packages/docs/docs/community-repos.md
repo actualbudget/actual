@@ -30,6 +30,8 @@ tracking, loyalty card paybacks, prepaid cards, etc.
 
 - **Portuguese meal cards from My Edenred and Coverflex** - https://github.com/rodriguestiago0/actual-mealcards
   - _This script will track Portuguese prepaid meal cards from My Edenred and Coverflex providers_
+- **actual-crypto-sync** - https://github.com/NicosKaralis/actual-crypto-sync
+  - _Keeps off-budget accounts in line with the value of crypto wallets on Bitcoin, Ethereum, BNB Smart Chain and TRON. It reads balances from block explorers and prices from CoinGecko, CoinMarketCap or CoinPaprika, then writes one adjustment transaction per account per day. It uses public addresses only, and runs as a Docker image on a schedule._
 
 ## Budget Migration
 
