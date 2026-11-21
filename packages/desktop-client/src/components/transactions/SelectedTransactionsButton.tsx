@@ -18,6 +18,7 @@ import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import { isNextScheduledDate } from '#util/schedule';
 
 type SelectedTransactionsButtonProps = {
   getTransaction: (id: string) => TransactionEntity | undefined;
@@ -158,6 +159,11 @@ export function SelectedTransactionsButton({
 
     return singleSchedules.length === selectedSchedules.length;
   }, [selectedSchedules]);
+
+  const skipsSelectedDates = useMemo(
+    () => selectedIds.every(id => isNextScheduledDate(id, selectedSchedules)),
+    [selectedIds, selectedSchedules],
+  );
 
   const canMakeAsSplitTransaction = useMemo(() => {
     if (selectedIds.length <= 1 || types.preview) {
@@ -318,7 +324,9 @@ export function SelectedTransactionsButton({
               canBeSkipped &&
                 ({
                   name: 'skip',
-                  text: t('Skip next scheduled date'),
+                  text: skipsSelectedDates
+                    ? t('Skip this scheduled date')
+                    : t('Skip next scheduled date'),
                 } as const),
               canBeCompleted &&
                 ({ name: 'complete', text: t('Mark as completed') } as const),

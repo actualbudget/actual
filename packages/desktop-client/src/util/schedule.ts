@@ -27,6 +27,18 @@ export function getStatusLabel(status: string) {
   }
 }
 
+// Preview transaction ids look like `preview/<scheduleId>/<date>`. Skipping
+// always advances the schedule's next date, so only the row for that date is
+// the one that actually gets skipped.
+export function isNextScheduledDate(
+  previewId: string,
+  schedules: ReadonlyArray<Pick<ScheduleEntity, 'id' | 'next_date'>>,
+) {
+  const [, scheduleId, date] = previewId.split('/');
+  const schedule = schedules.find(s => s.id === scheduleId);
+  return schedule != null && date != null && date === schedule.next_date;
+}
+
 function makeNumberSuffix(num: number, locale: Locale) {
   // Slight abuse of date-fns to turn a number like "1" into the full
   // form "1st" but formatting a date with that number
