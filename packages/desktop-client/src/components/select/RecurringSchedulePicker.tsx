@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from 'react';
 import type { CSSProperties, Dispatch } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -16,6 +23,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { sendCatch } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
+import { hasShortMonthFallback } from '@actual-app/core/shared/schedules';
 import type { RecurConfig, RecurPattern } from '@actual-app/core/types/models';
 import type {
   TransObjectLiteral,
@@ -256,7 +264,7 @@ function SchedulePreview({
         </Text>
         <SpaceBetween gap={20} style={{ marginTop: 10 }}>
           {previewDates.map((d, idx) => (
-            <View key={idx} style={{ flex: 1 }}>
+            <View key={idx} style={{ flex: 1 }} data-vrt-mask>
               <Text>{monthUtils.format(d, dateFormat, locale)}</Text>
               <Text>{monthUtils.format(d, 'EEEE', locale)}</Text>
             </View>
@@ -299,70 +307,93 @@ function MonthlyPatterns({
   return (
     <SpaceBetween direction="vertical" gap={10} style={{ marginTop: 10 }}>
       {config.patterns.map((recurrence, idx) => (
-        <View
-          key={idx}
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            width: '100%',
-          }}
-        >
-          <Select
-            options={[
-              [-1, t('Last')],
-              Menu.line,
-              ...DAY_OF_MONTH_OPTIONS.map(opt => [opt, String(opt)] as const),
-            ]}
-            value={recurrence.value}
-            onChange={value =>
-              dispatch({
-                type: 'update-recurrence',
-                recurrence,
-                field: 'value',
-                value: parsePatternValue(value),
-              })
-            }
-            style={{ flex: 1, marginRight: 10 }}
-          />
-          <Select
-            options={[
-              ['day', t('Day')],
-              Menu.line,
-              ...DAY_OF_WEEK_OPTIONS.map(opt => [opt.id, opt.name] as const),
-            ]}
-            value={recurrence.type}
-            onChange={value => {
-              dispatch({
-                type: 'update-recurrence',
-                recurrence,
-                field: 'type',
-                value,
-              });
+        <Fragment key={idx}>
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              width: '100%',
             }}
-            style={{ flex: 1, marginRight: 10 }}
-          />
-          <Button
-            variant="bare"
-            aria-label={t('Remove recurrence')}
-            style={{ padding: 7 }}
-            onPress={() =>
-              dispatch({
-                type: 'remove-recurrence',
-                recurrence,
-              })
-            }
           >
-            <SvgSubtract style={{ width: 8, height: 8 }} />
-          </Button>
-          <Button
-            variant="bare"
-            aria-label={t('Add recurrence')}
-            style={{ padding: 7, marginLeft: 5 }}
-            onPress={() => dispatch({ type: 'add-recurrence' })}
-          >
-            <SvgAdd style={{ width: 10, height: 10 }} />
-          </Button>
-        </View>
+            <Select
+              options={[
+                [-1, t('Last')],
+                Menu.line,
+                ...DAY_OF_MONTH_OPTIONS.map(opt => [opt, String(opt)] as const),
+              ]}
+              value={recurrence.value}
+              onChange={value =>
+                dispatch({
+                  type: 'update-recurrence',
+                  recurrence,
+                  field: 'value',
+                  value: parsePatternValue(value),
+                })
+              }
+              style={{ flex: 1, marginRight: 10 }}
+            />
+            <Select
+              options={[
+                ['day', t('Day')],
+                Menu.line,
+                ...DAY_OF_WEEK_OPTIONS.map(opt => [opt.id, opt.name] as const),
+              ]}
+              value={recurrence.type}
+              onChange={value => {
+                dispatch({
+                  type: 'update-recurrence',
+                  recurrence,
+                  field: 'type',
+                  value,
+                });
+              }}
+              style={{ flex: 1, marginRight: 10 }}
+            />
+            <Button
+              variant="bare"
+              aria-label={t('Remove recurrence')}
+              style={{ padding: 7 }}
+              onPress={() =>
+                dispatch({
+                  type: 'remove-recurrence',
+                  recurrence,
+                })
+              }
+            >
+              <SvgSubtract style={{ width: 8, height: 8 }} />
+            </Button>
+            <Button
+              variant="bare"
+              aria-label={t('Add recurrence')}
+              style={{ padding: 7, marginLeft: 5 }}
+              onPress={() => dispatch({ type: 'add-recurrence' })}
+            >
+              <SvgAdd style={{ width: 10, height: 10 }} />
+            </Button>
+          </View>
+          {recurrence.type === 'day' &&
+            recurrence.value >= 29 &&
+            ((recurrence.value === 31 &&
+              config.patterns.filter(p => p.type === 'day').length === 1) ||
+              (config.endMode !== 'after_n_occurrences' &&
+                hasShortMonthFallback(unparseConfig(config)))) && (
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 5,
+                  marginTop: -5,
+                }}
+              >
+                <Text style={{ color: theme.tableText }}>
+                  <Trans>
+                    Months without this day will use the last day of that month.
+                  </Trans>
+                </Text>
+              </View>
+            )}
+        </Fragment>
       ))}
     </SpaceBetween>
   );
@@ -401,6 +432,7 @@ function RecurringScheduleTooltip({
   }, [currentConfig]);
 
   const { config } = state;
+  const startDay = parseInt(monthUtils.format(config.start, 'd'), 10);
 
   const updateField = <Field extends keyof RecurConfig>(
     field: Field,
@@ -509,6 +541,28 @@ function RecurringScheduleTooltip({
           </Button>
         ) : null}
       </SpaceBetween>
+      {config.frequency === 'monthly' &&
+      (config.patterns == null || config.patterns.length === 0) &&
+      startDay >= 29 &&
+      (startDay === 31 ||
+        (config.endMode !== 'after_n_occurrences' &&
+          hasShortMonthFallback(unparseConfig(config)))) ? (
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 5,
+            marginTop: 5,
+          }}
+        >
+          <Text style={{ color: theme.tableText }}>
+            <Trans>
+              Months without this day will use the last day of that month.
+            </Trans>
+          </Text>
+        </View>
+      ) : null}
       {config.frequency === 'monthly' &&
         config.patterns &&
         config.patterns.length > 0 && (
@@ -626,6 +680,7 @@ export function RecurringSchedulePicker({
     <View>
       <Button
         ref={triggerRef}
+        data-testid="recurring-picker-trigger"
         style={{ textAlign: 'left', ...buttonStyle }}
         onPress={() => setIsOpen(true)}
       >
