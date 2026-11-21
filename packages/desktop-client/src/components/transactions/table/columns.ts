@@ -12,6 +12,8 @@ export const TRANSACTION_TABLE_COLUMN_IDS = [
   'deposit',
   'balance',
   'cleared',
+  // Only offered while the `reviewNewTransactions` experiment is on.
+  'reviewed',
 ] as const;
 
 export type TransactionTableColumnId =
@@ -66,6 +68,7 @@ export function useTransactionTableColumnLabels(): Record<
     deposit: t('Deposit'),
     balance: t('Running balance'),
     cleared: t('Cleared'),
+    reviewed: t('Reviewed'),
   };
 }
 

@@ -6,6 +6,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 import { theme } from '@actual-app/components/theme';
 import { send } from '@actual-app/core/platform/client/connection';
+import { markReviewedOnCategoryChange } from '@actual-app/core/shared/tags';
 import {
   addSplitTransaction,
   applyTransactionDiff,
@@ -30,6 +31,7 @@ import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { TableHandleRef } from '#components/table';
 import { isValidBoundaryDrop } from '#hooks/useDragDrop';
 import type { DropPosition } from '#hooks/useDragDrop';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
@@ -113,6 +115,7 @@ type TransactionListProps = Pick<
   | 'showAccount'
   | 'showBalances'
   | 'showCleared'
+  | 'showReviewed'
   | 'showGroup'
   | 'showReconciled'
   | 'showSelection'
@@ -150,6 +153,7 @@ export function TransactionList({
   showBalances,
   showReconciled,
   showCleared,
+  showReviewed,
   showGroup,
   showAccount,
   columnOrder,
@@ -185,6 +189,7 @@ export function TransactionList({
   const navigate = useNavigate();
   const [learnCategories = 'true'] = useSyncedPref('learn-categories');
   const isLearnCategoriesEnabled = String(learnCategories) === 'true';
+  const isReviewTagEnabled = useFeatureFlag('reviewNewTransactions');
 
   const transactionsLatest = useRef<readonly TransactionEntity[]>([]);
   useLayoutEffect(() => {
@@ -202,6 +207,12 @@ export function TransactionList({
 
   const onSave = useCallback(
     async (transaction: TransactionEntity) => {
+      if (isReviewTagEnabled) {
+        transaction = markReviewedOnCategoryChange(
+          transactionsLatest.current.find(t => t.id === transaction.id),
+          transaction,
+        );
+      }
       const saveTransaction = async () => {
         const changes = updateTransaction(
           transactionsLatest.current,
@@ -229,7 +240,7 @@ export function TransactionList({
 
       await saveTransaction();
     },
-    [isLearnCategoriesEnabled, onChange, onRefetch],
+    [isLearnCategoriesEnabled, isReviewTagEnabled, onChange, onRefetch],
   );
 
   const onAddSplit = useCallback(
@@ -517,6 +528,7 @@ export function TransactionList({
         showBalances={showBalances}
         showReconciled={showReconciled}
         showCleared={showCleared}
+        showReviewed={showReviewed}
         showAccount={showAccount}
         showCategory
         showGroup={showGroup}

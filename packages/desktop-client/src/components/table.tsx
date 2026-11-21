@@ -535,6 +535,9 @@ type CellButtonProps = {
   onSelect?: (e) => void;
   onEdit?: () => void;
   className?: string;
+  role?: string;
+  'aria-label'?: string;
+  'aria-checked'?: boolean;
 };
 export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
   (
@@ -548,6 +551,9 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
       onSelect,
       onEdit,
       className,
+      role,
+      'aria-label': ariaLabel,
+      'aria-checked': ariaChecked,
     },
     ref,
   ) => {
@@ -569,6 +575,9 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
         innerRef={ref}
         className={className}
         tabIndex={0}
+        role={role}
+        aria-label={ariaLabel}
+        aria-checked={ariaChecked}
         onKeyDown={e => {
           if (e.key === 'x' || e.key === ' ') {
             e.preventDefault();
