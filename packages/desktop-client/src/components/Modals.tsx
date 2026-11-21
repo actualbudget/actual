@@ -358,15 +358,7 @@ export function Modals() {
           );
 
         case 'future-buffer-mode':
-          // Automatic mode starts from the current month
-          return (
-            <SheetNameProvider
-              key={key}
-              name={monthUtils.sheetForMonth(monthUtils.currentMonth())}
-            >
-              <FutureBufferModeModal />
-            </SheetNameProvider>
-          );
+          return <FutureBufferModeModal key={key} />;
 
         case 'tracking-balance-menu':
           return (
