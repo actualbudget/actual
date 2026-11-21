@@ -5,8 +5,9 @@ import { getSqlite3 } from '#platform/server/sqlite/wasm';
 // pool install deletes the pool directory, which is never acceptable for
 // user data
 export const MIN_SQLITE_VERSION = 3054000;
-// The parent of the pool directories (see POOL_ROOT in opfs-sahpool.ts)
-const PROBE_DIRECTORY = 'actual';
+// The parent of the pool directories (see POOL_ROOT in opfs-sahpool.ts),
+// which the probe below leaves behind
+export const PROBE_DIRECTORY = 'actual';
 
 // Whether this worker can use OPFS sync access handles: present (dedicated
 // worker, secure context, Chrome 108, Firefox 111, Safari 16.4) and usable

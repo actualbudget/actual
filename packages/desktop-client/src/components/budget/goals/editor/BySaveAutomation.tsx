@@ -72,7 +72,7 @@ export const BySaveAutomation = ({
           <AmountInput
             id="by-amount-field"
             value={amount}
-            zeroSign="+"
+            sign="+"
             onUpdate={(value: number) =>
               dispatch(
                 updateTemplate({

@@ -24,6 +24,7 @@ import { useServerURL, useServerVersion } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { loadPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 
@@ -336,6 +337,9 @@ export function Settings() {
   const { isNarrowWidth } = useResponsive();
   const dispatch = useDispatch();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
+  const [defaultCurrencyCode] = useSyncedPref('defaultCurrencyCode');
+  const hasDefaultCurrencyCode =
+    defaultCurrencyCode != null && defaultCurrencyCode !== '';
 
   useEffect(() => {
     const unlisten = listen('prefs-updated', () => {
@@ -347,10 +351,10 @@ export function Settings() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!isCurrencyExperimentalEnabled) {
+    if (!isCurrencyExperimentalEnabled && hasDefaultCurrencyCode) {
       void dispatch(saveSyncedPrefs({ prefs: { defaultCurrencyCode: '' } }));
     }
-  }, [dispatch, isCurrencyExperimentalEnabled]);
+  }, [dispatch, isCurrencyExperimentalEnabled, hasDefaultCurrencyCode]);
 
   if (isNarrowWidth) {
     return <Outlet />;
