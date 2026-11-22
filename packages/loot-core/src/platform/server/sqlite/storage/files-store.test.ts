@@ -30,6 +30,29 @@ describe('sqlite file rows', () => {
     expect(await hasMigratedSqliteFiles('opfs')).toBe(false);
   });
 
+  it('leaves the one path it is told to out of the count', async () => {
+    await putSqliteFileRow({
+      filepath: '/documents/a/db.sqlite',
+      contents: new Uint8Array(0),
+      storage: 'memory-idb',
+    });
+    expect(
+      await hasMigratedSqliteFiles(undefined, '/documents/a/db.sqlite'),
+    ).toBe(false);
+    expect(
+      await hasMigratedSqliteFiles(undefined, '/documents/b/db.sqlite'),
+    ).toBe(true);
+
+    await putSqliteFileRow({
+      filepath: '/documents/b/db.sqlite',
+      contents: '',
+      storage: 'opfs',
+    });
+    expect(
+      await hasMigratedSqliteFiles(undefined, '/documents/a/db.sqlite'),
+    ).toBe(true);
+  });
+
   it('reports migrated data when both kinds of rows exist', async () => {
     await putSqliteFileRow({
       filepath: '/documents/a/db.sqlite',
