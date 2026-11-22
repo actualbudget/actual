@@ -561,7 +561,7 @@ app.post(
 bankSync.post(
   '/transactions',
   handleError(async (req: Request, res: Response) => {
-    const { accountId, startDate, aspspName } = req.body || {};
+    const { accountId, startDate, aspspName, importPending } = req.body || {};
 
     if (!accountId || !startDate) {
       res.send({
@@ -620,6 +620,8 @@ bankSync.post(
         dateFrom,
         dateTo,
         psuHeaders,
+        // Clients that predate the setting send nothing and get everything.
+        { bookedOnly: importPending === false },
       );
 
       const all: ReturnType<typeof normalizeTransactions> = [];

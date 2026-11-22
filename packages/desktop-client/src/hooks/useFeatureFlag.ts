@@ -12,7 +12,6 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   balanceForecastReport: false,
   customThemes: false,
   budgetAnalysisReport: false,
-  enableBanking: false,
   sankeyReport: false,
   mobileCalculator: false,
   monteCarloReport: false,
