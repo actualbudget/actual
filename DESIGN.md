@@ -41,13 +41,15 @@ typography:
     fontWeight: 400
 rounded:
   sm: '4px'
-  md: '6px'
   sheet: '18px'
+  pill: '999px'
 spacing:
-  xs: '5px'
-  sm: '10px'
-  md: '16px'
-  lg: '20px'
+  xxs: '2px'
+  xs: '4px'
+  sm: '8px'
+  md: '12px'
+  lg: '16px'
+  xl: '24px'
 components:
   button-primary:
     backgroundColor: '{colors.actual-purple}'
@@ -182,6 +184,10 @@ Flat-first with ambient shadows. Structure comes from 1px borders (Navy Mist) an
 ## 5. Components
 
 Utilitarian and quick: compact paddings, instant state feedback, built for daily repetition. All values below are the light theme; every color routes through the semantic token layer.
+
+### Spacing and Radius Scale
+
+Spacing comes from the `spacing` scale in `packages/component-library/src/tokens.ts`, a 4px grid: `xxs` 2, `xs` 4, `sm` 8, `md` 12, `lg` 16, `xl` 24. Radius comes from `radius` in the same file: `sm` 4, `sheet` 18, `pill` 999. New code uses these tokens. Many existing screens predate the scale and use 5, 10, 15 and 20px values, and table containers use a 6px radius that has no token.
 
 ### Buttons
 
