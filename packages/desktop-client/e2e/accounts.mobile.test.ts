@@ -154,7 +154,7 @@ test.describe('Mobile Accounts', () => {
     // The menu has no close button, tapping outside the sheet dismisses it
     const accountMenuModal = page.getByTestId('account-menu-modal');
     // If more tests need to dismiss a sheet, add a dedicated method, but for now, tap out of the way
-    await accountMenuModal.click({ position: { x: 5, y: 5 } }); 
+    await accountMenuModal.click({ position: { x: 5, y: 5 } });
     await expect(accountMenuModal).not.toBeVisible();
 
     await page.getByRole('button', { name: 'Back', exact: true }).click();
