@@ -8,20 +8,22 @@ export type CSSProperties = Record<string, any>;
 
 const MOBILE_MIN_HEIGHT = 40;
 
+export function shadowColor(opacity: number) {
+  return `color-mix(in srgb, ${theme.shadow} ${Math.round(opacity * 100)}%, transparent)`;
+}
+
 const shadowLarge = {
-  // oxlint-disable-next-line actual/no-color-literals
-  boxShadow: '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
+  boxShadow: `0 15px 30px 0 ${shadowColor(0.11)}, 0 5px 15px 0 ${shadowColor(0.08)}`,
 };
 
 const shadowSheet = {
-  // oxlint-disable-next-line actual/no-color-literals
-  boxShadow: '0 -4px 24px rgba(0,0,0,0.2)',
+  boxShadow: `0 -4px 24px ${shadowColor(0.2)}`,
 };
 
 export const styles: CSSProperties = {
   incomeHeaderHeight: 70,
-  // oxlint-disable-next-line actual/no-color-literals
-  cardShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+  cardShadow: `0 1px 3px ${shadowColor(0.12)}, 0 1px 2px ${shadowColor(0.24)}`,
+  chartTooltipShadow: `0 1px 6px ${shadowColor(0.2)}`,
   monthRightPadding: 5,
   menuBorderRadius: 4,
   mobileMinHeight: MOBILE_MIN_HEIGHT,
@@ -93,8 +95,7 @@ export const styles: CSSProperties = {
     userSelect: 'none',
   },
   shadow: {
-    // oxlint-disable-next-line actual/no-color-literals
-    boxShadow: '0 2px 4px 0 rgba(0,0,0,0.1)',
+    boxShadow: `0 2px 4px 0 ${shadowColor(0.1)}`,
   },
   shadowLarge,
   shadowSheet,

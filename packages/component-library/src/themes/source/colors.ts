@@ -706,6 +706,7 @@ export const colors = {
   },
 
   overlayBackground: { all: { raw: 'rgba(0, 0, 0, 0.3)' } },
+  shadow: { all: 'black' },
 
   chartQual1: { all: 'chartQual1' },
   chartQual2: { all: 'chartQual2' },
