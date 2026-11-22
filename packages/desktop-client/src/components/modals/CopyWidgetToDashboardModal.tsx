@@ -9,10 +9,6 @@ import { View } from '@actual-app/components/view';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { useDashboardPages } from '#hooks/useDashboardPages';
 import type { Modal as ModalType } from '#modals/modalsSlice';
-// The Reports alias only resolves files already present in the alias index.
-// Keep this as a relative import until the alias resolver supports new modules.
-// eslint-disable-next-line actual/prefer-subpath-imports, typescript-paths/absolute-parent-import
-import { translateBuiltInDashboardPageName } from '../reports/reports/defaultDashboardNames';
 
 type CopyWidgetToDashboardModalProps = Extract<
   ModalType,
@@ -26,16 +22,8 @@ export function CopyWidgetToDashboardModal({
   const { data: dashboardPages = [] } = useDashboardPages();
 
   const items: ComponentProps<typeof Menu<string>>['items'] = useMemo(
-    () =>
-      dashboardPages.map(d => ({
-        name: d.id,
-        text: translateBuiltInDashboardPageName(
-          d.name,
-          d.builtin_key ?? undefined,
-          t,
-        ),
-      })),
-    [dashboardPages, t],
+    () => dashboardPages.map(d => ({ name: d.id, text: d.name })),
+    [dashboardPages],
   );
 
   return (

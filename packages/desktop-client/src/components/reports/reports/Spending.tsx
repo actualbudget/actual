@@ -54,8 +54,6 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
-import { translateBuiltInDashboardName } from './defaultDashboardNames';
-
 export function Spending() {
   const params = useParams();
   const { data: widget, isPending } = useDashboardWidget<SpendingWidget>({
@@ -270,26 +268,18 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     setIsLive(nextIsLive);
   };
 
-  const title = translateBuiltInDashboardName(
-    widget?.meta?.name || t('Monthly Spending'),
-    widget?.meta?.builtin_key,
-    t,
-  );
+  const title = widget?.meta?.name || t('Monthly Spending');
   const onSaveWidgetName = async (newName: string) => {
     if (!widget) {
       throw new Error('No widget that could be saved.');
     }
 
     const name = newName || t('Monthly Spending');
-    if (name === title) {
-      return;
-    }
     updateDashboardWidgetMutation.mutate({
       widget: {
         id: widget.id,
         meta: {
           ...(widget.meta ?? {}),
-          builtin_key: undefined,
           name,
         },
       },

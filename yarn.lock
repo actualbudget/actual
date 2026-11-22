@@ -134,6 +134,7 @@ __metadata:
     fflate: "npm:^0.8.3"
     handlebars: "npm:^4.7.10"
     hyperformula: "npm:^3.5.0"
+    i18next: "npm:^26.4.4"
     jest-diff: "npm:^30.5.2"
     jsverify: "npm:^0.8.4"
     lru-cache: "npm:^11.5.3"

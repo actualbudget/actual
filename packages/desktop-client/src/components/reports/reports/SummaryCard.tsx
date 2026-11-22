@@ -19,8 +19,6 @@ import { SummaryNumber } from '#components/reports/SummaryNumber';
 import { useReport } from '#components/reports/useReport';
 import { useLocale } from '#hooks/useLocale';
 
-import { translateBuiltInDashboardName } from './defaultDashboardNames';
-
 type SummaryCardProps = {
   widgetId: string;
   isEditing?: boolean;
@@ -38,11 +36,6 @@ export function SummaryCard({
   const { t } = useTranslation();
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
-  const cardName = translateBuiltInDashboardName(
-    meta?.name || t('Summary'),
-    meta?.builtin_key,
-    t,
-  );
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -105,17 +98,14 @@ export function SummaryCard({
       <View style={{ flex: 1, overflow: 'hidden' }}>
         <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
           <ReportCardName
-            name={cardName}
+            name={meta?.name || t('Summary')}
             isEditing={nameMenuOpen}
             onChange={newName => {
-              if (newName !== cardName) {
-                onMetaChange({
-                  ...meta,
-                  builtin_key: undefined,
-                  content: JSON.stringify(content),
-                  name: newName,
-                });
-              }
+              onMetaChange({
+                ...meta,
+                content: JSON.stringify(content),
+                name: newName,
+              });
               setNameMenuOpen(false);
             }}
             onClose={() => setNameMenuOpen(false)}

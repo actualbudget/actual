@@ -1,4 +1,5 @@
 import type { NewDashboardWidgetEntity } from '#types/models';
+import { t } from 'i18next';
 
 export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
   // Top row: Key metrics at a glance
@@ -9,8 +10,7 @@ export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
     x: 0,
     y: 0,
     meta: {
-      name: 'Total Income (YTD)',
-      builtin_key: 'total-income-ytd',
+      name: t('Total Income (YTD)'),
       content: JSON.stringify({
         type: 'sum',
         fontSize: 20,
@@ -47,8 +47,7 @@ export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
     x: 3,
     y: 0,
     meta: {
-      name: 'Total Expenses (YTD)',
-      builtin_key: 'total-expenses-ytd',
+      name: t('Total Expenses (YTD)'),
       content: JSON.stringify({
         type: 'sum',
         fontSize: 20,
@@ -85,8 +84,7 @@ export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
     x: 6,
     y: 0,
     meta: {
-      name: 'Avg Per Month',
-      builtin_key: 'average-per-month',
+      name: t('Avg Per Month'),
       content: JSON.stringify({
         type: 'avgPerMonth',
         fontSize: 20,
@@ -123,8 +121,7 @@ export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
     x: 9,
     y: 0,
     meta: {
-      name: 'Avg Per Transaction',
-      builtin_key: 'average-per-transaction',
+      name: t('Avg Per Transaction'),
       content: JSON.stringify({
         type: 'avgPerTransact',
         fontSize: 20,
@@ -179,8 +176,7 @@ export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
     x: 0,
     y: 5,
     meta: {
-      name: 'This Month',
-      builtin_key: 'this-month',
+      name: t('This Month'),
       mode: 'single-month',
     },
   },
@@ -191,8 +187,7 @@ export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
     x: 4,
     y: 5,
     meta: {
-      name: 'Budget Overview',
-      builtin_key: 'budget-overview',
+      name: t('Budget Overview'),
       mode: 'budget',
     },
   },
@@ -203,8 +198,7 @@ export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
     x: 8,
     y: 5,
     meta: {
-      name: '3-Month Average',
-      builtin_key: 'three-month-average',
+      name: t('3-Month Average'),
       mode: 'average',
     },
   },
@@ -216,8 +210,7 @@ export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
     x: 0,
     y: 8,
     meta: {
-      name: 'Transaction Calendar',
-      builtin_key: 'transaction-calendar',
+      name: t('Transaction Calendar'),
       timeFrame: {
         start: '2024-01-01',
         end: '2024-03-31',
@@ -240,8 +233,7 @@ export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
     x: 8,
     y: 8,
     meta: {
-      name: 'Recent Net Worth Change',
-      builtin_key: 'recent-net-worth-change',
+      name: t('Recent Net Worth Change'),
       content: JSON.stringify({
         type: 'sum',
         fontSize: 32,
@@ -262,9 +254,9 @@ export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
     x: 8,
     y: 10,
     meta: {
-      builtin_key: 'dashboard-tips',
-      content:
+      content: t(
         '## Dashboard Tips\n\nYou can add new widgets or edit existing widgets by using the buttons at the top of the page. Choose a widget type and customize it to fit your needs.\n\n**Moving cards:** Drag any card by its header to reposition it.\n\n**Deleting cards:** Click the three-dot menu on any card and select "Remove".',
+      ),
     },
   },
 ];

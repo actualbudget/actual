@@ -281,7 +281,6 @@ export type DbCustomReport = {
 export type DbDashboardPage = {
   id: string;
   name: string;
-  builtin_key?: string | null;
   sort_order: number;
   tombstone: 1 | 0;
 };

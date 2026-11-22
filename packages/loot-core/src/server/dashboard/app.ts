@@ -192,7 +192,7 @@ async function moveDashboardPage({
 }
 
 async function renameDashboardPage({ id, name }: { id: string; name: string }) {
-  await db.updateWithSchema('dashboard_pages', { id, name, builtin_key: null });
+  await db.updateWithSchema('dashboard_pages', { id, name });
 }
 
 async function getDashboardPages(): Promise<DashboardPageEntity[]> {

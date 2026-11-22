@@ -11,8 +11,6 @@ import type { DashboardPageEntity } from '@actual-app/core/types/models';
 
 import { useRenameDashboardPageMutation } from '#reports/mutations';
 
-import { translateBuiltInDashboardPageName } from './reports/defaultDashboardNames';
-
 type DashboardHeaderProps = {
   dashboard: DashboardPageEntity;
 };
@@ -107,11 +105,7 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
               minWidth: 0,
             }}
           >
-            {translateBuiltInDashboardPageName(
-              dashboard.name,
-              dashboard.builtin_key ?? undefined,
-              t,
-            )}
+            {dashboard.name}
           </View>
           <Button
             variant="bare"
