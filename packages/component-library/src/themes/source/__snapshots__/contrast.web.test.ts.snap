@@ -9,7 +9,6 @@ exports[`theme contrast > records the ratio of every known failure 1`] = `
   "dark: tableHeaderText on tableHeaderBackground": "4.01",
   "light: errorText on errorBackground": "3.74",
   "light: formInputTextPlaceholder on formInputBackground": "2.05",
-  "light: mobileHeaderTextSubdued on mobileHeaderBackground": "2.77",
   "light: mobileNavItem on mobileNavBackground": "2.61",
   "light: noticeText on noticeBackground": "4.29",
   "light: noticeTextLight on tableBackground": "2.90",

@@ -254,13 +254,13 @@ export const colors = {
 
   modalBackground: { light: 'white', dark: 'gray800', midnight: 'gray700' },
   modalBorder: { light: 'white', dark: 'navy600', midnight: 'gray200' },
-  mobileHeaderBackground: {
-    light: 'purple400',
-    dark: 'purple800',
-    midnight: 'gray900',
+  mobileHeaderBackground: { all: { ref: 'accent' } },
+  mobileHeaderText: { all: { ref: 'accentContrast' } },
+  mobileHeaderTextSubdued: {
+    all: {
+      raw: 'color-mix(in srgb, var(--color-mobileHeaderText) 75%, transparent)',
+    },
   },
-  mobileHeaderText: { light: 'navy50', dark: 'navy150', midnight: 'purple200' },
-  mobileHeaderTextSubdued: { all: 'gray200' },
   mobileHeaderTextHover: { all: { raw: 'rgba(200, 200, 200, 0.15)' } },
   mobilePageBackground: {
     light: 'navy50',
@@ -555,21 +555,11 @@ export const colors = {
     midnight: 'gray800',
   },
 
-  floatingActionBarBackground: {
-    light: 'purple400',
-    dark: 'purple800',
-    midnight: 'gray900',
-  },
+  floatingActionBarBackground: { all: { ref: 'accent' } },
   floatingActionBarBorder: {
-    light: { ref: 'floatingActionBarBackground' },
-    dark: { ref: 'floatingActionBarBackground' },
-    midnight: 'purple300',
+    all: { ref: 'floatingActionBarBackground' },
   },
-  floatingActionBarText: {
-    light: 'navy50',
-    dark: 'navy150',
-    midnight: 'purple200',
-  },
+  floatingActionBarText: { all: { ref: 'accentContrast' } },
 
   tooltipText: { light: 'navy900', dark: 'navy100', midnight: 'gray100' },
   tooltipBackground: { light: 'white', dark: 'navy800', midnight: 'gray800' },

@@ -9,7 +9,6 @@ const knownFailures = new Set<string>([
   'light: pageTextSubdued on pageBackground',
   'light: pageTextSubdued on tableBackground',
   'light: tableTextLight on tableBackground',
-  'light: mobileHeaderTextSubdued on mobileHeaderBackground',
   'light: mobileNavItem on mobileNavBackground',
   'light: noticeText on noticeBackground',
   'light: noticeTextLight on tableBackground',
