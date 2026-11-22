@@ -17,6 +17,7 @@ import type {
   DashboardPageEntity,
   DashboardWidgetEntity,
   ImportTransactionEntity,
+  NewDashboardWidgetEntity,
   NoteEntity,
   RuleEntity,
   TransactionEntity,
@@ -505,8 +506,11 @@ export function deleteDashboardPage(id: string) {
   return send('dashboard-delete', id);
 }
 
-export function resetDashboard(id: string) {
-  return send('dashboard-reset', id);
+export function resetDashboard(
+  id: string,
+  widgets: NewDashboardWidgetEntity[],
+) {
+  return send('dashboard-reset', { id, widgets });
 }
 
 export function getDashboardWidgets(

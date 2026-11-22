@@ -13,7 +13,6 @@ import { mutator } from '#server/mutators';
 import { reportModel } from '#server/reports/app';
 import { batchMessages } from '#server/sync';
 import { undoable } from '#server/undo';
-import { DEFAULT_DASHBOARD_STATE } from '#shared/dashboard';
 import { q } from '#shared/query';
 import type {
   DashboardPageEntity,
@@ -21,6 +20,7 @@ import type {
   ExportImportCustomReportWidget,
   ExportImportDashboard,
   ExportImportDashboardWidget,
+  NewDashboardWidgetEntity,
 } from '#types/models';
 import type { EverythingButIdOptional, WithOptional } from '#types/util';
 
@@ -254,7 +254,13 @@ async function updateDashboardWidget(
   await db.updateWithSchema('dashboard', widget);
 }
 
-async function resetDashboard(id: string) {
+async function resetDashboard({
+  id,
+  widgets: defaultWidgets,
+}: {
+  id: string;
+  widgets: NewDashboardWidgetEntity[];
+}) {
   await batchMessages(async () => {
     const widgets = await db.selectWithSchema(
       'dashboard',
@@ -266,8 +272,8 @@ async function resetDashboard(id: string) {
       // Delete all widgets for this dashboard
       ...widgets.map(({ id }) => db.delete_('dashboard', id)),
 
-      // Insert the default state
-      ...DEFAULT_DASHBOARD_STATE.map(widget =>
+      // Insert the default state provided by the desktop client
+      ...defaultWidgets.map(widget =>
         db.insertWithSchema('dashboard', { ...widget, dashboard_page_id: id }),
       ),
     ]);
