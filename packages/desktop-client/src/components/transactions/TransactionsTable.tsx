@@ -2376,10 +2376,10 @@ function NotesCell({
         </Tooltip>
       )}
     >
-      {({ inputStyle, onKeyDown, onBlur, value, setValue }) => (
+      {({ inputStyle, onKeyDown, onBlur, onUpdate, value }) => (
         <TagAutocomplete
           inputValue={value}
-          setInputValue={setValue}
+          setInputValue={onUpdate}
           inputStyle={inputStyle}
           onBlur={onBlur}
           onKeyDown={onKeyDown}

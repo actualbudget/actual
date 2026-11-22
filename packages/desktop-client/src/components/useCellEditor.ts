@@ -119,10 +119,9 @@ export function useCellEditor<T>({
   };
 }
 
-export type CellEditSession<T = string | undefined> = {
-  committedValue: T;
+// Lets a cell's editor (e.g. DateSelect) drive the cell's edit session
+export type CellEditSession<T> = {
   onUpdateDraft?: (value: T) => void;
   onCommit: (value: T) => void;
   onCancel: () => void;
-  onExit?: () => void;
 };

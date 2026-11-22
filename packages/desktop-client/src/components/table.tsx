@@ -450,7 +450,6 @@ export type CustomCellRenderProps<T = string | undefined> = {
   shouldSaveFromKey: (ev: KeyboardEvent) => boolean;
   inputStyle: CSSProperties;
   value: T;
-  setValue: (value: T) => void;
   editSession: CellEditSession<T>;
 };
 type CustomCellProps<T = string | undefined> = Omit<
@@ -505,15 +504,9 @@ export function CustomCell<T = string | undefined>({
   }
 
   const editSession: CellEditSession<T> = {
-    committedValue,
-    onUpdateDraft: val => cellEditor.setValue(val),
-    onCommit: val => {
-      cellEditor.commitEdit(val);
-    },
-    onCancel: () => {
-      cellEditor.cancelEdit();
-    },
-    onExit,
+    onUpdateDraft: cellEditor.setValue,
+    onCommit: cellEditor.commitEdit,
+    onCancel: cellEditor.cancelEdit,
   };
 
   return (
@@ -522,14 +515,11 @@ export function CustomCell<T = string | undefined>({
         children?.({
           onBlur: onBlur_,
           onKeyDown: onKeyDown_,
-          onUpdate: val => cellEditor.setValue(val),
-          onSave: val => {
-            cellEditor.commitEdit(val);
-          },
+          onUpdate: cellEditor.setValue,
+          onSave: cellEditor.commitEdit,
           shouldSaveFromKey,
           inputStyle: inputCellStyle,
           value: cellEditor.value,
-          setValue: cellEditor.setValue,
           editSession,
         })
       }
@@ -1444,6 +1434,8 @@ export type TableNavigator<T extends TableItem = TableItem> = {
   };
 };
 
+type Direction = 'left' | 'right' | 'up' | 'down';
+
 export function useTableNavigator<T extends TableItem>(
   data: T[],
   fields: string[] | ((item?: T) => string[]),
@@ -1458,10 +1450,8 @@ export function useTableNavigator<T extends TableItem>(
   const modalState = useModalState();
   const modalStackLength = useRef(modalState.modalStack.length);
 
-  // Used by the Escape handler to clear the multi-select set when no
-  // cell is being edited. Both contexts return null when this hook is
-  // used outside a SelectedProvider (e.g. in the budget grid), in
-  // which case the Escape branch below is a no-op.
+  // Escape clears the checked rows and Space toggles them. Both are null
+  // outside a SelectedProvider (e.g. the budget grid), where they do nothing.
   const selectedItems = useSelectedItems();
   const selectedDispatch = useSelectedDispatch();
 
@@ -1489,9 +1479,13 @@ export function useTableNavigator<T extends TableItem>(
   const editingId = isEditing && cursor ? cursor.id : null;
   const focusedField = cursor?.field ?? null;
 
-  function onEditFirstField(id: T['id']) {
+  function getFirstField(id: T['id']) {
     const item = data.find(item => item.id === id);
-    const [field] = item ? getFields(item) : [];
+    return item ? getFields(item)[0] : undefined;
+  }
+
+  function onEditFirstField(id: T['id']) {
+    const field = getFirstField(id);
     if (field != null) {
       beginEdit(id, field);
     }
@@ -1515,63 +1509,54 @@ export function useTableNavigator<T extends TableItem>(
     }
   }
 
-  function onFocusPrevious() {
-    if (!cursor) return;
+  // The cell next to the cursor, or null at the edge of the table. Left and
+  // right wrap to the neighbouring row; up and down skip rows without the
+  // cursor's field.
+  function findNeighbor(
+    dir: Direction,
+  ): { id: T['id']; field: string | undefined } | null {
+    if (!cursor) {
+      return null;
+    }
     const idx = data.findIndex(item => item.id === cursor.id);
-    if (idx > 0) {
-      const item = data[idx - 1];
-      const fields = getFields(item);
-      beginEdit(item.id, fields[fields.length - 1]);
-    } else {
-      flashInput();
-    }
-  }
 
-  function onFocusNext() {
-    if (!cursor) return;
-    const idx = data.findIndex(item => item.id === cursor.id);
-    if (idx < data.length - 1) {
-      const item = data[idx + 1];
-      const fields = getFields(item);
-      beginEdit(item.id, fields[0]);
-    } else {
-      flashInput();
-    }
-  }
-
-  function moveHorizontally(dir: number) {
-    if (cursor) {
-      const fields = getFields(data.find(item => item.id === cursor.id));
-      const idx = fields.indexOf(cursor.field) + dir;
-
-      if (idx < 0) {
-        onFocusPrevious();
-      } else if (idx >= fields.length) {
-        onFocusNext();
-      } else {
-        beginEdit(cursor.id, fields[idx]);
-      }
-    }
-  }
-
-  function moveVertically(dir: number) {
-    if (cursor) {
-      const idx = data.findIndex(item => item.id === cursor.id);
-      let nextIdx = idx;
-
-      while (true) {
-        nextIdx = nextIdx + dir;
-        if (nextIdx >= 0 && nextIdx < data.length) {
-          const next = data[nextIdx];
-          if (getFields(next).includes(cursor.field)) {
-            beginEdit(next.id, cursor.field);
-            break;
-          }
-        } else {
-          flashInput();
-          break;
+    if (dir === 'up' || dir === 'down') {
+      const step = dir === 'up' ? -1 : 1;
+      for (let i = idx + step; i >= 0 && i < data.length; i += step) {
+        if (getFields(data[i]).includes(cursor.field)) {
+          return { id: data[i].id, field: cursor.field };
         }
       }
+      return null;
+    }
+
+    const step = dir === 'left' ? -1 : 1;
+    const fields = getFields(data[idx]);
+    const fieldIdx = fields.indexOf(cursor.field) + step;
+    if (fieldIdx >= 0 && fieldIdx < fields.length) {
+      return { id: cursor.id, field: fields[fieldIdx] };
+    }
+    const nextItem = idx + step >= 0 ? data[idx + step] : undefined;
+    if (!nextItem) {
+      return null;
+    }
+    const nextFields = getFields(nextItem);
+    return {
+      id: nextItem.id,
+      field: step < 0 ? nextFields[nextFields.length - 1] : nextFields[0],
+    };
+  }
+
+  // Moves the edit cursor; at the edge of the table the input flashes
+  function moveEdit(dir: Direction) {
+    if (!cursor) {
+      return;
+    }
+    const next = findNeighbor(dir);
+    if (next) {
+      beginEdit(next.id, next.field);
+    } else {
+      flashInput();
     }
   }
 
@@ -1583,44 +1568,17 @@ export function useTableNavigator<T extends TableItem>(
   }
 
   function onSelectFirstField(id: T['id']) {
-    const item = data.find(item => item.id === id);
-    const [field] = item ? getFields(item) : [];
+    const field = getFirstField(id);
     if (field != null) {
       selectCell(id, field);
     }
   }
 
-  // Moves the selected cell like the edit cursor, but without editing and
-  // without wrapping past the first or last row
-  function moveSelection(dir: 'left' | 'right' | 'up' | 'down') {
-    if (!cursor) {
-      return;
-    }
-    const idx = data.findIndex(item => item.id === cursor.id);
-    if (idx === -1) {
-      return;
-    }
-
-    if (dir === 'up' || dir === 'down') {
-      const step = dir === 'up' ? -1 : 1;
-      for (let i = idx + step; i >= 0 && i < data.length; i += step) {
-        if (getFields(data[i]).includes(cursor.field)) {
-          selectCell(data[i].id, cursor.field);
-          return;
-        }
-      }
-      return;
-    }
-
-    const fields = getFields(data[idx]);
-    const fieldIdx = fields.indexOf(cursor.field) + (dir === 'left' ? -1 : 1);
-    if (fieldIdx >= 0 && fieldIdx < fields.length) {
-      selectCell(cursor.id, fields[fieldIdx]);
-    } else if (dir === 'left' && idx > 0) {
-      const prevFields = getFields(data[idx - 1]);
-      selectCell(data[idx - 1].id, prevFields[prevFields.length - 1]);
-    } else if (dir === 'right' && idx < data.length - 1) {
-      selectCell(data[idx + 1].id, getFields(data[idx + 1])[0]);
+  // Like moveEdit, but without editing, and it stops at the table's edge
+  function moveSelection(dir: Direction) {
+    const next = findNeighbor(dir);
+    if (next) {
+      selectCell(next.id, next.field);
     }
   }
 
@@ -1660,36 +1618,27 @@ export function useTableNavigator<T extends TableItem>(
           isRangeSelect: e.shiftKey,
         });
         return true;
-      case 'Escape':
-        // Checked rows go first, then the selected cell itself
-        if (selectedItems && selectedItems.size > 0) {
-          selectedDispatch?.({ type: 'select-none' });
-        } else {
-          setCursor(null);
-        }
-        return true;
       default:
         return false;
     }
   }
 
-  function onMove(dir: 'left' | 'right' | 'up' | 'down') {
-    switch (dir) {
-      case 'left':
-        moveHorizontally(-1);
-        break;
-      case 'right':
-        moveHorizontally(1);
-        break;
-      case 'up':
-        moveVertically(-1);
-        break;
-      case 'down':
-        moveVertically(1);
-        break;
-      default:
-        throw new Error('Unknown direction: ' + dir);
+  // Each press peels off one layer: the edit, then the checked rows, then
+  // the selected cell
+  function onEscape(e: KeyboardEvent): boolean {
+    if (isInCell()) {
+      exitEdit();
+      return true;
     }
+    if (selectedItems != null && selectedItems.size > 0) {
+      selectedDispatch?.({ type: 'select-none' });
+      return true;
+    }
+    if (cursor && e.target === e.currentTarget) {
+      setCursor(null);
+      return true;
+    }
+    return false;
   }
 
   // Keys pressed while no cell is active belong to the Table (#9494)
@@ -1744,34 +1693,19 @@ export function useTableNavigator<T extends TableItem>(
             e.preventDefault();
             e.stopPropagation();
 
-            onMove(
-              e.key === 'Enter'
-                ? e.shiftKey
-                  ? 'up'
-                  : 'down'
-                : e.shiftKey
-                  ? 'left'
-                  : 'right',
-            );
+            if (e.key === 'Enter') {
+              moveEdit(e.shiftKey ? 'up' : 'down');
+            } else {
+              moveEdit(e.shiftKey ? 'left' : 'right');
+            }
             break;
 
-          case 'Escape': {
-            // Each press peels off one layer. Leaving the cell keeps any
-            // checked rows; the selected state clears them next.
-            const isActive = isInCell();
-            const hasSelection =
-              selectedItems != null && selectedItems.size > 0;
-            if (isActive) {
-              exitEdit();
-            } else if (hasSelection) {
-              selectedDispatch?.({ type: 'select-none' });
-            }
-            if (isActive || hasSelection) {
+          case 'Escape':
+            if (onEscape(e)) {
               e.preventDefault();
               e.stopPropagation();
             }
             break;
-          }
           default:
         }
       },
