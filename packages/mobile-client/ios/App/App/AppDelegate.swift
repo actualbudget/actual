@@ -38,35 +38,48 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         task.expirationHandler = {
             DispatchQueue.main.async { complete(success: false) }
         }
-        syncWebApp(completion: complete)
+        // Right after iOS relaunched the app the web app is still loading, so
+        // ask again until it takes the request or the task runs out of time.
+        func attempt() {
+            guard !isCompleted else { return }
+            syncWebApp { didSync in
+                if didSync {
+                    complete(success: true)
+                } else {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: attempt)
+                }
+            }
+        }
+        attempt()
     }
 
     // The sync code and the database live in the web view, so the web app does
-    // the work (see useBackgroundSync.ts) and resolves the promise when done.
-    //
-    // ponytail: when iOS relaunched the app for the task the web app is still
-    // loading (or the web view is missing), so nothing answers and the task
-    // runs until it expires. The web app syncs by itself on launch in that
-    // time. Add a "loaded" signal if the wasted time matters.
-    func syncWebApp(completion: @escaping (_ success: Bool) -> Void) {
+    // the work (see useBackgroundSync.ts). Reports false when the web app did
+    // not take the request: it cancels the event when it does.
+    func syncWebApp(completion: @escaping (_ didSync: Bool) -> Void) {
         let webView = UIApplication.shared.connectedScenes
             .compactMap { ($0 as? UIWindowScene)?.windows.first?.rootViewController as? CAPBridgeViewController }
             .first?.webView
-        webView?.callAsyncJavaScript(
+        guard let webView else {
+            completion(false)
+            return
+        }
+        webView.callAsyncJavaScript(
             """
-            await new Promise(done =>
-              window.dispatchEvent(new CustomEvent('actual-background-sync', { detail: done })),
+            let done;
+            const finished = new Promise(resolve => (done = resolve));
+            const wasTaken = !window.dispatchEvent(
+              new CustomEvent('actual-background-sync', { detail: done, cancelable: true }),
             );
-            return true;
+            if (wasTaken) {
+              await finished;
+            }
+            return wasTaken;
             """,
             in: nil,
             in: .page
         ) { result in
-            if case .success = result {
-                completion(true)
-            } else {
-                completion(false)
-            }
+            completion((try? result.get()) as? Bool == true)
         }
     }
 

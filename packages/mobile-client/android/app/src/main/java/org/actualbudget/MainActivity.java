@@ -8,7 +8,10 @@ public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        BackgroundSyncWorker.start(getBridge());
+        // There is no bridge when the device has no usable web view.
+        if (getBridge() != null) {
+            BackgroundSyncWorker.start(getBridge());
+        }
     }
 
     @Override

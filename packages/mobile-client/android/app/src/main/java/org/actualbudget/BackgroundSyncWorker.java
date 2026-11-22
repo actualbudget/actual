@@ -11,8 +11,11 @@ import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 import com.getcapacitor.Bridge;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 // Syncs the open budget every now and then while the app is not in use.
 //
@@ -28,13 +31,24 @@ public class BackgroundSyncWorker extends Worker {
     private static final String WORK_NAME = "background-sync";
 
     private static volatile Bridge bridge;
-    private static volatile CountDownLatch pendingSync = new CountDownLatch(0);
+
+    // The run that is waiting for the web app, by run number, so that a late
+    // answer to an earlier run cannot end a later one.
+    private static final AtomicInteger runCount = new AtomicInteger();
+    private static volatile Map.Entry<Integer, CountDownLatch> pendingSync;
+
+    private static void finish(int run) {
+        Map.Entry<Integer, CountDownLatch> pending = pendingSync;
+        if (pending != null && pending.getKey() == run) {
+            pending.getValue().countDown();
+        }
+    }
 
     public static class Callbacks {
 
         @JavascriptInterface
-        public void done() {
-            pendingSync.countDown();
+        public void done(int run) {
+            finish(run);
         }
     }
 
@@ -42,7 +56,9 @@ public class BackgroundSyncWorker extends Worker {
         super(context, params);
     }
 
-    static void start(Bridge appBridge) {
+    // Synchronized with the cancellation in doWork(), which must not undo the
+    // schedule made here.
+    static synchronized void start(Bridge appBridge) {
         bridge = appBridge;
         appBridge.getWebView().addJavascriptInterface(new Callbacks(), "ActualBackgroundSync");
 
@@ -65,24 +81,36 @@ public class BackgroundSyncWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        Bridge appBridge = bridge;
-        if (appBridge == null) {
-            // Android started the app just for this, without its web view.
-            // Stop the schedule so that does not repeat every 15 minutes;
-            // opening the app starts it again.
-            WorkManager.getInstance(getApplicationContext()).cancelUniqueWork(WORK_NAME);
-            return Result.success();
+        Bridge appBridge;
+        synchronized (BackgroundSyncWorker.class) {
+            appBridge = bridge;
+            if (appBridge == null) {
+                // Android started the app just for this, without its web view.
+                // Stop the schedule so that does not repeat every 15 minutes;
+                // opening the app starts it again.
+                WorkManager.getInstance(getApplicationContext()).cancelUniqueWork(WORK_NAME);
+                return Result.success();
+            }
         }
 
+        int run = runCount.incrementAndGet();
         CountDownLatch sync = new CountDownLatch(1);
-        pendingSync = sync;
+        pendingSync = new SimpleImmutableEntry<>(run, sync);
+        // The web app cancels the event when it takes the request. If it did
+        // not (still loading, or no budget open), there is nothing to wait for.
         appBridge.eval(
-            "window.dispatchEvent(new CustomEvent('actual-background-sync', { detail: () => ActualBackgroundSync.done() }))",
-            null
+            "!window.dispatchEvent(new CustomEvent('actual-background-sync', { cancelable: true, detail: () => ActualBackgroundSync.done(" +
+                run +
+                ") }))",
+            wasTaken -> {
+                if (!"true".equals(wasTaken)) {
+                    finish(run);
+                }
+            }
         );
         try {
-            // Nothing answers while the web app is still loading: do not hold
-            // the device awake for the 10 minutes a worker may run.
+            // Do not hold the device awake for the 10 minutes a worker may
+            // run if the web app never reports back.
             sync.await(1, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

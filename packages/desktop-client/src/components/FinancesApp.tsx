@@ -13,6 +13,7 @@ import { getLatestAppVersion, sync } from '#app/appSlice';
 import { ProtectedRoute } from '#auth/ProtectedRoute';
 import { Permissions } from '#auth/types';
 import { useAutomaticBankSync } from '#hooks/useAutomaticBankSync';
+import { useBackgroundSync } from '#hooks/useBackgroundSync';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
@@ -120,6 +121,9 @@ export function FinancesApp() {
 
   useAutomaticBankSync();
   useNewsNotification();
+  // Here rather than at the top of the app, so that the native apps are only
+  // answered once a budget is open and there is something to sync.
+  useBackgroundSync(() => dispatch(sync()));
 
   const init = useEffectEvent(() => {
     // Wait a little bit to make sure the sync button will get the

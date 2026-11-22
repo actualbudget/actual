@@ -3,6 +3,9 @@ import { useEffect, useEffectEvent } from 'react';
 // Dispatched on `window` by the iOS and Android shells (AppDelegate.swift and
 // BackgroundSyncWorker.java) from a system background task. `detail` is a
 // function to call once the work is done, so the shell can end the task.
+// Cancelling the event tells the shell that the request was taken: without
+// that it knows nothing was listening yet (the app is still loading, or no
+// budget is open).
 const BACKGROUND_SYNC_EVENT = 'actual-background-sync';
 
 /**
@@ -24,6 +27,7 @@ export function useBackgroundSync(callback: () => Promise<unknown>) {
   useEffect(() => {
     function onBackgroundSync(event: Event) {
       if (event instanceof CustomEvent && typeof event.detail === 'function') {
+        event.preventDefault();
         void runCallback(event.detail);
       }
     }

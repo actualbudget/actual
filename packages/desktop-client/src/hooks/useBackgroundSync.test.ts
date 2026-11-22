@@ -3,9 +3,13 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { useBackgroundSync } from './useBackgroundSync';
 
+// Returns whether the web app took the request, as the native apps see it.
 function dispatchBackgroundSync(done: () => void) {
-  window.dispatchEvent(
-    new CustomEvent('actual-background-sync', { detail: done }),
+  return !window.dispatchEvent(
+    new CustomEvent('actual-background-sync', {
+      detail: done,
+      cancelable: true,
+    }),
   );
 }
 
@@ -38,13 +42,19 @@ describe('useBackgroundSync', () => {
     await vi.waitFor(() => expect(done).toHaveBeenCalledTimes(1));
   });
 
-  it('stops listening after unmount', () => {
+  it('tells the native app that it took the request', () => {
+    renderHook(() => useBackgroundSync(() => Promise.resolve()));
+
+    expect(dispatchBackgroundSync(vi.fn())).toBe(true);
+  });
+
+  it('leaves the request untaken after unmount', () => {
     const callback = vi.fn(() => Promise.resolve());
     const { unmount } = renderHook(() => useBackgroundSync(callback));
 
     unmount();
-    dispatchBackgroundSync(vi.fn());
 
+    expect(dispatchBackgroundSync(vi.fn())).toBe(false);
     expect(callback).not.toHaveBeenCalled();
   });
 });
