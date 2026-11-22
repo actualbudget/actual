@@ -97,7 +97,7 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
         <Cheveron
           style={{
             flexShrink: 0,
-            color: theme.pageTextSubdued,
+            color: theme.pageTextLight,
             marginLeft: 5,
           }}
           width={styles.text.fontSize}
