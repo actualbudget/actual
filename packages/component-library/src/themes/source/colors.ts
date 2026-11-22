@@ -381,7 +381,7 @@ export const colors = {
     dark: 'navy900',
     midnight: 'gray700',
   },
-  calendarItemText: { light: 'navy150', dark: 'navy150', midnight: 'gray150' },
+  calendarItemText: { all: 'white' },
   calendarItemBackground: {
     light: 'navy800',
     dark: 'navy800',
@@ -537,7 +537,7 @@ export const colors = {
   noteTagBackground: { all: { ref: 'accentSubtle' } },
   noteTagBackgroundHover: {
     all: {
-      raw: 'color-mix(in srgb, var(--color-accentSubtle) 80%, var(--color-accent))',
+      raw: 'color-mix(in srgb, var(--color-accentSubtle) 50%, var(--color-tableBackground))',
     },
   },
   noteTagText: { all: { ref: 'accentSubtleText' } },

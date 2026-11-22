@@ -28,8 +28,6 @@ const knownFailures = new Set<string>([
   'midnight: noticeText on noticeBackground',
   'midnight: noticeTextDark on noticeBackground',
   'midnight: pillText on pillBackground',
-  'dark: calendarItemText on calendarSelectedBackground',
-  'midnight: calendarItemText on calendarSelectedBackground',
 ]);
 
 function describePair(theme: ThemeName, text: string, background: string) {

@@ -137,6 +137,7 @@ export const contrastPairs: ContrastPair[] = [
   text('pillTextHighlighted', 'pillBackgroundLight'),
   text('menuAutoCompleteTextHeader', 'menuAutoCompleteBackground'),
   text('noteTagText', 'noteTagBackground'),
+  text('noteTagText', 'noteTagBackgroundHover'),
   text('tooltipText', 'tooltipBackground'),
   text('calendarText', 'calendarBackground'),
   text('calendarItemText', 'calendarItemBackground'),
