@@ -439,3 +439,264 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
     ).toStrictEqual(['Google', 'AAA Google']);
   });
 });
+
+describe('PayeeAutocomplete keyboard selection with transfer payees', () => {
+  const TRANSFER_ID = 'transfer-id';
+
+  beforeEach(() => {
+    vi.mocked(useNearbyPayees).mockReturnValue(mockNearbyPayeesResult([]));
+  });
+
+  // The transfer is highlighted via ArrowDown; Tab/Enter must pick it, not
+  // whichever payee sits at the same index in fzf order.
+  async function pickHighlighted(
+    transferName: string,
+    key: '{Tab}' | '{Enter}',
+    arrowDowns: number,
+  ) {
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(payeeQueries.listCommon().queryKey, []);
+    const account = generateAccount('acct', false, false);
+    const onUpdate = vi.fn();
+    const onSelect = vi.fn();
+
+    render(
+      <TestProviders queryClient={queryClient}>
+        <AuthProvider>
+          <PayeeAutocomplete
+            type="single"
+            value={null}
+            embedded={false}
+            payees={[
+              makePayee('Test A'),
+              makePayee('Test B'),
+              {
+                id: TRANSFER_ID,
+                name: transferName,
+                favorite: false,
+                transfer_acct: account.id,
+              },
+            ]}
+            accounts={[account]}
+            onUpdate={onUpdate}
+            onSelect={onSelect}
+          />
+        </AuthProvider>
+      </TestProviders>,
+    );
+
+    const input = screen.getByLabelText('Payee');
+    await userEvent.click(input);
+    await userEvent.type(input, 'Test');
+    await waitForAutocomplete();
+    for (let i = 0; i < arrowDowns; i++) {
+      await userEvent.keyboard('{ArrowDown}');
+    }
+    await userEvent.keyboard(key);
+
+    // Tab commits the value last reported through onUpdate; Enter commits
+    // through onSelect (a later call than any onUpdate).
+    const mock = key === '{Tab}' ? onUpdate : onSelect;
+    return mock.mock.calls.at(-1)?.[0];
+  }
+
+  test.each(['{Tab}', '{Enter}'] as const)(
+    '%s picks a transfer that fzf ranks above regular payees',
+    async key => {
+      // An exact name match starts highlighted, so no arrow keys are needed.
+      expect(await pickHighlighted('Test', key, 0)).toBe(TRANSFER_ID);
+    },
+  );
+
+  test.each(['{Tab}', '{Enter}'] as const)(
+    '%s picks a transfer that fzf ranks below regular payees',
+    async key => {
+      // Highlight starts on the first payee (after 'Create payee'); the
+      // transfer renders last, two rows down.
+      expect(await pickHighlighted('Test Account', key, 2)).toBe(TRANSFER_ID);
+    },
+  );
+});
+
+describe('PayeeAutocomplete default highlight with common payees', () => {
+  beforeEach(() => {
+    vi.mocked(useNearbyPayees).mockReturnValue(mockNearbyPayeesResult([]));
+  });
+
+  async function typeAndCommit(typed: string, key: '{Tab}' | '{Enter}') {
+    const queryClient = createTestQueryClient();
+    const testStore = makePayee('Test Store', { favorite: true });
+    queryClient.setQueryData(payeeQueries.listCommon().queryKey, [testStore]);
+    const onUpdate = vi.fn();
+    const onSelect = vi.fn();
+
+    render(
+      <TestProviders queryClient={queryClient}>
+        <AuthProvider>
+          <PayeeAutocomplete
+            type="single"
+            value={null}
+            embedded={false}
+            payees={[makePayee('Test'), testStore, makePayee('Tesla Motors')]}
+            accounts={[]}
+            onUpdate={onUpdate}
+            onSelect={onSelect}
+          />
+        </AuthProvider>
+      </TestProviders>,
+    );
+
+    const input = screen.getByLabelText('Payee');
+    await userEvent.click(input);
+    await userEvent.type(input, typed);
+    await waitForAutocomplete();
+    await userEvent.keyboard(key);
+
+    const mock = key === '{Tab}' ? onUpdate : onSelect;
+    return mock.mock.calls.at(-1)?.[0];
+  }
+
+  test.each(['{Tab}', '{Enter}'] as const)(
+    '%s selects the typed exact match over a common payee',
+    async key => {
+      expect(await typeAndCommit('Test', key)).toBe('test-id');
+    },
+  );
+
+  test.each(['{Tab}', '{Enter}'] as const)(
+    '%s on a non-exact query reports the first rendered row',
+    async key => {
+      // Not an exact match: 'Create payee' stays first, the first rendered
+      // payee row (the common payee) is highlighted.
+      expect(await typeAndCommit('Tes', key)).toBe('test store-id');
+    },
+  );
+});
+
+describe('PayeeAutocomplete keyboard selection regressions', () => {
+  async function typeAndCommit({
+    typed,
+    key,
+    payees: testPayees,
+    accounts: testAccounts = [],
+    common = [],
+    nearby = [],
+    backspaces = 0,
+  }: {
+    typed: string;
+    backspaces?: number;
+    key: '{Tab}' | '{Enter}';
+    payees: PayeeEntity[];
+    accounts?: AccountEntity[];
+    common?: PayeeEntity[];
+    nearby?: NearbyPayeeEntity[];
+  }) {
+    vi.mocked(useNearbyPayees).mockReturnValue(mockNearbyPayeesResult(nearby));
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(payeeQueries.listCommon().queryKey, common);
+    const onUpdate = vi.fn();
+    const onSelect = vi.fn();
+
+    render(
+      <TestProviders queryClient={queryClient}>
+        <AuthProvider>
+          <PayeeAutocomplete
+            type="single"
+            value={null}
+            embedded={false}
+            payees={testPayees}
+            accounts={testAccounts}
+            onUpdate={onUpdate}
+            onSelect={onSelect}
+          />
+        </AuthProvider>
+      </TestProviders>,
+    );
+
+    const input = screen.getByLabelText('Payee');
+    await userEvent.click(input);
+    await userEvent.type(input, typed);
+    if (backspaces > 0) {
+      await userEvent.keyboard('{Backspace}'.repeat(backspaces));
+    }
+    await waitForAutocomplete();
+    await userEvent.keyboard(key);
+
+    const mock = key === '{Tab}' ? onUpdate : onSelect;
+    return mock.mock.calls.at(-1)?.[0];
+  }
+
+  test.each([
+    ['{Tab}', 'zed ba-id'],
+    ['{Enter}', 'zed bar-id'],
+  ] as const)(
+    '%s keeps the nearby highlight when the last backspace makes a nearby payee match',
+    async (key, expected) => {
+      const zedBarFee = makePayee('Zed Bar Fee', { favorite: true });
+      const zedBa = makePayee('Zed Ba');
+      expect(
+        await typeAndCommit({
+          typed: 'Zed Bax',
+          backspaces: 1,
+          key,
+          payees: [
+            zedBarFee,
+            zedBa,
+            {
+              id: 'zed-transfer-id',
+              name: 'Zed Ba',
+              favorite: false,
+              transfer_acct: generateAccount('acct', false, false).id,
+            },
+          ],
+          accounts: [generateAccount('acct', false, false)],
+          common: [zedBarFee],
+          nearby: [makeNearbyPayee('Zed Bar', 10)],
+        }),
+      ).toBe(expected);
+    },
+  );
+
+  test.each([
+    ['{Tab}', 'test-id'],
+    // Enter commits the highlighted row, the first nearby payee.
+    ['{Enter}', 'test cafe-id'],
+  ] as const)(
+    '%s with nearby payees present keeps the unsorted suggestion order',
+    async (key, expected) => {
+      const testStore = makePayee('Test Store', { favorite: true });
+      expect(
+        await typeAndCommit({
+          typed: 'Test',
+          key,
+          payees: [makePayee('Test'), testStore],
+          common: [testStore],
+          nearby: [makeNearbyPayee('Test Cafe', 10)],
+        }),
+      ).toBe(expected);
+    },
+  );
+
+  test.each(['{Tab}', '{Enter}'] as const)(
+    '%s picks a transfer whose name exactly matches the typed text',
+    async key => {
+      const account = generateAccount('acct', false, false);
+      expect(
+        await typeAndCommit({
+          typed: 'Ally Savings',
+          key,
+          payees: [
+            makePayee('Ally Savings Fee'),
+            {
+              id: 'ally-transfer-id',
+              name: 'Ally Savings',
+              favorite: false,
+              transfer_acct: account.id,
+            },
+          ],
+          accounts: [account],
+        }),
+      ).toBe('ally-transfer-id');
+    },
+  );
+});

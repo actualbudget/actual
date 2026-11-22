@@ -168,6 +168,26 @@ function determineItemType(
   }
 }
 
+// Downshift's highlightedIndex follows PayeeList's grouped render order, and
+// Autocomplete resolves keyboard updates by indexing into the suggestions, so
+// the suggestions must be in that same order (stable sort keeps fzf ranking
+// within each group).
+const RENDER_ORDER: PayeeAutocompleteItem['itemType'][] = [
+  'common_payee',
+  'payee',
+  'account',
+];
+
+function sortByRenderOrder(items: PayeeAutocompleteItem[]) {
+  const rank = (item: PayeeAutocompleteItem) =>
+    item.id === 'new'
+      ? -1
+      : RENDER_ORDER.includes(item.itemType)
+        ? RENDER_ORDER.indexOf(item.itemType)
+        : RENDER_ORDER.length;
+  return [...items].sort((a, b) => rank(a) - rank(b));
+}
+
 function PayeeList({
   items,
   getItemProps,
@@ -213,7 +233,7 @@ function PayeeList({
         },
       );
 
-      // assign indexes in render order
+      // assign indexes in render order (keep in sync with RENDER_ORDER)
       const newPayeeWithIndex = result.newPayee
         ? { ...result.newPayee, highlightedIndex: currentIndex++ }
         : null;
@@ -510,6 +530,12 @@ export function PayeeAutocomplete({
     const newItem = suggestions.find(s => s.id === 'new');
     const realSuggestions = suggestions.filter(s => s.id !== 'new');
 
+    // With nearby payees, PayeeList prepends them and the highlight is pinned
+    // to 0, so keep the unsorted order. Gate on the unfiltered list: the
+    // filtered one is a stale closure when called from onInputValueChange.
+    const maybeSort = (items: PayeeAutocompleteItem[]) =>
+      nearbyPayeesWithType.length > 0 ? items : sortByRenderOrder(items);
+
     let filtered: PayeeAutocompleteItem[];
     if (!value) {
       filtered = realSuggestions.slice(0, 100);
@@ -538,10 +564,10 @@ export function PayeeAutocomplete({
         !firstFiltered.transfer_acct
       ) {
         // Exact match found, remove the 'Create payee' option.
-        return results.slice(1);
+        return maybeSort(results.slice(1));
       }
     }
-    return results;
+    return maybeSort(results);
   };
 
   return (
@@ -575,7 +601,7 @@ export function PayeeAutocomplete({
       }}
       onUpdate={(id, inputValue) => onUpdate?.(id, makeNew(id, inputValue))}
       onSelect={handleSelect}
-      getHighlightedIndex={suggestions => {
+      getHighlightedIndex={(suggestions, value) => {
         // If we have nearby payees, highlight the first nearby payee
         if (filteredNearbyPayees.length > 0) {
           return 0;
@@ -584,7 +610,23 @@ export function PayeeAutocomplete({
         // Otherwise use original logic for suggestions
         if (suggestions.length === 0) {
           return null;
-        } else if (suggestions[0].id === 'new') {
+        }
+
+        // Highlight the exact name match (first in render order, so a regular
+        // payee wins over a same-named transfer) wherever the sort put it.
+        const exactIndex =
+          nearbyPayeesWithType.length > 0
+            ? -1
+            : suggestions.findIndex(
+                s =>
+                  s.id !== 'new' &&
+                  getNormalisedString(s.name) === getNormalisedString(value),
+              );
+        if (exactIndex !== -1) {
+          return exactIndex;
+        }
+
+        if (suggestions[0].id === 'new') {
           // Highlight the first payee since the create payee option is at index 0.
           return suggestions.length > 1 ? 1 : 0;
         }
