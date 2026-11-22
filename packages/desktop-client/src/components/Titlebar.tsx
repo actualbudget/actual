@@ -159,8 +159,7 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
   const hoveredStyle = isMobile
     ? {
         color: mobileColor,
-        // oxlint-disable-next-line actual/theme-token-roles
-        background: theme.mobileHeaderTextHover,
+        background: theme.mobileHeaderBackgroundHover,
       }
     : {};
 

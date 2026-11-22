@@ -75,8 +75,7 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
                       variant="primary"
                       isLoading={loadingState === 'cloud'}
                       style={{
-                        // oxlint-disable-next-line actual/theme-token-roles
-                        backgroundColor: theme.errorText,
+                        backgroundColor: theme.buttonDangerBackground,
                         alignSelf: 'center',
                         border: 0,
                         padding: '10px 30px',
@@ -165,8 +164,7 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
                         }
                       : {
                           border: 0,
-                          // oxlint-disable-next-line actual/theme-token-roles
-                          backgroundColor: theme.errorText,
+                          backgroundColor: theme.buttonDangerBackground,
                         }),
                   }}
                   onPress={async () => {

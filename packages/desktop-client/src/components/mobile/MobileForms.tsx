@@ -125,8 +125,7 @@ export function InputField({
         className={iconFieldWrapperClassName}
         nativeStyle={{
           backgroundColor: disabled
-            ? // oxlint-disable-next-line actual/theme-token-roles
-              theme.formInputTextReadOnlySelection
+            ? theme.formInputBackgroundDisabled
             : theme.tableBackground,
         }}
       >
@@ -181,8 +180,7 @@ export function InputField({
         ...style,
         color: disabled ? theme.tableTextInactive : theme.tableText,
         backgroundColor: disabled
-          ? // oxlint-disable-next-line actual/theme-token-roles
-            theme.formInputTextReadOnlySelection
+          ? theme.formInputBackgroundDisabled
           : theme.tableBackground,
       }}
       {...props}
@@ -207,8 +205,7 @@ const defaultTapFieldClassName = () =>
     alignItems: 'center',
     backgroundColor: theme.tableBackground,
     '&[data-disabled]': {
-      // oxlint-disable-next-line actual/theme-token-roles
-      backgroundColor: theme.formInputTextReadOnlySelection,
+      backgroundColor: theme.formInputBackgroundDisabled,
     },
     '&[data-pressed]': {
       opacity: 0.5,

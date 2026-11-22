@@ -3051,8 +3051,7 @@ function TransactionTableInner({
               left: 0,
               right: 0,
               height: 20,
-              // oxlint-disable-next-line actual/theme-token-roles
-              backgroundColor: theme.errorText,
+              backgroundColor: theme.tableBackground,
               boxShadow: `0 0 6px ${shadowColor(0.2)}`,
             }}
           />

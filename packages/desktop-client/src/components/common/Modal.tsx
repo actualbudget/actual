@@ -101,8 +101,7 @@ const mobileSheetHandleStyle: CSSProperties = {
   width: 36,
   height: 4,
   borderRadius: radius.pill,
-  // oxlint-disable-next-line actual/theme-token-roles
-  backgroundColor: theme.pageTextSubdued,
+  backgroundColor: theme.mobileSheetHandle,
   alignSelf: 'center',
   marginTop: spacing.sm,
   marginBottom: spacing.sm,

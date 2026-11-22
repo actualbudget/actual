@@ -166,8 +166,10 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
                       variant="primary"
                       style={
                         apiKey
-                          ? // oxlint-disable-next-line actual/theme-token-roles
-                            { border: 0, backgroundColor: theme.errorText }
+                          ? {
+                              border: 0,
+                              backgroundColor: theme.buttonDangerBackground,
+                            }
                           : undefined
                       }
                       type="submit"

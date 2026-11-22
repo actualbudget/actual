@@ -709,6 +709,58 @@ export const colors = {
   overlayBackground: { all: { raw: 'rgba(0, 0, 0, 0.3)' } },
   shadow: { all: 'black' },
   scrollbarThumb: { all: { raw: '#d0d0d0' } },
+  scrollbarThumbStrong: {
+    all: { ref: 'pageTextSubdued' },
+    fallback: 'pageTextSubdued',
+  },
+
+  buttonDangerBackground: { all: { ref: 'errorText' }, fallback: 'errorText' },
+  progressBarFill: {
+    all: { ref: 'pageTextPositive' },
+    fallback: 'pageTextPositive',
+  },
+  newsUnreadIndicator: {
+    all: { ref: 'pageTextPositive' },
+    fallback: 'pageTextPositive',
+  },
+  updateNotificationBackground: {
+    all: { ref: 'pageTextPositive' },
+    fallback: 'pageTextPositive',
+  },
+  updateNotificationText: {
+    all: { ref: 'tableBackground' },
+    fallback: 'tableBackground',
+  },
+  dropIndicator: { all: { ref: 'pageTextLink' }, fallback: 'pageTextLink' },
+  mobileSheetHandle: {
+    all: { ref: 'pageTextSubdued' },
+    fallback: 'pageTextSubdued',
+  },
+  skeletonBackground: { all: { ref: 'pageText' }, fallback: 'pageText' },
+  skeletonBackgroundSubdued: {
+    all: { ref: 'pageTextSubdued' },
+    fallback: 'pageTextSubdued',
+  },
+  formInputBackgroundDisabled: {
+    all: { ref: 'formInputTextReadOnlySelection' },
+    fallback: 'formInputTextReadOnlySelection',
+  },
+  formInputBackgroundReadOnlySelection: {
+    all: { ref: 'formInputTextReadOnlySelection' },
+    fallback: 'formInputTextReadOnlySelection',
+  },
+  mobileHeaderBackgroundHover: {
+    all: { ref: 'mobileHeaderTextHover' },
+    fallback: 'mobileHeaderTextHover',
+  },
+  carryoverIndicatorBackground: {
+    all: { ref: 'pillText' },
+    fallback: 'pillText',
+  },
+  carryoverIndicatorText: {
+    all: { ref: 'pillBackgroundLight' },
+    fallback: 'pillBackgroundLight',
+  },
 
   formulaFunction: {
     light: { raw: '#795e26' },

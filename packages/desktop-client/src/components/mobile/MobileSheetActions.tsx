@@ -46,9 +46,8 @@ export function MobileSheetActions({
           ...touchButtonStyle,
           ...(isNarrowWidth && { flex: 1.4 }),
           ...(isDestructive && {
-            // oxlint-disable-next-line actual/theme-token-roles
-            backgroundColor: theme.errorText,
-            borderColor: theme.errorText,
+            backgroundColor: theme.buttonDangerBackground,
+            borderColor: theme.buttonDangerBackground,
           }),
         }}
       >
