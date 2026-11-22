@@ -44,6 +44,7 @@ export function CalendarCardSkeleton() {
               style={{
                 width: 14,
                 height: 10,
+                // oxlint-disable-next-line actual/theme-token-roles
                 backgroundColor: theme.pageTextSubdued,
               }}
             />

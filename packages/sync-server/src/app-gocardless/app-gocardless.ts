@@ -7,6 +7,8 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
+import { MOBILE_APP_RETURN_PAGE_HTML } from '#util/mobile-app-return';
+import { validateGlobalBankSyncSession } from '#util/validate-budget-session';
 
 import {
   AccountNotLinkedToRequisition,
@@ -45,10 +47,12 @@ function validateOrigin(origin: string | undefined) {
   return url.origin;
 }
 
-function resolveRedirectHost(req: Request) {
+// The desktop and mobile apps have no web origin the bank could redirect back
+// to, so they land on this server's own completion page instead.
+function resolveRedirectHost(req: Request, returnToApp: boolean) {
   const { origin } = req.headers;
   const host = req.get('host');
-  if (origin === ELECTRON_APP_ORIGIN && host) {
+  if ((origin === ELECTRON_APP_ORIGIN || returnToApp) && host) {
     return `${req.protocol}://${host}`;
   }
   return validateOrigin(origin);
@@ -88,6 +92,10 @@ app.get('/link', function (req, res) {
   res.send(LINK_PAGE_HTML);
 });
 
+app.get('/link/app', function (req, res) {
+  res.send(MOBILE_APP_RETURN_PAGE_HTML);
+});
+
 export { app as handlers };
 app.use(express.json());
 // SECURITY NOTE (intended behaviour - not a vulnerability):
@@ -96,11 +104,15 @@ app.use(express.json());
 // server-wide (global) bank-sync credentials is admin-only, but every
 // signed-in user on that server may use them. This is a supported feature
 // and will remain; budgets with their own credentials use those instead.
+// API keys need explicit permission to sync shared connections.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
+const bankSync = express.Router();
+bankSync.use(validateGlobalBankSyncSession);
+app.use(bankSync);
 app.use(validateSessionMiddleware);
 
-app.post('/status', async (req, res) => {
+bankSync.post('/status', async (req, res) => {
   res.send({
     status: 'ok',
     data: {
@@ -133,11 +145,13 @@ app.post(
   handleError(async (req, res) => {
     const { institutionId: rawInstitutionId } = req.body || {};
     const institutionId = sanitizeId<GoCardlessInstitutionId>(rawInstitutionId);
-    const host = resolveRedirectHost(req);
+    const returnToApp = req.body?.returnToApp === true;
+    const host = resolveRedirectHost(req, returnToApp);
 
     const { link, requisitionId } = await goCardlessService.createRequisition({
       institutionId,
-      host,
+      redirectUrl:
+        host + (returnToApp ? '/gocardless/link/app' : '/gocardless/link'),
     });
 
     res.send({
@@ -238,7 +252,7 @@ app.post(
   }),
 );
 
-app.post(
+bankSync.post(
   '/transactions',
   ensureConfigured,
   handleError(async (req, res) => {

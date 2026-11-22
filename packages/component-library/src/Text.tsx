@@ -4,11 +4,8 @@ import type { HTMLProps, ReactNode, Ref } from 'react';
 import { css, cx } from '@emotion/css';
 
 import type { CSSProperties } from './styles';
-import {
-  componentSizeText,
-  sizeResponsiveStyles,
-  type ComponentSize,
-} from './tokens';
+import { componentSizeText, sizeResponsiveStyles } from './tokens';
+import type { ComponentSize } from './tokens';
 
 // `touch` is a control concept; text elements don't accept it.
 type TextSize = Exclude<ComponentSize, 'touch'>;

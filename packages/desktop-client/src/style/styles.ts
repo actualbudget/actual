@@ -18,7 +18,9 @@ function onScrollbarChange() {
       width: 7,
       borderRadius: 30,
       backgroundClip: 'padding-box',
+      // oxlint-disable-next-line actual/no-color-literals
       border: '2px solid rgba(0, 0, 0, 0)',
+      // oxlint-disable-next-line actual/no-color-literals
       backgroundColor: '#d0d0d0',
     },
   };
@@ -26,15 +28,18 @@ function onScrollbarChange() {
   styles.lightScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
       width: 11,
+      // oxlint-disable-next-line actual/no-color-literals
       backgroundColor: 'rgba(200, 200, 200, .2)',
     },
     '& ::-webkit-scrollbar-thumb': {
       width: 7,
       borderRadius: 30,
       backgroundClip: 'padding-box',
+      // oxlint-disable-next-line actual/no-color-literals
       border: '2px solid rgba(0, 0, 0, 0)',
     },
     '& ::-webkit-scrollbar-thumb:vertical': {
+      // oxlint-disable-next-line actual/no-color-literals
       backgroundColor: '#d0d0d0',
     },
   };
@@ -42,13 +47,16 @@ function onScrollbarChange() {
   styles.darkScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
       width: 11,
+      // oxlint-disable-next-line actual/no-color-literals
       backgroundColor: 'rgba(0, 0, 0, 0)',
     },
     '& ::-webkit-scrollbar-thumb:vertical': {
       width: 7,
       borderRadius: 30,
       backgroundClip: 'padding-box',
+      // oxlint-disable-next-line actual/no-color-literals
       backgroundColor: 'rgba(200, 200, 200, .5)',
+      // oxlint-disable-next-line actual/no-color-literals
       border: '2px solid rgba(0, 0, 0, 0)',
     },
   };

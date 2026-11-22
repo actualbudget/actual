@@ -67,6 +67,48 @@ export async function seedLegacyDatabase(
   database.close();
 }
 
+// Another tab's absurd-sql connection, which closes on a version change
+// unless told to stay
+export function holdLegacyConnection(
+  name: string,
+  { stubborn = false } = {},
+): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(name, 2);
+    request.onsuccess = () => {
+      const database = request.result;
+      if (!stubborn) {
+        database.onversionchange = () => database.close();
+      }
+      resolve(database);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// What a tab on the previous release does when it reopens a copy and
+// writes: the file change counter in the header moves
+export async function writeToLegacyDatabase(name: string): Promise<void> {
+  const database = await holdLegacyConnection(name);
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const transaction = database.transaction('data', 'readwrite');
+      const store = transaction.objectStore('data');
+      const request = store.get(0);
+      request.onsuccess = () => {
+        const block = new Uint8Array(request.result as ArrayBuffer);
+        block[27] += 1;
+        store.put(block.buffer, 0);
+      };
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
+    });
+  } finally {
+    database.close();
+  }
+}
+
 export async function listIndexedDbNames(): Promise<string[]> {
   const databases = await indexedDB.databases();
   return databases.map(database => database.name ?? '').filter(Boolean);

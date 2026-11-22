@@ -1124,6 +1124,7 @@ const autocompletePopoverPointerHandler = ViewPlugin.define(view => {
   };
 });
 
+/* oxlint-disable actual/no-color-literals */
 // Custom theme for categorized function highlighting (light)
 const functionCategoryTheme = EditorView.baseTheme({
   '&light .cm-keyword': { color: '#0066CC' }, // Math functions in blue
@@ -1167,6 +1168,8 @@ export const excelFormulaDarkHighlighting = syntaxHighlighting(
     { tag: tags.special(tags.variableName), color: '#4FC1FF' }, // Special variables in bright cyan
   ]),
 );
+
+/* oxlint-enable actual/no-color-literals */
 
 // Combined extension for Excel formula support
 export function excelFormulaExtension(

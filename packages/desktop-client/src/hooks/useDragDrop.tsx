@@ -511,6 +511,7 @@ export function DropHighlight({ pos, offset }: DropHighlightProps) {
         right: 2,
         borderRadius: 3,
         height: 3,
+        // oxlint-disable-next-line actual/theme-token-roles
         background: theme.pageTextLink,
         zIndex: 10000,
         pointerEvents: 'none',

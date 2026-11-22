@@ -1,14 +1,7 @@
 # Enable Banking Setup
 
-<ExperimentalFeatureWarning issueId="7799" />
-
-:::warning
-All functionality described here may not be available in the latest stable release. See [Experimental Features](../../experimental/index.md) for instructions to enable experimental features. Use the `nightly` images for the latest implementation.
-:::
-
 ## Before You Start
 
-- **Turn on the experimental feature.** Go to **Settings → Experimental** and tick **Enable Banking sync (EU banks)**. The option only shows up when Actual is connected to a server. See [Experimental Features](../../experimental/index.md) for more details.
 - **Use a server that is reachable over HTTPS.** Enable Banking only sends you back to addresses that start with `https://`.
 - **Do the setup in a web browser.** Open the address of your server in a browser instead of using the desktop app. The desktop app shows a redirect URL that starts with `app://`, which Enable Banking does not accept. Accounts you link in the browser can be synced from the desktop app afterwards.
 - **Use one Enable Banking application for everything.** Actual stores a single set of Enable Banking credentials for the whole server, shared by all budget files. Link all your banks through the same application. Setting up a second application replaces the first one, and the accounts linked through the first one stop syncing.

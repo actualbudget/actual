@@ -16,8 +16,8 @@ import {
   componentSizeControl,
   componentSizeText,
   sizeResponsiveStyles,
-  type ComponentSize,
 } from './tokens';
+import type { ComponentSize } from './tokens';
 
 export const baseInputStyle = {
   outline: 0,

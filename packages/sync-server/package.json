@@ -18,7 +18,7 @@
   ],
   "type": "module",
   "imports": {
-    "#db": "./src/db.js",
+    "#db": "./src/db.ts",
     "#account-db": "./src/account-db.js",
     "#load-config": "./src/load-config.js",
     "#migrations": "./src/migrations.ts",

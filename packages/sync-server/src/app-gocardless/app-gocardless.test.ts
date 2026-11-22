@@ -5,6 +5,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GoCardlessRequisitionId } from './gocardless-node.types';
 import { mockInstitution } from './services/tests/fixtures';
 
+vi.mock('#util/validate-budget-session', () => ({
+  validateGlobalBankSyncSession: (
+    _req: unknown,
+    _res: unknown,
+    next: () => void,
+  ) => next(),
+}));
+
 vi.mock('#util/middlewares', () => ({
   requestLoggerMiddleware: (_req: unknown, _res: unknown, next: () => void) =>
     next(),
@@ -57,7 +65,7 @@ describe('/create-web-token', () => {
     });
     expect(createRequisition).toHaveBeenCalledWith({
       institutionId: 'SANDBOXFINANCE_SFIN0000',
-      host: 'https://budget.example.com',
+      redirectUrl: 'https://budget.example.com/gocardless/link',
     });
   });
 
@@ -71,7 +79,24 @@ describe('/create-web-token', () => {
     expect(res.body.data.link).toBe('https://gocardless.example/start');
     expect(createRequisition).toHaveBeenCalledWith({
       institutionId: 'SANDBOXFINANCE_SFIN0000',
-      host: expect.stringMatching(/^http:\/\/127\.0\.0\.1:\d+$/),
+      redirectUrl: expect.stringMatching(
+        /^http:\/\/127\.0\.0\.1:\d+\/gocardless\/link$/,
+      ),
+    });
+  });
+
+  it('redirects the mobile app to the server itself, flagged to return to the app', async () => {
+    const res = await request(app)
+      .post('/create-web-token')
+      .set('Origin', 'capacitor://localhost')
+      .send({ institutionId: 'SANDBOXFINANCE_SFIN0000', returnToApp: true });
+
+    expect(res.body.status).toBe('ok');
+    expect(createRequisition).toHaveBeenCalledWith({
+      institutionId: 'SANDBOXFINANCE_SFIN0000',
+      redirectUrl: expect.stringMatching(
+        /^http:\/\/127\.0\.0\.1:\d+\/gocardless\/link\/app$/,
+      ),
     });
   });
 
@@ -227,6 +252,14 @@ describe('/link', () => {
     expect(res.status).toBe(200);
     expect(res.headers['content-type']).toMatch(/text\/html/);
     expect(res.text).toContain('window.close()');
+  });
+
+  it('sends the mobile app flow back to the app', async () => {
+    const res = await request(app).get('/link/app');
+
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('actualbudget://localhost');
+    expect(res.text).not.toContain('window.close()');
   });
 });
 
