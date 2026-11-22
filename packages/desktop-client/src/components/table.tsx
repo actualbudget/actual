@@ -317,6 +317,7 @@ const inputCellStyle = {
 
 const readonlyInputStyle = {
   backgroundColor: 'transparent',
+  // oxlint-disable-next-line actual/theme-token-roles
   '::selection': { backgroundColor: theme.formInputTextReadOnlySelection },
 };
 
