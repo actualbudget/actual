@@ -1,5 +1,6 @@
-import type { NewDashboardWidgetEntity } from '#types/models';
 import { t } from 'i18next';
+
+import type { NewDashboardWidgetEntity } from '#types/models';
 
 export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
   // Top row: Key metrics at a glance
