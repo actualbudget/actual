@@ -12,6 +12,8 @@
     ".": {
       "entry": ["bin/*.mts"],
       "ignore": ["lage.config.js", ".claude/**", ".agents/**"],
+      // Type-aware backend that oxlint discovers on its own; never imported
+      "ignoreDependencies": ["tsrs"],
     },
     "packages/api": {
       "entry": ["index.browser.ts", "browser-worker.ts", "e2e/**/*.{ts,mjs}"],
