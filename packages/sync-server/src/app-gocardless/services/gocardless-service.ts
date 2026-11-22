@@ -317,6 +317,10 @@ export const goCardlessService = {
         'separate_continuous_history_consent',
       ) ?? false;
 
+    // Read the bank-specific setting; default to the existing behavior.
+    const skipEndUserAgreement =
+      BankFactory(institutionId).skipEndUserAgreement ?? false;
+
     const body = {
       redirectUrl,
       institutionId,
@@ -329,6 +333,7 @@ export const goCardlessService = {
       ssn: null,
       redirectImmediate: false,
       accountSelection,
+      skipEndUserAgreement,
     };
 
     console.log('GoCardless requisition request:', {
@@ -338,6 +343,7 @@ export const goCardlessService = {
       transactionTotalDays: institution.transaction_total_days,
       separateContinuousHistoryConsent,
       accountSelection,
+      skipEndUserAgreement,
       supportedFeatures: institution.supported_features,
     });
 
@@ -526,6 +532,7 @@ export const client = {
     ssn,
     redirectImmediate,
     accountSelection,
+    skipEndUserAgreement,
   }: {
     redirectUrl: string;
     institutionId: GoCardlessInstitutionId;
@@ -536,6 +543,7 @@ export const client = {
     ssn: string | null;
     redirectImmediate: boolean;
     accountSelection: boolean;
+    skipEndUserAgreement: boolean;
   }): Promise<Requisition> =>
     await getGocardlessClient().initSession({
       redirectUrl,
@@ -547,6 +555,7 @@ export const client = {
       ssn,
       redirectImmediate,
       accountSelection,
+      skipEndUserAgreement,
     }),
   generateToken: async (): Promise<TokenResponse> =>
     await getGocardlessClient().generateToken(),

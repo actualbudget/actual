@@ -292,6 +292,46 @@ describe('goCardlessService', () => {
         expect.objectContaining({ maxHistoricalDays: 90 }),
       );
     });
+
+    it('should retain the default agreement flow for regular banks', async () => {
+      setTokenSpy.mockResolvedValue(undefined);
+      getInstitutionSpy.mockResolvedValue(mockInstitution);
+      createRequisitionSpy.mockResolvedValue(mockCreateRequisition);
+
+      await goCardlessService.createRequisition(params);
+
+      expect(createRequisitionSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skipEndUserAgreement: false,
+        }),
+      );
+    });
+
+    it('should bypass agreement creation for ING Italy across retries', async () => {
+      setTokenSpy.mockResolvedValue(undefined);
+      createRequisitionSpy
+        .mockRejectedValueOnce(new Error('initial request failed'))
+        .mockResolvedValueOnce(mockCreateRequisition);
+
+      getInstitutionSpy.mockResolvedValue({
+        ...mockInstitution,
+        id: 'ING_INGBITMM',
+      });
+
+      await goCardlessService.createRequisition({
+        ...params,
+        institutionId: 'ING_INGBITMM' as GoCardlessInstitutionId,
+      });
+
+      expect(createRequisitionSpy).toHaveBeenCalledTimes(2);
+
+      for (const callIndex of [1, 2]) {
+        expect(createRequisitionSpy).toHaveBeenNthCalledWith(
+          callIndex,
+          expect.objectContaining({ skipEndUserAgreement: true }),
+        );
+      }
+    });
   });
 
   describe('#deleteRequisition', () => {
