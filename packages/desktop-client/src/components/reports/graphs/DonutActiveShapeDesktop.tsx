@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { theme } from '@actual-app/components/theme';
 import { Sector } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
@@ -91,8 +92,13 @@ export function DonutActiveShapeDesktop({
         >
           {format(value, 'financial')}
         </FinancialText>
-        {/* oxlint-disable-next-line actual/no-color-literals */}
-        <text x={labelX} y={ey} dy={36} textAnchor={textAnchor} fill="#999">
+        <text
+          x={labelX}
+          y={ey}
+          dy={36}
+          textAnchor={textAnchor}
+          fill={theme.pageTextSubdued}
+        >
           {`(${(percent * 100).toFixed(2)}%)`}
         </text>
       </PrivacyFilter>

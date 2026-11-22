@@ -222,8 +222,9 @@ export const PayeeTableRow = memo(
                 {payee.favorite ? <SvgBookmark style={{ width: 10 }} /> : null}
                 {isLearnCategoriesEnabled && !payee.learn_categories && (
                   <Tooltip content={t('Category learning disabled')}>
-                    {/* oxlint-disable-next-line actual/no-color-literals */}
-                    <SvgLightBulb style={{ color: 'red', width: 10 }} />
+                    <SvgLightBulb
+                      style={{ color: theme.errorText, width: 10 }}
+                    />
                   </Tooltip>
                 )}
               </>

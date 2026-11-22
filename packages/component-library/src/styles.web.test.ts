@@ -1,4 +1,12 @@
-import { shadowColor } from './styles';
+import { fadeColor, shadowColor } from './styles';
+
+describe('fadeColor', () => {
+  it('mixes the color with transparent at the given opacity', () => {
+    expect(fadeColor('currentColor', 0.4)).toBe(
+      'color-mix(in srgb, currentColor 40%, transparent)',
+    );
+  });
+});
 
 describe('shadowColor', () => {
   it('fades the theme shadow color to the given opacity', () => {

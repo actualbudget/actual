@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 
+import { theme } from './theme';
 import { View } from './View';
 
 type FormErrorProps = {
@@ -9,7 +10,8 @@ type FormErrorProps = {
 
 export function FormError({ style, children }: FormErrorProps) {
   return (
-    // oxlint-disable-next-line actual/no-color-literals
-    <View style={{ color: 'red', fontSize: 13, ...style }}>{children}</View>
+    <View style={{ color: theme.errorText, fontSize: 13, ...style }}>
+      {children}
+    </View>
   );
 }

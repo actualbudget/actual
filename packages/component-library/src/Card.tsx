@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 import type { ComponentProps } from 'react';
 
+import { shadowColor } from './styles';
 import { theme } from './theme';
 import { View } from './View';
 
@@ -19,8 +20,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
           borderRadius: 6,
           backgroundColor: theme.cardBackground,
           borderColor: theme.cardBorder,
-          // oxlint-disable-next-line actual/no-color-literals
-          boxShadow: '0 1px 2px #9594A8',
+          boxShadow: `0 1px 2px ${shadowColor(0.4)}`,
           ...props.style,
         }}
       >

@@ -8,8 +8,12 @@ export type CSSProperties = Record<string, any>;
 
 const MOBILE_MIN_HEIGHT = 40;
 
+export function fadeColor(color: string, opacity: number) {
+  return `color-mix(in srgb, ${color} ${Math.round(opacity * 100)}%, transparent)`;
+}
+
 export function shadowColor(opacity: number) {
-  return `color-mix(in srgb, ${theme.shadow} ${Math.round(opacity * 100)}%, transparent)`;
+  return fadeColor(theme.shadow, opacity);
 }
 
 const shadowLarge = {

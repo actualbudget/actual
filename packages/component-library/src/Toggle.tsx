@@ -82,8 +82,7 @@ export const Toggle = ({
               boxShadow: `0 0 2px 0 ${shadowColor(0.29)}`,
               backgroundColor: isDisabled
                 ? theme.checkboxToggleDisabled
-                : // oxlint-disable-next-line actual/no-color-literals
-                  '#fff',
+                : theme.checkboxToggleKnob,
             },
             isOn && {
               left: 'calc(100% - 2px)',

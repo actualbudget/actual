@@ -20,7 +20,7 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgLogo } from '@actual-app/components/icons/logo';
 import { SvgDelete } from '@actual-app/components/icons/v0';
 import { Input } from '@actual-app/components/input';
-import { styles } from '@actual-app/components/styles';
+import { shadowColor, styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
@@ -343,8 +343,7 @@ function getOverlayBackgroundStyle({
 }: OverlayBackgroundStyleOptions): CSSProperties {
   // On mobile, we disable the blurred background for performance reasons.
   if (isNarrowWidth) {
-    // oxlint-disable-next-line actual/no-color-literals
-    return { backgroundColor: 'rgba(0, 0, 0, 0.4)' };
+    return { backgroundColor: shadowColor(0.4) };
   }
   // On desktop, only the top modal blurs: each stacked backdrop filter
   // re-filters the whole viewport, which is extremely slow in Firefox.
@@ -353,8 +352,7 @@ function getOverlayBackgroundStyle({
   }
   // The modal directly below the top one gets a plain dim, equal to brightness(0.9).
   if (isDirectlyBelowTopModal) {
-    // oxlint-disable-next-line actual/no-color-literals
-    return { backgroundColor: 'rgba(0, 0, 0, 0.1)' };
+    return { backgroundColor: shadowColor(0.1) };
   }
   return {};
 }

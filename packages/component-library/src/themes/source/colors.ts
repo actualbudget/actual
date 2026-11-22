@@ -608,6 +608,7 @@ export const colors = {
     dark: 'gray400',
     midnight: 'gray700',
   },
+  checkboxToggleKnob: { all: 'white' },
 
   pillBackground: { light: 'navy150', dark: 'navy800', midnight: 'gray500' },
   pillBackgroundLight: {
@@ -707,6 +708,7 @@ export const colors = {
 
   overlayBackground: { all: { raw: 'rgba(0, 0, 0, 0.3)' } },
   shadow: { all: 'black' },
+  scrollbarThumb: { all: { raw: '#d0d0d0' } },
 
   chartQual1: { all: 'chartQual1' },
   chartQual2: { all: 'chartQual2' },

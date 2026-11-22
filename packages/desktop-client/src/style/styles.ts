@@ -1,5 +1,6 @@
+import { fadeColor, styles } from '@actual-app/components/styles';
 // @ts-strict-ignore
-import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import * as Platform from '@actual-app/core/shared/platform';
 
 let hiddenScrollbars = false;
@@ -18,46 +19,38 @@ function onScrollbarChange() {
       width: 7,
       borderRadius: 30,
       backgroundClip: 'padding-box',
-      // oxlint-disable-next-line actual/no-color-literals
-      border: '2px solid rgba(0, 0, 0, 0)',
-      // oxlint-disable-next-line actual/no-color-literals
-      backgroundColor: '#d0d0d0',
+      border: '2px solid transparent',
+      backgroundColor: theme.scrollbarThumb,
     },
   };
 
   styles.lightScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
       width: 11,
-      // oxlint-disable-next-line actual/no-color-literals
-      backgroundColor: 'rgba(200, 200, 200, .2)',
+      backgroundColor: fadeColor(theme.scrollbarThumb, 0.2),
     },
     '& ::-webkit-scrollbar-thumb': {
       width: 7,
       borderRadius: 30,
       backgroundClip: 'padding-box',
-      // oxlint-disable-next-line actual/no-color-literals
-      border: '2px solid rgba(0, 0, 0, 0)',
+      border: '2px solid transparent',
     },
     '& ::-webkit-scrollbar-thumb:vertical': {
-      // oxlint-disable-next-line actual/no-color-literals
-      backgroundColor: '#d0d0d0',
+      backgroundColor: theme.scrollbarThumb,
     },
   };
 
   styles.darkScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
       width: 11,
-      // oxlint-disable-next-line actual/no-color-literals
-      backgroundColor: 'rgba(0, 0, 0, 0)',
+      backgroundColor: 'transparent',
     },
     '& ::-webkit-scrollbar-thumb:vertical': {
       width: 7,
       borderRadius: 30,
       backgroundClip: 'padding-box',
-      // oxlint-disable-next-line actual/no-color-literals
-      backgroundColor: 'rgba(200, 200, 200, .5)',
-      // oxlint-disable-next-line actual/no-color-literals
-      border: '2px solid rgba(0, 0, 0, 0)',
+      backgroundColor: fadeColor(theme.scrollbarThumb, 0.5),
+      border: '2px solid transparent',
     },
   };
 

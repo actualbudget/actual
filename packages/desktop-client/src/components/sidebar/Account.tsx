@@ -12,7 +12,7 @@ import {
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { styles } from '@actual-app/components/styles';
+import { fadeColor, styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -225,8 +225,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
             <AlignedText
               style={
                 titleAccount && {
-                  // oxlint-disable-next-line actual/no-color-literals
-                  borderBottom: `1.5px solid rgba(255,255,255,0.4)`,
+                  borderBottom: `1.5px solid ${fadeColor('currentColor', 0.4)}`,
                   paddingBottom: '3px',
                 }
               }

@@ -9,7 +9,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgDelete } from '@actual-app/components/icons/v0';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { styles } from '@actual-app/components/styles';
+import { shadowColor, styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -333,8 +333,7 @@ function Notification({
                     whiteSpace: 'pre-wrap',
                     fontFamily: 'monospace',
                     fontSize: 12,
-                    // oxlint-disable-next-line actual/no-color-literals
-                    backgroundColor: 'rgba(0, 0, 0, .05)',
+                    backgroundColor: shadowColor(0.05),
                     padding: 10,
                     borderRadius: 4,
                     width: '100%',

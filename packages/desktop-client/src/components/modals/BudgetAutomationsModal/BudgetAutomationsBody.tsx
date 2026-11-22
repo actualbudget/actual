@@ -44,8 +44,7 @@ const ALWAYS_SCROLL_CLASS = css({
     minHeight: 24,
     borderRadius: 30,
     backgroundClip: 'padding-box',
-    // oxlint-disable-next-line actual/no-color-literals
-    border: '2px solid rgba(0, 0, 0, 0)',
+    border: '2px solid transparent',
     backgroundColor: theme.tableBorder,
   },
 });

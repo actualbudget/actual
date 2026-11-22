@@ -203,8 +203,7 @@ export function CashFlowGraph({
             isAnimationActive={false}
           />
 
-          {/* oxlint-disable-next-line actual/no-color-literals */}
-          <ReferenceLine y={0} stroke="#000" />
+          <ReferenceLine y={0} stroke={theme.pageText} />
           <Bar
             dataKey="income"
             stackId="a"
