@@ -5,11 +5,8 @@ import { css, cx } from '@emotion/css';
 import type { CSSObject } from '@emotion/serialize';
 
 import { Button } from './Button';
-import {
-  componentSizeIcon,
-  sizeResponsiveStyles,
-  type IconButtonSize,
-} from './tokens';
+import { componentSizeIcon, sizeResponsiveStyles } from './tokens';
+import type { IconButtonSize } from './tokens';
 
 type IconButtonProps = Omit<
   ComponentPropsWithoutRef<typeof Button>,
