@@ -160,21 +160,17 @@ export const colors = {
     dark: 'navy700',
     midnight: 'gray700',
   },
-  sidebarItemAccentSelected: { all: 'purple200' },
+  sidebarItemAccentSelected: {
+    all: { accentTextOn: 'sidebarBackground', contrast: 7 },
+  },
   sidebarItemBackgroundSelected: {
-    light: {
+    all: {
       raw: 'color-mix(in srgb, var(--color-sidebarItemAccentSelected) 22%, transparent)',
-    },
-    dark: {
-      raw: 'color-mix(in srgb, var(--color-sidebarItemAccentSelected) 22%, transparent)',
-    },
-    midnight: {
-      raw: 'color-mix(in srgb, var(--color-sidebarItemAccentSelected) 35%, transparent)',
     },
   },
   sidebarItemText: { light: 'navy150', dark: 'navy150', midnight: 'gray100' },
   sidebarItemTextUpdated: { all: { ref: 'sidebarItemText' } },
-  sidebarItemTextSelected: { all: 'purple200' },
+  sidebarItemTextSelected: { all: { ref: 'sidebarItemAccentSelected' } },
   sidebarBudgetName: { light: 'navy150', dark: 'navy300', midnight: 'gray300' },
   sidebarHeaderText: { light: 'white', dark: 'white', midnight: 'gray100' },
   sidebarTextSubdued: {
@@ -259,9 +255,7 @@ export const colors = {
     midnight: 'green400',
   },
   menuAutoCompleteTextHeader: {
-    light: 'orange150',
-    dark: 'purple200',
-    midnight: 'purple200',
+    all: { accentTextOn: 'menuAutoCompleteBackground', contrast: 7 },
   },
   menuAutoCompleteItemTextHover: {
     light: { ref: 'menuAutoCompleteText' },
@@ -549,9 +543,7 @@ export const colors = {
   },
   pillText: { light: 'navy800', dark: 'navy200', midnight: 'gray200' },
   pillTextHighlighted: {
-    light: 'purple600',
-    dark: 'purple200',
-    midnight: 'purple200',
+    all: { accentTextOn: 'pillBackgroundLight', contrast: 7 },
   },
   pillBorder: { light: 'navy150', dark: 'navy700', midnight: 'gray500' },
   pillBorderDark: {

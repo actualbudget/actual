@@ -68,7 +68,7 @@ Example using variables:
 
 ### Changing the Accent Color
 
-The accent is the color of primary buttons, links, checkboxes, the outline of a focused input and selected rows. You can change all of them by setting one variable:
+The accent is the color of primary buttons, links, checkboxes, the outline of a focused input, selected rows and the selected item in the sidebar. You can change all of them by setting one variable:
 
 ```css
 :root {
@@ -86,6 +86,8 @@ Actual works out the related colors from the accent and from your theme's `--col
 - `--color-accentSubtleText` - Accent text on the tinted background
 
 You can set any of these yourself. Actual keeps your value and only works out the ones you leave out. If you set `--color-accentSubtle` and leave out `--color-accentSubtleText`, Actual picks a text color that is readable on your tint. A more specific variable, such as `--color-buttonPrimaryBackground`, still takes priority over the accent for the thing it styles.
+
+Accent text that sits on its own background, such as the selected sidebar item on `--color-sidebarBackground`, is worked out against that background.
 
 A few details keep their own variables and do not follow the accent, such as the link hover color (`--color-pageTextLinkLight`) and the border of a hovered table row (`--color-tableBorderHover`).
 

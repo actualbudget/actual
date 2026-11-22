@@ -4,11 +4,13 @@ import {
   accentSurfaceTokens,
   deriveAccent,
   derivedAccentTokens,
+  nearestWithContrast,
+  textContrast,
 } from './source/derive';
 import { palette } from './source/palette';
 import { composite, resolveToken, toHex } from './source/resolve';
 import type { ResolvedColor } from './source/resolve';
-import type { ThemeName } from './source/types';
+import type { ThemeName, TokenDefinition } from './source/types';
 
 type Declarations = Map<string, string>;
 
@@ -24,6 +26,22 @@ const customPropertyPattern = /^--[A-Za-z0-9_-]+$/;
 
 const toRgb = converter('rgb');
 const paletteColors: Record<string, string> = palette;
+const definitions: Record<string, TokenDefinition> = colors;
+
+function accentTextOnTokens(theme: ThemeName) {
+  return Object.entries(definitions).flatMap(([name, definition]) => {
+    const value = 'all' in definition ? definition.all : definition[theme];
+    return typeof value === 'object' && 'accentTextOn' in value
+      ? [
+          {
+            name,
+            surface: value.accentTextOn,
+            contrast: value.contrast ?? textContrast,
+          },
+        ]
+      : [];
+  });
+}
 
 function readDeclarations(css: string) {
   const declarations: Declarations = new Map();
@@ -83,7 +101,9 @@ function resolveProperty(
 
 function derive(theme: ThemeName, css: string) {
   const declarations = readDeclarations(css);
-  if (!inputTokens.some(name => declarations.has(`color-${name}`))) {
+  const textOnTokens = accentTextOnTokens(theme);
+  const inputs = [...inputTokens, ...textOnTokens.map(token => token.surface)];
+  if (!inputs.some(name => declarations.has(`color-${name}`))) {
     return null;
   }
 
@@ -119,9 +139,19 @@ function derive(theme: ThemeName, css: string) {
       ? undefined
       : toHex(ownSubtle.alpha < 1 ? composite(ownSubtle, surface) : ownSubtle),
   );
-  const derived = derivedAccentTokens
-    .filter(name => !declarations.has(`color-${name}`))
-    .map(name => `  --color-${name}: ${accentSet[name]};`);
+  const derived = [
+    ...derivedAccentTokens.map(name => ({ name, value: accentSet[name] })),
+    ...textOnTokens.map(token => ({
+      name: token.name,
+      value: nearestWithContrast(
+        accentSet.accent,
+        [toHex(readSurface(token.surface))],
+        token.contrast,
+      ),
+    })),
+  ]
+    .filter(({ name }) => !declarations.has(`color-${name}`))
+    .map(({ name, value }) => `  --color-${name}: ${value};`);
   return derived.length > 0 ? `:root {\n${derived.join('\n')}\n}` : null;
 }
 

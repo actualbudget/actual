@@ -33,11 +33,36 @@ describe('deriveAccentCss', () => {
       'accentBorder',
       'accentSubtle',
       'accentSubtleText',
+      'sidebarItemAccentSelected',
+      'menuAutoCompleteTextHeader',
+      'pillTextHighlighted',
     ]);
     expect(derived.accentContrast).toBe('#ffffff');
     expect(wcagContrast(derived.accentText, '#ffffff')).toBeGreaterThanOrEqual(
       4.5,
     );
+  });
+
+  it('keeps the sidebar selection readable on the sidebar for any accent', () => {
+    for (const accent of ['#0a7d5a', '#ffd84d', '#1a1a1a', '#d32f2f']) {
+      const derived = declarations(
+        deriveAccentCss('light', `:root { --color-accent: ${accent}; }`),
+      );
+      expect(
+        wcagContrast(derived.sidebarItemAccentSelected, palette.navy900),
+        accent,
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it('works out the sidebar selection against a sidebar the theme sets', () => {
+    const derived = declarations(
+      deriveAccentCss('light', ':root { --color-sidebarBackground: #ffffff; }'),
+    );
+
+    expect(
+      wcagContrast(derived.sidebarItemAccentSelected, '#ffffff'),
+    ).toBeGreaterThanOrEqual(7);
   });
 
   it('matches the built-in values when given the built-in accent', () => {
@@ -46,7 +71,7 @@ describe('deriveAccentCss', () => {
       deriveAccentCss('light', ':root { --color-accent: #8719e0; }'),
     );
 
-    expect(Object.keys(derived)).toHaveLength(6);
+    expect(Object.keys(derived)).toHaveLength(9);
     for (const [name, value] of Object.entries(derived)) {
       expect(value).toBe(builtIn[name]);
     }

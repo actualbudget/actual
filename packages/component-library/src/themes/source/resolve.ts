@@ -1,5 +1,10 @@
 import { converter, formatHex, parse, wcagContrast } from './color';
-import { accentSurfaceTokens, deriveAccent } from './derive';
+import {
+  accentSurfaceTokens,
+  deriveAccent,
+  nearestWithContrast,
+  textContrast,
+} from './derive';
 import type { DerivedAccentToken } from './derive';
 import type { ThemeName, TokenDefinition, TokenValue } from './types';
 
@@ -123,12 +128,38 @@ function resolveDerived(
   return resolveCss(accentSet[token], context);
 }
 
+function resolveAccentTextOn(
+  surfaceName: string,
+  contrast: number,
+  context: Context,
+): ResolvedColor {
+  const surface = resolveName(surfaceName, context);
+  const accent = resolveName('accent', context);
+  return resolveCss(
+    nearestWithContrast(toHex(accent), [toHex(surface)], contrast),
+    context,
+  );
+}
+
+export function isComputedValue(value: TokenValue) {
+  return (
+    typeof value === 'object' && ('derive' in value || 'accentTextOn' in value)
+  );
+}
+
 function resolveValue(value: TokenValue, context: Context): ResolvedColor {
   if (typeof value === 'string') {
     return resolveCss(context.palette[value], context);
   }
   if ('derive' in value) {
     return resolveDerived(value.derive, context);
+  }
+  if ('accentTextOn' in value) {
+    return resolveAccentTextOn(
+      value.accentTextOn,
+      value.contrast ?? textContrast,
+      context,
+    );
   }
   if ('ref' in value) {
     return resolveName(value.ref, context);

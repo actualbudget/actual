@@ -83,6 +83,11 @@ export const contrastPairs: ContrastPair[] = [
   text('sidebarItemText', 'sidebarBackground'),
   text('sidebarItemText', 'sidebarItemBackgroundHover', 'sidebarBackground'),
   text('sidebarItemTextSelected', 'sidebarBackground'),
+  text(
+    'sidebarItemTextSelected',
+    'sidebarItemBackgroundSelected',
+    'sidebarBackground',
+  ),
   text('sidebarBudgetName', 'sidebarBackground'),
 
   text('settingsCardText', 'settingsCardBackground'),
@@ -129,6 +134,8 @@ export const contrastPairs: ContrastPair[] = [
 
   text('pillText', 'pillBackground'),
   text('pillTextSelected', 'pillBackgroundSelected'),
+  text('pillTextHighlighted', 'pillBackgroundLight'),
+  text('menuAutoCompleteTextHeader', 'menuAutoCompleteBackground'),
   text('noteTagText', 'noteTagBackground'),
   text('tooltipText', 'tooltipBackground'),
   text('calendarText', 'calendarBackground'),
