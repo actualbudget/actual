@@ -1,10 +1,10 @@
-import { theme } from '../../theme';
+import { theme } from '#theme';
 import {
   darkThemeCss,
   lightThemeCss,
   midnightThemeCss,
   paletteCss,
-} from '../index';
+} from '#themes';
 
 import { colors } from './colors';
 import { generateThemeCss } from './generate';

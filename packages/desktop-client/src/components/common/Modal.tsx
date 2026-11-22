@@ -1,10 +1,10 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type {
   ComponentPropsWithoutRef,
   ComponentPropsWithRef,
   CSSProperties,
   ReactNode,
 } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   Dialog,
   Modal as ReactAriaModal,
@@ -47,6 +47,27 @@ const mobileSheetContainerStyle: CSSProperties = {
 };
 
 const SHEET_EXIT_MS = 180;
+const KEYBOARD_FOLLOW_TRANSITION = '300ms cubic-bezier(0.22, 1, 0.36, 1)';
+
+// A registered length can be transitioned; unregistered variables cannot.
+const canTransitionViewportHeightVariable = registerViewportHeightVariable();
+
+function registerViewportHeightVariable() {
+  if (typeof CSS === 'undefined' || !('registerProperty' in CSS)) {
+    return false;
+  }
+  try {
+    CSS.registerProperty({
+      name: '--visual-viewport-height',
+      syntax: '<length>',
+      inherits: true,
+      initialValue: '0px',
+    });
+  } catch {
+    // Already registered.
+  }
+  return true;
+}
 
 const sheetSlideIn = keyframes({
   from: { transform: 'translateY(100%)' },
@@ -80,6 +101,7 @@ const mobileSheetHandleStyle: CSSProperties = {
   width: 36,
   height: 4,
   borderRadius: radius.pill,
+  // oxlint-disable-next-line actual/theme-token-roles
   backgroundColor: theme.pageTextSubdued,
   alignSelf: 'center',
   marginTop: spacing.sm,
@@ -128,7 +150,14 @@ export const Modal = ({
     return () => disableScope(name);
   }, [enableScope, disableScope, name]);
 
-  const { isHidden, isActive, onClose: closeModal } = useModalState();
+  const {
+    isHidden,
+    isActive,
+    modalStack,
+    onClose: closeModal,
+  } = useModalState();
+  const isDirectlyBelowTopModal =
+    !isActive(name) && modalStack.at(-2)?.name === name;
   const dispatch = useDispatch();
   const prefersReducedMotion = useReducedMotion();
   const isAnimatedSheet = isSheet && !prefersReducedMotion;
@@ -190,14 +219,11 @@ export const Modal = ({
           inset: 0,
           zIndex: MODAL_Z_INDEX,
           fontSize: 14,
-          // on mobile, we disable the blurred background for performance reasons
-          ...(isNarrowWidth
-            ? {
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
-              }
-            : {
-                backdropFilter: 'blur(1px) brightness(0.9)',
-              }),
+          ...getOverlayBackgroundStyle({
+            isNarrowWidth,
+            isTopModal: isActive(name),
+            isDirectlyBelowTopModal,
+          }),
           ...style,
         }}
         {...props}
@@ -207,15 +233,20 @@ export const Modal = ({
           nativeStyle={{
             // React Aria's height removes pinch zoom scaling. Safari page zoom
             // needs CSS pixels, including keyboard resizing while zoomed.
-            '--visual-viewport-height': `${viewport.height}px`,
+            // Excludes the status bar area.
+            '--visual-viewport-height': `calc(${viewport.height}px - env(safe-area-inset-top, 0px))`,
             top: viewport.offsetTop,
           }}
           style={{
             display: 'flex',
-            ...(isSheet
-              ? { alignItems: 'stretch', justifyContent: 'flex-end' }
-              : { alignItems: 'center', justifyContent: 'center' }),
+            marginTop: 'env(safe-area-inset-top, 0px)',
+            alignItems: isSheet ? 'stretch' : 'center',
             height: 'var(--visual-viewport-height)',
+            // Follow the on-screen keyboard instead of snapping.
+            ...(isNarrowWidth &&
+              !prefersReducedMotion && {
+                transition: `${canTransitionViewportHeightVariable ? '--visual-viewport-height' : 'height'} ${KEYBOARD_FOLLOW_TRANSITION}, top ${KEYBOARD_FOLLOW_TRANSITION}`,
+              }),
             overflowY: 'auto',
             ...wrapperProps?.style,
           }}
@@ -223,6 +254,8 @@ export const Modal = ({
           <ReactAriaModal
             ref={sheetRef}
             className={isAnimatedSheet ? mobileSheetModalClassName : undefined}
+            // Auto margins never push an oversized modal above the container.
+            style={{ marginTop: 'auto', marginBottom: isSheet ? 0 : 'auto' }}
           >
             {modalProps => (
               <Dialog
@@ -296,6 +329,35 @@ export const Modal = ({
     </ErrorBoundary>
   );
 };
+
+type OverlayBackgroundStyleOptions = {
+  isNarrowWidth: boolean;
+  isTopModal: boolean;
+  isDirectlyBelowTopModal: boolean;
+};
+
+function getOverlayBackgroundStyle({
+  isNarrowWidth,
+  isTopModal,
+  isDirectlyBelowTopModal,
+}: OverlayBackgroundStyleOptions): CSSProperties {
+  // On mobile, we disable the blurred background for performance reasons.
+  if (isNarrowWidth) {
+    // oxlint-disable-next-line actual/no-color-literals
+    return { backgroundColor: 'rgba(0, 0, 0, 0.4)' };
+  }
+  // On desktop, only the top modal blurs: each stacked backdrop filter
+  // re-filters the whole viewport, which is extremely slow in Firefox.
+  if (isTopModal) {
+    return { backdropFilter: 'blur(1px) brightness(0.9)' };
+  }
+  // The modal directly below the top one gets a plain dim, equal to brightness(0.9).
+  if (isDirectlyBelowTopModal) {
+    // oxlint-disable-next-line actual/no-color-literals
+    return { backgroundColor: 'rgba(0, 0, 0, 0.1)' };
+  }
+  return {};
+}
 
 type ModalContentContainerProps = {
   style?: CSSProperties;

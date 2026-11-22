@@ -110,6 +110,7 @@ export function CleanupGroupPicker({
             backgroundColor: theme.menuBackground,
             border: `1px solid ${theme.menuBorder}`,
             borderRadius: 6,
+            // oxlint-disable-next-line actual/no-color-literals
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
             zIndex: 10,
             maxHeight: 240,

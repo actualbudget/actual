@@ -24,6 +24,7 @@ type SyncEvent = {
   | {
       type: 'applied';
       tables: string[];
+      requestId?: string;
       data?: Map<string, unknown>;
       prevData?: Map<string, unknown>;
     }

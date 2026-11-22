@@ -63,6 +63,7 @@ export function ImportProgress() {
             className={css({
               height: '100%',
               width: `${percentage}%`,
+              // oxlint-disable-next-line actual/theme-token-roles
               backgroundColor: theme.pageTextPositive,
               transition: 'width 150ms ease-out',
             })}

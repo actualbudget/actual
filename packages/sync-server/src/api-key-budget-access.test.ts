@@ -19,6 +19,7 @@ import { handlers as accountApp } from './app-account';
 import { handlers as adminApp } from './app-admin';
 import { handlers as keysApp } from './app-api-keys';
 import { handlers as syncApp } from './app-sync';
+import * as UserService from './services/user-service';
 import {
   getPathForGroupFile,
   getPathForUserFile,
@@ -214,7 +215,7 @@ describe('budget access with an API key', () => {
     },
   );
 
-  it.each(['lost-access', 'deleted-budget'])(
+  it.each(['lost-access', 'deleted-budget', 'demote-admin'])(
     'supports multiple budgets and retains only accessible scopes after %s',
     async change => {
       const created = await request(app)
@@ -253,24 +254,32 @@ describe('budget access with an API key', () => {
 
       if (change === 'lost-access') {
         db.mutate('UPDATE users SET role = ? WHERE id = ?', ['BASIC', userId]);
+        UserService.updateFileOwner('genericAdmin', budget.fileId);
+      } else if (change === 'demote-admin') {
         db.mutate('UPDATE files SET owner = ? WHERE id = ?', [
           'genericAdmin',
-          otherBudget.fileId,
+          budget.fileId,
         ]);
+        UserService.updateUserWithRole(userId, userId, userId, 1, 'BASIC');
       } else {
-        db.mutate('UPDATE files SET deleted = 1 WHERE id = ?', [
-          otherBudget.fileId,
-        ]);
+        await request(app)
+          .post('/sync/delete-user-file')
+          .set('X-ACTUAL-TOKEN', session)
+          .send({ fileId: budget.fileId })
+          .expect(200);
       }
-      await get('/sync/download-user-file', otherBudget.fileId).expect(403);
-      await sync(otherBudget.fileId, otherBudget.groupId).expect(403);
-      await get('/sync/download-user-file').expect(200);
-      await sync().expect(200);
+      expect(
+        db.all('SELECT id FROM api_keys WHERE user_id = ?', [userId]),
+      ).toEqual([{ id: created.body.data.id }]);
+      await get('/sync/download-user-file').expect(403);
+      await sync().expect(403);
+      await get('/sync/download-user-file', otherBudget.fileId).expect(200);
+      await sync(otherBudget.fileId, otherBudget.groupId).expect(200);
       expect(
         (await get('/sync/list-user-files')).body.data.map(
           (file: { fileId: string }) => file.fileId,
         ),
-      ).toEqual([budget.fileId]);
+      ).toEqual([otherBudget.fileId]);
     },
   );
 
@@ -300,7 +309,7 @@ describe('budget access with an API key', () => {
   );
 
   it.each(['deleted-budget', 'lost-access', 'no-budget-grants'])(
-    'authenticates the key but denies budget access after %s',
+    'rejects keys without accessible budgets after %s',
     async change => {
       if (change === 'deleted-budget') {
         db.mutate('UPDATE files SET deleted = 1 WHERE id = ?', [budget.fileId]);
@@ -313,14 +322,9 @@ describe('budget access with an API key', () => {
       } else {
         db.mutate('DELETE FROM api_key_budgets WHERE key_id = ?', [keyId]);
       }
-      const validated = await get('/account/validate').expect(200);
-      expect(validated.body.data).toEqual({
-        validated: true,
-        loginMethod: 'api-key',
-      });
-      const listed = await get('/sync/list-user-files').expect(200);
-      expect(listed.body.data).toEqual([]);
-      await expectBudgetDenied(403);
+      await get('/account/validate').expect(401);
+      await get('/sync/list-user-files').expect(401);
+      await expectBudgetDenied(401);
     },
   );
 
@@ -335,8 +339,11 @@ describe('budget access with an API key', () => {
       budget.fileId,
     ]);
     expect((await get('/sync/download-user-file')).status).toBe(200);
-    db.mutate('DELETE FROM user_access WHERE user_id = ?', [userId]);
-    expect((await get('/sync/download-user-file')).status).toBe(403);
+    UserService.deleteUserAccessByFileId([userId], budget.fileId);
+    expect((await get('/sync/download-user-file')).status).toBe(401);
+    expect(
+      db.all('SELECT id FROM api_keys WHERE user_id = ?', [userId]),
+    ).toEqual([]);
   });
 
   it.each([

@@ -11,7 +11,9 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
+import { MOBILE_APP_RETURN_PAGE_HTML } from '#util/mobile-app-return';
 import { isBlockedIp } from '#util/ssrf';
+import { validateGlobalBankSyncSession } from '#util/validate-budget-session';
 
 import type {
   EnableBankingSession,
@@ -124,7 +126,12 @@ async function buildSessionResult(
   };
 }
 
-// Auth callback from bank redirect — must be before validateSessionMiddleware
+// Marks an auth started from the mobile app. The callback URL has to match the
+// one registered with Enable Banking exactly, so the state is the only thing
+// that can carry this through the bank redirect.
+const APP_STATE_SUFFIX = '-app';
+
+// The bank redirect callback does not require an Actual session,
 // since the bank redirects here directly (no auth token available)
 app.get('/auth_callback', async (req: Request, res: Response) => {
   const code = typeof req.query.code === 'string' ? req.query.code : undefined;
@@ -166,6 +173,11 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
       cleanupPendingAuth(state);
     }
 
+    if (state.endsWith(APP_STATE_SUFFIX)) {
+      res.send(MOBILE_APP_RETURN_PAGE_HTML);
+      return;
+    }
+
     res.send(
       '<html><body><p>Authorization successful. This window will close.</p>' +
         '<script>setTimeout(function(){window.close()},1000)</script></body></html>',
@@ -200,8 +212,12 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
 // server-wide (global) bank-sync credentials is admin-only, but every
 // signed-in user on that server may use them. This is a supported feature
 // and will remain; budgets with their own credentials use those instead.
+// API keys need explicit permission to sync shared connections.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
+const bankSync = express.Router();
+bankSync.use(validateGlobalBankSyncSession);
+app.use(bankSync);
 app.use(validateSessionMiddleware);
 
 // --- Poll/complete-auth coordination ---
@@ -233,7 +249,7 @@ function cleanupPendingAuth(state: string, waiterId?: string) {
 
 // --- Routes ---
 
-app.post(
+bankSync.post(
   '/status',
   handleError(async (req: Request, res: Response) => {
     const configured = enableBankingService.isConfigured();
@@ -342,7 +358,8 @@ app.post(
 app.post(
   '/start-auth',
   handleError(async (req: Request, res: Response) => {
-    const { aspsp, redirectUrl, maxConsentValidity, psuType } = req.body || {};
+    const { aspsp, redirectUrl, maxConsentValidity, psuType, returnToApp } =
+      req.body || {};
 
     if (!aspsp || !redirectUrl) {
       res.send({
@@ -355,7 +372,7 @@ app.post(
       return;
     }
 
-    const state = uuidv4();
+    const state = uuidv4() + (returnToApp === true ? APP_STATE_SUFFIX : '');
 
     try {
       const authResponse = await enableBankingService.startAuth(
@@ -541,7 +558,7 @@ app.post(
   }),
 );
 
-app.post(
+bankSync.post(
   '/transactions',
   handleError(async (req: Request, res: Response) => {
     const { accountId, startDate, aspspName } = req.body || {};

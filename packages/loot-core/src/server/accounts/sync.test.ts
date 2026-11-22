@@ -1048,6 +1048,56 @@ describe('SimpleFin batch sync', () => {
     },
   );
 
+  test('derives the opening balance from amounts without two decimal places', async () => {
+    const providerAccountId = 'sf-account-decimals';
+    const acctId = await db.insertAccount({
+      id: 'acct-decimals',
+      account_id: providerAccountId,
+      name: 'Checking',
+      account_sync_source: 'simpleFin',
+    });
+
+    const transactions = [
+      {
+        booked: true,
+        date: '2017-10-03',
+        payeeName: 'Coffee Shop',
+        transactionAmount: { amount: '-25.5' },
+        transactionId: 'provider-tx-1',
+      },
+      {
+        booked: true,
+        date: '2017-10-02',
+        payeeName: 'Bookstore',
+        transactionAmount: { amount: '-10' },
+        transactionId: 'provider-tx-2',
+      },
+    ];
+    mockSimpleFinTransactions({
+      [providerAccountId]: {
+        transactions: { all: transactions, booked: transactions, pending: [] },
+        balances: [],
+        startingBalance: 10000,
+      },
+      errors: {},
+    });
+
+    const result = await accountsApp.handlers['simplefin-batch-sync']({
+      ids: [acctId],
+    });
+    expect(result[0].res.errors).toHaveLength(0);
+
+    const imported = await getAllTransactions();
+    const openingBalance = imported.find(t => t.starting_balance_flag);
+    expect(openingBalance?.amount).toBe(13550);
+    expect(
+      imported
+        .filter(t => !t.starting_balance_flag)
+        .map(t => t.amount)
+        .sort((a, b) => a - b),
+    ).toEqual([-2550, -1000]);
+  });
+
   test('does not emit transaction CRDT messages when provider category appears later', async () => {
     const providerAccountId = 'sf-account-1';
     const acctId = await db.insertAccount({
