@@ -1,14 +1,73 @@
+import BackgroundTasks
 import UIKit
 import Capacitor
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    // Also listed under BGTaskSchedulerPermittedIdentifiers in Info.plist.
+    private static let backgroundSyncTaskIdentifier = "org.actualbudget.backgroundSync"
+
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.backgroundSyncTaskIdentifier, using: .main) { [weak self] task in
+            self?.runBackgroundSync(task)
+        }
         return true
+    }
+
+    // Asks iOS to wake the app at some point to sync. iOS picks the time (if
+    // at all: never after a force quit or with Background App Refresh off), so
+    // this is best effort.
+    func scheduleBackgroundSync() {
+        let request = BGAppRefreshTaskRequest(identifier: Self.backgroundSyncTaskIdentifier)
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 15 * 60)
+        try? BGTaskScheduler.shared.submit(request)
+    }
+
+    private func runBackgroundSync(_ task: BGTask) {
+        scheduleBackgroundSync()
+
+        var isCompleted = false
+        func complete(success: Bool) {
+            guard !isCompleted else { return }
+            isCompleted = true
+            task.setTaskCompleted(success: success)
+        }
+        task.expirationHandler = {
+            DispatchQueue.main.async { complete(success: false) }
+        }
+        syncWebApp(completion: complete)
+    }
+
+    // The sync code and the database live in the web view, so the web app does
+    // the work (see useBackgroundSync.ts) and resolves the promise when done.
+    //
+    // ponytail: when iOS relaunched the app for the task the web app is still
+    // loading (or the web view is missing), so nothing answers and the task
+    // runs until it expires. The web app syncs by itself on launch in that
+    // time. Add a "loaded" signal if the wasted time matters.
+    func syncWebApp(completion: @escaping (_ success: Bool) -> Void) {
+        let webView = UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.windows.first?.rootViewController as? CAPBridgeViewController }
+            .first?.webView
+        webView?.callAsyncJavaScript(
+            """
+            await new Promise(done =>
+              window.dispatchEvent(new CustomEvent('actual-background-sync', { detail: done })),
+            );
+            return true;
+            """,
+            in: nil,
+            in: .page
+        ) { result in
+            if case .success = result {
+                completion(true)
+            } else {
+                completion(false)
+            }
+        }
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

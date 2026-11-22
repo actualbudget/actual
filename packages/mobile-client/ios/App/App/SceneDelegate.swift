@@ -28,4 +28,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         (window?.rootViewController as? CAPBridgeViewController)?.webView?.allowsBackForwardNavigationGestures = true
     }
 
+    func sceneDidEnterBackground(_ scene: UIScene) {
+        (UIApplication.shared.delegate as? AppDelegate)?.scheduleBackgroundSync()
+    }
+
 }

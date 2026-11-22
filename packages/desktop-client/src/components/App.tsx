@@ -18,6 +18,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { setAppState, sync } from '#app/appSlice';
 import { closeBudget, loadBudget } from '#budgetfiles/budgetfilesSlice';
 import { handleGlobalEvents } from '#global-events';
+import { useBackgroundSync } from '#hooks/useBackgroundSync';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useOnVisible } from '#hooks/useOnVisible';
@@ -192,6 +193,8 @@ export function App() {
     console.debug('triggering sync because of visibility change');
     await dispatch(sync());
   });
+
+  useBackgroundSync(() => dispatch(sync()));
 
   useEffect(() => {
     function checkScrollbars() {
