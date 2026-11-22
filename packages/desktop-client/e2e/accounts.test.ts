@@ -399,6 +399,40 @@ test.describe('Accounts', () => {
     await expect(unreconciled.getByTestId('balance')).toHaveText('-170.00');
   });
 
+  test('does not mark the account reconciled when exiting an unbalanced reconciliation', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Exit Reconcile',
+      offBudget: false,
+      balance: 100,
+    });
+    await accountPage.waitFor();
+
+    const reconcileButton = page.getByRole('button', { name: 'Reconcile' });
+    const reconcilePopover = page.locator('[data-popover]');
+
+    await reconcileButton.click();
+    const amountInput = reconcilePopover.getByRole('textbox');
+    await amountInput.waitFor();
+    // The input is pre-filled with the cleared balance, so any other
+    // amount leaves a difference.
+    await amountInput.fill('50.00');
+    await reconcilePopover.getByRole('button', { name: 'Reconcile' }).click();
+
+    const exitButton = page.getByRole('button', {
+      name: 'Exit reconciliation',
+    });
+    await exitButton.click();
+    // The button going away means reconcile mode has ended
+    await expect(exitButton).not.toBeVisible();
+
+    await reconcileButton.click();
+    // Scoped to the popover: the Reconcile button's tooltip shows the
+    // same text.
+    await expect(
+      reconcilePopover.getByText('Not yet reconciled'),
+    ).toBeVisible();
+  });
+
   test('opens the other side of a transfer from its arrow', async () => {
     accountPage = await navigation.goToAccountPage('Bank of America');
     await accountPage.createSingleTransaction({

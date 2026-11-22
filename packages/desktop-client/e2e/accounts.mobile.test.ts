@@ -140,8 +140,42 @@ test.describe('Mobile Accounts', () => {
 
     await accountPage.lockTransactions();
     await expect(accountPage.reconcilingBanner).not.toBeVisible();
+    const reconcileModal = await accountPage.reopenReconciliation();
+    await expect(
+      reconcileModal.getByText('Reconciled less than a minute ago', {
+        exact: false,
+      }),
+    ).toBeVisible();
+    // Closing the reconcile modal returns to the account menu beneath it
+    await reconcileModal
+      .getByRole('button', { name: 'Close', exact: true })
+      .click();
+    await expect(reconcileModal).not.toBeVisible();
+    // The menu has no close button, tapping outside the sheet dismisses it
+    const accountMenuModal = page.getByTestId('account-menu-modal');
+    // If more tests need to dismiss a sheet, add a dedicated method, but for now, tap out of the way
+    await accountMenuModal.click({ position: { x: 5, y: 5 } }); 
+    await expect(accountMenuModal).not.toBeVisible();
 
     await page.getByRole('button', { name: 'Back', exact: true }).click();
     await expect(accountsPage.accountList).toBeVisible();
+  });
+
+  test('does not mark the account reconciled when exiting an unbalanced reconciliation', async () => {
+    const accountsPage = await navigation.goToAccountsPage();
+    await accountsPage.waitFor();
+
+    const accountPage = await accountsPage.openNthAccount(0);
+    await accountPage.waitFor();
+
+    await accountPage.startReconciliation('200.00');
+    await expect(accountPage.reconcilingBannerDifference).toBeVisible();
+
+    await accountPage.exitReconciliation();
+    // The banner going away means reconcile mode has ended
+    await expect(accountPage.reconcilingBanner).not.toBeVisible();
+
+    const reconcileModal = await accountPage.reopenReconciliation();
+    await expect(reconcileModal.getByText('Not yet reconciled')).toBeVisible();
   });
 });

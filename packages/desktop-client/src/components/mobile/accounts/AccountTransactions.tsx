@@ -234,14 +234,17 @@ function TransactionListWithPreviews({
   const { onBatchEdit } = useTransactionBatchActions();
 
   const onDoneReconciling = useCallback(async () => {
-    await reconciliation.finishReconciliation(account.id, reconcileAmount);
-
-    updateAccount({
-      account: {
-        ...account,
-        last_reconciled: new Date().getTime().toString(),
-      },
-    });
+    //Only update the account if we succeeded
+    if (
+      await reconciliation.finishReconciliation(account.id, reconcileAmount)
+    ) {
+      updateAccount({
+        account: {
+          ...account,
+          last_reconciled: new Date().getTime().toString(),
+        },
+      });
+    }
 
     setSearchParams(
       prev => {

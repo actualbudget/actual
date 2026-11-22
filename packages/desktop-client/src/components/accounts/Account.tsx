@@ -1173,12 +1173,20 @@ class AccountInternal extends PureComponent<
 
     const { reconcileAmount } = this.state;
 
-    await reconciliation.finishReconciliation(account.id, reconcileAmount, () =>
-      this.lockTransactions(),
+    const didReconcile = await reconciliation.finishReconciliation(
+      account.id,
+      reconcileAmount,
+      () => this.lockTransactions(),
     );
 
-    const lastReconciled = new Date().getTime().toString();
-    this.props.onUpdateAccount({ ...account, last_reconciled: lastReconciled });
+    // Only mark the reconciliation if it occurred
+    if (didReconcile) {
+      const lastReconciled = new Date().getTime().toString();
+      this.props.onUpdateAccount({
+        ...account,
+        last_reconciled: lastReconciled,
+      });
+    }
 
     this.setState(state => ({
       reconcileAmount: null,

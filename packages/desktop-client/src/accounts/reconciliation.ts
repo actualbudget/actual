@@ -89,7 +89,9 @@ export async function finishReconciliation(
 
   if (targetDiff === 0) {
     await lock();
+    return true;
   }
+  return false;
 }
 
 export async function createReconciliationTransaction(
