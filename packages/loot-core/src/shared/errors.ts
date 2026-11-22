@@ -164,7 +164,7 @@ export function getSyncError(error: string, id: string, meta?: unknown) {
   } else if (error === 'budget-in-use') {
     return `Budget "${id}" is already open in another tab or window of this browser. Close it there and try again.`;
   } else if (error === 'storage-migration-failed') {
-    return `Moving budget "${id}" to the new browser storage failed. Nothing was deleted; reload the page and try again.`;
+    return `Moving budget "${id}" to the new browser storage failed. Nothing was deleted; open the budget again to retry.`;
   } else if (error === 'storage-unavailable') {
     return `Budget "${id}" is in storage this browser cannot reach right now. Nothing was deleted; reload the page and try again.`;
   } else if (error === 'storage-lost') {

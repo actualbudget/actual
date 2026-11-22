@@ -77,6 +77,7 @@ import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
+import { StorageMigrationFailedModal } from './modals/StorageMigrationFailedModal';
 import { TagColorModal } from './modals/TagColorModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
@@ -100,7 +101,11 @@ export function Modals() {
   const [budgetId] = useMetadataPref('id');
 
   const onCloseModal = useEffectEvent(() => {
-    if (modalStack.length > 0) {
+    // A budget that failed to move is reported while the app is still
+    // settling on its first page, which must not dismiss the report
+    const isReportingFailedMove =
+      modalStack.at(-1)?.name === 'storage-migration-failed';
+    if (modalStack.length > 0 && !isReportingFailedMove) {
       dispatch(closeModal());
     }
   });
@@ -417,6 +422,9 @@ export function Modals() {
 
         case 'out-of-sync-migrations':
           return <OutOfSyncMigrationsModal key={key} />;
+
+        case 'storage-migration-failed':
+          return <StorageMigrationFailedModal key={key} {...modal.options} />;
 
         case 'edit-access':
           return <EditUserAccess key={key} {...modal.options} />;

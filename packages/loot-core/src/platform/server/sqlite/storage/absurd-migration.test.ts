@@ -13,6 +13,7 @@ import {
   completeMigration,
   deleteLegacyDatabase,
   legacySnapshot,
+  matchesLegacyDatabase,
   pageSizeFromHeader,
   readLegacyDatabaseBytes,
 } from './absurd-migration';
@@ -20,10 +21,12 @@ import { BudgetInUseError, StorageMigrationError } from './errors';
 import { getSqliteFileRow, putSqliteFileRow } from './files-store';
 import { legacyDatabaseName } from './paths';
 import {
+  holdLegacyConnection,
   initWasmEngine,
   listIndexedDbNames,
   resetIndexedDb,
   seedLegacyDatabase,
+  writeToLegacyDatabase,
 } from './test-helpers';
 
 const PATH = '/documents/Actual/My-Budget-abc123/db.sqlite';
@@ -46,25 +49,6 @@ async function makeDatabaseBytes(
   const bytes = await exportDatabase(db);
   closeDatabase(db);
   return bytes;
-}
-
-// Another tab's absurd-sql connection, which closes on a version change
-// unless told to stay
-function holdLegacyConnection(
-  name: string,
-  { stubborn = false } = {},
-): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(name, 2);
-    request.onsuccess = () => {
-      const database = request.result;
-      if (!stubborn) {
-        database.onversionchange = () => database.close();
-      }
-      resolve(database);
-    };
-    request.onerror = () => reject(request.error);
-  });
 }
 
 async function legacyVersion(name: string): Promise<number | undefined> {
@@ -141,6 +125,70 @@ describe('absurd-sql migration helpers', () => {
     expect(read?.length).toBe(bytes.length);
     const tail = (read as Uint8Array).subarray(lastBlock * pageSize);
     expect(tail.every(byte => byte === 0)).toBe(true);
+  });
+
+  it('tells a file that is the copy byte for byte from one that is not', async () => {
+    // More than one run of blocks, so a difference in a later one counts
+    const bytes = await makeDatabaseBytes(3000, 1024);
+    const pageSize = pageSizeFromHeader(bytes) ?? 4096;
+    expect(bytes.length).toBeGreaterThan(256 * pageSize);
+    await seedLegacyDatabase(NAME, bytes);
+    const snapshot = legacySnapshot(bytes);
+
+    expect(await matchesLegacyDatabase(PATH, bytes, snapshot)).toBe(true);
+
+    for (const offset of [200, 300 * pageSize + 7, bytes.length - 1]) {
+      const altered = bytes.slice();
+      altered[offset] ^= 0xff;
+      expect(await matchesLegacyDatabase(PATH, altered, snapshot)).toBe(false);
+    }
+    expect(
+      await matchesLegacyDatabase(PATH, bytes.slice(0, -1), snapshot),
+    ).toBe(false);
+    const longer = new Uint8Array(bytes.length + 1);
+    longer.set(bytes);
+    expect(await matchesLegacyDatabase(PATH, longer, snapshot)).toBe(false);
+  });
+
+  it('holds the blocks a copy lacks to be zeros', async () => {
+    const bytes = await makeDatabaseBytes(50, 1024);
+    const pageSize = pageSizeFromHeader(bytes) ?? 4096;
+    const lastBlock = Math.ceil(bytes.length / pageSize) - 1;
+    // One gap with stored blocks after it, and one at the end
+    expect(lastBlock).toBeGreaterThan(3);
+    await seedLegacyDatabase(NAME, bytes, { skipBlocks: [1, lastBlock] });
+
+    // What a move reads has the gaps filled in, and that is what matches
+    const read = (await readLegacyDatabaseBytes(PATH)) as Uint8Array;
+    const snapshot = legacySnapshot(read);
+    expect(await matchesLegacyDatabase(PATH, read, snapshot)).toBe(true);
+    expect(await matchesLegacyDatabase(PATH, bytes, snapshot)).toBe(false);
+
+    // A block stored after a gap is held against its own place
+    const altered = read.slice();
+    altered[2 * pageSize + 5] ^= 0xff;
+    expect(await matchesLegacyDatabase(PATH, altered, snapshot)).toBe(false);
+  });
+
+  it('matches nothing where there is no copy', async () => {
+    const nothing = new Uint8Array(0);
+    expect(
+      await matchesLegacyDatabase(PATH, nothing, legacySnapshot(nothing)),
+    ).toBe(false);
+    expect(await listIndexedDbNames()).not.toContain(NAME);
+  });
+
+  it('takes a copy written to since it was read for a budget in use', async () => {
+    const bytes = await makeDatabaseBytes(5);
+    await seedLegacyDatabase(NAME, bytes);
+    const snapshot = legacySnapshot(bytes);
+    await writeToLegacyDatabase(NAME);
+
+    // Not a move gone wrong: the file read earlier is no longer the copy
+    await expect(
+      matchesLegacyDatabase(PATH, bytes, snapshot),
+    ).rejects.toBeInstanceOf(BudgetInUseError);
+    expect(await legacyVersion(NAME)).toBe(2);
   });
 
   it('returns null for a missing or empty legacy database', async () => {
@@ -270,22 +318,8 @@ describe('absurd-sql migration helpers', () => {
     const bytes = await makeDatabaseBytes(5);
     await seedLegacyDatabase(NAME, bytes);
     const snapshot = legacySnapshot(bytes);
-    // A tab on the previous release reopens the copy and writes, which
-    // moves the file change counter in the header
-    const other = await holdLegacyConnection(NAME);
-    await new Promise<void>((resolve, reject) => {
-      const transaction = other.transaction('data', 'readwrite');
-      const store = transaction.objectStore('data');
-      const request = store.get(0);
-      request.onsuccess = () => {
-        const block = new Uint8Array(request.result as ArrayBuffer);
-        block[27] += 1;
-        store.put(block.buffer, 0);
-      };
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-    });
-    other.close();
+    // A tab on the previous release reopens the copy and writes
+    await writeToLegacyDatabase(NAME);
 
     await expect(
       completeMigration(

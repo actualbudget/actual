@@ -672,6 +672,7 @@ export function CreatePayeeButton({
           ? theme.menuAutoCompleteBackgroundHover
           : 'transparent',
         ':active': {
+          // oxlint-disable-next-line actual/no-color-literals
           backgroundColor: 'rgba(100, 100, 100, .25)',
         },
         ...narrowStyle,

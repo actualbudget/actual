@@ -225,6 +225,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
             <AlignedText
               style={
                 titleAccount && {
+                  // oxlint-disable-next-line actual/no-color-literals
                   borderBottom: `1.5px solid rgba(255,255,255,0.4)`,
                   paddingBottom: '3px',
                 }

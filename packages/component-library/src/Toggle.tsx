@@ -78,10 +78,12 @@ export const Toggle = ({
               height: '12px',
               borderRadius: '100px',
               transition: '0.2s',
+              // oxlint-disable-next-line actual/no-color-literals
               boxShadow: '0 0 2px 0 rgba(10, 10, 10, 0.29)',
               backgroundColor: isDisabled
                 ? theme.checkboxToggleDisabled
-                : '#fff',
+                : // oxlint-disable-next-line actual/no-color-literals
+                  '#fff',
             },
             isOn && {
               left: 'calc(100% - 2px)',
