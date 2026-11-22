@@ -758,7 +758,11 @@ async function openSpendingReport(page: Page, firstDate = '02/01/2024') {
   };
 }
 
-async function addReportDateFilter(page: Page, operator: string, date: string) {
+async function addReportDateFilter(
+  page: Page,
+  operator: string,
+  ...dates: string[]
+) {
   const filter = page
     .getByRole('button', { name: /Unsaved report/ })
     .locator('../..')
@@ -770,9 +774,12 @@ async function addReportDateFilter(page: Page, operator: string, date: string) {
     .click();
   const menu = page.getByTestId('filters-menu-tooltip');
   await menu.getByRole('button', { name: operator, exact: true }).click();
-  const input = menu.getByRole('textbox');
-  await input.fill(date);
-  await input.press('Tab');
+  const inputs = menu.getByRole('textbox');
+  for (const [index, date] of dates.entries()) {
+    const input = inputs.nth(index);
+    await input.fill(date);
+    await input.blur();
+  }
   await menu.getByRole('button', { name: 'Apply', exact: true }).click();
 }
 
@@ -784,8 +791,7 @@ test('uses filtered months for average spending in a custom report', async ({
   await expect(total).toContainText('-1,020.00');
   await expect(average).toContainText('-30.00');
 
-  await addReportDateFilter(page, 'is greater than or equals', '03/15/2026');
-  await addReportDateFilter(page, 'is less than or equals', '07/02/2026');
+  await addReportDateFilter(page, 'is between', '03/15/2026', '07/02/2026');
 
   await expect(total).toContainText('-500.00');
   // The two partial boundary months and the three empty months all count.
@@ -823,8 +829,7 @@ test('uses filtered quarters for average spending in a custom report and its das
   await page.getByRole('button', { name: 'Quarterly', exact: true }).click();
   await expect(average).toContainText('-204.00');
 
-  await addReportDateFilter(page, 'is greater than or equals', '07/01/2026');
-  await addReportDateFilter(page, 'is less than or equals', '09/30/2026');
+  await addReportDateFilter(page, 'is between', '07/01/2026', '09/30/2026');
   await expect(total).toContainText('-200.00');
   await expect(average).toContainText('-200.00');
 

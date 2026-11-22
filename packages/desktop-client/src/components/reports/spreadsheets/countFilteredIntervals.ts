@@ -59,9 +59,16 @@ function matchesDateFilter(date: string, filter: unknown): boolean | undefined {
   if (!('date' in filter)) {
     return true;
   }
-  const constraint = filter.date;
+  return matchesDateConstraint(date, filter.date);
+}
+
+function matchesDateConstraint(date: string, constraint: unknown): boolean {
   if (typeof constraint === 'string') {
     return date === constraint;
+  }
+  // ActualQL combines the bounds of an "is between" filter with AND.
+  if (Array.isArray(constraint)) {
+    return constraint.every(bound => matchesDateConstraint(date, bound));
   }
   if (!constraint || typeof constraint !== 'object') {
     return true;

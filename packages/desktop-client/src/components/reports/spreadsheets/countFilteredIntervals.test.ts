@@ -121,6 +121,21 @@ describe('countFilteredIntervals', () => {
     ).toBe(2);
   });
 
+  it.each(['Monthly', 'Quarterly'] as const)(
+    'applies both bounds of an is between filter for %s reports',
+    interval => {
+      expect(
+        countFilteredIntervals(
+          '2025-10-01',
+          '2027-03-31',
+          interval,
+          [{ date: [{ $gte: '2026-06-30' }, { $lte: '2026-07-01' }] }],
+          'and',
+        ),
+      ).toBe(2);
+    },
+  );
+
   it('excludes dates outside the report even within its boundary quarter', () => {
     expect(
       countFilteredIntervals(
