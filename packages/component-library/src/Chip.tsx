@@ -5,14 +5,23 @@ import { Button } from './Button';
 import { SvgClose } from './icons/v1';
 import { View } from './View';
 
-type ChipProps = Omit<
+type ChipBaseProps = Omit<
   ComponentPropsWithoutRef<typeof Button>,
   'size' | 'variant'
 > & {
   removable?: boolean;
-  onRemove?: () => void;
   variant?: 'normal' | 'bare';
 };
+
+type ChipProps =
+  | (ChipBaseProps & {
+      onRemove?: undefined;
+      removeButtonLabel?: undefined;
+    })
+  | (ChipBaseProps & {
+      onRemove: () => void;
+      removeButtonLabel: string;
+    });
 
 const chipStyle = {
   padding: '4px 8px',
@@ -23,6 +32,7 @@ const chipStyle = {
 export function Chip({
   removable = true,
   onRemove,
+  removeButtonLabel,
   variant = 'normal',
   style,
   children,
@@ -60,6 +70,7 @@ export function Chip({
       <Button
         variant="bare"
         isDisabled={props.isDisabled}
+        aria-label={removeButtonLabel}
         onPress={() => onRemove()}
         style={{ padding: 0, flexShrink: 0 }}
       >
