@@ -199,3 +199,34 @@ describe('FilterEditor "is between"', () => {
     );
   });
 });
+
+describe('FilterEditor month', () => {
+  it('picks a month with the month picker', async () => {
+    const user = userEvent.setup();
+    const onSave = vi.fn();
+    render(
+      <FilterEditor
+        field="date"
+        op="is"
+        value="2020-08"
+        options={{ month: true }}
+        onSave={onSave}
+        onClose={vi.fn()}
+      />,
+      { wrapper: TestProviders },
+    );
+
+    await user.click(screen.getByTestId('month-picker-trigger'));
+    await user.click(screen.getByRole('button', { name: 'October 2020' }));
+    await user.click(screen.getByRole('button', { name: 'Apply' }));
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        field: 'date',
+        op: 'is',
+        value: '2020-10',
+        options: expect.objectContaining({ month: true }),
+      }),
+    );
+  });
+});
