@@ -1,33 +1,70 @@
 import * as monthUtils from '@actual-app/core/shared/months';
+import { millisecondsInDay } from 'date-fns/constants';
+
+import { getReportQueryDateTransform } from './makeQuery';
 
 export function countFilteredIntervals(
   startDate: string,
   endDate: string,
-  interval: 'Monthly' | 'Quarterly',
+  interval: string,
+  intervals: string[],
   filters: unknown[],
   conditionsOp: string,
 ): number {
   const filter = conditionsOp === 'or' ? { $or: filters } : { $and: filters };
+  const [firstDay, lastDay] = getQueryDayBounds(startDate, endDate, interval);
+  const first = toUtcTimestamp(firstDay);
+  const last = toUtcTimestamp(lastDay);
+  const intervalStarts = intervals.map(start =>
+    toUtcTimestamp(monthUtils.dayFromDate(start)),
+  );
 
-  // Both report queries bound the range by month, even when the results are
-  // grouped by quarter. A covered month counts even if it has no transactions.
-  const coveredMonths = monthUtils
-    .rangeInclusive(startDate, endDate)
-    .filter(month => {
-      const daysInMonth = Number(monthUtils.lastDayOfMonth(month).slice(-2));
-      for (let day = 1; day <= daysInMonth; day++) {
-        const date = `${month}-${String(day).padStart(2, '0')}`;
-        if (matchesDateFilter(date, filter) !== false) {
-          return true;
-        }
+  // Use the report's interval boundaries, but only consider days inside the
+  // transaction query's range. Step through calendar days in UTC so local
+  // timezone transitions don't skip dates stored in the database.
+  return intervalStarts.filter((intervalStart, index) => {
+    const nextIntervalStart = intervalStarts[index + 1];
+    for (
+      let time = Math.max(intervalStart, first);
+      time <= last &&
+      (nextIntervalStart === undefined || time < nextIntervalStart);
+      time += millisecondsInDay
+    ) {
+      const day = new Date(time).toISOString().slice(0, 10);
+      if (matchesDateFilter(day, filter) !== false) {
+        return true;
       }
-      return false;
-    });
+    }
+    return false;
+  }).length;
+}
 
-  if (interval === 'Monthly') {
-    return coveredMonths.length;
+function toUtcTimestamp(day: string): number {
+  return Date.parse(`${day}T00:00:00Z`);
+}
+
+function getQueryDayBounds(
+  startDate: string,
+  endDate: string,
+  interval: string,
+): [string, string] {
+  switch (getReportQueryDateTransform(interval)) {
+    case '$year':
+      return [
+        monthUtils.firstDayOfMonth(monthUtils.getYearStart(startDate)),
+        monthUtils.lastDayOfMonth(monthUtils.getYearEnd(endDate)),
+      ];
+    case '$month':
+      return [
+        monthUtils.firstDayOfMonth(startDate),
+        monthUtils.lastDayOfMonth(endDate),
+      ];
+    default:
+      return [
+        monthUtils.dayFromDate(startDate),
+        monthUtils.dayFromDate(endDate),
+      ];
   }
-  return new Set(coveredMonths.map(monthUtils.getQuarterStart)).size;
 }
 
 // Use the date expressions produced by make-filters-from-conditions. Month,

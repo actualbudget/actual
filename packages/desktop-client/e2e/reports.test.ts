@@ -849,6 +849,52 @@ test('uses filtered quarters for average spending in a custom report and its das
   await expect(widget.locator(tableAverage)).toHaveText('-200.00');
 });
 
+for (const { interval, firstDate, from, to, spending, averageSpending } of [
+  {
+    interval: 'Yearly',
+    firstDate: '10/01/2025',
+    from: '07/01/2026',
+    to: '09/30/2026',
+    spending: '-200.00',
+    averageSpending: '-200.00',
+  },
+  {
+    interval: 'Weekly',
+    firstDate: '10/01/2025',
+    from: '06/28/2026',
+    to: '07/06/2026',
+    spending: '-200.00',
+    averageSpending: '-100.00',
+  },
+  {
+    interval: 'Daily',
+    firstDate: '01/02/2017',
+    from: '01/02/2017',
+    to: '01/03/2017',
+    spending: '-340.00',
+    averageSpending: '-170.00',
+  },
+]) {
+  test(`uses date filters for ${interval.toLowerCase()} average spending in a custom report`, async ({
+    page,
+  }) => {
+    const { report, total, average, tableAverage } = await openSpendingReport(
+      page,
+      firstDate,
+    );
+    await report.pageContent
+      .getByRole('button', { name: 'Monthly', exact: true })
+      .click();
+    await page.getByRole('button', { name: interval, exact: true }).click();
+    await addReportDateFilter(page, 'is between', from, to);
+    await expect(total).toContainText(spending);
+    await expect(average).toContainText(averageSpending);
+
+    await report.selectViz('Data Table');
+    await expect(tableAverage).toHaveText(averageSpending);
+  });
+}
+
 test.describe('Reports without transactions', () => {
   let page: Page;
 

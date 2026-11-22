@@ -114,7 +114,7 @@ export function createCustomSpreadsheet({
   );
   const transactionConditions = conditions.filter(cond => !cond.customName);
   const hasDateFilter =
-    (interval === 'Monthly' || interval === 'Quarterly') &&
+    ReportOptions.intervalMap.has(interval) &&
     balanceTypeOp !== 'totalBudgeted' &&
     transactionConditions.some(cond => cond.field === 'date');
 
@@ -125,6 +125,12 @@ export function createCustomSpreadsheet({
     let groupByList = initialGroups;
     let scopeTagNames: string[] | undefined;
     const hasGroups = groupBy === 'Tag' || groupByList.length > 0;
+    const intervals =
+      interval === 'Weekly'
+        ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)
+        : monthUtils[
+            ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
+          ](startDate, endDate);
     const { filters } =
       hasGroups || hasDateFilter
         ? await send('make-filters-from-conditions', {
@@ -136,6 +142,7 @@ export function createCustomSpreadsheet({
           startDate,
           endDate,
           interval,
+          intervals,
           filters,
           conditionsOp,
         )
@@ -234,13 +241,6 @@ export function createCustomSpreadsheet({
         date: monthUtils.quarterFromDate(d.date),
       }));
     }
-
-    const intervals =
-      interval === 'Weekly'
-        ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)
-        : monthUtils[
-            ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
-          ](startDate, endDate);
 
     let totalAssets = 0;
     let totalDebts = 0;
