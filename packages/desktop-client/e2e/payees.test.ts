@@ -113,6 +113,9 @@ test.describe('Payees', () => {
     for (const field of ['name', 'rule-count']) {
       await page.keyboard.press('Tab');
       expect(await isOutlined(field)).toBe(true);
+      if (field === 'name') {
+        await expect(row).toMatchThemeScreenshots();
+      }
     }
 
     // A checked row keeps its own color while a cell in it is selected
@@ -121,6 +124,7 @@ test.describe('Payees', () => {
       page.getByTestId('selected-payees-select-button'),
     ).toBeVisible();
     expect(await rowBackground()).not.toBe(selectedColor);
+    await expect(row).toMatchThemeScreenshots();
 
     await page.keyboard.press('Escape');
     await expect(
