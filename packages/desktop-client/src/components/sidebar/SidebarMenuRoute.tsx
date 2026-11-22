@@ -28,7 +28,7 @@ export function SidebarMenuRoute({
   children,
 }: SidebarMenuRouteProps) {
   const { isNarrowWidth } = useResponsive();
-  const { sidebarItems } = useSidebarMenu();
+  const { sidebarItems, isItemAvailable } = useSidebarMenu();
   const itemDetails = useSidebarMenuItemDetails();
   const location = useLocation();
 
@@ -36,6 +36,10 @@ export function SidebarMenuRoute({
   const isSettingsPage = isNarrowWidth
     ? !isMobilePage
     : !sidebarItems.some(item => item.id === id);
+
+  if (!isItemAvailable(id)) {
+    return <Navigate to="/settings" replace />;
+  }
 
   if (isSettingsPage !== isInSettings) {
     return (

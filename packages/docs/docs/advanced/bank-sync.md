@@ -29,11 +29,17 @@ Actual can download new transactions from your linked accounts in the background
 
 To turn it on:
 
-1. Open **Bank Sync** from the sidebar (on mobile, find it in the navigation menu).
-2. In the **Automatic syncing** section, choose how often Actual should sync: **Every 12 hours**, **Every day** or **Every week**.
-3. To use a different schedule, choose **Custom interval**, then enter a number and pick the unit (minutes, hours, days or weeks).
+1. Open **Settings** and select **Bank Sync**.
+2. Click the menu button (three dots) at the top right of the page and choose **Automatic syncing**.
 
-The **Automatic syncing** section only appears once at least one account is linked to a bank.
+   <img width="643" alt="The Bank Sync page with the menu open and the Automatic syncing item highlighted" src="/img/advanced/bank-sync/bank-sync-automatic-syncing-menu@2x.webp" />
+   - **1.** The menu button.
+   - **2. Automatic syncing.** Shows the current setting and opens the **Automatic syncing** dialog.
+
+3. Next to **Sync accounts**, choose how often Actual should sync: **Every 12 hours**, **Every day** or **Every week**.
+4. To use a different schedule, choose **Custom interval**, then enter a number and pick the unit (minutes, hours, days or weeks).
+
+The **Automatic syncing** menu item only appears once at least one account is linked to a bank.
 
 A few things to know:
 

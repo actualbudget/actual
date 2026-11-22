@@ -39,13 +39,15 @@ Server Version 24.10.0 or higher are required for this feature.
 
    <img width="518" alt="The Add account dialog with the Set up bank sync button highlighted" src="/img/advanced/bank-sync/bank-sync-add-account-modal@2x.webp" />
 
-9. Under **Providers**, click **Set up** on the SimpleFIN card.
+9. In the list of providers, click **Set up** next to SimpleFIN.
 
-   <img width="640" alt="The Providers section of the Bank Sync page with Set up on the SimpleFIN card highlighted" src="/img/advanced/bank-sync/simplefin-set-up@2x.webp" />
+   <img width="640" alt="The Bank Sync page listing the providers, with Set up next to SimpleFIN highlighted" src="/img/advanced/bank-sync/simplefin-set-up@2x.webp" />
+
+   If another provider is already set up, the list is not shown on the page. Click the menu button (three dots) at the top right of the page, choose **Providers**, then click **Set up** next to SimpleFIN.
 
 10. You will be asked to enter your SimpleFIN setup token. The keys from this value will be saved on the server, so you will only need to enter it once.
 
-    <img width="510" alt="The Set-up SimpleFIN dialog with an empty Token field" src="/img/advanced/bank-sync/simplefin-setup-modal@2x.webp" />
+    <img width="510" alt="The Set-up SimpleFIN dialog with the For this budget only switch and an empty Token field" src="/img/advanced/bank-sync/simplefin-setup-modal@2x.webp" />
 
 To use separate SimpleFIN credentials for this budget, enable **For this budget only** during setup. The budget must be uploaded to your sync server first. Administrators can choose global or budget-specific credentials; other budget owners can configure budget-specific credentials when global credentials are not active.
 
@@ -58,13 +60,15 @@ Budget-specific credentials take precedence over global credentials. Resetting t
 
      <img width="297" alt="The account menu with Link account highlighted" src="/img/advanced/bank-sync/bank-sync-link-account-menu@2x.webp" />
 
-   - **_To create a new account with bank syncing click on the '+ Add account' link in the left menu at the bottom, then click Set up bank sync_**
+   - **_To create a new account with bank syncing click on the '+ Add account' link in the left menu at the bottom, click Set up bank sync, then click Link bank account on the Bank Sync page_**
 
      <img width="240" alt="The sidebar with the Add account button at the bottom highlighted" src="/img/advanced/bank-sync/bank-sync-add-account@2x.webp" />
 
-2. Click the **Link bank account** button on the SimpleFIN card.
+     <img width="637" alt="The Bank Sync page with the Link bank account button highlighted" src="/img/advanced/bank-sync/bank-sync-link-bank-account@2x.webp" />
 
-   <img width="662" alt="The Link account dialog with Link bank account on the SimpleFIN card highlighted" src="/img/advanced/bank-sync/simplefin-link-bank-account@2x.webp" />
+2. If you have set up more than one provider, Actual asks which one to use. Choose **SimpleFIN**. If SimpleFIN is the only provider you have set up, Actual skips this step.
+
+   <img width="510" alt="The Link Capital One Checking dialog listing the providers, with SimpleFIN highlighted" src="/img/advanced/bank-sync/simplefin-choose-provider@2x.webp" />
 
 3. A Link Accounts box will pop up. To link a SimpleFIN account to an Actual account, click the "Set up bank sync" button in the same row.
    - The "Bank Account To Sync" column contains the names of the accounts found via SimpleFIN
@@ -91,10 +95,12 @@ Budget-specific credentials take precedence over global credentials. Resetting t
 
 To reset your SimpleFIN setup token:
 
-1. Click "Add Account" in the sidebar.
+1. Open **Settings** and select **Bank Sync**.
 
-2. Next to "Link bank account with SimpleFIN", click the three-dot menu button.
+2. Click the menu button (three dots) at the top right of the page and choose **Providers**.
 
-3. Click "Reset SimpleFIN credentials".
+3. In the **Providers** dialog, click the three-dot menu button next to SimpleFIN and choose **Reset credentials**.
+
+4. Click **Reset credentials** to confirm.
 
 You will then need to obtain a new setup token from SimpleFIN and enter it into Actual.

@@ -112,6 +112,7 @@ const mobileSheetHandleStyle: CSSProperties = {
 type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
   presentation?: 'dialog' | 'sheet';
   ariaLabelledBy?: string;
+  ariaLabel?: string;
   name: string;
   isLoading?: boolean;
   noAnimation?: boolean;
@@ -136,6 +137,7 @@ export const Modal = ({
   containerProps,
   presentation = 'dialog',
   ariaLabelledBy,
+  ariaLabel,
   ...props
 }: ModalProps) => {
   const { t } = useTranslation();
@@ -259,7 +261,9 @@ export const Modal = ({
           >
             {modalProps => (
               <Dialog
-                aria-label={ariaLabelledBy ? undefined : t('Modal dialog')}
+                aria-label={
+                  ariaLabelledBy ? undefined : (ariaLabel ?? t('Modal dialog'))
+                }
                 aria-labelledby={ariaLabelledBy}
                 className={css(styles.lightScrollbar)}
                 style={{

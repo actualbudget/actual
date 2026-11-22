@@ -26,6 +26,10 @@ export function ManagePage({
   style,
   children,
 }: ManagePageProps) {
+  const hasToolbar = [actions, search, selection, menu].some(
+    slot => slot != null && slot !== false,
+  );
+
   return (
     <View style={{ flex: 1, minHeight: 0, gap: spacing.md, ...style }}>
       {description != null && (
@@ -39,32 +43,34 @@ export function ManagePage({
           {description}
         </Text>
       )}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          flexWrap: 'wrap',
-          gap: spacing.sm,
-          flexShrink: 0,
-        }}
-      >
+      {hasToolbar && (
         <View
           style={{
-            flex: '1 0 auto',
             flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'flex-end',
+            flexWrap: 'wrap',
             gap: spacing.sm,
+            flexShrink: 0,
           }}
         >
-          {actions}
+          <View
+            style={{
+              flex: '1 0 auto',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing.sm,
+            }}
+          >
+            {actions}
+          </View>
+          {search != null && (
+            <View style={{ flex: '100 1 100px', maxWidth: 250 }}>{search}</View>
+          )}
+          {selection}
+          {menu}
         </View>
-        {search != null && (
-          <View style={{ flex: '100 1 100px', maxWidth: 250 }}>{search}</View>
-        )}
-        {selection}
-        {menu}
-      </View>
+      )}
       {children}
     </View>
   );

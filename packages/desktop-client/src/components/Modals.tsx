@@ -19,6 +19,10 @@ import { AccountReconcileModal } from './modals/AccountReconcileModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
 import { AllAccountsMenuModal } from './modals/AllAccountsMenuModal';
 import { ApiKeyModal } from './modals/ApiKeyModal';
+import { BankSyncAutomaticSyncModal } from './modals/BankSyncAutomaticSyncModal';
+import { BankSyncLinkProviderModal } from './modals/BankSyncLinkProviderModal';
+import { BankSyncMenuModal } from './modals/BankSyncMenuModal';
+import { BankSyncProvidersModal } from './modals/BankSyncProvidersModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
@@ -283,6 +287,18 @@ export function Modals() {
 
         case 'schedules-upcoming-length':
           return <UpcomingLength key={key} />;
+
+        case 'bank-sync-providers':
+          return <BankSyncProvidersModal key={key} {...modal.options} />;
+
+        case 'bank-sync-automatic-sync':
+          return <BankSyncAutomaticSyncModal key={key} />;
+
+        case 'bank-sync-menu':
+          return <BankSyncMenuModal key={key} {...modal.options} />;
+
+        case 'bank-sync-link-provider':
+          return <BankSyncLinkProviderModal key={key} {...modal.options} />;
 
         case 'schedule-posts-offline-notification':
           return <PostsOfflineNotification key={key} />;

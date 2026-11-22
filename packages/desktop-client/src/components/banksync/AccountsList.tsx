@@ -6,6 +6,7 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 import { useLocale } from '#hooks/useLocale';
 
 import { AccountRow } from './AccountRow';
+import { accountsSubgridStyle } from './accountsTableLayout';
 
 type AccountsListProps = {
   accounts: AccountEntity[];
@@ -29,6 +30,7 @@ export function AccountsList({
   return (
     <View
       style={{
+        ...accountsSubgridStyle,
         marginBottom: -1,
       }}
     >
