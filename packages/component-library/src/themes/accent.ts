@@ -16,14 +16,23 @@ const inputTokens = ['accent', ...Object.values(accentSurfaceTokens)];
 const maxReferenceDepth = 10;
 const referencePattern = /^var\s*\(\s*--([a-zA-Z0-9_-]+)\s*\)$/i;
 const bareHexPattern = /^[0-9a-f]+$/i;
+const customPropertyPattern = /^--[A-Za-z0-9_-]+$/;
 
 const toRgb = converter('rgb');
 const paletteColors: Record<string, string> = palette;
 
 function readDeclarations(css: string) {
   const declarations: Declarations = new Map();
-  for (const match of css.matchAll(/--([A-Za-z0-9_-]+)\s*:\s*([^;}]+)/g)) {
-    declarations.set(match[1], match[2].trim());
+  for (const declaration of css.split(/[;{}]/)) {
+    const separator = declaration.indexOf(':');
+    if (separator === -1) {
+      continue;
+    }
+    const name = declaration.slice(0, separator).trim().split(/\s/).at(-1);
+    const value = declaration.slice(separator + 1).trim();
+    if (name != null && customPropertyPattern.test(name) && value !== '') {
+      declarations.set(name.slice(2), value);
+    }
   }
   return declarations;
 }
