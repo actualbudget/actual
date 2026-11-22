@@ -676,7 +676,7 @@ exports[`resolved theme colors > midnight resolves every token 1`] = `
   "settingsCardTextSubdued": "#bdc5cf",
   "settingsNavItemAccentSelected": "#bb91ff",
   "settingsNavItemBackgroundHover": "#e8ecf014",
-  "settingsNavItemBackgroundSelected": "#bb91ff38",
+  "settingsNavItemBackgroundSelected": "#342553",
   "settingsNavItemText": "#e8ecf0",
   "settingsNavItemTextSelected": "#bb91ff",
   "sidebarBackground": "#080811",

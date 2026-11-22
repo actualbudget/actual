@@ -27,6 +27,5 @@ exports[`theme contrast > records the ratio of every known failure 1`] = `
   "midnight: noticeTextDark on noticeBackground": "3.22",
   "midnight: pageTextSubdued on pageBackground": "2.65",
   "midnight: pillText on pillBackground": "4.19",
-  "midnight: settingsNavItemTextSelected on settingsNavItemBackgroundSelected": "3.18",
 }
 `;

@@ -31,7 +31,6 @@ const knownFailures = new Set<string>([
   'midnight: noticeTextDark on noticeBackground',
   'midnight: pillText on pillBackground',
   'light: calendarItemText on calendarSelectedBackground',
-  'midnight: settingsNavItemTextSelected on settingsNavItemBackgroundSelected',
 ]);
 
 function describePair(theme: ThemeName, text: string, background: string) {

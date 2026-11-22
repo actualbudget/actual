@@ -219,9 +219,7 @@ export const colors = {
     dark: {
       raw: 'color-mix(in srgb, var(--color-settingsNavItemAccentSelected) 22%, transparent)',
     },
-    midnight: {
-      raw: 'color-mix(in srgb, var(--color-settingsNavItemAccentSelected) 22%, transparent)',
-    },
+    midnight: { ref: 'accentSubtle' },
   },
 
   menuBackground: { light: 'white', dark: 'navy800', midnight: 'gray700' },
