@@ -85,7 +85,7 @@ Actual works out the related colors from the accent and from your theme's `--col
 - `--color-accentSubtle` - Tinted background for selected rows and pills
 - `--color-accentSubtleText` - Accent text on the tinted background
 
-You can set any of these yourself. Actual keeps your value and only works out the ones you leave out. If you set `--color-accentSubtle` and leave out `--color-accentSubtleText`, Actual picks a text color that is readable on your tint. Other text on the tint, such as the text of a selected row, keeps its own color, so choose a tint that suits it. A more specific variable, such as `--color-buttonPrimaryBackground`, still takes priority over the accent for the thing it styles.
+You can set any of these yourself. Actual keeps your value and only works out the ones you leave out. The tinted background and its text are a pair, so if you set `--color-accentSubtle`, also set `--color-accentSubtleText` to a color that is readable on it. A more specific variable, such as `--color-buttonPrimaryBackground`, still takes priority over the accent for the thing it styles.
 
 Accent text that sits on its own background, such as the selected sidebar item on `--color-sidebarBackground`, is worked out against that background.
 

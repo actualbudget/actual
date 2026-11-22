@@ -14,11 +14,7 @@ import type { ThemeName, TokenDefinition } from './source/types';
 
 type Declarations = Map<string, string>;
 
-const inputTokens = [
-  'accent',
-  'accentSubtle',
-  ...Object.values(accentSurfaceTokens),
-];
+const inputTokens = ['accent', ...Object.values(accentSurfaceTokens)];
 const maxReferenceDepth = 10;
 const referencePattern = /^var\s*\(\s*--([a-zA-Z0-9_-]+)\s*\)$/i;
 const bareHexPattern = /^[0-9a-f]+$/i;
@@ -124,10 +120,6 @@ function derive(theme: ThemeName, css: string) {
     return null;
   }
 
-  const ownSubtle = declarations.has('color-accentSubtle')
-    ? resolveProperty('color-accentSubtle', theme, declarations)
-    : null;
-
   const accentSet = deriveAccent(
     toHex(accent.alpha < 1 ? composite(accent, surface) : accent),
     {
@@ -135,11 +127,6 @@ function derive(theme: ThemeName, css: string) {
       page: toHex(page),
       mobilePage: toHex(mobilePage),
     },
-    ownSubtle == null
-      ? undefined
-      : [surface, page, mobilePage].map(under =>
-          toHex(ownSubtle.alpha < 1 ? composite(ownSubtle, under) : ownSubtle),
-        ),
   );
   const derived = [
     ...derivedAccentTokens.map(name => ({ name, value: accentSet[name] })),

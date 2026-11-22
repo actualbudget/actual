@@ -225,47 +225,6 @@ describe('deriveAccentCss', () => {
     );
   });
 
-  it('works out the tint text against a tint the theme sets itself', () => {
-    const withoutTint = declarations(
-      deriveAccentCss('light', ':root { --color-accent: #000000; }'),
-    );
-    const withTint = declarations(
-      deriveAccentCss(
-        'light',
-        ':root { --color-accent: #000000; --color-accentSubtle: #000000; }',
-      ),
-    );
-
-    expect(withTint.accentSubtle).toBeUndefined();
-    expect(
-      wcagContrast(withTint.accentSubtleText, '#000000'),
-    ).toBeGreaterThanOrEqual(4.5);
-    expect(withTint.accentText).toBe(withoutTint.accentText);
-  });
-
-  it('checks a see-through tint over the page as well as the table', () => {
-    const derived = declarations(
-      deriveAccentCss(
-        'light',
-        ':root { --color-accent: #767676; --color-accentSubtle: transparent; }',
-      ),
-    );
-
-    expect(
-      wcagContrast(derived.accentSubtleText, palette.navy100),
-    ).toBeGreaterThanOrEqual(4.5);
-  });
-
-  it('works out the tint text for a theme that only sets the tint', () => {
-    const derived = declarations(
-      deriveAccentCss('dark', ':root { --color-accentSubtle: #f4e9ff; }'),
-    );
-
-    expect(
-      wcagContrast(derived.accentSubtleText, '#f4e9ff'),
-    ).toBeGreaterThanOrEqual(4.5);
-  });
-
   it('reads minified css', () => {
     const spaced = deriveAccentCss(
       'light',
