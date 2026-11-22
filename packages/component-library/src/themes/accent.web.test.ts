@@ -267,8 +267,14 @@ describe('deriveAccentCss', () => {
   });
 
   it('reads minified css', () => {
+    const spaced = deriveAccentCss(
+      'light',
+      ':root { --color-accent: #0a7d5a; }',
+    );
+
+    expect(spaced).not.toBe(null);
     expect(deriveAccentCss('light', ':root{--color-accent:#0a7d5a}')).toBe(
-      deriveAccentCss('light', ':root { --color-accent: #0a7d5a; }'),
+      spaced,
     );
   });
 });

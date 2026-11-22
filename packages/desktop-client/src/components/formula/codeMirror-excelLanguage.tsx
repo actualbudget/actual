@@ -907,7 +907,7 @@ const autocompletePopoverTheme = EditorView.baseTheme({
     marginLeft: 'auto',
     whiteSpace: 'nowrap',
   },
-  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected] .cm-completionDetail':
+  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected] .cm-completionDetail, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem:hover .cm-completionDetail, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem-hover .cm-completionDetail, .cm-tooltip.cm-tooltip-autocomplete li[role="option"]:hover .cm-completionDetail':
     {
       color: theme.menuAutoCompleteItemTextHover,
     },
