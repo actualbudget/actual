@@ -130,8 +130,9 @@ function hoverFill(fill: string, contrast: string) {
 export function deriveAccent(
   accent: string,
   { surface, page, mobilePage }: AccentSurfaces,
+  ownSubtle?: string,
 ): AccentSet {
-  const key = `${accent}|${surface}|${page}|${mobilePage}`;
+  const key = `${accent}|${surface}|${page}|${mobilePage}|${ownSubtle ?? ''}`;
   const cached = cache.get(key);
   if (cached != null) {
     return cached;
@@ -157,8 +158,11 @@ export function deriveAccent(
     accentHover: hoverFill(fill, contrast),
     accentText: text,
     accentBorder: nearestWithContrast(fill, [surface, page], shapeContrast),
-    accentSubtle: subtle,
-    accentSubtleText: text,
+    accentSubtle: ownSubtle ?? subtle,
+    accentSubtleText:
+      ownSubtle == null
+        ? text
+        : nearestWithContrast(fill, [ownSubtle], textContrast),
   };
   cache.set(key, accentSet);
   return accentSet;
