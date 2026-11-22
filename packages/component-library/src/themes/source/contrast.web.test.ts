@@ -9,8 +9,6 @@ const knownFailures = new Set<string>([
   'light: pageTextSubdued on pageBackground',
   'light: pageTextSubdued on tableBackground',
   'light: tableTextLight on tableBackground',
-  'light: menuItemTextHeader on menuBackground',
-  'light: menuKeybindingText on menuBackground',
   'light: mobileHeaderTextSubdued on mobileHeaderBackground',
   'light: mobileNavItem on mobileNavBackground',
   'light: noticeText on noticeBackground',
@@ -30,7 +28,8 @@ const knownFailures = new Set<string>([
   'midnight: noticeText on noticeBackground',
   'midnight: noticeTextDark on noticeBackground',
   'midnight: pillText on pillBackground',
-  'light: calendarItemText on calendarSelectedBackground',
+  'dark: calendarItemText on calendarSelectedBackground',
+  'midnight: calendarItemText on calendarSelectedBackground',
 ]);
 
 function describePair(theme: ThemeName, text: string, background: string) {

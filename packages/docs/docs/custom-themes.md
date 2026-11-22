@@ -89,8 +89,6 @@ You can set any of these yourself. Actual keeps your value and only works out th
 
 Accent text that sits on its own background, such as the selected sidebar item on `--color-sidebarBackground`, is worked out against that background.
 
-A few details keep their own variables and do not follow the accent, such as the link hover color (`--color-pageTextLinkLight`) and the border of a hovered table row (`--color-tableBorderHover`).
-
 ### Available CSS Variables
 
 Custom themes can override any of the CSS variables defined in Actual's base themes. These variables correspond to the token names in the theme source file, `packages/component-library/src/themes/source/colors.ts`.

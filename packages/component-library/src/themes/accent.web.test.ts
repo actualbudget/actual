@@ -34,6 +34,8 @@ describe('deriveAccentCss', () => {
       'accentSubtle',
       'accentSubtleText',
       'sidebarItemAccentSelected',
+      'menuItemTextHeader',
+      'menuKeybindingText',
       'menuAutoCompleteTextHeader',
       'pillTextHighlighted',
     ]);
@@ -71,7 +73,7 @@ describe('deriveAccentCss', () => {
       deriveAccentCss('light', ':root { --color-accent: #8719e0; }'),
     );
 
-    expect(Object.keys(derived)).toHaveLength(9);
+    expect(Object.keys(derived)).toHaveLength(11);
     for (const [name, value] of Object.entries(derived)) {
       expect(value).toBe(builtIn[name]);
     }
