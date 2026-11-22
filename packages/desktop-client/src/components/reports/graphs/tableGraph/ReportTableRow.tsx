@@ -69,9 +69,13 @@ export const ReportTableRow = memo(
     colorized,
     scopeTagNames,
   }: ReportTableRowProps) => {
-    const average = Math.round(item[balanceTypeOp] / intervalsCount);
+    const average =
+      intervalsCount === 0
+        ? 0
+        : Math.round(item[balanceTypeOp] / intervalsCount);
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
     const format = useFormat();
+    const formattedAverage = format(average, 'financial');
 
     const navigate = useNavigate();
     const { isNarrowWidth } = useResponsive();
@@ -346,11 +350,9 @@ export const ReportTableRow = memo(
             privacyFilter
           />
           <Cell
-            value={format(average, 'financial')}
+            value={formattedAverage}
             title={
-              Math.abs(average / 100) > 100000
-                ? format(average, 'financial')
-                : undefined
+              Math.abs(average / 100) > 100000 ? formattedAverage : undefined
             }
             textAlign="right"
             style={{

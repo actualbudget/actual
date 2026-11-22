@@ -209,7 +209,7 @@ export function GetCardData({
         interval={report.interval}
         compact
         style={{ height: 'auto', flex: 1 }}
-        intervalsCount={intervals.length}
+        intervalsCount={data.filteredIntervalCount ?? intervals.length}
         showTrendLines={report.showTrendLines}
         showTooltip={!isNarrowWidth && showTooltip}
       />
