@@ -1124,58 +1124,29 @@ const autocompletePopoverPointerHandler = ViewPlugin.define(view => {
   };
 });
 
-/* oxlint-disable actual/no-color-literals */
-// Custom theme for categorized function highlighting (light)
 const functionCategoryTheme = EditorView.baseTheme({
-  '&light .cm-keyword': { color: '#0066CC' }, // Math functions in blue
-  '&light .cm-className': { color: '#267F99' }, // Logical functions in teal
-  '&light .cm-namespace': { color: '#AF00DB' }, // Text functions in purple
-  '&light .cm-typeName': { color: '#098658' }, // Date functions in green
-  '&light .cm-propertyName': { color: '#D73A49' }, // Query functions in red
+  '.cm-keyword': { color: theme.formulaFunctionMath },
+  '.cm-className': { color: theme.formulaFunctionLogical },
+  '.cm-namespace': { color: theme.formulaFunctionText },
+  '.cm-typeName': { color: theme.formulaFunctionDate },
+  '.cm-propertyName': { color: theme.formulaFunctionQuery },
 });
 
-// Syntax highlighting for Excel formulas
-export const excelFormulaHighlighting = syntaxHighlighting(
+const excelFormulaHighlighting = syntaxHighlighting(
   HighlightStyle.define([
-    { tag: tags.function(tags.variableName), color: '#795E26' }, // Generic functions in brown/gold
-    // Other syntax elements
-    { tag: tags.string, color: '#A31515' }, // Strings in red
-    { tag: tags.number, color: '#098658' }, // Numbers in green
-    { tag: tags.operator, color: '#000000' }, // Operators in black
-    { tag: tags.variableName, color: '#001080' }, // Variables in dark blue
-    { tag: tags.special(tags.variableName), color: '#0070C1' }, // Special variables (transaction fields) in bright blue
+    { tag: tags.function(tags.variableName), color: theme.formulaFunction },
+    { tag: tags.string, color: theme.formulaString },
+    { tag: tags.number, color: theme.formulaNumber },
+    { tag: tags.operator, color: theme.formulaOperator },
+    { tag: tags.variableName, color: theme.formulaVariable },
+    { tag: tags.special(tags.variableName), color: theme.formulaField },
   ]),
 );
-
-// Custom theme for categorized function highlighting (dark)
-const functionCategoryThemeDark = EditorView.baseTheme({
-  '&dark .cm-keyword': { color: '#4FC1FF' }, // Math functions in bright cyan
-  '&dark .cm-className': { color: '#4EC9B0' }, // Logical functions in teal
-  '&dark .cm-namespace': { color: '#C586C0' }, // Text functions in light purple
-  '&dark .cm-typeName': { color: '#B5CEA8' }, // Date functions in light green
-  '&dark .cm-propertyName': { color: '#F97583' }, // Query functions in light red
-});
-
-// Dark theme syntax highlighting
-export const excelFormulaDarkHighlighting = syntaxHighlighting(
-  HighlightStyle.define([
-    { tag: tags.function(tags.variableName), color: '#DCDCAA' }, // Generic functions in light yellow
-    // Other syntax elements
-    { tag: tags.string, color: '#CE9178' }, // Strings in orange
-    { tag: tags.number, color: '#B5CEA8' }, // Numbers in light green
-    { tag: tags.operator, color: '#D4D4D4' }, // Operators in light gray
-    { tag: tags.variableName, color: '#9CDCFE' }, // Variables in light blue
-    { tag: tags.special(tags.variableName), color: '#4FC1FF' }, // Special variables in bright cyan
-  ]),
-);
-
-/* oxlint-enable actual/no-color-literals */
 
 // Combined extension for Excel formula support
 export function excelFormulaExtension(
   mode: FormulaMode,
   queries?: Record<string, unknown>,
-  isDark?: boolean,
   variables?: Record<string, number | string>,
   onBadgeClick?: (details: FormulaBadgeClick) => void,
   categoryBadges?: Record<string, string>,
@@ -1191,8 +1162,8 @@ export function excelFormulaExtension(
       onBadgeClick,
       categoryBadges,
     ),
-    isDark ? excelFormulaDarkHighlighting : excelFormulaHighlighting,
-    isDark ? functionCategoryThemeDark : functionCategoryTheme,
+    excelFormulaHighlighting,
+    functionCategoryTheme,
     tooltipZIndexTheme,
     tooltipPortalConfig,
     autocompletePopoverTheme,

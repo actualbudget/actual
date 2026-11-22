@@ -301,7 +301,6 @@ export function FormulaEditor({
       ...excelFormulaExtension(
         mode,
         queries,
-        isDarkTheme,
         variables,
         openBadgePicker,
         categoryBadges,
@@ -314,7 +313,6 @@ export function FormulaEditor({
     [
       mode,
       queries,
-      isDarkTheme,
       disabled,
       singleLine,
       variables,

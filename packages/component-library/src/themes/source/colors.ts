@@ -710,6 +710,62 @@ export const colors = {
   shadow: { all: 'black' },
   scrollbarThumb: { all: { raw: '#d0d0d0' } },
 
+  formulaFunction: {
+    light: { raw: '#795e26' },
+    dark: { raw: '#dcdcaa' },
+    midnight: { raw: '#dcdcaa' },
+  },
+  formulaFunctionMath: {
+    light: { raw: '#0066cc' },
+    dark: { raw: '#4fc1ff' },
+    midnight: { raw: '#4fc1ff' },
+  },
+  formulaFunctionLogical: {
+    light: { raw: '#267f99' },
+    dark: { raw: '#4ec9b0' },
+    midnight: { raw: '#4ec9b0' },
+  },
+  formulaFunctionText: {
+    light: { raw: '#af00db' },
+    dark: { raw: '#c586c0' },
+    midnight: { raw: '#c586c0' },
+  },
+  formulaFunctionDate: {
+    light: { raw: '#098658' },
+    dark: { raw: '#b5cea8' },
+    midnight: { raw: '#b5cea8' },
+  },
+  formulaFunctionQuery: {
+    light: { raw: '#d73a49' },
+    dark: { raw: '#f97583' },
+    midnight: { raw: '#f97583' },
+  },
+  formulaString: {
+    light: { raw: '#a31515' },
+    dark: { raw: '#ce9178' },
+    midnight: { raw: '#ce9178' },
+  },
+  formulaNumber: {
+    light: { raw: '#098658' },
+    dark: { raw: '#b5cea8' },
+    midnight: { raw: '#b5cea8' },
+  },
+  formulaOperator: {
+    light: { raw: '#000000' },
+    dark: { raw: '#d4d4d4' },
+    midnight: { raw: '#d4d4d4' },
+  },
+  formulaVariable: {
+    light: { raw: '#001080' },
+    dark: { raw: '#9cdcfe' },
+    midnight: { raw: '#9cdcfe' },
+  },
+  formulaField: {
+    light: { raw: '#0070c1' },
+    dark: { raw: '#4fc1ff' },
+    midnight: { raw: '#4fc1ff' },
+  },
+
   chartQual1: { all: 'chartQual1' },
   chartQual2: { all: 'chartQual2' },
   chartQual3: { all: 'chartQual3' },
