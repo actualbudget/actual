@@ -208,23 +208,11 @@ export const colors = {
       raw: 'color-mix(in srgb, var(--color-settingsNavItemText) 8%, transparent)',
     },
   },
-  settingsNavItemAccentSelected: {
-    light: { ref: 'accentText' },
-    dark: { ref: 'accentText' },
-    midnight: { ref: 'accentSubtleText' },
-  },
+  settingsNavItemAccentSelected: { all: { ref: 'accentSubtleText' } },
   settingsNavItemTextSelected: {
     all: { ref: 'settingsNavItemAccentSelected' },
   },
-  settingsNavItemBackgroundSelected: {
-    light: {
-      raw: 'color-mix(in srgb, var(--color-settingsNavItemAccentSelected) 10%, transparent)',
-    },
-    dark: {
-      raw: 'color-mix(in srgb, var(--color-settingsNavItemAccentSelected) 22%, transparent)',
-    },
-    midnight: { ref: 'accentSubtle' },
-  },
+  settingsNavItemBackgroundSelected: { all: { ref: 'accentSubtle' } },
 
   menuBackground: { light: 'white', dark: 'navy800', midnight: 'gray700' },
   menuItemBackgroundHover: {
