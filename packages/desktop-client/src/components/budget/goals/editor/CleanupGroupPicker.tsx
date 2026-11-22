@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
+import { shadowColor } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -110,8 +111,7 @@ export function CleanupGroupPicker({
             backgroundColor: theme.menuBackground,
             border: `1px solid ${theme.menuBorder}`,
             borderRadius: 6,
-            // oxlint-disable-next-line actual/no-color-literals
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            boxShadow: `0 4px 12px ${shadowColor(0.15)}`,
             zIndex: 10,
             maxHeight: 240,
             overflowY: 'auto',

@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import * as d from 'date-fns';
@@ -65,8 +66,7 @@ function CustomTooltip({
       className={css({
         pointerEvents: 'none',
         borderRadius: 2,
-        // oxlint-disable-next-line actual/no-color-literals
-        boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+        boxShadow: styles.chartTooltipShadow,
         backgroundColor: theme.menuBackground,
         color: theme.menuItemText,
         padding: 10,

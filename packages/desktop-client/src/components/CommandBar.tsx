@@ -9,7 +9,7 @@ import {
   SvgReports,
 } from '@actual-app/components/icons/v1';
 import { SvgHelp, SvgNotesPaperText } from '@actual-app/components/icons/v2';
-import { styles } from '@actual-app/components/styles';
+import { shadowColor, styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -275,8 +275,7 @@ export function CommandBar() {
         border: `1px solid ${theme.modalBorder}`,
         color: theme.pageText,
         borderRadius: '8px',
-        // oxlint-disable-next-line actual/no-color-literals
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+        boxShadow: `0 4px 12px ${shadowColor(0.1)}`,
         overflow: 'hidden',
         zIndex: 3001,
       })}

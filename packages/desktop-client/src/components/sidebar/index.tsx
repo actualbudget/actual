@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { shadowColor } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 import { useDebounceCallback } from 'usehooks-ts';
 
@@ -49,8 +50,7 @@ export function FloatableSidebar() {
         boxShadow:
           !sidebarShouldFloat || sidebar.hidden
             ? 'none'
-            : // oxlint-disable-next-line actual/no-color-literals
-              '0 15px 30px 0 rgba(0,0,0,0.25), 0 3px 15px 0 rgba(0,0,0,.5)',
+            : `0 15px 30px 0 ${shadowColor(0.25)}, 0 3px 15px 0 ${shadowColor(0.5)}`,
         transform: `translateY(${!sidebarShouldFloat ? -8 : 0}px)
                       translateX(${
                         sidebarShouldFloat && sidebar.hidden ? '-100' : '0'

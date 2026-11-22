@@ -42,7 +42,7 @@ import {
   SvgSubtract,
 } from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
-import { styles } from '@actual-app/components/styles';
+import { shadowColor, styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -2207,8 +2207,7 @@ const Transaction = memo(function Transaction({
               backgroundColor: theme.tableBackground,
               borderRadius: 4,
               padding: '8px 16px',
-              // oxlint-disable-next-line actual/no-color-literals
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+              boxShadow: `0 2px 8px ${shadowColor(0.3)}`,
               width: '50vw',
               minWidth: 500,
               flexDirection: 'row',
@@ -3054,8 +3053,7 @@ function TransactionTableInner({
               height: 20,
               // oxlint-disable-next-line actual/theme-token-roles
               backgroundColor: theme.errorText,
-              // oxlint-disable-next-line actual/no-color-literals
-              boxShadow: '0 0 6px rgba(0, 0, 0, .20)',
+              boxShadow: `0 0 6px ${shadowColor(0.2)}`,
             }}
           />
         )}

@@ -1,9 +1,10 @@
-// @ts-strict-ignore
 import React from 'react';
 import type { ComponentProps, CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
+// @ts-strict-ignore
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import type { SpendingEntity } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
@@ -72,8 +73,7 @@ const CustomTooltip = ({
           zIndex: 1000,
           pointerEvents: 'none',
           borderRadius: 2,
-          // oxlint-disable-next-line actual/no-color-literals
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+          boxShadow: styles.chartTooltipShadow,
           backgroundColor: theme.menuBackground,
           color: theme.menuItemText,
           padding: 10,

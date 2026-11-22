@@ -1,9 +1,10 @@
-// @ts-strict-ignore
 import React, { useId, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+// @ts-strict-ignore
+import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
@@ -60,8 +61,7 @@ function TrendTooltip({ active, payload, style }: TrendTooltipProps) {
             zIndex: 1000,
             pointerEvents: 'none',
             borderRadius: 2,
-            // oxlint-disable-next-line actual/no-color-literals
-            boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+            boxShadow: styles.chartTooltipShadow,
             backgroundColor: theme.menuBackground,
             color: theme.menuItemText,
             padding: 10,
@@ -140,8 +140,7 @@ function StackedTooltip({
             zIndex: 1000,
             pointerEvents: 'auto',
             borderRadius: 2,
-            // oxlint-disable-next-line actual/no-color-literals
-            boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+            boxShadow: styles.chartTooltipShadow,
             backgroundColor: theme.menuBackground,
             color: theme.menuItemText,
             padding: 10,

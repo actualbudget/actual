@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
+import { shadowColor } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -77,8 +78,7 @@ export function ReportCard({
         borderBottomRightRadius: 2,
         width: '100%',
         height: '100%',
-        // oxlint-disable-next-line actual/no-color-literals
-        boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
+        boxShadow: `0 2px 6px ${shadowColor(0.15)}`,
         transition: 'box-shadow .25s',
         ...(isEditing
           ? {
@@ -95,8 +95,7 @@ export function ReportCard({
               },
             }),
         ':hover': {
-          // oxlint-disable-next-line actual/no-color-literals
-          ...(to ? { boxShadow: '0 4px 6px rgba(0, 0, 0, .15)' } : null),
+          ...(to ? { boxShadow: `0 4px 6px ${shadowColor(0.15)}` } : null),
           ...(isEditing ? { cursor: 'move', filter: 'grayscale(0)' } : null),
         },
         ...(to ? null : containerProps),

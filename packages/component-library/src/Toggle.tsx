@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 
 import { css } from '@emotion/css';
 
+import { shadowColor } from './styles';
 import { theme } from './theme';
 import { View } from './View';
 
@@ -78,8 +79,7 @@ export const Toggle = ({
               height: '12px',
               borderRadius: '100px',
               transition: '0.2s',
-              // oxlint-disable-next-line actual/no-color-literals
-              boxShadow: '0 0 2px 0 rgba(10, 10, 10, 0.29)',
+              boxShadow: `0 0 2px 0 ${shadowColor(0.29)}`,
               backgroundColor: isDisabled
                 ? theme.checkboxToggleDisabled
                 : // oxlint-disable-next-line actual/no-color-literals

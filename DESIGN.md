@@ -174,6 +174,9 @@ Flat-first with ambient shadows. Structure comes from 1px borders (Navy Mist) an
 - **Card** (`box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)`): Resting cards and small raised widgets.
 - **Ambient** (`box-shadow: 0 2px 4px 0 rgba(0,0,0,0.1)`): Focused inputs, subtle lift.
 - **Large** (`box-shadow: 0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)`): Tooltips, popovers, floating panels.
+- **Chart tooltip** (`box-shadow: 0 1px 6px rgba(0,0,0,0.2)`): Hover tooltips on report graphs.
+
+Shadows take their color from the `shadow` theme token, which is black in the built-in themes. In code, build the color with `shadowColor(opacity)` from the component library styles instead of writing `rgba()`.
 
 ### Named Rules
 

@@ -10,7 +10,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgAdd } from '@actual-app/components/icons/v0';
 import { Input } from '@actual-app/components/input';
-import { styles } from '@actual-app/components/styles';
+import { shadowColor, styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { send } from '@actual-app/core/platform/client/connection';
 import { css } from '@emotion/css';
@@ -178,8 +178,7 @@ export function TagAutocomplete({
         className={css(styles.darkScrollbar, {
           background: theme.menuAutoCompleteBackground,
           borderRadius: 6,
-          // oxlint-disable-next-line actual/no-color-literals
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          boxShadow: `0 4px 6px ${shadowColor(0.1)}`,
           width: inputRef.current?.offsetWidth ?? 100,
         })}
         offset={1}
