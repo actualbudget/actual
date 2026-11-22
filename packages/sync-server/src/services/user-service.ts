@@ -43,10 +43,14 @@ export function getOwnerCount(): number {
   return ownerCount;
 }
 
+// Prefer the owner created by the first OpenID login. Until there is one (for
+// example when an admin added the users before anyone logged in through
+// OpenID), fall back to the owner that the multi-user migration created for
+// password login, which has an empty user name.
 export function getOwnerId() {
   const { id } =
     getAccountDb().first(
-      `SELECT users.id FROM users WHERE users.user_name <> '' and users.owner = 1`,
+      `SELECT users.id FROM users WHERE users.owner = 1 ORDER BY users.user_name = '' LIMIT 1`,
     ) || {};
   return id;
 }
