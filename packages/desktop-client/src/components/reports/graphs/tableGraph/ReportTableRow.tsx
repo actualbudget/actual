@@ -69,11 +69,13 @@ export const ReportTableRow = memo(
     colorized,
     scopeTagNames,
   }: ReportTableRowProps) => {
-    const average = Math.round(item[balanceTypeOp] / intervalsCount);
-    const hasAverage = Number.isFinite(average);
+    const average =
+      intervalsCount === 0
+        ? 0
+        : Math.round(item[balanceTypeOp] / intervalsCount);
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
     const format = useFormat();
-    const formattedAverage = hasAverage ? format(average, 'financial') : '';
+    const formattedAverage = format(average, 'financial');
 
     const navigate = useNavigate();
     const { isNarrowWidth } = useResponsive();
@@ -350,17 +352,14 @@ export const ReportTableRow = memo(
           <Cell
             value={formattedAverage}
             title={
-              hasAverage && Math.abs(average / 100) > 100000
-                ? formattedAverage
-                : undefined
+              Math.abs(average / 100) > 100000 ? formattedAverage : undefined
             }
             textAlign="right"
             style={{
               fontWeight: 600,
               minWidth: compact ? 50 : 85,
               backgroundColor: style?.backgroundColor,
-              ...(colorized &&
-                hasAverage && { color: getAmountColor(average) }),
+              ...(colorized && { color: getAmountColor(average) }),
             }}
             unexposedContent={({ value }) => (
               <FinancialText style={{ textAlign: 'right', flexGrow: 1 }}>

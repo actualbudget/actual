@@ -711,9 +711,7 @@ test.describe('Reports', () => {
   });
 });
 
-test('uses filtered months for average spending in a custom report', async ({
-  page,
-}) => {
+async function openSpendingReport(page: Page, firstDate = '02/01/2024') {
   const configurationPage = new ConfigurationPage(page);
   const navigation = new Navigation(page);
   await page.goto('/');
@@ -724,7 +722,7 @@ test('uses filtered months for average spending in a custom report', async ({
     balance: 0,
   });
   for (const [date, debit] of [
-    ['02/01/2024', '340.00'],
+    [firstDate, '340.00'],
     ['03/15/2026', '300.00'],
     ['07/02/2026', '200.00'],
     ['11/01/2026', '180.00'],
@@ -749,33 +747,45 @@ test('uses filtered months for average spending in a custom report', async ({
   await page.getByRole('button', { name: 'All time', exact: true }).click();
   await report.showSummaryButton.click();
 
-  const total = page.getByText('TOTAL SPENDING', { exact: true }).locator('..');
-  const average = page
-    .getByText('AVERAGE SPENDING', { exact: true })
-    .locator('..');
-  await expect(total).toContainText('-1,020.00');
-  await expect(average).toContainText('-30.00');
+  return {
+    navigation,
+    report,
+    total: page.getByText('TOTAL SPENDING', { exact: true }).locator('..'),
+    average: page.getByText('AVERAGE SPENDING', { exact: true }).locator('..'),
+    tableAverage: page
+      .getByTestId('report-row-Totals')
+      .locator(':scope > div > div:last-child'),
+  };
+}
 
+async function addReportDateFilter(page: Page, operator: string, date: string) {
   const filter = page
     .getByRole('button', { name: /Unsaved report/ })
     .locator('../..')
     .getByRole('button', { name: '', exact: true });
-  for (const [operator, date] of [
-    ['is greater than or equals', '03/15/2026'],
-    ['is less than or equals', '07/02/2026'],
-  ]) {
-    await filter.click();
-    await page
-      .getByTestId('filters-select-tooltip')
-      .getByRole('button', { name: 'Date', exact: true })
-      .click();
-    const menu = page.getByTestId('filters-menu-tooltip');
-    await menu.getByRole('button', { name: operator, exact: true }).click();
-    const input = menu.getByRole('textbox');
-    await input.fill(date);
-    await input.press('Tab');
-    await menu.getByRole('button', { name: 'Apply', exact: true }).click();
-  }
+  await filter.click();
+  await page
+    .getByTestId('filters-select-tooltip')
+    .getByRole('button', { name: 'Date', exact: true })
+    .click();
+  const menu = page.getByTestId('filters-menu-tooltip');
+  await menu.getByRole('button', { name: operator, exact: true }).click();
+  const input = menu.getByRole('textbox');
+  await input.fill(date);
+  await input.press('Tab');
+  await menu.getByRole('button', { name: 'Apply', exact: true }).click();
+}
+
+test('uses filtered months for average spending in a custom report', async ({
+  page,
+}) => {
+  const { report, total, average, tableAverage } =
+    await openSpendingReport(page);
+  await expect(total).toContainText('-1,020.00');
+  await expect(average).toContainText('-30.00');
+
+  await addReportDateFilter(page, 'is greater than or equals', '03/15/2026');
+  await addReportDateFilter(page, 'is less than or equals', '07/02/2026');
 
   await expect(total).toContainText('-500.00');
   // The two partial boundary months and the three empty months all count.
@@ -784,8 +794,54 @@ test('uses filtered months for average spending in a custom report', async ({
   await report.selectViz('Data Table');
   const tableTotals = page.getByTestId('report-row-Totals');
   await expect(tableTotals.getByText('-500.00', { exact: true })).toBeVisible();
-  await expect(tableTotals.getByText('-100.00', { exact: true })).toBeVisible();
+  await expect(tableAverage).toHaveText('-100.00');
   await expect(average).toContainText('-100.00');
+});
+
+test('shows a zero average when a date filter is outside the report range', async ({
+  page,
+}) => {
+  const { report, total, average, tableAverage } =
+    await openSpendingReport(page);
+  await addReportDateFilter(page, 'is less than', '01/01/2020');
+
+  await expect(total).toContainText('0.00');
+  await expect(average).toContainText('0.00');
+
+  await report.selectViz('Data Table');
+  await expect(tableAverage).toHaveText('0.00');
+});
+
+test('uses filtered quarters for average spending in a custom report and its dashboard widget', async ({
+  page,
+}) => {
+  const { navigation, report, total, average, tableAverage } =
+    await openSpendingReport(page, '10/01/2025');
+  await report.pageContent
+    .getByRole('button', { name: 'Monthly', exact: true })
+    .click();
+  await page.getByRole('button', { name: 'Quarterly', exact: true }).click();
+  await expect(average).toContainText('-204.00');
+
+  await addReportDateFilter(page, 'is greater than or equals', '07/01/2026');
+  await addReportDateFilter(page, 'is less than or equals', '09/30/2026');
+  await expect(total).toContainText('-200.00');
+  await expect(average).toContainText('-200.00');
+
+  await report.selectViz('Data Table');
+  await expect(tableAverage).toHaveText('-200.00');
+
+  const reportName = 'Quarterly spending';
+  await page.getByRole('button', { name: /Unsaved report/ }).click();
+  await page.getByRole('button', { name: 'Save new report' }).click();
+  await page.getByRole('textbox', { name: 'Report Name' }).fill(reportName);
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await expect(page.getByRole('button', { name: reportName })).toBeVisible();
+  const dashboard = await navigation.goToReportsPage();
+  const widget = dashboard.pageContent.locator('.react-grid-item').last();
+  await widget.scrollIntoViewIfNeeded();
+  await expect(widget.getByRole('heading', { name: reportName })).toBeVisible();
+  await expect(widget.locator(tableAverage)).toHaveText('-200.00');
 });
 
 test.describe('Reports without transactions', () => {

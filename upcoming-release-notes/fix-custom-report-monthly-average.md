@@ -3,4 +3,4 @@ category: Bugfixes
 authors: [wunsir]
 ---
 
-Use the months covered by date filters to calculate monthly averages in custom reports.
+Respect date filters when calculating monthly and quarterly averages in custom reports.

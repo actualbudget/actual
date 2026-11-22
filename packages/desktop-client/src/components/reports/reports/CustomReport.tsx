@@ -614,7 +614,7 @@ function CustomReportInner({
   const groupedData = useReport('grouped', getGroupData);
 
   const data = graphData ? { ...graphData, groupedData } : null;
-  const averageIntervalsCount = data?.filteredMonthCount ?? intervals.length;
+  const averageIntervalsCount = data?.filteredIntervalCount ?? intervals.length;
 
   const customReportItems: CustomReportEntity = {
     id: '',

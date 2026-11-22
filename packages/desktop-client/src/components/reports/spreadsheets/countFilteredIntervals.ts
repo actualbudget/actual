@@ -1,26 +1,33 @@
 import * as monthUtils from '@actual-app/core/shared/months';
 
-export function countFilteredMonths(
+export function countFilteredIntervals(
   startDate: string,
   endDate: string,
+  interval: 'Monthly' | 'Quarterly',
   filters: unknown[],
   conditionsOp: string,
 ): number {
-  const months = monthUtils.rangeInclusive(startDate, endDate);
   const filter = conditionsOp === 'or' ? { $or: filters } : { $and: filters };
 
-  // The report query bounds Monthly reports by month, so every day in each
-  // month is eligible for the date filters, even if there are no transactions.
-  return months.filter(month => {
-    const daysInMonth = Number(monthUtils.lastDayOfMonth(month).slice(-2));
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = `${month}-${String(day).padStart(2, '0')}`;
-      if (matchesDateFilter(date, filter) !== false) {
-        return true;
+  // Both report queries bound the range by month, even when the results are
+  // grouped by quarter. A covered month counts even if it has no transactions.
+  const coveredMonths = monthUtils
+    .rangeInclusive(startDate, endDate)
+    .filter(month => {
+      const daysInMonth = Number(monthUtils.lastDayOfMonth(month).slice(-2));
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = `${month}-${String(day).padStart(2, '0')}`;
+        if (matchesDateFilter(date, filter) !== false) {
+          return true;
+        }
       }
-    }
-    return false;
-  }).length;
+      return false;
+    });
+
+  if (interval === 'Monthly') {
+    return coveredMonths.length;
+  }
+  return new Set(coveredMonths.map(monthUtils.getQuarterStart)).size;
 }
 
 // Use the date expressions produced by make-filters-from-conditions. Month,

@@ -27,7 +27,7 @@ import { resolveTagScope } from '#components/reports/tagScope';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
 import { calculateLegend } from './calculateLegend';
-import { countFilteredMonths } from './countFilteredMonths';
+import { countFilteredIntervals } from './countFilteredIntervals';
 import { fetchSpreadsheetQueryData } from './fetchSpreadsheetQueryData';
 import { filterEmptyRows } from './filterEmptyRows';
 import {
@@ -70,7 +70,7 @@ export type createCustomSpreadsheetProps = {
 };
 
 type CustomSpreadsheetData = DataEntity & {
-  filteredMonthCount?: number;
+  filteredIntervalCount?: number;
 };
 
 export function createCustomSpreadsheet({
@@ -113,8 +113,8 @@ export function createCustomSpreadsheet({
     accounts,
   );
   const transactionConditions = conditions.filter(cond => !cond.customName);
-  const hasMonthlyDateFilter =
-    interval === 'Monthly' &&
+  const hasDateFilter =
+    (interval === 'Monthly' || interval === 'Quarterly') &&
     balanceTypeOp !== 'totalBudgeted' &&
     transactionConditions.some(cond => cond.field === 'date');
 
@@ -126,13 +126,19 @@ export function createCustomSpreadsheet({
     let scopeTagNames: string[] | undefined;
     const hasGroups = groupBy === 'Tag' || groupByList.length > 0;
     const { filters } =
-      hasGroups || hasMonthlyDateFilter
+      hasGroups || hasDateFilter
         ? await send('make-filters-from-conditions', {
             conditions: transactionConditions,
           })
         : { filters: [] };
-    const filteredMonthCount = hasMonthlyDateFilter
-      ? countFilteredMonths(startDate, endDate, filters, conditionsOp)
+    const filteredIntervalCount = hasDateFilter
+      ? countFilteredIntervals(
+          startDate,
+          endDate,
+          interval,
+          filters,
+          conditionsOp,
+        )
       : undefined;
     const emptyData: CustomSpreadsheetData = {
       data: [],
@@ -146,7 +152,7 @@ export function createCustomSpreadsheet({
       netDebts: 0,
       totalTotals: 0,
       totalBudgeted: 0,
-      filteredMonthCount,
+      filteredIntervalCount,
     };
 
     if (!hasGroups) {
@@ -417,7 +423,7 @@ export function createCustomSpreadsheet({
       totalTotals: totalAssets + totalDebts,
       totalBudgeted: totalAssets + totalDebts,
       scopeTagNames,
-      filteredMonthCount,
+      filteredIntervalCount,
     });
   };
 }
