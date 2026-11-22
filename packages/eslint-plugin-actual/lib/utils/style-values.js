@@ -80,6 +80,21 @@ function getPropertyValue(node) {
     : node.value;
 }
 
+function getStaticString(node) {
+  if (node.type === 'Literal' && typeof node.value === 'string') {
+    return node.value;
+  }
+  if (node.type === 'TemplateLiteral' && node.expressions.length === 0) {
+    return node.quasis[0].value.cooked ?? node.quasis[0].value.raw;
+  }
+  if (node.type === 'BinaryExpression' && node.operator === '+') {
+    const left = getStaticString(node.left);
+    const right = getStaticString(node.right);
+    return left != null && right != null ? left + right : null;
+  }
+  return null;
+}
+
 function collectValueLeaves(node, leaves = []) {
   if (node == null) {
     return leaves;
@@ -94,7 +109,7 @@ function collectValueLeaves(node, leaves = []) {
       collectValueLeaves(node.right, leaves);
       break;
     case 'BinaryExpression':
-      if (node.operator === '+') {
+      if (node.operator === '+' && getStaticString(node) == null) {
         collectValueLeaves(node.left, leaves);
         collectValueLeaves(node.right, leaves);
       } else {
@@ -125,6 +140,9 @@ function getLeafText(node) {
   }
   if (node.type === 'TemplateElement') {
     return node.value.cooked ?? node.value.raw;
+  }
+  if (node.type === 'BinaryExpression') {
+    return getStaticString(node);
   }
   return null;
 }

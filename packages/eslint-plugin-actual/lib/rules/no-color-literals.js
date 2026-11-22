@@ -8,7 +8,7 @@ const {
 
 const hexColor = /#(?:[0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{3,4})(?![0-9a-z])/i;
 const colorFunction =
-  /\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch)\((?!\s*from\b)/i;
+  /\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\((?!\s*from\b)/i;
 const namedColors = new Set([
   'aliceblue',
   'antiquewhite',
@@ -161,7 +161,7 @@ const namedColors = new Set([
 ]);
 
 function hasColorLiteral(value) {
-  const text = value.replace(/url\([^)]*\)/gi, '');
+  const text = value.replace(/url\([^)]*\)?/gi, '');
   if (hexColor.test(text) || colorFunction.test(text)) {
     return true;
   }

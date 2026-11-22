@@ -23,6 +23,8 @@ void runClassic(
       `const style = { background: 'url(/img/black.png) no-repeat' };`,
       `const style = { backgroundImage: 'url(/img/black.png)' };`,
       `const style = { border: '1px solid ' + theme.tableBorder };`,
+      `const style = { background: 'url(' + '/img/black.png' + ')' };`,
+      `const style = { background: 'url(/img/black' + extension + ')' };`,
       `const style = { color: \`rgb(from \${theme.pageText} r g b / 0.5)\` };`,
     ],
 
@@ -55,7 +57,24 @@ void runClassic(
       {
         code: `const style = { border: '1px solid ' + '#fff' };`,
         output: null,
-        errors: [{ messageId: 'useThemeToken', data: { value: '#fff' } }],
+        errors: [
+          { messageId: 'useThemeToken', data: { value: '1px solid #fff' } },
+        ],
+      },
+      {
+        code: `const style = { border: '1px solid ' + (isActive ? 'red' : theme.tableBorder) };`,
+        output: null,
+        errors: [{ messageId: 'useThemeToken', data: { value: 'red' } }],
+      },
+      {
+        code: `const style = { color: 'rgb(from color(srgb 1 0 0) r g b / 0.5)' };`,
+        output: null,
+        errors: [{ messageId: 'useThemeToken' }],
+      },
+      {
+        code: `const style = { color: 'color(display-p3 1 0 0)' };`,
+        output: null,
+        errors: [{ messageId: 'useThemeToken' }],
       },
       {
         code: `const style = { color: '#fff' };`,
