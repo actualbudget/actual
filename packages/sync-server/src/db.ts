@@ -8,14 +8,12 @@ export class WrappedDatabase {
     this.db = db;
   }
 
-  // oxlint-disable-next-line typescript/no-explicit-any
-  all<Row = any>(sql: string, params: (string | number)[] = []): Row[] {
+  all<Row = unknown>(sql: string, params: (string | number)[] = []): Row[] {
     const stmt = this.db.prepare<unknown[], Row>(sql);
     return stmt.all(...params);
   }
 
-  // oxlint-disable-next-line typescript/no-explicit-any
-  first<Row = any>(sql: string, params: string[] = []): Row | null {
+  first<Row = unknown>(sql: string, params: string[] = []): Row | null {
     const rows = this.all<Row>(sql, params);
     return rows.length === 0 ? null : rows[0];
   }
