@@ -20,7 +20,9 @@ This page is for people who want to try it before it becomes the default. Everyt
 
 The choice is remembered by the browser, not by the budget. It covers every budget opened in that browser, and your other browsers and devices keep their own setting.
 
-Each budget is moved to the new storage the first time it is opened. The loading screen shows the progress. The old copy is deleted only after the moved budget has been checked.
+Each budget is moved to the new storage the first time it is opened. The loading screen shows the progress. The old copy is deleted only after the contents of the moved budget have been checked against it.
+
+If a budget cannot be moved, nothing is deleted and Actual tells you so. Opening the budget again tries once more. While no other budget in the browser uses the new storage yet, the message also offers **Go back to previous storage**. This turns the new storage engine off again and tries to open the budget the way it was opened before. If the budget does not open by itself, pick it from the list of files. If it cannot be opened on the previous storage either, the copy in this browser may be damaged: download the budget again from your sync server, or [restore it from a backup](../backup-restore/restore.md).
 
 Opening Actual once with `?storage=opfs` added to the address, for example `https://your-server.example/?storage=opfs`, turns it on as well. You do not need the parameter again.
 

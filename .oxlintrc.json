@@ -480,9 +480,30 @@
       }
     },
     {
-      "files": ["packages/desktop-client/src/style/themes/*"],
+      "files": [
+        "packages/component-library/src/theme.ts",
+        "packages/component-library/src/themes/**/*"
+      ],
       "rules": {
         "eslint/no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": [
+        "packages/component-library/**/*.stories.{ts,tsx}",
+        "packages/component-library/.storybook/**/*"
+      ],
+      "rules": {
+        "actual/no-untranslated-strings": "off",
+        "import/no-default-export": "off",
+        "react/rules-of-hooks": "off"
+      }
+    },
+    {
+      "files": ["packages/component-library/src/icons/*.ts"],
+      "rules": {
+        "actual/no-extraneous-dependencies": "off",
+        "import/no-default-export": "off"
       }
     },
     // TODO: enable these
@@ -519,6 +540,30 @@
         "typescript/no-base-to-string": "error",
         "typescript/no-unsafe-unary-minus": "error",
         "typescript/no-unsafe-type-assertion": "error"
+      }
+    },
+    {
+      "files": [
+        "packages/component-library/src/**/*.{ts,tsx}",
+        "packages/desktop-client/src/**/*.{ts,tsx}"
+      ],
+      "rules": {
+        "actual/no-color-literals": "error",
+        "actual/no-raw-color-variables": "error",
+        "actual/theme-token-roles": "error"
+      }
+    },
+    {
+      "files": [
+        "**/*.test.{ts,tsx}",
+        "**/*.stories.{ts,tsx}",
+        "packages/component-library/src/icons/**/*",
+        "packages/component-library/src/themes/**/*"
+      ],
+      "rules": {
+        "actual/no-color-literals": "off",
+        "actual/no-raw-color-variables": "off",
+        "actual/theme-token-roles": "off"
       }
     }
   ]

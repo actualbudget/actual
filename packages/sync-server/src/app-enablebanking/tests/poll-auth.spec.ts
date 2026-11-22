@@ -3,6 +3,14 @@ import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock all external dependencies before importing the app
+vi.mock('#util/validate-budget-session', () => ({
+  validateGlobalBankSyncSession: (
+    _req: unknown,
+    _res: unknown,
+    next: () => void,
+  ) => next(),
+}));
+
 vi.mock('../../services/secrets-service', () => ({
   SecretName: {
     enablebanking_applicationId: 'enablebanking_applicationId',
@@ -185,6 +193,39 @@ describe('Enable Banking Express routes', () => {
       expect(res.body.data.url).toBe('https://enablebanking.com/auth/redirect');
       expect(res.body.data.state).toBeDefined();
       expect(typeof res.body.data.state).toBe('string');
+    });
+  });
+
+  describe('GET /auth_callback', () => {
+    async function startAndFinishAuth(returnToApp: boolean) {
+      mockFetchResponse({ url: 'https://enablebanking.com/auth/redirect' });
+      const start = await request(app)
+        .post('/start-auth')
+        .send({
+          aspsp: { name: 'Nordea', country: 'FI' },
+          redirectUrl: 'https://app.example.com/callback',
+          returnToApp,
+        });
+
+      mockFetchResponse({ session_id: 'session-123', accounts: [] });
+      return request(app)
+        .get('/auth_callback')
+        .query({ code: 'auth-code-123', state: start.body.data.state });
+    }
+
+    it('closes the window for a browser flow', async () => {
+      const res = await startAndFinishAuth(false);
+
+      expect(res.status).toBe(200);
+      expect(res.text).toContain('window.close()');
+      expect(res.text).not.toContain('actualbudget://');
+    });
+
+    it('sends a mobile app flow back to the app', async () => {
+      const res = await startAndFinishAuth(true);
+
+      expect(res.status).toBe(200);
+      expect(res.text).toContain('actualbudget://localhost');
     });
   });
 

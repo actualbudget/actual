@@ -10,6 +10,7 @@ import { logger } from '#platform/server/log';
 import {
   BudgetInUseError,
   flushSqliteStorage,
+  hasMigratedSqliteFiles,
   StorageLostError,
   StorageMigrationError,
   StorageUnavailableError,
@@ -632,6 +633,13 @@ async function _loadBudget(id: Budget['id']): Promise<{
     | 'storage-migration-failed'
     | 'storage-unavailable'
     | 'storage-lost';
+  // What the user calls the budget, where it got as far as its
+  // preferences, for the client to say which one this is about
+  budgetName?: string;
+  // With `storage-migration-failed`: whether the budget could be opened
+  // on the previous storage engine instead, or null where that could not
+  // be found out
+  canKeepPreviousStorage?: boolean | null;
 }> {
   let dir: string;
   try {
@@ -650,31 +658,50 @@ async function _loadBudget(id: Budget['id']): Promise<{
     return { error: 'budget-not-found' };
   }
 
+  // Kept from this load's own preferences: the ones in memory are
+  // whichever budget's were loaded last
+  let budgetName: string | undefined;
   try {
     resetFormulaPreferencesCache();
-    await prefs.loadPrefs(id);
+    ({ budgetName } = await prefs.loadPrefs(id));
     await db.openDatabase(id);
   } catch (e) {
     captureBreadcrumb({ message: 'Error loading budget ' + id });
     await closeBudget();
     // Expected conditions on the web storage, not bugs
     if (e instanceof BudgetInUseError) {
-      return { error: 'budget-in-use' };
+      return { error: 'budget-in-use', budgetName };
     }
     if (e instanceof StorageMigrationError) {
       logger.error('Storage migration failed', e);
-      return { error: 'storage-migration-failed' };
+      return {
+        error: 'storage-migration-failed',
+        budgetName,
+        // Offered while no other budget lives in the new storage: going
+        // back moves every budget there back first, which with others
+        // moved is left to the setting. This budget's own row does not
+        // count; it has one when it was being taken over from the
+        // fallback store, and goes back like any other. A lookup that
+        // fails says neither
+        canKeepPreviousStorage: await hasMigratedSqliteFiles(
+          undefined,
+          fs.join(dir, 'db.sqlite'),
+        ).then(
+          hasOthers => !hasOthers,
+          () => null,
+        ),
+      };
     }
     if (e instanceof StorageUnavailableError) {
       logger.error('Storage unavailable', e);
-      return { error: 'storage-unavailable' };
+      return { error: 'storage-unavailable', budgetName };
     }
     if (e instanceof StorageLostError) {
       logger.error('Storage lost', e);
-      return { error: 'storage-lost' };
+      return { error: 'storage-lost', budgetName };
     }
     captureException(e);
-    return { error: 'opening-budget' };
+    return { error: 'opening-budget', budgetName };
   }
 
   // Older versions didn't tag the file with the current user, so do
@@ -697,7 +724,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
       captureException(e);
       logger.info('Error updating budget ' + id, e);
       logger.log('Error updating budget', e);
-      result = { error: 'loading-budget' };
+      result = { error: 'loading-budget', budgetName };
     }
 
     await closeBudget();

@@ -202,7 +202,7 @@ export function getSyncError(error: string, id: string) {
     );
   } else if (error === 'storage-migration-failed') {
     return t(
-      'Moving budget "{{id}}" to the new browser storage failed. Nothing was deleted; reload the page and try again.',
+      'Moving budget "{{id}}" to the new browser storage failed. Nothing was deleted; open the budget again to retry.',
       { id },
     );
   } else if (error === 'storage-unavailable') {
