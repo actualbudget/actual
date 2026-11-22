@@ -75,11 +75,21 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const locale = useLocale();
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { data: accounts = [] } = useAccounts();
+  const {
+    data: accounts = [],
+    isPending: isAccountsLoading,
+    isPlaceholderData: isAccountsPlaceholder,
+  } = useAccounts();
   const {
     data: categories = { grouped: [], list: [] },
     isPending: isCategoriesLoading,
+    isPlaceholderData: isCategoriesPlaceholder,
   } = useCategories();
+  const isDataLoading =
+    isAccountsLoading ||
+    isAccountsPlaceholder ||
+    isCategoriesLoading ||
+    isCategoriesPlaceholder;
   const format = useFormat();
 
   const expenseCategoryGroups = categories.grouped.filter(
@@ -125,7 +135,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
   // initialize once when data is available
   useEffect(() => {
-    if (selectionsInitialized || isCategoriesLoading) {
+    if (selectionsInitialized || isDataLoading) {
       return;
     }
 
@@ -163,7 +173,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     selectionsInitialized,
     accounts,
     categories.list,
-    isCategoriesLoading,
+    isDataLoading,
     widget?.meta,
   ]);
 
@@ -333,8 +343,8 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       spreadsheet: ReturnType<typeof useSpreadsheet>,
       setData: (data: CrossoverData) => void,
     ) => {
-      // Don't run if dates are not yet initialized
-      if (!start || !end) {
+      // Don't run until dates and saved selections are initialized.
+      if (!selectionsInitialized || !start || !end) {
         return;
       }
 
@@ -356,6 +366,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     [
       start,
       end,
+      selectionsInitialized,
       swr,
       useCustomGrowth,
       estimatedReturn,
@@ -419,7 +430,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     });
   };
 
-  if (!allMonths || !displayData || !start || !end || isCategoriesLoading) {
+  if (!allMonths || !displayData || !start || !end || isDataLoading) {
     return <LoadingIndicator />;
   }
 

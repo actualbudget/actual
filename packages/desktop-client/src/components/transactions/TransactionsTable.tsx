@@ -2240,6 +2240,7 @@ const Transaction = memo(function Transaction({
               backgroundColor: theme.tableBackground,
               borderRadius: 4,
               padding: '8px 16px',
+              // oxlint-disable-next-line actual/no-color-literals
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
               width: '50vw',
               minWidth: 500,
@@ -3084,7 +3085,9 @@ function TransactionTableInner({
               left: 0,
               right: 0,
               height: 20,
+              // oxlint-disable-next-line actual/theme-token-roles
               backgroundColor: theme.errorText,
+              // oxlint-disable-next-line actual/no-color-literals
               boxShadow: '0 0 6px rgba(0, 0, 0, .20)',
             }}
           />

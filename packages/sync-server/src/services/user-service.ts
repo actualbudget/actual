@@ -78,6 +78,7 @@ export function updateUserWithRole(
       'UPDATE users SET user_name = ?, display_name = ?, enabled = ?, role = ? WHERE id = ?',
       [userName, displayName, enabled, roleId, userId],
     );
+    revokeApiKeysWithoutBudgetAccess();
     if (!enabled) {
       getAccountDb().mutate('DELETE FROM sessions WHERE user_id = ?', [userId]);
     }
@@ -131,13 +132,16 @@ export function updateFileOwner(ownerId, fileId) {
     throw new Error('Invalid parameters');
   }
   try {
-    const result = getAccountDb().mutate(
-      'UPDATE files set owner = ? WHERE id = ?',
-      [ownerId, fileId],
-    );
-    if (result.changes === 0) {
-      throw new Error('File not found');
-    }
+    getAccountDb().transaction(() => {
+      const result = getAccountDb().mutate(
+        'UPDATE files set owner = ? WHERE id = ?',
+        [ownerId, fileId],
+      );
+      if (result.changes === 0) {
+        throw new Error('File not found');
+      }
+      revokeApiKeysWithoutBudgetAccess();
+    });
   } catch (error) {
     throw new Error(`Failed to update file owner: ${error.message}`);
   }
@@ -160,6 +164,24 @@ export function canAccessActiveFile(fileId: string, userId: string): boolean {
     [fileId],
   );
   return !!file && (isAdmin(userId) || countUserAccess(fileId, userId) > 0);
+}
+
+export function revokeApiKeysWithoutBudgetAccess() {
+  const db = getAccountDb();
+  const keys: { id: string; user_id: string }[] = db.all(
+    'SELECT id, user_id FROM api_keys',
+  );
+  for (const key of keys) {
+    const budgets: { file_id: string }[] = db.all(
+      'SELECT file_id FROM api_key_budgets WHERE key_id = ?',
+      [key.id],
+    );
+    if (
+      !budgets.some(budget => canAccessActiveFile(budget.file_id, key.user_id))
+    ) {
+      db.mutate('DELETE FROM api_keys WHERE id = ?', [key.id]);
+    }
+  }
 }
 
 export function countUserAccess(fileId, userId) {
@@ -229,6 +251,7 @@ export function deleteUserAccessByFileId(userIds, fileId) {
         const result = getAccountDb().mutate(sql, [...chunk, fileId]);
         totalChanges += result.changes;
       }
+      revokeApiKeysWithoutBudgetAccess();
     });
   } catch (error) {
     throw new Error(`Failed to delete user access: ${error.message}`);

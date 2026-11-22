@@ -8,6 +8,7 @@ import type { WasmDatabase } from '#platform/server/sqlite/wasm';
 import {
   completeMigration,
   deleteLegacyDatabase,
+  matchesLegacyDatabase,
   openLegacyDatabaseContents,
   verifyMigratedDatabase,
   writeLegacyDatabaseBytes,
@@ -252,7 +253,18 @@ export function createOpfsStore({
     return pool.util.exportFile(fileName);
   }
 
-  function discardImport(pool: Pool, fileName: string) {
+  // Undoes an import that did not go through, unless the row names the
+  // pool by now: the file is then a committed one, which another call
+  // moved in, and it is all there is of the budget
+  async function discardImport(pool: Pool, path: string, fileName: string) {
+    const isCommitted = await getSqliteFileRow(path).then(
+      row => row?.storage === 'opfs',
+      // Not knowing, the file stays: one nothing claims does no harm
+      () => true,
+    );
+    if (isCommitted) {
+      return;
+    }
     try {
       pool.util.unlink(fileName);
     } catch {
@@ -274,8 +286,21 @@ export function createOpfsStore({
       return false;
     }
     try {
+      unlinkJournal(pool, fileName);
       await pool.util.importDb(fileName, contents.read);
       onMigrationProgress?.('verify');
+      // Before any connection touches the file, so it is as imported. The
+      // import itself sets the two file-format bytes of the header to 1,
+      // which takes a file out of WAL mode: those have to be that, and
+      // are then held to be the copy's, so that all else is compared
+      const imported = pool.util.exportFile(fileName);
+      if (imported[18] !== 1 || imported[19] !== 1) {
+        throw new Error('the moved file has an unexpected file format');
+      }
+      imported.set(contents.snapshot.header.subarray(18, 20), 18);
+      if (!(await matchesLegacyDatabase(path, imported, contents.snapshot))) {
+        throw new Error('the moved file differs from the absurd-sql copy');
+      }
       verifyImported(pool, fileName);
       // A refused cutover or a failed marker write leaves nothing of the
       // move behind, so the next open redoes it
@@ -286,7 +311,7 @@ export function createOpfsStore({
         onMigrationProgress,
       );
     } catch (error) {
-      discardImport(pool, fileName);
+      await discardImport(pool, path, fileName);
       onMigrationProgress?.('failed');
       throw error instanceof BudgetInUseError
         ? error
@@ -313,6 +338,7 @@ export function createOpfsStore({
     }
     const bytes = row.contents;
     try {
+      unlinkJournal(pool, fileName);
       await pool.util.importDb(
         fileName,
         new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength),
@@ -325,7 +351,7 @@ export function createOpfsStore({
         rev: row.rev,
       });
     } catch (error) {
-      discardImport(pool, fileName);
+      await discardImport(pool, path, fileName);
       throw new StorageMigrationError(path, error);
     }
     await deleteLegacyDatabase(legacyDatabaseName(path));
@@ -341,7 +367,7 @@ export function createOpfsStore({
   // say, an absurd-sql copy wins over a pooled file: a crash between an
   // import and its marker leaves such a file, and the copy is what the
   // legacy engine kept editing since.
-  async function importExisting(
+  async function importExistingOnce(
     pool: Pool,
     path: string,
     fileName: string,
@@ -358,6 +384,30 @@ export function createOpfsStore({
       return true;
     }
     return (await migrateLegacy(pool, path, fileName, row)) || pooled;
+  }
+
+  // One import of a path at a time. A read of a closed file and an open
+  // of it would otherwise each move it into the pool: the second writes
+  // over the file the first is checking, and one that fails undoes what
+  // the other made
+  const importing = new Map<string, Promise<boolean>>();
+
+  function importExisting(
+    pool: Pool,
+    path: string,
+    fileName: string,
+  ): Promise<boolean> {
+    const inFlight = importing.get(path);
+    if (inFlight) {
+      return inFlight;
+    }
+    const promise = importExistingOnce(pool, path, fileName).finally(() => {
+      if (importing.get(path) === promise) {
+        importing.delete(path);
+      }
+    });
+    importing.set(path, promise);
+    return promise;
   }
 
   // A write replacing a file is kept apart from opens and reads of that
@@ -488,7 +538,13 @@ export function createOpfsStore({
         if (!(await importExisting(pool, path, fileName))) {
           throw new Error('File does not exist: ' + path);
         }
-        return exportPooled(pool, fileName);
+        // An open that shared the import has the file by now, or is
+        // about to: it is read from that handle, as above. One that
+        // failed since leaves no handle, and the file is in the pool
+        const opened =
+          (await opening.get(path)?.catch(() => undefined)) ??
+          pool.open.get(fileName);
+        return opened ? exportBytes(opened) : exportPooled(pool, fileName);
       } finally {
         release(pool);
       }
