@@ -8,6 +8,7 @@ import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { listen } from '@actual-app/core/platform/client/connection';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
+import type { TagEntity } from '@actual-app/core/types/models';
 
 import { EmptyMessage } from '#components/common/EmptyMessage';
 import { ManagePage } from '#components/common/ManagePage';
@@ -23,10 +24,7 @@ import { TagsList } from './TagsList';
 import { TagsMenuButton } from './TagsMenuButton';
 
 export function ManageTags() {
-  const { t } = useTranslation();
   const [filter, setFilter] = useState('');
-  const [hoveredTag, setHoveredTag] = useState<string>();
-  const [create, setCreate] = useState(false);
   const { data: tags = [], refetch } = useTags();
 
   useEffect(() => listen('undo-event', () => refetch({ cancelRefetch: true })));
@@ -40,6 +38,36 @@ export function ManageTags() {
   }, [filter, tags]);
 
   const selectedInst = useSelected('manage-tags', filteredTags, []);
+
+  return (
+    <SelectedProvider instance={selectedInst}>
+      <ManageTagsContent
+        tags={tags}
+        filteredTags={filteredTags}
+        filter={filter}
+        onFilterChange={setFilter}
+      />
+    </SelectedProvider>
+  );
+}
+
+type ManageTagsContentProps = {
+  tags: TagEntity[];
+  filteredTags: TagEntity[];
+  filter: string;
+  onFilterChange: (filter: string) => void;
+};
+
+// Inside the SelectedProvider so the navigator can clear and toggle checks
+function ManageTagsContent({
+  tags,
+  filteredTags,
+  filter,
+  onFilterChange,
+}: ManageTagsContentProps) {
+  const { t } = useTranslation();
+  const [hoveredTag, setHoveredTag] = useState<string>();
+  const [create, setCreate] = useState(false);
   const tableNavigator = useTableNavigator(filteredTags, [
     'select',
     'tag',
@@ -48,52 +76,44 @@ export function ManageTags() {
   ]);
 
   return (
-    <SelectedProvider instance={selectedInst}>
-      <ManagePage
-        actions={
-          <Button variant="primary" onPress={() => setCreate(true)}>
-            <SvgAdd
-              width={10}
-              height={10}
-              style={{ marginRight: spacing.xs }}
-            />
-            <Trans>Add new tag</Trans>
-          </Button>
-        }
-        search={
-          <Search
-            placeholder={t('Filter tags…')}
-            width="100%"
-            value={filter}
-            onChange={setFilter}
+    <ManagePage
+      actions={
+        <Button variant="primary" onPress={() => setCreate(true)}>
+          <SvgAdd width={10} height={10} style={{ marginRight: spacing.xs }} />
+          <Trans>Add new tag</Trans>
+        </Button>
+      }
+      search={
+        <Search
+          placeholder={t('Filter tags…')}
+          width="100%"
+          value={filter}
+          onChange={onFilterChange}
+        />
+      }
+      selection={
+        <SelectedTagsButton onRename={id => tableNavigator.onEdit(id, 'tag')} />
+      }
+      menu={<TagsMenuButton />}
+    >
+      <View style={styles.tableContainer}>
+        <TagsHeader />
+        {create && (
+          <TagCreationRow onClose={() => setCreate(false)} tags={tags} />
+        )}
+        {tags.length ? (
+          <TagsList
+            navigator={tableNavigator}
+            tags={filteredTags}
+            hoveredTag={hoveredTag}
+            onHover={id => setHoveredTag(id ?? undefined)}
           />
-        }
-        selection={
-          <SelectedTagsButton
-            onRename={id => tableNavigator.onEdit(id, 'tag')}
-          />
-        }
-        menu={<TagsMenuButton />}
-      >
-        <View style={styles.tableContainer}>
-          <TagsHeader />
-          {create && (
-            <TagCreationRow onClose={() => setCreate(false)} tags={tags} />
-          )}
-          {tags.length ? (
-            <TagsList
-              navigator={tableNavigator}
-              tags={filteredTags}
-              hoveredTag={hoveredTag}
-              onHover={id => setHoveredTag(id ?? undefined)}
-            />
-          ) : (
-            <EmptyMessage>
-              <Trans>No tags</Trans>
-            </EmptyMessage>
-          )}
-        </View>
-      </ManagePage>
-    </SelectedProvider>
+        ) : (
+          <EmptyMessage>
+            <Trans>No tags</Trans>
+          </EmptyMessage>
+        )}
+      </View>
+    </ManagePage>
   );
 }

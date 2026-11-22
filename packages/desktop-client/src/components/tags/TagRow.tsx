@@ -148,6 +148,7 @@ export const TagRow = memo(
         <SelectCell
           exposed={hovered || selected || focusedField === 'select'}
           focused={focusedField === 'select'}
+          onEdit={() => onEdit(tag.id, 'select')}
           onSelect={e => {
             dispatchSelected({
               type: 'select',
@@ -171,7 +172,12 @@ export const TagRow = memo(
             }}
           />
         ) : (
-          <Cell width={250} plain style={{ padding: '5px', display: 'block' }}>
+          <Cell
+            name="tag"
+            width={250}
+            plain
+            style={{ padding: '5px', display: 'block' }}
+          >
             <TagEditor tag={tag} ref={colorButtonRef} />
           </Cell>
         )}

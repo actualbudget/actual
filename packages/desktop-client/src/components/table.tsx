@@ -1052,6 +1052,8 @@ export const Table = forwardRef(
       focusedField,
       getNavigatorProps,
     } = navigator;
+    // Tables that don't pass isSelected still keep a checked row's highlight
+    const checkedItems = useSelectedItems();
     const focusExit = useRef<HTMLDivElement>(null);
     const list = useRef(null);
     const listContainerInnerRef = useRef<HTMLDivElement>(null);
@@ -1185,7 +1187,10 @@ export const Table = forwardRef(
             transform: 'translateY(var(--pos))',
             backgroundColor,
             ...(selectedField != null &&
-              selectedCellStyle(selectedField, !!selected)),
+              selectedCellStyle(
+                selectedField,
+                !!selected || !!checkedItems?.has(String(item.id)),
+              )),
           }}
           nativeStyle={{ '--pos': `${style.top - 1}px` }}
           data-focus-key={item.id}
