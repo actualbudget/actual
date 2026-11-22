@@ -91,7 +91,7 @@ Use custom hooks from `src/hooks` instead of importing directly from react-route
 - **Theme tokens outside their role**: Don't put a text token on a background or a background token on text
 - **`@actual-app/web/*` imports in `loot-core`**: Don't import from web package in core
 
-The three color rules are enforced by lint. Code that broke them before the rules existed carries an `oxlint-disable-next-line` comment naming the rule. Remove the comment when you fix one.
+The three color rules are enforced by lint on `.ts` and `.tsx` files in `packages/component-library/src` and `packages/desktop-client/src`. Tests, stories, icons and the theme source files are skipped. Code that broke them before the rules existed carries an `oxlint-disable-next-line` comment naming the rule. Remove the comment when you fix one.
 
 ## File Structure Patterns
 

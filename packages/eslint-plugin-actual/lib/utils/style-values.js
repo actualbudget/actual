@@ -2,6 +2,7 @@ const colorProperties = new Set([
   'accentColor',
   'background',
   'backgroundColor',
+  'backgroundImage',
   'border',
   'borderBlock',
   'borderBlockColor',
@@ -91,6 +92,14 @@ function collectValueLeaves(node, leaves = []) {
     case 'LogicalExpression':
       collectValueLeaves(node.left, leaves);
       collectValueLeaves(node.right, leaves);
+      break;
+    case 'BinaryExpression':
+      if (node.operator === '+') {
+        collectValueLeaves(node.left, leaves);
+        collectValueLeaves(node.right, leaves);
+      } else {
+        leaves.push(node);
+      }
       break;
     case 'TemplateLiteral':
       node.quasis.forEach(quasi => leaves.push(quasi));

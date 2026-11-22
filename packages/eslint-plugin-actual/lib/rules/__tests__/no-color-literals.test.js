@@ -21,9 +21,42 @@ void runClassic(
       `<rect fill="url(#fade)" />`,
       `<Link variant="external" linkColor="purple" />`,
       `const style = { background: 'url(/img/black.png) no-repeat' };`,
+      `const style = { backgroundImage: 'url(/img/black.png)' };`,
+      `const style = { border: '1px solid ' + theme.tableBorder };`,
+      `const style = { color: \`rgb(from \${theme.pageText} r g b / 0.5)\` };`,
     ],
 
     invalid: [
+      {
+        code: `const style = { color: 'aliceblue' };`,
+        output: null,
+        errors: [{ messageId: 'useThemeToken', data: { value: 'aliceblue' } }],
+      },
+      {
+        code: `const style = { border: '1px solid rebeccapurple' };`,
+        output: null,
+        errors: [{ messageId: 'useThemeToken' }],
+      },
+      {
+        code: `const style = { color: 'rgb(from #fff r g b / 0.5)' };`,
+        output: null,
+        errors: [{ messageId: 'useThemeToken' }],
+      },
+      {
+        code: `const style = { color: \`rgb(from \${theme.pageText} r g b / 0.5) red\` };`,
+        output: null,
+        errors: [{ messageId: 'useThemeToken' }],
+      },
+      {
+        code: `const style = { backgroundImage: 'linear-gradient(#fff, #000)' };`,
+        output: null,
+        errors: [{ messageId: 'useThemeToken' }],
+      },
+      {
+        code: `const style = { border: '1px solid ' + '#fff' };`,
+        output: null,
+        errors: [{ messageId: 'useThemeToken', data: { value: '#fff' } }],
+      },
       {
         code: `const style = { color: '#fff' };`,
         output: null,
