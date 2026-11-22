@@ -1,5 +1,6 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import type { RemoteFile } from '@actual-app/core/server/cloud-storage';
+import { TEST_BUDGET_ID } from '@actual-app/core/shared/constants';
 import { getUnsafeZipMeta } from '@actual-app/core/shared/errors';
 import type { Budget } from '@actual-app/core/types/budget';
 import type { File } from '@actual-app/core/types/file';
@@ -135,6 +136,28 @@ export const closeBudgetUI = createAppAsyncThunk(
     if (prefs && prefs.id) {
       dispatch(resetApp());
       queryClient.clear();
+    }
+  },
+);
+
+export const exitDemoBudget = createAppAsyncThunk(
+  `${sliceName}/exitDemoBudget`,
+  async (_, { dispatch, getState, extra: { queryClient } }) => {
+    if (getState().prefs.local?.id !== TEST_BUDGET_ID) {
+      return;
+    }
+
+    dispatch(resetApp());
+    queryClient.clear();
+    dispatch(setAppState({ loadingText: t('Closing...') }));
+    await send('close-budget');
+    // The demo is regenerated every time it is opened, so remove it to
+    // bring newcomers back to a clean starting point.
+    await send('delete-budget', { id: TEST_BUDGET_ID });
+    await dispatch(loadAllFiles());
+    dispatch(setAppState({ loadingText: null }));
+    if (localStorage.getItem('SharedArrayBufferOverride')) {
+      window.location.reload();
     }
   },
 );

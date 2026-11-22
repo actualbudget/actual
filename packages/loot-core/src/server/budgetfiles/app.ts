@@ -45,6 +45,7 @@ import {
   uniqueBudgetName,
   validateBudgetName,
 } from '#server/util/budget-name';
+import { TEST_BUDGET_ID } from '#shared/constants';
 import * as Platform from '#shared/platform';
 import type { Budget } from '#types/budget';
 
@@ -57,7 +58,6 @@ import {
 } from './backups';
 
 const DEMO_BUDGET_ID = '_demo-budget';
-const TEST_BUDGET_ID = '_test-budget';
 
 export type BudgetFileHandlers = {
   'validate-budget-name': typeof handleValidateBudgetName;

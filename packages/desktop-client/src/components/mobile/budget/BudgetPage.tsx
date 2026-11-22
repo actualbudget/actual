@@ -27,6 +27,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
+import { TEST_BUDGET_ID } from '@actual-app/core/shared/constants';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { groupById } from '@actual-app/core/shared/util';
 import type { TransObjectLiteral } from '@actual-app/core/types/util';
@@ -44,7 +45,7 @@ import {
   useSaveCategoryMutation,
   useSortCategoriesMutation,
 } from '#budget';
-import { closeBudget } from '#budgetfiles/budgetfilesSlice';
+import { closeBudget, exitDemoBudget } from '#budgetfiles/budgetfilesSlice';
 import { clampMonth } from '#components/budget/MonthsContext';
 import { prewarmMonth } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
@@ -55,6 +56,7 @@ import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
+import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useNavigate } from '#hooks/useNavigate';
 import { useOverspentCategories } from '#hooks/useOverspentCategories';
 import { SheetNameProvider } from '#hooks/useSheetName';
@@ -621,6 +623,7 @@ function Banners({ month, onBudgetAction }) {
       aria-label={t('Banners')}
       style={{ backgroundColor: theme.mobilePageBackground }}
     >
+      <DemoBudgetBanner />
       <UncategorizedTransactionsBanner />
       <OverspendingBanner
         month={month}
@@ -653,6 +656,41 @@ function Banner({ type = 'info', children }) {
     >
       {children}
     </Card>
+  );
+}
+
+function DemoBudgetBanner(props) {
+  const dispatch = useDispatch();
+  const [budgetId] = useMetadataPref('id');
+
+  if (budgetId !== TEST_BUDGET_ID) {
+    return null;
+  }
+
+  return (
+    <GridListItem textValue="Demo budget banner" {...props}>
+      <Banner type="warning">
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10,
+          }}
+        >
+          <Text>
+            <Trans>You are exploring a demo budget</Trans>
+          </Text>
+          <Button
+            onPress={() => void dispatch(exitDemoBudget())}
+            style={PILL_STYLE}
+          >
+            <Trans>Exit demo</Trans>
+          </Button>
+        </View>
+      </Banner>
+    </GridListItem>
   );
 }
 
