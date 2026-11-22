@@ -20,6 +20,7 @@ import {
 } from '#server/util/custom-sync-mapping';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
+import { addTag, UNREVIEWED_TAG } from '#shared/tags';
 import {
   makeChild as makeChildTransaction,
   recalculateSplit,
@@ -70,6 +71,12 @@ function getAccountBalance(account) {
 
 async function updateAccountBalance(id: AccountEntity['id'], balance: number) {
   await db.update('accounts', { id, balance_current: balance });
+}
+
+// Synced preferences store booleans as the strings 'true' / 'false'.
+async function readBoolPref(id: string, defaultValue: boolean) {
+  const data = await aqlQuery(q('preferences').filter({ id }).select('value'));
+  return String(data?.data?.[0]?.value ?? defaultValue) === 'true';
 }
 
 async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
@@ -522,16 +529,8 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         .filter({ id: `custom-sync-mappings-${acctId}` })
         .select('value'),
     ).then(data => data?.data?.[0]?.value),
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `sync-import-pending-${acctId}` })
-        .select('value'),
-    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `sync-import-notes-${acctId}` })
-        .select('value'),
-    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+    readBoolPref(`sync-import-pending-${acctId}`, true),
+    readBoolPref(`sync-import-notes-${acctId}`, true),
   ]);
 
   const mappings = customMappingsRaw
@@ -625,6 +624,10 @@ export type ReconcileTransactionsOptions = MatchTransactionsOptions & {
   isPreview?: boolean;
   defaultCleared?: boolean;
   updateDates?: boolean;
+  // Add the unreviewed tag to the notes of transactions this call creates.
+  // Transactions matched to an existing one never get it, so removing the
+  // tag sticks.
+  tagNewForReview?: boolean;
 };
 
 export type ReconcileTransactionsResult = {
@@ -649,6 +652,7 @@ export async function reconcileTransactions(
     updateDates = false,
     reimportDeleted,
     payeeNameNormalization,
+    tagNewForReview = false,
   }: ReconcileTransactionsOptions = {},
 ): Promise<ReconcileTransactionsResult> {
   logger.log('Performing transaction reconciliation');
@@ -770,6 +774,9 @@ export async function reconcileTransactions(
         id: uuidv4(),
         category: trans.category || null,
         cleared: trans.cleared ?? defaultCleared,
+        ...(tagNewForReview
+          ? { notes: addTag(trans.notes, UNREVIEWED_TAG) }
+          : {}),
       };
 
       if (subtransactions && subtransactions.length > 0) {
@@ -849,11 +856,7 @@ export async function matchTransactions(
   const reimportDeleted =
     reimportDeletedOverride !== undefined
       ? reimportDeletedOverride
-      : await aqlQuery(
-          q('preferences')
-            .filter({ id: `sync-reimport-deleted-${acctId}` })
-            .select('value'),
-        ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+      : await readBoolPref(`sync-reimport-deleted-${acctId}`, true);
 
   const hasMatched = new Set();
   const exactMatchedParentIds = new Set<db.DbViewTransaction['id']>();
@@ -1118,17 +1121,12 @@ async function processBankSyncDownload(
   // that account sync sources can give two different transaction IDs even though it's the same transaction.
   const useStrictIdChecking = !acctRow.account_sync_source;
 
-  const importTransactions = await aqlQuery(
-    q('preferences')
-      .filter({ id: `sync-import-transactions-${id}` })
-      .select('value'),
-  ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+  const importTransactions = await readBoolPref(
+    `sync-import-transactions-${id}`,
+    true,
+  );
 
-  const updateDates = await aqlQuery(
-    q('preferences')
-      .filter({ id: `sync-update-dates-${id}` })
-      .select('value'),
-  ).then(data => String(data?.data?.[0]?.value ?? 'false') === 'true');
+  const updateDates = await readBoolPref(`sync-update-dates-${id}`, false);
 
   /** Starting balance is actually the current balance of the account. */
   const {
@@ -1159,11 +1157,10 @@ async function processBankSyncDownload(
       acctRow.account_sync_source === 'enableBanking' &&
       currentBalance !== null
     ) {
-      const importPending = await aqlQuery(
-        q('preferences')
-          .filter({ id: `sync-import-pending-${id}` })
-          .select('value'),
-      ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+      const importPending = await readBoolPref(
+        `sync-import-pending-${id}`,
+        true,
+      );
       const importable = importPending
         ? transactions
         : transactions.filter(trans => Boolean(trans.booked));
@@ -1228,6 +1225,14 @@ async function processBankSyncDownload(
     account: id,
   }));
 
+  // Only reached on later syncs: the initial sync above returns early and
+  // deliberately doesn't tag, since its history backfill isn't "new" to
+  // the user.
+  const tagNewForReview = await readBoolPref(
+    'flags.reviewNewTransactions',
+    false,
+  );
+
   return runMutator(async () => {
     const result = await reconcileTransactions(
       id,
@@ -1236,6 +1241,7 @@ async function processBankSyncDownload(
         isBankSyncAccount: true,
         strictIdChecking: useStrictIdChecking,
         updateDates,
+        tagNewForReview,
       },
     );
 

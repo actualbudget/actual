@@ -42,6 +42,7 @@ import type {
 import { FloatingActionBar } from '#components/mobile/FloatingActionBar';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategoriesById } from '#hooks/useCategories';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocale } from '#hooks/useLocale';
 import { useNavigate } from '#hooks/useNavigate';
 import { usePayees } from '#hooks/usePayees';
@@ -338,8 +339,10 @@ function SelectedTransactionsFloatingActionBar({
   const isMoreThanOne = selectedTransactions.size > 1;
 
   const { showUndoNotification } = useUndo();
+  const isReviewTagEnabled = useFeatureFlag('reviewNewTransactions');
   const {
     onBatchEdit,
+    onBatchToggleReviewed,
     onBatchDuplicate,
     onBatchDelete,
     onBatchLinkSchedule,
@@ -493,10 +496,30 @@ function SelectedTransactionsFloatingActionBar({
             onOpenChange={() => setIsEditMenuOpen(false)}
             style={{ width: 200 }}
           >
-            <Menu
+            <Menu<keyof TransactionEntity | 'reviewed'>
               getItemStyle={getMenuItemStyle}
               style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={name => {
+                if (name === 'reviewed') {
+                  void onBatchToggleReviewed({
+                    ids: selectedTransactionsArray,
+                    onSuccess: (ids, isReviewed) => {
+                      showUndoNotification({
+                        message: isReviewed
+                          ? t(
+                              'Successfully marked {{count}} transactions as reviewed.',
+                              { count: ids.length },
+                            )
+                          : t(
+                              'Successfully marked {{count}} transactions as unreviewed.',
+                              { count: ids.length },
+                            ),
+                      });
+                    },
+                  });
+                  setIsEditMenuOpen(false);
+                  return;
+                }
                 void onBatchEdit?.({
                   name,
                   ids: selectedTransactionsArray,
@@ -582,6 +605,9 @@ function SelectedTransactionsFloatingActionBar({
                   name: 'cleared',
                   text: t('Cleared'),
                 },
+                ...(isReviewTagEnabled
+                  ? [{ name: 'reviewed', text: t('Reviewed') }]
+                  : []),
               ]}
             />
           </Popover>

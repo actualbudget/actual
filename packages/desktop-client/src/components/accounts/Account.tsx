@@ -8,7 +8,12 @@ import React, {
 import type { ReactElement, RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Trans } from 'react-i18next';
-import { Navigate, useLocation, useParams } from 'react-router';
+import {
+  Navigate,
+  useLocation,
+  useNavigationType,
+  useParams,
+} from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -60,6 +65,7 @@ import { useAccounts } from '#hooks/useAccounts';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { usePayees } from '#hooks/usePayees';
@@ -230,6 +236,7 @@ type AccountInternalProps = {
   showReconciled: boolean;
   setShowReconciled: (newValue: boolean) => void;
   showGroup: boolean;
+  isReviewTagEnabled: boolean;
   showExtraBalances?: boolean;
   setShowExtraBalances: (newValue: boolean) => void;
   transactionColumns: TransactionTableColumn[];
@@ -243,6 +250,9 @@ type AccountInternalProps = {
   expandSplits?: boolean | undefined;
   savedFilters: TransactionFilterEntity[];
   onBatchEdit: ReturnType<typeof useTransactionBatchActions>['onBatchEdit'];
+  onBatchToggleReviewed: ReturnType<
+    typeof useTransactionBatchActions
+  >['onBatchToggleReviewed'];
   onBatchDuplicate: ReturnType<
     typeof useTransactionBatchActions
   >['onBatchDuplicate'];
@@ -255,6 +265,7 @@ type AccountInternalProps = {
   onBatchDelete: ReturnType<typeof useTransactionBatchActions>['onBatchDelete'];
   categoryId?: string;
   location: ReturnType<typeof useLocation>;
+  navigationType: ReturnType<typeof useNavigationType>;
   dateFormat: ReturnType<typeof useDateFormat>;
   currencySymbol: string;
   payees: PayeeEntity[];
@@ -320,6 +331,9 @@ class AccountInternal extends PureComponent<
   _isOptimisticUpdate: boolean = false;
   // A transaction to bring into view once the account is loaded
   pendingFocusId: TransactionEntity['id'] | null = null;
+  // Counts applyFilters calls, so a call that is still waiting on the
+  // backend can tell a newer call has replaced its filters.
+  filtersRequestId = 0;
 
   constructor(props: AccountInternalProps) {
     super(props);
@@ -437,7 +451,40 @@ class AccountInternal extends PureComponent<
     //Resest sort/filter/search on account change
     if (this.props.accountId !== prevProps.accountId) {
       this.setState({ sort: null, search: '', filterConditions: [] });
+    } else if (this.props.location.key !== prevProps.location.key) {
+      this.applyLocationFilters(prevProps);
     }
+  }
+
+  applyLocationFilters(prevProps: AccountInternalProps) {
+    if (this.props.filterConditions.length > 0) {
+      // A drill-down (e.g. the title bar's unreviewed link) can navigate here
+      // with new filters while this view is already open. The constructor
+      // only reads the filters it mounts with, so apply these ones now.
+      // Clear any search too: applyFilters doesn't reapply it, and the
+      // drill-down should show everything its filters match.
+      this.resetFilters([...this.props.filterConditions]);
+    } else if (
+      this.props.navigationType === 'POP' &&
+      prevProps.filterConditions.length > 0 &&
+      isEqual(this.state.filterConditions, prevProps.filterConditions)
+    ) {
+      // Going Back (or Forward) from a drill-down to a location without
+      // filters removes the filters that drill-down applied. Other
+      // navigations without filters, such as undo or jumping to a transfer,
+      // keep the current filters, and so does Back once the user has
+      // changed the filters themselves.
+      this.resetFilters([]);
+    }
+  }
+
+  resetFilters(conditions: ConditionEntity[]) {
+    this.setState(
+      { filterId: undefined, filterConditionsOp: 'and', search: '' },
+      () => {
+        void this.applyFilters(conditions);
+      },
+    );
   }
 
   componentWillUnmount() {
@@ -580,6 +627,8 @@ class AccountInternal extends PureComponent<
   // oxlint-disable-next-line react/no-unsafe
   UNSAFE_componentWillReceiveProps(nextProps: AccountInternalProps) {
     if (this.props.accountId !== nextProps.accountId) {
+      // Discard any filter request still pending for the previous account.
+      this.filtersRequestId++;
       this.pendingFocusId = getFocusTransactionId(nextProps.location);
       this.setState(
         {
@@ -994,7 +1043,8 @@ class AccountInternal extends PureComponent<
       .filter(
         column =>
           (column.id !== 'account' || this.showAccountColumn()) &&
-          (column.id !== 'balance' || this.canCalculateBalance()),
+          (column.id !== 'balance' || this.canCalculateBalance()) &&
+          (column.id !== 'reviewed' || this.props.isReviewTagEnabled),
       )
       .map(column => {
         // Balance and cleared visibility can be temporarily overridden in
@@ -1222,6 +1272,13 @@ class AccountInternal extends PureComponent<
           this.table.current.edit(updatedIds[0], 'select', false);
         }
       },
+    });
+  };
+
+  onBatchToggleReviewed = (ids: string[]) => {
+    void this.props.onBatchToggleReviewed({
+      ids,
+      onSuccess: this.refetchTransactions,
     });
   };
 
@@ -1655,6 +1712,7 @@ class AccountInternal extends PureComponent<
   };
 
   applyFilters = async (conditions: ConditionEntity[]) => {
+    const requestId = ++this.filtersRequestId;
     if (conditions.length > 0) {
       const filteredCustomQueryFilters: Partial<RuleConditionEntity>[] =
         conditions.filter(cond => !isTransactionFilterEntity(cond));
@@ -1669,6 +1727,10 @@ class AccountInternal extends PureComponent<
           ),
         },
       );
+      // Filters applied or cleared while this request was pending win.
+      if (requestId !== this.filtersRequestId) {
+        return;
+      }
       const conditionsOpKey =
         this.state.filterConditionsOp === 'or' ? '$or' : '$and';
       this.currentQuery = this.rootQuery.filter({
@@ -1977,6 +2039,7 @@ class AccountInternal extends PureComponent<
                 onBatchDuplicate={this.onBatchDuplicate}
                 onRunRules={this.onRunRules}
                 onBatchEdit={this.onBatchEdit}
+                onBatchToggleReviewed={this.onBatchToggleReviewed}
                 onBatchLinkSchedule={this.onBatchLinkSchedule}
                 onBatchUnlinkSchedule={this.onBatchUnlinkSchedule}
                 onCreateRule={this.onCreateRule}
@@ -2087,6 +2150,7 @@ type AccountHackProps = Omit<
   | 'dispatch'
   | 'splitsExpandedDispatch'
   | 'onBatchEdit'
+  | 'onBatchToggleReviewed'
   | 'onBatchDuplicate'
   | 'onBatchLinkSchedule'
   | 'onBatchUnlinkSchedule'
@@ -2099,6 +2163,7 @@ function AccountHack(props: AccountHackProps) {
   const dispatch = useDispatch();
   const {
     onBatchEdit,
+    onBatchToggleReviewed,
     onBatchDuplicate,
     onBatchLinkSchedule,
     onBatchUnlinkSchedule,
@@ -2111,6 +2176,7 @@ function AccountHack(props: AccountHackProps) {
       dispatch={dispatch}
       splitsExpandedDispatch={splitsExpandedDispatch}
       onBatchEdit={onBatchEdit}
+      onBatchToggleReviewed={onBatchToggleReviewed}
       onBatchDuplicate={onBatchDuplicate}
       onBatchLinkSchedule={onBatchLinkSchedule}
       onBatchUnlinkSchedule={onBatchUnlinkSchedule}
@@ -2124,6 +2190,7 @@ function AccountHack(props: AccountHackProps) {
 export function Account() {
   const params = useParams();
   const location = useLocation();
+  const navigationType = useNavigationType();
 
   const { data: { grouped: categoryGroups } = { grouped: [] } } =
     useCategories();
@@ -2156,6 +2223,7 @@ export function Account() {
     showGroup,
     saveColumns,
   } = useTransactionTableColumns(params.id);
+  const isReviewTagEnabled = useFeatureFlag('reviewNewTransactions');
 
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
@@ -2207,6 +2275,7 @@ export function Account() {
             showReconciled={String(hideReconciled) !== 'true'}
             setShowReconciled={val => setHideReconciled(String(!val))}
             showGroup={showGroup}
+            isReviewTagEnabled={isReviewTagEnabled}
             showExtraBalances={String(showExtraBalances) === 'true'}
             setShowExtraBalances={extraBalances =>
               setShowExtraBalances(String(extraBalances))
@@ -2222,6 +2291,7 @@ export function Account() {
             accountId={params.id}
             categoryId={location?.state?.categoryId}
             location={location}
+            navigationType={navigationType}
             savedFilters={savedFiters}
             onReopenAccount={onReopenAccount}
             onUpdateAccount={onUpdateAccount}

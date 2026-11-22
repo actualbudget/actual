@@ -40,6 +40,8 @@ import {
   SvgHyperlink2,
   SvgLockClosed,
   SvgSubtract,
+  SvgViewHide,
+  SvgViewShow,
 } from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
@@ -52,6 +54,7 @@ import { memoizeOne } from '@actual-app/core/shared/memoize';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import { DEFAULT_UPCOMING_SCHEDULE_DAYS } from '@actual-app/core/shared/schedules';
+import { isUnreviewed, setReviewed } from '@actual-app/core/shared/tags';
 import {
   addSplitTransaction,
   deleteTransaction,
@@ -125,6 +128,7 @@ import type {
   OnDragChangeCallback,
   OnDropCallback,
 } from '#hooks/useDragDrop';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { usePrevious } from '#hooks/usePrevious';
@@ -334,6 +338,13 @@ const TransactionHeader = memo(
         alignItems: 'center',
         tooltip: <ClearedColumnLegend />,
         sortDirection: 'asc',
+      },
+      reviewed: {
+        value: columnLabels.reviewed,
+        valueIcon: <SvgViewShow style={{ width: 13, height: 13 }} />,
+        width: 38,
+        alignItems: 'center',
+        tooltip: <Trans>Reviewed: you've checked this transaction</Trans>,
       },
     };
 
@@ -557,8 +568,84 @@ function StatusCell({
   );
 }
 
+type ReviewedCellProps = {
+  id: TransactionEntity['id'];
+  notes: TransactionEntity['notes'];
+  focused?: boolean;
+  isChild?: boolean;
+  isPreview?: boolean;
+  onEdit: TransactionEditFunction;
+  onUpdate: TransactionUpdateFunction;
+};
+
+// The review state lives in the notes as the #unreviewed tag, so toggling
+// it adds or removes the tag. Split children never carry the tag.
+function ReviewedCell({
+  id,
+  notes,
+  focused,
+  isChild,
+  isPreview,
+  onEdit,
+  onUpdate,
+}: ReviewedCellProps) {
+  const { t } = useTranslation();
+  const isReviewed = !isUnreviewed(notes);
+  const isHidden = isChild || isPreview;
+
+  return (
+    <Cell
+      name="reviewed"
+      width={38}
+      alignItems="center"
+      focused={focused}
+      style={{ padding: 1 }}
+      plain
+    >
+      <CellButton
+        style={{
+          padding: 3,
+          backgroundColor: 'transparent',
+          border: '1px solid transparent',
+          borderRadius: 50,
+          ':focus': {
+            border: '1px solid ' + theme.formInputBorderSelected,
+            boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
+          },
+          cursor: 'pointer',
+          ...(isHidden && { visibility: 'hidden' }),
+        }}
+        disabled={isHidden}
+        // CellButton keeps its custom keyboard and focus handling, which a
+        // native checkbox input would replace.
+        // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
+        role="checkbox"
+        aria-label={t('Reviewed')}
+        aria-checked={isReviewed}
+        onEdit={() => onEdit(id, 'reviewed')}
+        onSelect={() => onUpdate('notes', setReviewed(notes, !isReviewed))}
+      >
+        <View title={isReviewed ? t('Reviewed') : t('Not reviewed')}>
+          {isReviewed ? (
+            <SvgViewShow
+              style={{ width: 13, height: 13, color: theme.pageTextSubdued }}
+            />
+          ) : (
+            <SvgViewHide
+              style={{ width: 13, height: 13, color: theme.warningText }}
+            />
+          )}
+        </View>
+      </CellButton>
+    </Cell>
+  );
+}
+
 type HeaderCellProps = {
   value: string;
+  // Shown in place of `value` for narrow columns; `value` then labels it
+  // for screen readers.
+  valueIcon?: ReactNode;
   id: string;
   icon?: 'asc' | 'desc' | 'clickable';
   tooltip?: ReactNode;
@@ -567,6 +654,7 @@ type HeaderCellProps = {
 
 function HeaderCell({
   value,
+  valueIcon,
   id,
   width,
   alignItems,
@@ -608,7 +696,15 @@ function HeaderCell({
             )}
           </Button>
         ) : (
-          <Text style={style}>{cellValue}</Text>
+          <Text style={style}>
+            {valueIcon ? (
+              <View aria-label={value} style={{ alignItems: 'center' }}>
+                {valueIcon}
+              </View>
+            ) : (
+              cellValue
+            )}
+          </Text>
         );
 
         return tooltip ? (
@@ -2120,6 +2216,19 @@ const Transaction = memo(function Transaction({
             onUpdate={onUpdate}
           />
         );
+      case 'reviewed':
+        return (
+          <ReviewedCell
+            key={columnId}
+            id={id}
+            notes={notes}
+            focused={focusedField === 'reviewed'}
+            isChild={isChild}
+            isPreview={isPreview}
+            onEdit={onEdit}
+            onUpdate={onUpdate}
+          />
+        );
       default:
         return null;
     }
@@ -3081,6 +3190,8 @@ export type TransactionTableProps = {
   showBalances: boolean;
   showReconciled: boolean;
   showCleared: boolean;
+  // Defaults to on; the column also needs the review experiment enabled.
+  showReviewed?: boolean;
   showAccount: boolean;
   showCategory: boolean;
   showGroup?: boolean;
@@ -3155,12 +3266,13 @@ export const TransactionTable = forwardRef(
       [],
     );
 
+    const isReviewTagEnabled = useFeatureFlag('reviewNewTransactions');
     // The ordered list of columns to render. The show* flags control which
-    // of the account/category/balance/cleared columns are available in the
-    // current view; `columnOrder` carries the user's column preferences.
-    // Memoized manually (the compiler bails out on this component) so the
-    // array identity is stable across renders — it crosses the `memo()`
-    // boundary of every transaction row.
+    // of the account/category/balance/cleared/reviewed columns are available
+    // in the current view; `columnOrder` carries the user's column
+    // preferences. Memoized manually (the compiler bails out on this
+    // component) so the array identity is stable across renders — it crosses
+    // the `memo()` boundary of every transaction row.
     const {
       columnOrder,
       showAccount,
@@ -3168,6 +3280,7 @@ export const TransactionTable = forwardRef(
       showGroup,
       showBalances,
       showCleared,
+      showReviewed = true,
     } = props;
     const visibleColumns = useMemo(
       () =>
@@ -3183,6 +3296,8 @@ export const TransactionTable = forwardRef(
               return showBalances;
             case 'cleared':
               return showCleared;
+            case 'reviewed':
+              return isReviewTagEnabled && showReviewed;
             default:
               return true;
           }
@@ -3194,6 +3309,8 @@ export const TransactionTable = forwardRef(
         showGroup,
         showBalances,
         showCleared,
+        showReviewed,
+        isReviewTagEnabled,
       ],
     );
     const [prevIsAdding, setPrevIsAdding] = useState(false);

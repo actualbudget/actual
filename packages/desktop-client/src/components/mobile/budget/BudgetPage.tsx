@@ -7,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
+import type { GridListItemProps } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -63,6 +64,7 @@ import { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useTransactions } from '#hooks/useTransactions';
 import { useUndo } from '#hooks/useUndo';
+import { useUnreviewedTransactions } from '#hooks/useUnreviewedTransactions';
 import { collapseModals, pushModal } from '#modals/modalsSlice';
 import { uncategorizedTransactions } from '#queries';
 import { useDispatch } from '#redux';
@@ -622,6 +624,7 @@ function Banners({ month, onBudgetAction }) {
       style={{ backgroundColor: theme.mobilePageBackground }}
     >
       <UncategorizedTransactionsBanner />
+      <UnreviewedTransactionsBanner />
       <OverspendingBanner
         month={month}
         onBudgetAction={onBudgetAction}
@@ -712,6 +715,43 @@ function UncategorizedTransactionsBanner(props) {
           >
             <Text>
               <Trans>Categorize</Trans>
+            </Text>
+          </Button>
+        </View>
+      </Banner>
+    </GridListItem>
+  );
+}
+
+function UnreviewedTransactionsBanner(
+  props: Omit<GridListItemProps, 'textValue'>,
+) {
+  const { t } = useTranslation();
+  const { count, openUnreviewed } = useUnreviewedTransactions();
+
+  if (count === 0) {
+    return null;
+  }
+
+  return (
+    <GridListItem textValue={t('Unreviewed transactions banner')} {...props}>
+      <Banner type="info">
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Text>
+            <Trans count={count}>
+              You have {{ count }} unreviewed transactions
+            </Trans>
+          </Text>
+          <Button onPress={openUnreviewed} style={PILL_STYLE}>
+            <Text>
+              <Trans>Review</Trans>
             </Text>
           </Button>
         </View>

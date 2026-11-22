@@ -40,6 +40,11 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import { DEFAULT_UPCOMING_SCHEDULE_DAYS } from '@actual-app/core/shared/schedules';
 import {
+  isUnreviewed,
+  markReviewedOnCategoryChange,
+  setReviewed,
+} from '@actual-app/core/shared/tags';
+import {
   addSplitTransaction,
   deleteTransaction,
   makeEmptySplitSubtransactions,
@@ -94,6 +99,7 @@ import {
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
 import { useNavigate } from '#hooks/useNavigate';
@@ -616,10 +622,10 @@ type TransactionEditInnerProps = {
   dateFormat: string;
   transactions: TransactionEntity[];
   onSave: (transactions: TransactionEntity[]) => void;
-  onUpdate: <Field extends keyof TransactionEntity>(
+  onUpdate: (
     transaction: TransactionEntity,
-    field: Field,
-    value?: TransactionEntity[Field],
+    field: keyof TransactionEntity,
+    alsoChangedFields?: Array<keyof TransactionEntity>,
   ) => void;
   onDelete: (id: TransactionEntity['id']) => void;
   onSplit: (id: TransactionEntity['id']) => void;
@@ -667,6 +673,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const { data: { grouped: categoryGroups } = { grouped: [] } } =
       useCategories();
     const noteRef = useRef<HTMLInputElement | null>(null);
+    const isReviewTagEnabled = useFeatureFlag('reviewNewTransactions');
 
     useEffect(() => {
       if (window.history.length === 1) {
@@ -914,15 +921,30 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         name: Field,
         value: TransactionEntity[Field],
       ) => {
-        const newTransaction = { ...serializedTransaction, [name]: value };
-        onUpdate(newTransaction, name);
+        let newTransaction = { ...serializedTransaction, [name]: value };
+        const alsoChangedFields: Array<keyof TransactionEntity> = [];
+        if (isReviewTagEnabled && name === 'category') {
+          newTransaction = markReviewedOnCategoryChange(
+            serializedTransaction,
+            newTransaction,
+          );
+          if (newTransaction.notes !== serializedTransaction.notes) {
+            // Only the updated field is saved unless listed here.
+            alsoChangedFields.push('notes');
+            // The notes input is uncontrolled, so show the new text there too.
+            if (noteRef.current) {
+              noteRef.current.value = newTransaction.notes ?? '';
+            }
+          }
+        }
+        onUpdate(newTransaction, name, alsoChangedFields);
         onClearActiveEdit();
 
         if (name === 'account') {
           hasAccountChanged.current = serializedTransaction.account !== value;
         }
       },
-      [onClearActiveEdit, onUpdate],
+      [isReviewTagEnabled, onClearActiveEdit, onUpdate],
     );
 
     const onUnlockReconciledInner = useCallback(
@@ -1524,6 +1546,26 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                 />
               </View>
             )}
+            {isReviewTagEnabled && !isAdding && (
+              <View style={{ alignItems: 'center' }}>
+                <FieldLabel title={t('Reviewed')} />
+                <ToggleField
+                  id="reviewed"
+                  isOn={!isUnreviewed(transaction.notes)}
+                  onToggle={isReviewed => {
+                    // The notes input is uncontrolled and may hold text
+                    // that isn't saved yet, so build on what it shows.
+                    const currentNotes =
+                      noteRef.current?.value ?? transaction.notes;
+                    const notes = setReviewed(currentNotes, isReviewed);
+                    if (noteRef.current) {
+                      noteRef.current.value = notes;
+                    }
+                    return onUpdateInner(transaction, 'notes', notes);
+                  }}
+                />
+              </View>
+            )}
           </View>
 
           <View>
@@ -1739,6 +1781,8 @@ function TransactionEditUnconnected({
     async (
       serializedTransaction: TransactionEntity,
       updatedField: keyof TransactionEntity,
+      // Other fields the caller changed along with `updatedField`.
+      alsoChangedFields: Array<keyof TransactionEntity> = [],
     ) => {
       const transaction = deserializeTransaction(
         serializedTransaction,
@@ -1749,7 +1793,10 @@ function TransactionEditUnconnected({
       // Run the rules to auto-fill in any data. Right now we only do
       // this on new transactions because that's how desktop works.
       const newTransaction = { ...transaction };
-      const changedFields = new Set<keyof TransactionEntity>([updatedField]);
+      const changedFields = new Set<keyof TransactionEntity>([
+        updatedField,
+        ...alsoChangedFields,
+      ]);
       if (isTemporary(newTransaction)) {
         trackClearedField(clearedFields.current, newTransaction, updatedField);
         const clearedOnThisRow = getClearedFieldNames(

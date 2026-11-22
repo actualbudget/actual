@@ -659,6 +659,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     showBalances={false}
                     showReconciled
                     showCleared={false}
+                    showReviewed={false}
                     showAccount
                     isAdding={false}
                     isNew={() => false}

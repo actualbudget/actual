@@ -31,6 +31,7 @@ import { useNavigate } from '#hooks/useNavigate';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncStatus } from '#hooks/useSyncStatus';
+import { useUnreviewedTransactions } from '#hooks/useUnreviewedTransactions';
 import { useDispatch } from '#redux';
 import * as bindings from '#spreadsheet/bindings';
 
@@ -62,6 +63,23 @@ function UncategorizedButton() {
     >
       <Trans count={count}>{{ count }} uncategorized transactions</Trans>
     </Link>
+  );
+}
+
+function UnreviewedButton() {
+  const { count, openUnreviewed } = useUnreviewedTransactions();
+  if (count === 0) {
+    return null;
+  }
+
+  return (
+    <Button
+      variant="bare"
+      onPress={openUnreviewed}
+      style={{ color: theme.warningText }}
+    >
+      <Trans count={count}>{{ count }} unreviewed transactions</Trans>
+    </Button>
   );
 }
 
@@ -342,6 +360,7 @@ export function Titlebar({ style }: TitlebarProps) {
       <View style={{ flex: 1 }} />
       <SpaceBetween gap={10}>
         <UncategorizedButton />
+        <UnreviewedButton />
         {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
         <PrivacyButton />
         <NotificationsButton />
