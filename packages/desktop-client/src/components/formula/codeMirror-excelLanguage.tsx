@@ -836,7 +836,7 @@ const autocompletePopoverTheme = EditorView.baseTheme({
       lineHeight: '1em',
       textTransform: 'uppercase',
       letterSpacing: '0.03em',
-      color: theme.menuItemTextHeader,
+      color: theme.menuAutoCompleteTextHeader,
       opacity: '1 !important',
       marginTop: '8px',
       position: 'sticky',
@@ -903,7 +903,7 @@ const autocompletePopoverTheme = EditorView.baseTheme({
   },
   '.cm-tooltip.cm-tooltip-autocomplete .cm-completionDetail': {
     fontSize: '12px',
-    color: theme.menuKeybindingText,
+    color: theme.menuAutoCompleteTextHeader,
     marginLeft: 'auto',
     whiteSpace: 'nowrap',
   },
