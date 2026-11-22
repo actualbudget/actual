@@ -243,6 +243,19 @@ describe('deriveAccentCss', () => {
     expect(withTint.accentText).toBe(withoutTint.accentText);
   });
 
+  it('checks a see-through tint over the page as well as the table', () => {
+    const derived = declarations(
+      deriveAccentCss(
+        'light',
+        ':root { --color-accent: #767676; --color-accentSubtle: transparent; }',
+      ),
+    );
+
+    expect(
+      wcagContrast(derived.accentSubtleText, palette.navy100),
+    ).toBeGreaterThanOrEqual(4.5);
+  });
+
   it('works out the tint text for a theme that only sets the tint', () => {
     const derived = declarations(
       deriveAccentCss('dark', ':root { --color-accentSubtle: #f4e9ff; }'),

@@ -137,7 +137,9 @@ function derive(theme: ThemeName, css: string) {
     },
     ownSubtle == null
       ? undefined
-      : toHex(ownSubtle.alpha < 1 ? composite(ownSubtle, surface) : ownSubtle),
+      : [surface, page, mobilePage].map(under =>
+          toHex(ownSubtle.alpha < 1 ? composite(ownSubtle, under) : ownSubtle),
+        ),
   );
   const derived = [
     ...derivedAccentTokens.map(name => ({ name, value: accentSet[name] })),
