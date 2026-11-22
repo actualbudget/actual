@@ -208,7 +208,11 @@ export const colors = {
       raw: 'color-mix(in srgb, var(--color-settingsNavItemText) 8%, transparent)',
     },
   },
-  settingsNavItemAccentSelected: { all: { ref: 'accentText' } },
+  settingsNavItemAccentSelected: {
+    light: { ref: 'accentText' },
+    dark: { ref: 'accentText' },
+    midnight: { ref: 'accentSubtleText' },
+  },
   settingsNavItemTextSelected: {
     all: { ref: 'settingsNavItemAccentSelected' },
   },
