@@ -480,9 +480,30 @@
       }
     },
     {
-      "files": ["packages/desktop-client/src/style/themes/*"],
+      "files": [
+        "packages/component-library/src/theme.ts",
+        "packages/component-library/src/themes/**/*"
+      ],
       "rules": {
         "eslint/no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": [
+        "packages/component-library/**/*.stories.{ts,tsx}",
+        "packages/component-library/.storybook/**/*"
+      ],
+      "rules": {
+        "actual/no-untranslated-strings": "off",
+        "import/no-default-export": "off",
+        "react/rules-of-hooks": "off"
+      }
+    },
+    {
+      "files": ["packages/component-library/src/icons/*.ts"],
+      "rules": {
+        "actual/no-extraneous-dependencies": "off",
+        "import/no-default-export": "off"
       }
     },
     // TODO: enable these

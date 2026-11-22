@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { RangeCalendarStateContext } from 'react-aria-components';
 
 // react-aria's CalendarYearPicker windows its year list by stepping whole
@@ -7,6 +7,7 @@ import { RangeCalendarStateContext } from 'react-aria-components';
 // the bounds' years instead; setFocusedDate clamps to [minValue, maxValue].
 export function YearSelect({ label }: { label: string }) {
   const state = useContext(RangeCalendarStateContext);
+  const [currentYear] = useState(() => new Date().getFullYear());
   if (!state) return null;
   const minYear = state.minValue?.year ?? state.focusedDate.year;
   // An omitted upper bound arrives as a far-future sentinel; don't render
@@ -14,7 +15,7 @@ export function YearSelect({ label }: { label: string }) {
   // select stays valid when navigating past the cap via the arrow buttons.
   const maxYear = Math.min(
     state.maxValue?.year ?? state.focusedDate.year,
-    Math.max(state.focusedDate.year, new Date().getFullYear() + 10),
+    Math.max(state.focusedDate.year, currentYear + 10),
   );
   const years = Array.from(
     { length: maxYear - minYear + 1 },
