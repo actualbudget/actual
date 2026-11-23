@@ -617,7 +617,7 @@ export async function postTransactionForSchedule({
   // own date only when every date before it is paid, so a missed payment never
   // drops out of the schedule.
   let occurrence = schedule.next_date;
-  if (dateCond && date && date > schedule.next_date) {
+  if (dateCond && date && date !== schedule.next_date) {
     const firstUnpaid = findFirstUnpaidOccurrence(
       dateCond,
       schedule.next_date,

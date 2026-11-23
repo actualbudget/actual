@@ -1168,6 +1168,18 @@ describe('schedule app', () => {
           });
         });
 
+        it('posts nothing when the same occurrence is posted again', async () => {
+          expect(
+            await postOccurrences('2017-01-05', [
+              { date: '2017-01-05' },
+              { date: '2017-01-05' },
+            ]),
+          ).toEqual({
+            dates: ['2017-01-05'],
+            nextDate: '2017-01-12',
+          });
+        });
+
         it('skips a later occurrence paid on its date when posting early', async () => {
           expect(
             await postOccurrences('2017-01-05', [{}], ['2017-01-12']),
