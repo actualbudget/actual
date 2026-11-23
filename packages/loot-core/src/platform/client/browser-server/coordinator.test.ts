@@ -1543,11 +1543,61 @@ describe('SharedWorker coordinator', () => {
       expect(forwardedIds(lobbyLeader)).toEqual([]);
       replyFrom(lobbyLeader, '__restore-budget');
 
-      expect(forwardedIds(lobbyLeader)).toEqual(['last-1', 'prefs-3']);
+      // Its own request to open the budget is among them
+      expect(forwardedIds(lobbyLeader)).toEqual([
+        'load-3',
+        'last-1',
+        'prefs-3',
+      ]);
       replyFrom(lobbyLeader, 'prefs-3');
+      replyFrom(lobbyLeader, 'load-3');
       expect(lobbyLeader.postMessage).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'reply', id: 'prefs-3' }),
       );
+      expect(lobbyLeader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'load-3' }),
+      );
+    });
+
+    it('answers a tab that was joining a budget when its leader went away', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      sendMsg(follower, {
+        id: 'load-f',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      replyFrom(leader, 'load-f');
+
+      const joining = connectTab(coordinator);
+      sendInit(joining);
+      sendMsg(joining, {
+        id: 'load-j',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+
+      // The leader goes before it has answered; the follower takes over
+      follower.postMessage.mockClear();
+      joining.postMessage.mockClear();
+      sendMsg(leader, { type: 'tab-closing' });
+      sendMsg(follower, {
+        type: '__track-restore',
+        requestId: '__restore-budget',
+        budgetId: 'budget-1',
+      });
+      simulateWorkerConnect(follower);
+      expect(forwardedIds(follower)).toEqual([]);
+      replyFrom(follower, '__restore-budget');
+
+      // Only the unanswered request is sent again
+      expect(forwardedIds(follower)).toEqual(['load-j']);
+      replyFrom(follower, 'load-j');
+      expect(joining.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'load-j' }),
+      );
+      expect(coordinator.getState().portToBudget.get(joining)).toBe('budget-1');
     });
 
     it('does not send an answered request again', () => {

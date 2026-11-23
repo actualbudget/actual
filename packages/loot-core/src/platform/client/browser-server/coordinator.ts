@@ -31,6 +31,8 @@ type BudgetGroup = {
 type RoutedRequest = {
   port: CoordinatorPort;
   msg: Record<string, unknown>;
+  /** Set on a request to join this budget; see `routeWaitingRequests`. */
+  joinsBudget?: string;
 };
 
 type CoordinatorOptions = {
@@ -53,9 +55,11 @@ export function createCoordinator({
   const portToBudget = new Map<CoordinatorPort, string>();
   const unassignedPorts = new Set<CoordinatorPort>();
 
-  // Requests that do not depend on the budget a backend has open: those of
-  // tabs without a budget, and those made in the lobby. Any backend can
-  // answer them, so they are kept until one has. `waitingRequests` have no
+  // Requests that another backend can answer just as well, kept until one
+  // has. Most do not depend on the budget a backend has open: those of
+  // tabs without a budget, and those made in the lobby. The other kind is
+  // a tab's request to join a budget, which the next leader of that budget
+  // answers once it has the budget open. `waitingRequests` have no
   // backend to go to yet; `sentRequests` are with a backend that has not
   // answered, and go back to waiting if that backend goes away. A request
   // stays one of these however often it is sent again, and whatever its
@@ -176,7 +180,11 @@ export function createCoordinator({
     for (const [id, request] of sentRequests) {
       if (request.group === group) {
         sentRequests.delete(id);
-        waitingRequests.push({ port: request.port, msg: request.msg });
+        waitingRequests.push({
+          port: request.port,
+          msg: request.msg,
+          joinsBudget: request.joinsBudget,
+        });
         requeued++;
       }
     }
@@ -197,8 +205,13 @@ export function createCoordinator({
 
     const requests = waitingRequests.splice(0);
     logger.log(`[SharedWorker] Sending ${requests.length} held request(s)`);
-    for (const { port, msg } of requests) {
-      if (isTrackedPort(port)) {
+    for (const { port, msg, joinsBudget } of requests) {
+      // A request to join a budget is only for the next leader of the
+      // group its tab is in. Once the tab is out of it (the budget was
+      // deleted under it, say), sending it again would open the budget anew
+      const isStillWanted =
+        !joinsBudget || portToBudget.get(port) === joinsBudget;
+      if (isTrackedPort(port) && isStillWanted) {
         replayedRequest = msg;
         try {
           port.onmessage?.({ data: msg });
@@ -786,7 +799,7 @@ export function createCoordinator({
             return;
           }
 
-          if (existingGroup && existingGroup.backendConnected) {
+          if (existingGroup) {
             addFollower(budgetId, port);
             existingGroup.requestToPort.set(msg.id as string, port);
             existingGroup.requestNames.set(
@@ -794,28 +807,20 @@ export function createCoordinator({
               msg.name as string,
             );
             existingGroup.requestBudgetIds.set(msg.id as string, budgetId);
-            existingGroup.leaderPort.postMessage({
-              type: '__to-worker',
+            // The leader may go away before it answers. The tab stays in
+            // the group, so the next leader gets the request again
+            sentRequests.set(msg.id as string, {
+              port,
               msg,
+              group: existingGroup,
+              joinsBudget: budgetId,
             });
-            logState(`Tab joined budget "${budgetId}" as follower`);
-            return;
-          }
-
-          if (existingGroup && !existingGroup.backendConnected) {
-            addFollower(budgetId, port);
-            existingGroup.requestToPort.set(msg.id as string, port);
-            existingGroup.requestNames.set(
-              msg.id as string,
-              msg.name as string,
-            );
-            existingGroup.requestBudgetIds.set(msg.id as string, budgetId);
             existingGroup.leaderPort.postMessage({
               type: '__to-worker',
               msg,
             });
             logState(
-              `Tab joined budget "${budgetId}" as follower (backend booting)`,
+              `Tab joined budget "${budgetId}" as follower${existingGroup.backendConnected ? '' : ' (backend booting)'}`,
             );
             return;
           }
