@@ -9,6 +9,7 @@ import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
 import { isElectron } from '@actual-app/core/shared/environment';
 import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
@@ -336,7 +337,19 @@ export function ConfigServer() {
 
     const urlChanged = httpUrl.replace(/\/+$/, '') !== currentUrl;
 
-    const { error } = await setServerUrl(httpUrl);
+    if (urlChanged) {
+      const result = await send('subscribe-needs-bootstrap', { url: httpUrl });
+      if ('error' in result) {
+        setUrl(httpUrl);
+        setLoading(false);
+        setError(result.error);
+        return;
+      }
+      // Revoke the session while the current server is still active.
+      await send('subscribe-sign-out');
+    }
+
+    const { error } = await setServerUrl(httpUrl, { validate: !urlChanged });
     setUrl(httpUrl);
 
     if (error) {
@@ -346,6 +359,8 @@ export function ConfigServer() {
       setLoading(false);
       if (urlChanged) {
         await dispatch(signOut());
+      } else {
+        await dispatch(loggedIn());
       }
       void navigate('/');
     }
