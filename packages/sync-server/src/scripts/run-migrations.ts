@@ -1,6 +1,6 @@
 import { run } from '#migrations';
 
-const direction = process.argv[2] || 'up';
+const direction = process.argv[2] ?? 'up';
 
 if (direction !== 'up' && direction !== 'down') {
   console.error(
