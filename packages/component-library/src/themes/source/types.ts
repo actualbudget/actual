@@ -10,7 +10,8 @@ export type TokenValue =
   | { ref: string }
   | { raw: string }
   | { derive: DerivedAccentToken }
-  | { accentTextOn: string; contrast?: number };
+  | { accentTextOn: string; contrast?: number }
+  | { contrastOn: string };
 
 type TokenValues = { all: TokenValue } | Record<ThemeName, TokenValue>;
 

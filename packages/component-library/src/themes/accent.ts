@@ -5,6 +5,7 @@ import {
   deriveAccent,
   derivedAccentTokens,
   nearestWithContrast,
+  pickContrast,
   textContrast,
 } from './source/derive';
 import { palette } from './source/palette';
@@ -35,6 +36,15 @@ function accentTextOnTokens(theme: ThemeName) {
             contrast: value.contrast ?? textContrast,
           },
         ]
+      : [];
+  });
+}
+
+function contrastOnTokens(theme: ThemeName) {
+  return Object.entries(definitions).flatMap(([name, definition]) => {
+    const value = 'all' in definition ? definition.all : definition[theme];
+    return typeof value === 'object' && 'contrastOn' in value
+      ? [{ name, fill: value.contrastOn }]
       : [];
   });
 }
@@ -98,7 +108,12 @@ function resolveProperty(
 function derive(theme: ThemeName, css: string) {
   const declarations = readDeclarations(css);
   const textOnTokens = accentTextOnTokens(theme);
-  const inputs = [...inputTokens, ...textOnTokens.map(token => token.surface)];
+  const contrastTokens = contrastOnTokens(theme);
+  const inputs = [
+    ...inputTokens,
+    ...textOnTokens.map(token => token.surface),
+    ...contrastTokens.map(token => token.fill),
+  ];
   if (!inputs.some(name => declarations.has(`color-${name}`))) {
     return null;
   }
@@ -128,6 +143,14 @@ function derive(theme: ThemeName, css: string) {
       mobilePage: toHex(mobilePage),
     },
   );
+  const themed: Record<string, TokenDefinition> = {
+    ...definitions,
+    accent: { all: { raw: accentSet.accent } },
+  };
+  const readFill = (token: string) =>
+    declarations.has(`color-${token}`)
+      ? readSurface(token)
+      : resolveToken(token, theme, themed, palette);
   const derived = [
     ...derivedAccentTokens.map(name => ({ name, value: accentSet[name] })),
     ...textOnTokens.map(token => ({
@@ -137,6 +160,10 @@ function derive(theme: ThemeName, css: string) {
         [toHex(readSurface(token.surface))],
         token.contrast,
       ),
+    })),
+    ...contrastTokens.map(token => ({
+      name: token.name,
+      value: pickContrast(toHex(readFill(token.fill))),
     })),
   ]
     .filter(({ name }) => !declarations.has(`color-${name}`))

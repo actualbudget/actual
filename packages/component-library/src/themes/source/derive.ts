@@ -109,7 +109,7 @@ export function nearestWithContrast(
   return strongest.color;
 }
 
-function pickContrast(fill: string) {
+export function pickContrast(fill: string) {
   if (wcagContrast(white, fill) >= textContrast) {
     return white;
   }

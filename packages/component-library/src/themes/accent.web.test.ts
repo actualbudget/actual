@@ -38,6 +38,7 @@ describe('deriveAccentCss', () => {
       'menuKeybindingText',
       'menuAutoCompleteTextHeader',
       'pillTextHighlighted',
+      'calendarSelectedText',
     ]);
     expect(derived.accentContrast).toBe('#ffffff');
     expect(wcagContrast(derived.accentText, '#ffffff')).toBeGreaterThanOrEqual(
@@ -67,13 +68,50 @@ describe('deriveAccentCss', () => {
     ).toBeGreaterThanOrEqual(7);
   });
 
+  it('puts black or white on the selected day to suit the accent', () => {
+    const pale = declarations(
+      deriveAccentCss('dark', ':root { --color-accent: #ffd84d; }'),
+    );
+    const deep = declarations(
+      deriveAccentCss('dark', ':root { --color-accent: #0a7d5a; }'),
+    );
+
+    expect(pale.calendarSelectedText).toBe('#000000');
+    expect(deep.calendarSelectedText).toBe('#ffffff');
+  });
+
+  it('works out the selected day text against a fill the theme sets', () => {
+    const pale = declarations(
+      deriveAccentCss(
+        'light',
+        ':root { --color-calendarSelectedBackground: #d9d9d9; }',
+      ),
+    );
+    const deep = declarations(
+      deriveAccentCss(
+        'light',
+        ':root { --color-accent: #ffd84d; --color-calendarSelectedBackground: #8839ef; }',
+      ),
+    );
+    const own = declarations(
+      deriveAccentCss(
+        'light',
+        ':root { --color-calendarSelectedBackground: #d9d9d9; --color-calendarSelectedText: #333333; }',
+      ),
+    );
+
+    expect(pale.calendarSelectedText).toBe('#000000');
+    expect(deep.calendarSelectedText).toBe('#ffffff');
+    expect(own.calendarSelectedText).toBeUndefined();
+  });
+
   it('matches the built-in values when given the built-in accent', () => {
     const builtIn = declarations(lightThemeCss);
     const derived = declarations(
       deriveAccentCss('light', ':root { --color-accent: #8719e0; }'),
     );
 
-    expect(Object.keys(derived)).toHaveLength(11);
+    expect(Object.keys(derived)).toHaveLength(12);
     for (const [name, value] of Object.entries(derived)) {
       expect(value).toBe(builtIn[name]);
     }

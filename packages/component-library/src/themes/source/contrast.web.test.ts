@@ -99,6 +99,7 @@ describe('resolveToken', () => {
     surface: { all: 'white' },
     ink: { light: 'black', dark: 'white', midnight: 'white' },
     alias: { all: { ref: 'ink' } },
+    label: { all: { contrastOn: 'ink' } },
     wash: {
       all: { raw: 'color-mix(in srgb, var(--color-ink) 25%, transparent)' },
     },
@@ -129,6 +130,18 @@ describe('resolveToken', () => {
     expect(resolveToken('alias', 'dark', testColors, testPalette)).toEqual(
       resolveToken('ink', 'dark', testColors, testPalette),
     );
+  });
+
+  it('picks black or white text for a fill', () => {
+    expect(resolveToken('label', 'light', testColors, testPalette)).toEqual(
+      resolveToken('surface', 'light', testColors, testPalette),
+    );
+    expect(resolveToken('label', 'dark', testColors, testPalette)).toEqual({
+      r: 0,
+      g: 0,
+      b: 0,
+      alpha: 1,
+    });
   });
 
   it('resolves a mix with transparent to the color at that alpha', () => {

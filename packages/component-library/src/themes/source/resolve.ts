@@ -3,6 +3,7 @@ import {
   accentSurfaceTokens,
   deriveAccent,
   nearestWithContrast,
+  pickContrast,
   textContrast,
 } from './derive';
 import type { DerivedAccentToken } from './derive';
@@ -141,9 +142,17 @@ function resolveAccentTextOn(
   );
 }
 
+function resolveContrastOn(fillName: string, context: Context): ResolvedColor {
+  return resolveCss(
+    pickContrast(toHex(resolveName(fillName, context))),
+    context,
+  );
+}
+
 export function isComputedValue(value: TokenValue) {
   return (
-    typeof value === 'object' && ('derive' in value || 'accentTextOn' in value)
+    typeof value === 'object' &&
+    ('derive' in value || 'accentTextOn' in value || 'contrastOn' in value)
   );
 }
 
@@ -160,6 +169,9 @@ function resolveValue(value: TokenValue, context: Context): ResolvedColor {
       value.contrast ?? textContrast,
       context,
     );
+  }
+  if ('contrastOn' in value) {
+    return resolveContrastOn(value.contrastOn, context);
   }
   if ('ref' in value) {
     return resolveName(value.ref, context);

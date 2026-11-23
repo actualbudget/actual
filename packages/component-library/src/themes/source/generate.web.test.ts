@@ -47,6 +47,7 @@ describe('built-in themes', () => {
     );
     expect(lightThemeCss).toContain('  --color-accentHover: #7300c3;');
     expect(darkThemeCss).toContain('  --color-accentContrast: #ffffff;');
+    expect(darkThemeCss).toContain('  --color-calendarSelectedText: #ffffff;');
     expect(lightThemeCss).toContain(
       '  --color-buttonPrimaryBackground: var(--color-accent);',
     );

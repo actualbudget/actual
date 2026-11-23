@@ -87,7 +87,7 @@ Actual works out the related colors from the accent and from your theme's `--col
 
 You can set any of these yourself. Actual keeps your value and only works out the ones you leave out. The tinted background and its text are a pair, so if you set `--color-accentSubtle`, also set `--color-accentSubtleText` to a color that is readable on it. A more specific variable, such as `--color-buttonPrimaryBackground`, still takes priority over the accent for the thing it styles.
 
-Accent text that sits on its own background, such as the selected sidebar item on `--color-sidebarBackground`, is worked out against that background.
+Accent text that sits on its own background, such as the selected sidebar item on `--color-sidebarBackground`, is worked out against that background. The text on the selected day in the date picker, `--color-calendarSelectedText`, is white when white is readable on `--color-calendarSelectedBackground` and black when it is not.
 
 ### Available CSS Variables
 
