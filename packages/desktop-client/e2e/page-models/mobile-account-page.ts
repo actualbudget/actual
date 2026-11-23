@@ -143,18 +143,6 @@ export class MobileAccountPage {
     await reconcileModal.getByRole('button', { name: 'Reconcile' }).click();
     await this.reconcilingBanner.waitFor();
   }
-  /**
-   * Opens the reconciling page but does not attempt to submit it.
-   * @returns The page model opened
-   */
-  async reopenReconciliation() {
-    await this.accountMenuButton.click();
-    await this.page
-      .getByTestId('account-menu-modal')
-      .getByRole('button', { name: 'Reconcile', exact: true })
-      .click();
-    return this.page.getByTestId('account-reconcile-modal');
-  }
 
   /**
    * Create a reconciliation balance adjustment transaction
@@ -171,14 +159,7 @@ export class MobileAccountPage {
   async lockTransactions() {
     await this.page.getByRole('button', { name: 'Lock transactions' }).click();
   }
-  /**
-   * Leaves Reconciliation while reconciliation is invalid
-   */
-  async exitReconciliation() {
-    await this.page
-      .getByRole('button', { name: 'Exit reconciliation' })
-      .click();
-  }
+
   /**
    * Unclear the first cleared transaction in the list
    */

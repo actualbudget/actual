@@ -3,4 +3,4 @@ category: Bugfixes
 authors: [RomajiQuadhash]
 ---
 
-Fix accounts showing as just reconciled after exiting a reconciliation that did not balance
+Don't mark an account as reconciled when exiting an unbalanced reconciliation

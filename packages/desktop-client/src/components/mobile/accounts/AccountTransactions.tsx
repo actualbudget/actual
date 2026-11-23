@@ -234,10 +234,12 @@ function TransactionListWithPreviews({
   const { onBatchEdit } = useTransactionBatchActions();
 
   const onDoneReconciling = useCallback(async () => {
-    //Only update the account if we succeeded
-    if (
-      await reconciliation.finishReconciliation(account.id, reconcileAmount)
-    ) {
+    const didReconcile = await reconciliation.finishReconciliation(
+      account.id,
+      reconcileAmount,
+    );
+
+    if (didReconcile) {
       updateAccount({
         account: {
           ...account,

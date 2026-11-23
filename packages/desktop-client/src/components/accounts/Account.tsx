@@ -1179,7 +1179,6 @@ class AccountInternal extends PureComponent<
       () => this.lockTransactions(),
     );
 
-    // Only mark the reconciliation if it occurred
     if (didReconcile) {
       const lastReconciled = new Date().getTime().toString();
       this.props.onUpdateAccount({
