@@ -404,6 +404,35 @@ it('stops editing when the edited row leaves the data', async () => {
   expect(screen.getByText('Idle')).toBeInTheDocument();
 });
 
+it('a row that leaves during the edge flash is not reopened when it returns', async () => {
+  const hasFocus = vi.spyOn(document, 'hasFocus').mockReturnValue(true);
+  try {
+    const items = [
+      { id: 'a', checkable: true },
+      { id: 'b', checkable: true },
+    ];
+    function table(rows: CheckableItem[]) {
+      return (
+        <TestProviders>
+          <CheckableTable items={rows} />
+        </TestProviders>
+      );
+    }
+    const { rerender } = render(table(items));
+    await userEvent.click(screen.getByRole('button', { name: 'Edit b' }));
+    // Enter on the last row starts a flash that would reopen the cell
+    await userEvent.keyboard('[Enter]');
+    rerender(table(items.slice(0, 1)));
+    rerender(table(items));
+    await new Promise(resolve => setTimeout(resolve, 150));
+
+    expect(screen.getByText('Cursor: b')).toBeInTheDocument();
+    expect(screen.getByText('Idle')).toBeInTheDocument();
+  } finally {
+    hasFocus.mockRestore();
+  }
+});
+
 it('space does not check a row without a checkbox', async () => {
   render(
     <TestProviders>

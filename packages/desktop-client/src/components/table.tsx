@@ -1475,6 +1475,13 @@ export function useTableNavigator<T extends TableItem>(
 
   useEffect(() => cancelFlash, [cancelFlash]);
 
+  // A flash for a row that left can't reopen it if the row comes back
+  useEffect(() => {
+    if (cursorState && !cursorItem) {
+      cancelFlash();
+    }
+  }, [cursorState, cursorItem, cancelFlash]);
+
   const beginEdit = useCallback(
     (id: T['id'], field?: string) => {
       cancelFlash();
