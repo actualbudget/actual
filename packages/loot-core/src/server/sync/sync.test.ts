@@ -4,6 +4,7 @@ import { getClock, Timestamp } from '@actual-app/crdt';
 import * as db from '#server/db';
 import { app } from '#server/main-app';
 import { runMutator } from '#server/mutators';
+import * as post from '#server/post';
 import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
 import * as mockSyncServer from '#server/tests/mockSyncServer';
@@ -78,9 +79,34 @@ describe('Sync', () => {
     }
   });
 
+  it('asks to register a local budget before sending a sync request', async () => {
+    await prefs.loadPrefs();
+    const request = vi.spyOn(post, 'postBinary');
+    const onSync = vi.fn();
+    app.events.on('sync', onSync);
+
+    try {
+      expect(await fullSync()).toMatchObject({
+        error: { reason: 'file-not-found' },
+      });
+      expect(onSync).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'error', subtype: 'file-not-found' }),
+      );
+      expect(request).not.toHaveBeenCalled();
+
+      await prefs.savePrefs({ groupId: 'group', cloudFileId: 'file' });
+      expect(await fullSync()).toMatchObject({ messages: [] });
+      expect(request).toHaveBeenCalledOnce();
+    } finally {
+      app.events.off('sync', onSync);
+      request.mockRestore();
+      prefs.unloadPrefs();
+    }
+  });
+
   it('should send messages to the server', async () => {
     void prefs.loadPrefs();
-    void prefs.savePrefs({ groupId: 'group' });
+    void prefs.savePrefs({ groupId: 'group', cloudFileId: 'file' });
 
     let timestamp = Timestamp.send();
     await sendMessages([
@@ -119,7 +145,7 @@ describe('Sync', () => {
 
   it('should resend old messages to the server', async () => {
     void prefs.loadPrefs();
-    void prefs.savePrefs({ groupId: 'group' });
+    void prefs.savePrefs({ groupId: 'group', cloudFileId: 'file' });
 
     global.stepForwardInTime(Date.parse('2018-11-13T13:20:00.000Z'));
 
@@ -157,7 +183,7 @@ describe('Sync', () => {
 
   it('should send a large backlog to the server in batches', async () => {
     void prefs.loadPrefs();
-    void prefs.savePrefs({ groupId: 'group' });
+    void prefs.savePrefs({ groupId: 'group', cloudFileId: 'file' });
 
     // Another client already synced a message to the server
     await mockSyncServer.handlers['/sync/sync'](
@@ -243,6 +269,7 @@ describe('Sync', () => {
     void prefs.loadPrefs();
     void prefs.savePrefs({
       groupId: 'group',
+      cloudFileId: 'file',
       lastSyncedTimestamp: Timestamp.zero.toString(),
     });
 
@@ -409,6 +436,7 @@ async function asSecondClient(func) {
   void prefs.loadPrefs();
   void prefs.savePrefs({
     groupId: 'group',
+    cloudFileId: 'file',
     lastSyncedTimestamp: Timestamp.zero.toString(),
   });
 
@@ -417,6 +445,7 @@ async function asSecondClient(func) {
   await global.emptyDatabase()();
   void prefs.savePrefs({
     groupId: 'group',
+    cloudFileId: 'file',
     lastSyncedTimestamp: Timestamp.zero.toString(),
   });
 }
@@ -596,7 +625,7 @@ describe('Sync projections', () => {
 describe('Sync account balance cells', () => {
   test('recomputes account totals and group subtotals when transactions sync', async () => {
     void prefs.loadPrefs();
-    void prefs.savePrefs({ groupId: 'group' });
+    void prefs.savePrefs({ groupId: 'group', cloudFileId: 'file' });
     await sheet.loadSpreadsheet(db);
 
     const spreadsheet = sheet.get();

@@ -923,6 +923,7 @@ async function runFullSync(): Promise<FullSyncResult> {
           meta: e.meta,
         });
       } else if (
+        e.reason === 'file-not-found' ||
         e.reason === 'decrypt-failure' ||
         e.reason === 'encrypt-failure'
       ) {
@@ -991,6 +992,11 @@ async function _fullSync(
     !currentId
   ) {
     return [];
+  }
+
+  // A local budget needs to be registered before we can send changes.
+  if (!cloudFileId) {
+    throw new SyncError('file-not-found');
   }
 
   // Snapshot the point at which we are currently syncing

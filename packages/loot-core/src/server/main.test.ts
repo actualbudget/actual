@@ -676,7 +676,7 @@ describe('Budget shutdown', () => {
   }
 
   test('finishes sync and schedule persistence before unloading, without admitting new syncs', async () => {
-    await prefs.savePrefs({ groupId: 'group' });
+    await prefs.savePrefs({ groupId: 'group', cloudFileId: 'file' });
     fs._setDocumentDir(__dirname);
     setSyncingMode('enabled');
     const syncGate = deferred();
