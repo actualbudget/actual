@@ -28,6 +28,11 @@ type BudgetGroup = {
   requestBudgetIds: Map<string, string>;
 };
 
+type RoutedRequest = {
+  port: CoordinatorPort;
+  msg: Record<string, unknown>;
+};
+
 type CoordinatorOptions = {
   enableConsoleForwarding?: boolean;
 };
@@ -47,6 +52,17 @@ export function createCoordinator({
   const budgetGroups = new Map<string, BudgetGroup>();
   const portToBudget = new Map<CoordinatorPort, string>();
   const unassignedPorts = new Set<CoordinatorPort>();
+
+  // Requests that do not depend on the budget a backend has open: those of
+  // tabs without a budget, and those made in the lobby. Any backend can
+  // answer them, so they are kept until one has. `waitingRequests` have no
+  // backend to go to yet; `sentRequests` are with a backend that has not
+  // answered, and go back to waiting if that backend goes away.
+  const waitingRequests: RoutedRequest[] = [];
+  const sentRequests = new Map<
+    string,
+    RoutedRequest & { group: BudgetGroup }
+  >();
 
   // ── Console forwarding ─────────────────────────────────────────────────
 
@@ -147,6 +163,42 @@ export function createCoordinator({
 
   function isGroupMember(group: BudgetGroup, port: CoordinatorPort) {
     return group.leaderPort === port || group.followers.has(port);
+  }
+
+  // A backend that goes away takes its unanswered requests with it, and
+  // the tabs that made them would wait forever. The ones any backend can
+  // answer are sent again once another is connected.
+  function requeueUnansweredRequests(group: BudgetGroup, budgetId: string) {
+    let requeued = 0;
+    for (const [id, request] of sentRequests) {
+      if (request.group === group) {
+        sentRequests.delete(id);
+        waitingRequests.push({ port: request.port, msg: request.msg });
+        requeued++;
+      }
+    }
+    if (requeued > 0) {
+      logger.log(
+        `[SharedWorker] Backend for "${budgetId}" went away with ${requeued} unanswered request(s) — they will be sent again`,
+      );
+    }
+  }
+
+  // Runs after every change of state. Waiting requests go back through the
+  // routing once a backend is connected, or once no group is left at all
+  // (the first tab to ask then starts a backend). While the only groups
+  // are still starting, they keep waiting.
+  function routeWaitingRequests() {
+    if (waitingRequests.length === 0) return;
+    if (!hasConnectedBackend() && budgetGroups.size > 0) return;
+
+    const requests = waitingRequests.splice(0);
+    logger.log(`[SharedWorker] Sending ${requests.length} held request(s)`);
+    for (const { port, msg } of requests) {
+      if (isTrackedPort(port)) {
+        port.onmessage?.({ data: msg });
+      }
+    }
   }
 
   function movePortToUnassigned(port: CoordinatorPort) {
@@ -262,6 +314,7 @@ export function createCoordinator({
       pendingPongs.delete(port);
       removePort(port);
     }
+    routeWaitingRequests();
     for (const port of connectedPorts) {
       pendingPongs.add(port);
       port.postMessage({ type: '__heartbeat-ping' });
@@ -274,6 +327,11 @@ export function createCoordinator({
     const idx = connectedPorts.indexOf(port);
     if (idx !== -1) connectedPorts.splice(idx, 1);
     unassignedPorts.delete(port);
+    for (const [id, request] of sentRequests) {
+      if (request.port === port) {
+        sentRequests.delete(id);
+      }
+    }
 
     const budgetId = portToBudget.get(port);
     portToBudget.delete(port);
@@ -295,6 +353,7 @@ export function createCoordinator({
       group = createBudgetGroup(port);
       budgetGroups.set(budgetId, group);
     } else {
+      requeueUnansweredRequests(group, budgetId);
       group.leaderPort = port;
       group.backendConnected = false;
       group.pendingConnect = false;
@@ -375,6 +434,7 @@ export function createCoordinator({
           `[SharedWorker] Last tab left budget "${budgetId}" — removing group`,
         );
         budgetGroups.delete(budgetId);
+        requeueUnansweredRequests(group, budgetId);
       }
       return;
     }
@@ -415,6 +475,7 @@ export function createCoordinator({
     }
 
     budgetGroups.delete(budgetId);
+    requeueUnansweredRequests(group, budgetId);
     if (evicted.length > 0) {
       logger.log(
         `[SharedWorker] Evicted ${evicted.length} tab(s) from budget "${budgetId}"`,
@@ -487,6 +548,7 @@ export function createCoordinator({
 
     if (closingPort === group.leaderPort && group.followers.size === 0) {
       budgetGroups.delete(budgetId);
+      requeueUnansweredRequests(group, budgetId);
       portToBudget.delete(closingPort);
       unassignedPorts.add(closingPort);
       logState(`Budget "${budgetId}" closed (no tabs remain)`);
@@ -615,6 +677,9 @@ export function createCoordinator({
           const workerMsg = msg.msg as Record<string, unknown>;
 
           if (workerMsg.type === 'reply' || workerMsg.type === 'error') {
+            if (sentRequests.get(workerMsg.id as string)?.group === group) {
+              sentRequests.delete(workerMsg.id as string);
+            }
             const targetPort = group.requestToPort.get(workerMsg.id as string);
             if (targetPort) {
               targetPort.postMessage(workerMsg);
@@ -889,17 +954,58 @@ export function createCoordinator({
         // ── Default: track and forward to leader ───────────────────
 
         let targetGroup = group;
-        if (!targetGroup && unassignedPorts.has(port) && isTrackedPort(port)) {
+        const isUnassigned =
+          !targetGroup && unassignedPorts.has(port) && isTrackedPort(port);
+        if (isUnassigned) {
           for (const [, g] of budgetGroups) {
             if (g.backendConnected) {
               targetGroup = g;
               break;
             }
           }
+
+          // No backend can take the request now. Dropped, it would never
+          // be answered and the tab that sent it would wait forever
+          if (!targetGroup && msg.id) {
+            if (budgetGroups.size === 0) {
+              // Every backend is gone and none is starting: this tab
+              // starts one, which runs the request once it has connected
+              electLeader('__lobby', port, null, msg);
+              const lobbyGroup = budgetGroups.get('__lobby');
+              if (lobbyGroup) {
+                lobbyGroup.requestToPort.set(msg.id as string, port);
+                if (msg.name) {
+                  lobbyGroup.requestNames.set(
+                    msg.id as string,
+                    msg.name as string,
+                  );
+                }
+                sentRequests.set(msg.id as string, {
+                  port,
+                  msg,
+                  group: lobbyGroup,
+                });
+              }
+              logState('Tab without a backend became lobby leader');
+            } else {
+              waitingRequests.push({ port, msg });
+              logger.log(
+                `[SharedWorker] No backend connected yet — holding "${String(msg.name)}" from a tab without a budget`,
+              );
+            }
+            return;
+          }
         }
 
         if (targetGroup) {
           if (msg.id) {
+            if (isUnassigned || portBudget === '__lobby') {
+              sentRequests.set(msg.id as string, {
+                port,
+                msg,
+                group: targetGroup,
+              });
+            }
             targetGroup.requestToPort.set(msg.id as string, port);
             if (msg.name) {
               targetGroup.requestNames.set(
@@ -922,6 +1028,8 @@ export function createCoordinator({
         }
       } catch (error) {
         logger.error('[SharedWorker] Error in message handler:', error);
+      } finally {
+        routeWaitingRequests();
       }
     };
 
