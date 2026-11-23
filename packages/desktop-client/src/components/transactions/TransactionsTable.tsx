@@ -4087,14 +4087,15 @@ export const TransactionTable = forwardRef(
             }
           }
 
-          const newTrans = latestState.current.newTransactions;
-          setNewTransactions(
-            ungroupTransactions(
-              updateTransaction(
-                newTrans,
-                groupTransaction([parentTransaction, ...finalSiblings]),
-              ).data,
-            ),
+          setNewTransactions(current =>
+            current !== newTransactions
+              ? current
+              : ungroupTransactions(
+                  updateTransaction(
+                    current,
+                    groupTransaction([parentTransaction, ...finalSiblings]),
+                  ).data,
+                ),
           );
         } else {
           tableNavigator.onEdit(null);

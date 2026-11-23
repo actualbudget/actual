@@ -2050,6 +2050,68 @@ describe('Transactions', () => {
     expect(child2.category).toBe(foodCategoryId);
   });
 
+  test('distributing a new split keeps a newer draft when rule results arrive late', async () => {
+    const foodCategoryId = usualGroup.categories![0].id;
+    let deferRules = false;
+    let resolveDeferredRule: (() => void) | null = null;
+    const { container, updateProps } = renderTransactions({
+      onApplyRules: async transaction => {
+        if (deferRules) {
+          return new Promise<TransactionEntity>(resolve => {
+            resolveDeferredRule = () =>
+              resolve({ ...transaction, category: foodCategoryId });
+          });
+        }
+        return transaction;
+      },
+    });
+    updateProps({ isAdding: true });
+
+    let input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '10.00');
+
+    await editNewField(container, 'category');
+    await userEvent.click(screen.getByTestId('split-transaction-button'));
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+
+    input = await editNewField(container, 'debit', 1);
+    await userEvent.clear(input);
+    await userEvent.type(input, '3.00[tab]');
+
+    deferRules = true;
+    await userEvent.click(screen.getByRole('button', { name: 'Distribute' }));
+    await waitFor(() => {
+      expect(resolveDeferredRule).not.toBeNull();
+    });
+
+    // Add a third split while Distribute is still waiting on rules
+    await userEvent.click(screen.getByTestId('add-split-button'));
+    expect(
+      container.querySelectorAll(
+        '[data-testid="new-transaction"] [data-testid="debit"]',
+      ),
+    ).toHaveLength(4);
+
+    // Resolve the stale rule call and ensure the 3-child draft is kept
+    await act(async () => {
+      resolveDeferredRule!();
+    });
+
+    const debitCells = container.querySelectorAll(
+      '[data-testid="new-transaction"] [data-testid="debit"]',
+    );
+    expect(debitCells).toHaveLength(4);
+    expect(debitCells[1].textContent).toBe('3.00');
+    expect(debitCells[2].textContent).toBe('0.00');
+    expect(debitCells[3].textContent).toBe('0.00');
+    expect(
+      container.querySelector('[data-testid="transaction-error"]'),
+    ).toBeTruthy();
+  });
+
   test('transaction with splits shows 0 in correct column', async () => {
     const { container, getTransactions } = renderTransactions();
 
