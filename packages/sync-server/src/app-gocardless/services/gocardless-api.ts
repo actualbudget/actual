@@ -222,7 +222,6 @@ export class GoCardlessApi {
   }: {
     redirectUrl: string;
     institutionId: GoCardlessInstitutionId;
-    // Optional to allow GoCardless to use its default agreement.
     agreement?: GoCardlessAgreementId;
     userLanguage: string;
     reference: string | null;
@@ -340,10 +339,8 @@ export class GoCardlessApi {
     ssn?: string | null;
     redirectImmediate?: boolean;
     accountSelection?: boolean;
-    // Skip creating an end-user agreement and use GoCardless' default.
     skipEndUserAgreement?: boolean;
   }): Promise<Requisition> {
-    // Create an agreement only when the default agreement isn't requested.
     const agreement = skipEndUserAgreement
       ? undefined
       : await this.createAgreement({

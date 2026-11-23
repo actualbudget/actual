@@ -27,14 +27,6 @@ export type IBank = {
   institutionIds: string[];
 
   /**
-   * Some institutions fail to complete the linking process when a requisition
-   * is associated with a previously created end-user agreement, leaving it in
-   * the `UA` state indefinitely. When enabled, this option skips agreement
-   * creation and uses GoCardless' default agreement instead.
-   */
-  skipEndUserAgreement?: boolean;
-
-  /**
    * Returns normalized object with required data for the frontend
    */
   normalizeAccount: (

@@ -293,44 +293,22 @@ describe('goCardlessService', () => {
       );
     });
 
-    it('should retain the default agreement flow for regular banks', async () => {
+    it('skips the end-user agreement for ING Italy without retrying', async () => {
       setTokenSpy.mockResolvedValue(undefined);
       getInstitutionSpy.mockResolvedValue(mockInstitution);
-      createRequisitionSpy.mockResolvedValue(mockCreateRequisition);
+      createRequisitionSpy.mockRejectedValue(new Error('failed'));
 
-      await goCardlessService.createRequisition(params);
-
-      expect(createRequisitionSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          skipEndUserAgreement: false,
+      await expect(
+        goCardlessService.createRequisition({
+          ...params,
+          institutionId: 'ING_INGBITMM' as GoCardlessInstitutionId,
         }),
+      ).rejects.toThrow(GenericGoCardlessError);
+
+      expect(createRequisitionSpy).toHaveBeenCalledTimes(1);
+      expect(createRequisitionSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ skipEndUserAgreement: true }),
       );
-    });
-
-    it('should bypass agreement creation for ING Italy across retries', async () => {
-      setTokenSpy.mockResolvedValue(undefined);
-      createRequisitionSpy
-        .mockRejectedValueOnce(new Error('initial request failed'))
-        .mockResolvedValueOnce(mockCreateRequisition);
-
-      getInstitutionSpy.mockResolvedValue({
-        ...mockInstitution,
-        id: 'ING_INGBITMM',
-      });
-
-      await goCardlessService.createRequisition({
-        ...params,
-        institutionId: 'ING_INGBITMM' as GoCardlessInstitutionId,
-      });
-
-      expect(createRequisitionSpy).toHaveBeenCalledTimes(2);
-
-      for (const callIndex of [1, 2]) {
-        expect(createRequisitionSpy).toHaveBeenNthCalledWith(
-          callIndex,
-          expect.objectContaining({ skipEndUserAgreement: true }),
-        );
-      }
     });
   });
 

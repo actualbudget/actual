@@ -317,9 +317,9 @@ export const goCardlessService = {
         'separate_continuous_history_consent',
       ) ?? false;
 
-    // Read the bank-specific setting; default to the existing behavior.
-    const skipEndUserAgreement =
-      BankFactory(institutionId).skipEndUserAgreement ?? false;
+    // ING Italy requisitions bound to an explicit agreement get stuck in `UA`
+    // https://github.com/actualbudget/actual/issues/8902
+    const skipEndUserAgreement = institutionId === 'ING_INGBITMM';
 
     const body = {
       redirectUrl,
@@ -347,7 +347,11 @@ export const goCardlessService = {
       supportedFeatures: institution.supported_features,
     });
 
-    const response = await client.initSession(body).catch(async () => {
+    const response = await client.initSession(body).catch(async error => {
+      if (skipEndUserAgreement) {
+        return handleGoCardlessError(error);
+      }
+
       debugSensitive('Failed to link using: %O', body);
       console.log(
         'Falling back to accessValidForDays = 90 ' +
