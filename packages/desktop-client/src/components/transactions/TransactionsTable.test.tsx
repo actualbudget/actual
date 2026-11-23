@@ -1349,6 +1349,31 @@ describe('Transactions', () => {
     expect(getTransactions()[2].date).toBe(movedDate);
   });
 
+  test('a date picked with the mouse saves after an unchanged enter', async () => {
+    const { container, getTransactions } = renderTransactions();
+    const originalDate = getTransactions()[2].date;
+    await editField(container, 'date', 2);
+    await userEvent.keyboard('[Enter]');
+    const input = queryField(container, 'date', 'input', 2);
+    expect(input).not.toBeNull();
+
+    // Reopen the picker and pick another day
+    await userEvent.click(input!);
+    const picker = screen.getByTestId('date-select-tooltip');
+    const day = originalDate.endsWith('-15') ? '16' : '15';
+    await userEvent.click(
+      within(picker).getByRole('button', {
+        name: new RegExp(` ${day}, \\d{4}`),
+      }),
+    );
+    const pickedDate = getTransactions()[2].date;
+    expect(pickedDate).not.toBe(originalDate);
+    expect(pickedDate.slice(-2)).toBe(day);
+
+    await userEvent.keyboard('[Escape]');
+    expect(getTransactions()[2].date).toBe(pickedDate);
+  });
+
   test('a note with line breaks is not changed by focusing it', async () => {
     const transactions = generateTransactions(5);
     transactions[2].notes = 'To 1. Main\nEndToEndID: FRI\r\nFrom 2. Savings';

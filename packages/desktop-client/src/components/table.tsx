@@ -1448,6 +1448,11 @@ export function useTableNavigator<T extends TableItem>(
     cursorState && data.find(item => item.id === cursorState.id);
   const cursor = cursorItem ? cursorState : null;
   const [isEditing, setIsEditing] = useState(false);
+  // Its editor closes too, so the keys aren't swallowed by a cell that isn't
+  // there, and it doesn't reopen by itself if the row comes back
+  if (isEditing && cursorState && !cursorItem) {
+    setIsEditing(false);
+  }
   const containerRef = useRef<HTMLDivElement>(null);
   const isFlashing = useRef(false);
   const flashTimer = useRef<ReturnType<typeof setTimeout>>(undefined);

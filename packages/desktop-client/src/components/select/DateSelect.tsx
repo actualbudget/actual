@@ -600,6 +600,8 @@ function DateSelectDesktop({
               setValue(format(date, dateFormat));
               setSelectedValue(format(date, dateFormat));
               if (editSession) {
+                // Reopens a session committed by Enter, so the pick saves
+                editSession.onUpdateDraft?.(formattedISO);
                 editSession.onCommit(formattedISO);
               } else {
                 onSelect(formattedISO);

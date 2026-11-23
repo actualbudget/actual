@@ -50,6 +50,7 @@ function CheckableRows({ items }: { items: CheckableItem[] }) {
         </button>
       ))}
       <span>Cursor: {navigator.cursor?.id ?? 'none'}</span>
+      <span>{navigator.isEditing ? 'Editing' : 'Idle'}</span>
       <span>Checked: {[...checked].join(',') || 'none'}</span>
     </div>
   );
@@ -376,6 +377,31 @@ it('drops the selected cell when its row leaves the data', async () => {
 
   expect(screen.getByText('Cursor: none')).toBeInTheDocument();
   expect(screen.getByText('Checked: none')).toBeInTheDocument();
+});
+
+it('stops editing when the edited row leaves the data', async () => {
+  const items = [
+    { id: 'a', checkable: true },
+    { id: 'b', checkable: true },
+  ];
+  function table(rows: CheckableItem[]) {
+    return (
+      <TestProviders>
+        <CheckableTable items={rows} />
+      </TestProviders>
+    );
+  }
+  const { rerender } = render(table(items));
+  await userEvent.click(screen.getByRole('button', { name: 'Edit b' }));
+  expect(screen.getByText('Editing')).toBeInTheDocument();
+
+  rerender(table(items.slice(0, 1)));
+  expect(screen.getByText('Idle')).toBeInTheDocument();
+
+  // The row coming back doesn't reopen its editor
+  rerender(table(items));
+  expect(screen.getByText('Cursor: b')).toBeInTheDocument();
+  expect(screen.getByText('Idle')).toBeInTheDocument();
 });
 
 it('space does not check a row without a checkbox', async () => {
