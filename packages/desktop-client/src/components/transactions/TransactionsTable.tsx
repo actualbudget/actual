@@ -4071,13 +4071,37 @@ export const TransactionTable = forwardRef(
 
         if (isTemporaryId(id)) {
           newNavigator.onEdit(null);
+          savePending.current = true;
+
+          let finalSiblings = updatedSiblings;
+          if (onApplyRulesProp) {
+            finalSiblings = [];
+            for (const [index, sibling] of updatedSiblings.entries()) {
+              if (sibling.amount !== siblingTransactions[index].amount) {
+                finalSiblings.push(
+                  await onApplyRulesProp(sibling, null, clearedFields.current),
+                );
+              } else {
+                finalSiblings.push(sibling);
+              }
+            }
+          }
+
+          const newTrans = latestState.current.newTransactions;
+          setNewTransactions(
+            ungroupTransactions(
+              updateTransaction(
+                newTrans,
+                groupTransaction([parentTransaction, ...finalSiblings]),
+              ).data,
+            ),
+          );
         } else {
           tableNavigator.onEdit(null);
+          await onSave(parentTransaction, updatedSiblings);
         }
-
-        await onSave(parentTransaction, updatedSiblings);
       },
-      [latestState, onSave],
+      [latestState, onSave, onApplyRulesProp],
     );
 
     function onCloseAddTransaction() {

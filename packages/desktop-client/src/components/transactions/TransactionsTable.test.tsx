@@ -1997,6 +1997,59 @@ describe('Transactions', () => {
     expect(screen.queryAllByTestId('transaction-error')).toHaveLength(0);
   });
 
+  test('distributing a new split runs rules on distributed children instead of the parent', async () => {
+    const foodCategoryId = usualGroup.categories![0].id;
+    const appliedTransactions: TransactionEntity[] = [];
+    const { container, getTransactions, updateProps } = renderTransactions({
+      onApplyRules: async transaction => {
+        appliedTransactions.push(transaction);
+        if (transaction.amount === -700) {
+          return { ...transaction, category: foodCategoryId };
+        }
+        return transaction;
+      },
+    });
+    updateProps({ isAdding: true });
+
+    let input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '10.00');
+
+    await editNewField(container, 'category');
+    await userEvent.click(screen.getByTestId('split-transaction-button'));
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+
+    input = await editNewField(container, 'debit', 1);
+    await userEvent.clear(input);
+    await userEvent.type(input, '3.00[tab]');
+
+    appliedTransactions.length = 0;
+
+    await userEvent.click(screen.getByRole('button', { name: 'Distribute' }));
+
+    await waitFor(() => {
+      expect(
+        container.querySelector('[data-testid="transaction-error"]'),
+      ).toBeNull();
+    });
+
+    expect(appliedTransactions).toHaveLength(1);
+    expect(appliedTransactions[0]).toEqual(
+      expect.objectContaining({ is_child: true, amount: -700 }),
+    );
+
+    await userEvent.click(
+      container.querySelector('[data-testid="add-button"]')!,
+    );
+    const [parent, child1, child2] = getTransactions().slice(0, 3);
+    expect(parent.amount).toBe(-1000);
+    expect(child1.amount).toBe(-300);
+    expect(child2.amount).toBe(-700);
+    expect(child2.category).toBe(foodCategoryId);
+  });
+
   test('transaction with splits shows 0 in correct column', async () => {
     const { container, getTransactions } = renderTransactions();
 

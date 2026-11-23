@@ -282,13 +282,18 @@ export function updateTransaction(
 
         let child = t;
         if (trans.id === transaction.id) {
-          const { payee: childPayee, ...rest } = t;
-          const newPayee =
-            childPayee === trans.payee ? transaction.payee : childPayee;
-          child = {
-            ...rest,
-            ...(newPayee != null ? { payee: newPayee } : {}),
-          };
+          if (parent.payee !== trans.payee) {
+            const { payee: childPayee, ...rest } = t;
+            const newPayee =
+              childPayee === trans.payee ? parent.payee : childPayee;
+            child = {
+              ...rest,
+              ...(newPayee != null ? { payee: newPayee } : {}),
+            };
+          } else if (t.payee === undefined) {
+            const { payee: _childPayee, ...rest } = t;
+            child = rest;
+          }
         } else if (t.id === transaction.id) {
           child = transaction;
         }

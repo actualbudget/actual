@@ -284,6 +284,33 @@ describe('Transactions', () => {
     });
   });
 
+  test('updating a split parent without changing its payee preserves blank child payees', () => {
+    const transactions = makeSplitTransaction(
+      { id: 't1', amount: -1000, payee: 'alice-id', error: splitError(-700) },
+      [
+        { id: 't2', amount: -300, payee: null },
+        { id: 't3', amount: 0, payee: 'alice-id' },
+      ],
+    );
+    const [parent, child1, child2] = transactions;
+
+    const { data, diff } = updateTransaction(transactions, {
+      ...parent,
+      subtransactions: [child1, { ...child2, amount: -700 }],
+    });
+
+    expect(data[1].payee).toBeNull();
+    expect(data[2].payee).toBe('alice-id');
+    expect(diff).toEqual({
+      added: [],
+      deleted: [],
+      updated: [
+        { id: 't1', error: null },
+        { id: 't3', amount: -700 },
+      ],
+    });
+  });
+
   test('deleting a split transaction works', () => {
     const transactions = [
       makeTransaction({ amount: 2001 }),
