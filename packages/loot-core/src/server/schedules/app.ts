@@ -612,8 +612,18 @@ export async function postTransactionForSchedule({
 
   // Read the day once: it can change while the transaction is saved.
   const postDay = currentDay();
+  const { date: dateCond } = extractScheduleConds(schedule._conditions);
+  // Pay the earliest unpaid occurrence first. A later upcoming date gets its
+  // own date only when every date before it is paid, so a missed payment never
+  // drops out of the schedule.
   const occurrence =
-    date && date > schedule.next_date ? date : schedule.next_date;
+    dateCond && date && date > schedule.next_date
+      ? (findFirstUnpaidOccurrence(
+          dateCond,
+          schedule.next_date,
+          await getIsOccurrencePaid(schedule),
+        ).date ?? schedule.next_date)
+      : schedule.next_date;
   const transaction = {
     payee: schedule._payee,
     account: schedule._account,
@@ -631,7 +641,6 @@ export async function postTransactionForSchedule({
   // next unpaid one (or complete the schedule if there is none), or the
   // occurrence shows as unpaid again whenever the transaction is dated before
   // `next_date`.
-  const { date: dateCond } = extractScheduleConds(schedule._conditions);
   if (
     dateCond &&
     (occurrence !== schedule.next_date || schedule.next_date > postDay)
@@ -640,36 +649,20 @@ export async function postTransactionForSchedule({
   }
 }
 
-// Moves `next_date` to the first unpaid occurrence; `occurrence` was just
-// paid. An unpaid occurrence before it stays due.
+type DateCond = ReturnType<typeof extractScheduleConds>['date'];
+
+// Moves `next_date` to the first unpaid occurrence; `occurrence` was just paid.
 async function skipPaidOccurrences(
   schedule: ScheduleEntity,
-  dateCond: ReturnType<typeof extractScheduleConds>['date'],
+  dateCond: DateCond,
   occurrence: string,
 ) {
-  const { data: postedTransactions } = await aqlQuery(
-    getHasTransactionsQuery([schedule]),
+  const isPaid = await getIsOccurrencePaid(schedule);
+  const { date: nextDate, skips } = findFirstUnpaidOccurrence(
+    dateCond,
+    schedule.next_date,
+    date => date === occurrence || isPaid(date),
   );
-  // `next_date` counts as paid like its status does, with the match window.
-  // Later occurrences need a transaction on their exact date; with the window,
-  // one transaction would pay several days of a daily schedule.
-  const isPaid = (date: string) =>
-    date === occurrence ||
-    postedTransactions.some(t => t.date === date) ||
-    (date === schedule.next_date &&
-      isScheduleOccurrencePosted({
-        schedule,
-        scheduleId: schedule.id,
-        occurrenceDate: date,
-        postedTransactions,
-      }));
-
-  let nextDate: string | null = schedule.next_date;
-  let skips = 0;
-  while (nextDate != null && isPaid(nextDate)) {
-    nextDate = getNextDateAfter(dateCond, nextDate);
-    skips++;
-  }
 
   if (nextDate == null) {
     await updateSchedule({ schedule: { id: schedule.id, completed: true } });
@@ -678,6 +671,38 @@ async function skipPaidOccurrences(
   for (let i = 0; i < skips; i++) {
     await skipNextDate({ id: schedule.id });
   }
+}
+
+// `next_date` counts as paid like its status does, with the match window.
+// Later occurrences need a transaction on their exact date; with the window,
+// one transaction would pay several days of a daily schedule.
+async function getIsOccurrencePaid(schedule: ScheduleEntity) {
+  const { data: postedTransactions } = await aqlQuery(
+    getHasTransactionsQuery([schedule]),
+  );
+  return (date: string) =>
+    postedTransactions.some(t => t.date === date) ||
+    (date === schedule.next_date &&
+      isScheduleOccurrencePosted({
+        schedule,
+        scheduleId: schedule.id,
+        occurrenceDate: date,
+        postedTransactions,
+      }));
+}
+
+function findFirstUnpaidOccurrence(
+  dateCond: DateCond,
+  from: string,
+  isPaid: (date: string) => boolean,
+) {
+  let date: string | null = from;
+  let skips = 0;
+  while (date != null && isPaid(date)) {
+    date = getNextDateAfter(dateCond, date);
+    skips++;
+  }
+  return { date, skips };
 }
 
 async function getSchedule(id: string): Promise<ScheduleEntity | null> {

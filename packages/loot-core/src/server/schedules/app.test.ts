@@ -1103,21 +1103,32 @@ describe('schedule app', () => {
           });
         });
 
-        it('keeps `next_date` on an earlier unpaid occurrence', async () => {
+        it('pays an earlier unpaid occurrence first', async () => {
           expect(
             await postOccurrences('2017-01-05', [{ date: '2017-01-12' }]),
           ).toEqual({
-            dates: ['2017-01-12'],
-            nextDate: '2017-01-05',
+            dates: ['2017-01-05'],
+            nextDate: '2017-01-12',
           });
         });
 
-        it('moves to the first unpaid occurrence once the earlier one is paid', async () => {
+        it('pays an earlier unpaid occurrence first when posted today', async () => {
           expect(
-            await postOccurrences('2017-01-05', [{ date: '2017-01-12' }, {}]),
+            await postOccurrences('2017-01-05', [
+              { date: '2017-01-12', today: true },
+            ]),
           ).toEqual({
-            dates: ['2017-01-05', '2017-01-12'],
-            nextDate: '2017-01-19',
+            dates: ['2017-01-01'],
+            nextDate: '2017-01-12',
+          });
+        });
+
+        it('pays the first unpaid occurrence before the selected one', async () => {
+          expect(
+            await postOccurrences('2017-01-01', [{}, { date: '2017-01-15' }]),
+          ).toEqual({
+            dates: ['2017-01-01', '2017-01-08'],
+            nextDate: '2017-01-15',
           });
         });
 

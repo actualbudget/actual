@@ -6,10 +6,7 @@ import {
   getHasTransactionsQuery,
   getStatus,
 } from '@actual-app/core/shared/schedules';
-import type {
-  PostedScheduleTransaction,
-  ScheduleStatuses,
-} from '@actual-app/core/shared/schedules';
+import type { ScheduleStatuses } from '@actual-app/core/shared/schedules';
 import type {
   AccountEntity,
   ScheduleEntity,
@@ -30,10 +27,7 @@ export type ScheduleStatusLabels = Map<
 >;
 function loadStatuses(
   schedules: readonly ScheduleEntity[],
-  onData: (
-    data: ScheduleStatuses,
-    postedTransactions: PostedScheduleTransaction[],
-  ) => void,
+  onData: (data: ScheduleStatuses) => void,
   onError: (error: Error) => void,
   upcomingLength: string = '7',
 ) {
@@ -53,7 +47,7 @@ function loadStatuses(
         ]),
       ) as ScheduleStatuses;
 
-      onData?.(scheduleStatuses, data.filter(Boolean));
+      onData?.(scheduleStatuses);
     },
     onError,
   });
@@ -65,8 +59,6 @@ type ScheduleData = {
   schedules: readonly ScheduleEntity[];
   statuses: ScheduleStatuses;
   statusLabels: ScheduleStatusLabels;
-  // Transactions of each schedule from its `next_date` on
-  postedTransactions: PostedScheduleTransaction[];
 };
 export type UseSchedulesResult = ScheduleData & {
   readonly isLoading: boolean;
@@ -82,7 +74,6 @@ export function useSchedules({
     schedules: [],
     statuses: new Map(),
     statusLabels: new Map(),
-    postedTransactions: [],
   });
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
 
@@ -121,12 +112,11 @@ export function useSchedules({
         statusQueryRef.current?.unsubscribe();
         statusQueryRef.current = loadStatuses(
           schedules,
-          (statuses, postedTransactions) => {
+          (statuses: ScheduleStatuses) => {
             if (!isUnmounted) {
               setData({
                 schedules,
                 statuses,
-                postedTransactions,
                 statusLabels: new Map(
                   [...statuses.keys()].map(key => [
                     key,

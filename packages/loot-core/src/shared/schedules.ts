@@ -521,7 +521,6 @@ export function computeSchedulePreviewTransactions(
   statuses: ScheduleStatuses,
   upcomingLength?: string,
   filter?: (schedule: ScheduleEntity) => boolean,
-  postedTransactions: readonly PostedScheduleTransaction[] = [],
 ) {
   const schedulesForPreview = schedules
     .filter(s => isForPreview(s, statuses))
@@ -567,17 +566,7 @@ export function computeSchedulePreviewTransactions(
         dates.shift();
       }
 
-      // A later occurrence paid early has a transaction on its exact date.
-      // `next_date` is left to its status.
-      const unpaidDates = dates.filter(
-        date =>
-          date === schedule.next_date ||
-          !postedTransactions.some(
-            t => t.schedule === schedule.id && t.date === date,
-          ),
-      );
-
-      return unpaidDates.map(date => ({
+      return dates.map(date => ({
         id: 'preview/' + schedule.id + `/${date}`,
         payee: schedule._payee,
         account: schedule._account,

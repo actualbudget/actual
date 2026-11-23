@@ -67,7 +67,6 @@ export function usePreviewTransactions({
     error: scheduleQueryError,
     schedules,
     statuses,
-    postedTransactions,
   } = useCachedSchedules();
   const [isLoading, setIsLoading] = useState(isSchedulesLoading);
   const [error, setError] = useState<Error | undefined>(undefined);
@@ -84,16 +83,8 @@ export function usePreviewTransactions({
       statuses,
       upcomingLength,
       filter,
-      postedTransactions,
     );
-  }, [
-    filter,
-    isSchedulesLoading,
-    schedules,
-    statuses,
-    upcomingLength,
-    postedTransactions,
-  ]);
+  }, [filter, isSchedulesLoading, schedules, statuses, upcomingLength]);
 
   useEffect(() => {
     let isUnmounted = false;
