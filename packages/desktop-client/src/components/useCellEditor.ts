@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import type { FocusEvent, KeyboardEvent } from 'react';
 
 type EditSessionState = 'active' | 'committed' | 'canceled';
@@ -27,8 +27,10 @@ export function useCellEditor<T>({
     useState<T>(committedValue);
   const [wasEditing, setWasEditing] = useState(isEditing);
   const sessionState = useRef<EditSessionState>('active');
+  // Event handlers read the draft synchronously (e.g. a pick followed by a
+  // save in one handler), so it's mirrored in a ref. Refs are only written
+  // from events and after commit: a discarded render must not change them.
   const valueRef = useRef<T>(committedValue);
-  valueRef.current = value;
   const isEdited = useRef(false);
 
   const isStartingEdit = isEditing && !wasEditing;
@@ -38,24 +40,30 @@ export function useCellEditor<T>({
   if (prevCommittedValue !== committedValue || isStartingEdit) {
     setValue(committedValue);
     setPrevCommittedValue(committedValue);
-    valueRef.current = committedValue;
-    isEdited.current = false;
-  }
-  // Cells stay mounted between edits. Only entering edit mode starts a
-  // fresh session; receiving a saved value must not enable another blur save.
-  if (isStartingEdit) {
-    sessionState.current = 'active';
   }
 
+  useLayoutEffect(() => {
+    valueRef.current = committedValue;
+    isEdited.current = false;
+  }, [committedValue, isEditing]);
+
+  // Cells stay mounted between edits. Only entering edit mode starts a
+  // fresh session; receiving a saved value must not enable another blur save.
+  useLayoutEffect(() => {
+    if (isEditing) {
+      sessionState.current = 'active';
+    }
+  }, [isEditing]);
+
   function setDraft(next: T | ((prev: T) => T)) {
+    const resolved =
+      typeof next === 'function'
+        ? (next as (prev: T) => T)(valueRef.current)
+        : next;
     sessionState.current = 'active';
     isEdited.current = true;
-    setValue(prev => {
-      const resolved =
-        typeof next === 'function' ? (next as (prev: T) => T)(prev) : next;
-      valueRef.current = resolved;
-      return resolved;
-    });
+    valueRef.current = resolved;
+    setValue(resolved);
   }
 
   // Only an active draft is reverted. After a commit that stays in the cell
@@ -97,10 +105,9 @@ export function useCellEditor<T>({
     }
   }
 
+  // A canceled draft isn't saved, but the caller still hears about the blur
+  // (the budget grid closes its editor from it)
   function onBlur(e: FocusEvent) {
-    if (sessionState.current === 'canceled') {
-      return;
-    }
     if (sessionState.current === 'active') {
       sessionState.current = 'committed';
       onUpdate?.(valueRef.current, isEdited.current);

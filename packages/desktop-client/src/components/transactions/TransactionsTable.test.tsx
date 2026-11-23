@@ -1161,18 +1161,18 @@ describe('Transactions', () => {
       await editField(container, field, 2);
       const target =
         field === 'payee'
-          ? screen.getByTestId('Alice-payee-item')
+          ? screen.getByTestId('Bob-payee-item')
           : within(screen.getByTestId('autocomplete')).getByText('General');
       await userEvent.click(target);
       await editField(container, 'notes', 3);
 
       const expectedValue =
         field === 'payee'
-          ? 'alice-id'
+          ? 'bob-id'
           : categories.find(category => category.name === 'General')?.id;
       expect(getTransactions()[2][field]).toBe(expectedValue);
       expect(queryField(container, field, '', 2)).toHaveTextContent(
-        field === 'payee' ? 'Alice' : 'General',
+        field === 'payee' ? 'Bob' : 'General',
       );
     },
   );
@@ -1195,12 +1195,12 @@ describe('Transactions', () => {
       await editField(container, field, 2);
       const target =
         field === 'payee'
-          ? screen.getByTestId('Alice-payee-item')
+          ? screen.getByTestId('Bob-payee-item')
           : within(screen.getByTestId('autocomplete')).getByText('General');
       await userEvent.click(target);
       const expectedValue =
         field === 'payee'
-          ? 'alice-id'
+          ? 'bob-id'
           : categories.find(category => category.name === 'General')?.id;
       expect(getTransactions()[2][field]).toBe(expectedValue);
       expect(queryField(container, field, 'input', 2)).not.toBeNull();
@@ -1316,6 +1316,37 @@ describe('Transactions', () => {
     // Returning to the app and then leaving the cell still saves the draft
     await userEvent.type(input, '[Tab]');
     expect(getTransactions()[2].notes).toBe('draft');
+  });
+
+  test('a date is not saved when the window loses focus', async () => {
+    const { container, getTransactions } = renderTransactions();
+    const originalDate = getTransactions()[2].date;
+    const input = await editField(container, 'date', 2);
+    await userEvent.clear(input);
+    await userEvent.type(input, '05/04/2016');
+
+    vi.mocked(document.hasFocus).mockReturnValue(false);
+    fireEvent.blur(input);
+    expect(getTransactions()[2].date).toBe(originalDate);
+    vi.mocked(document.hasFocus).mockReturnValue(true);
+  });
+
+  test('a date moved with the arrow keys saves after an unchanged enter', async () => {
+    const { container, getTransactions } = renderTransactions();
+    const originalDate = getTransactions()[2].date;
+    await editField(container, 'date', 2);
+    expect(screen.getByTestId('date-select-tooltip')).toBeInTheDocument();
+    await userEvent.keyboard('[Enter]');
+    expect(queryField(container, 'date', 'input', 2)).not.toBeNull();
+
+    // Reopen the picker, move a week ahead, and save
+    await userEvent.keyboard('[ArrowDown][ArrowDown][Enter]');
+    const movedDate = getTransactions()[2].date;
+    expect(movedDate).not.toBe(originalDate);
+
+    await userEvent.keyboard('[Escape]');
+    expect(queryField(container, 'date', 'input', 2)).toBeNull();
+    expect(getTransactions()[2].date).toBe(movedDate);
   });
 
   test('a note with line breaks is not changed by focusing it', async () => {

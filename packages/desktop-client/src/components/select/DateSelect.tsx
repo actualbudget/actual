@@ -529,7 +529,8 @@ function DateSelectDesktop({
           }
 
           if (editSession) {
-            if (clearOnBlur) {
+            // The window losing focus also blurs; the cell keeps its draft
+            if (clearOnBlur && document.hasFocus()) {
               if (value === '') {
                 editSession.onCommit(defaultValue || '');
               } else {
@@ -586,8 +587,12 @@ function DateSelectDesktop({
             embedded={embedded}
             onUpdate={date => {
               setSelectedValue(format(date, dateFormat));
-              if (!editSession) {
-                onUpdate?.(format(date, 'yyyy-MM-dd'));
+              const iso = format(date, 'yyyy-MM-dd');
+              // Reopens a committed session, so the next Enter saves again
+              if (editSession) {
+                editSession.onUpdateDraft?.(iso);
+              } else {
+                onUpdate?.(iso);
               }
             }}
             onSelect={date => {

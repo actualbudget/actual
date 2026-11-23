@@ -1441,10 +1441,16 @@ export function useTableNavigator<T extends TableItem>(
   fields: string[] | ((item?: T) => string[]),
 ): TableNavigator<T> {
   const getFields = typeof fields !== 'function' ? () => fields : fields;
-  const [cursor, setCursor] = useState<TableCursor<T>>(null);
+  const [cursorState, setCursor] = useState<TableCursor<T>>(null);
+  // A row that leaves the data (filtered out, deleted) drops the selected
+  // cell; it comes back if the row does
+  const cursorItem =
+    cursorState && data.find(item => item.id === cursorState.id);
+  const cursor = cursorItem ? cursorState : null;
   const [isEditing, setIsEditing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const isFlashing = useRef(false);
+  const flashTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // See `onBlur` for why we need this
   const modalState = useModalState();
@@ -1455,15 +1461,29 @@ export function useTableNavigator<T extends TableItem>(
   const selectedItems = useSelectedItems();
   const selectedDispatch = useSelectedDispatch();
 
-  const beginEdit = useCallback((id: T['id'], field?: string) => {
-    setCursor({ id, field });
-    setIsEditing(true);
+  // Any edit or exit supersedes a pending flash, so it can't reopen a cell
+  const cancelFlash = useCallback(() => {
+    clearTimeout(flashTimer.current);
+    flashTimer.current = undefined;
+    isFlashing.current = false;
   }, []);
 
+  useEffect(() => cancelFlash, [cancelFlash]);
+
+  const beginEdit = useCallback(
+    (id: T['id'], field?: string) => {
+      cancelFlash();
+      setCursor({ id, field });
+      setIsEditing(true);
+    },
+    [cancelFlash],
+  );
+
   const exitEdit = useCallback(() => {
+    cancelFlash();
     setIsEditing(false);
     containerRef.current?.focus();
-  }, []);
+  }, [cancelFlash]);
 
   const onEdit = useCallback(
     (id: T['id'] | null, field?: string) => {
@@ -1502,8 +1522,7 @@ export function useTableNavigator<T extends TableItem>(
 
     if (currentCursor) {
       isFlashing.current = true;
-      setTimeout(() => {
-        isFlashing.current = false;
+      flashTimer.current = setTimeout(() => {
         beginEdit(currentCursor.id, currentCursor.field);
       }, 100);
     }
@@ -1609,7 +1628,12 @@ export function useTableNavigator<T extends TableItem>(
         beginEdit(cursor.id, cursor.field);
         return true;
       case ' ':
-        if (!selectedDispatch) {
+        // Only rows with a checkbox can be checked (not transfer payees)
+        if (
+          !selectedDispatch ||
+          !cursorItem ||
+          !getFields(cursorItem).includes('select')
+        ) {
           return false;
         }
         selectedDispatch({
@@ -1740,6 +1764,7 @@ export function useTableNavigator<T extends TableItem>(
           // Focus moving to the table itself keeps the selected cell;
           // leaving the table drops it so no stale highlight is left
           if (containerRef.current !== e.relatedTarget) {
+            cancelFlash();
             setCursor(null);
           }
         }

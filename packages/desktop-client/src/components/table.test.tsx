@@ -1,6 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import {
+  SelectedProvider,
+  useSelected,
+  useSelectedItems,
+} from '#hooks/useSelected';
 import { TestProviders } from '#mocks';
 
 import { CustomCell, InputCell, useTableNavigator } from './table';
@@ -21,6 +26,41 @@ function NavigableTable() {
       </div>
       <button>Outside table</button>
     </>
+  );
+}
+
+type CheckableItem = { id: string; checkable: boolean };
+
+function CheckableRows({ items }: { items: CheckableItem[] }) {
+  const navigator = useTableNavigator(items, item =>
+    item?.checkable ? ['select', 'value'] : ['value'],
+  );
+  const checked = useSelectedItems();
+  const { innerRef, ...navigatorProps } = navigator.getNavigatorProps({
+    tabIndex: 0,
+  });
+  return (
+    <div {...navigatorProps} ref={innerRef} data-testid="table">
+      {items.map(item => (
+        <button
+          key={item.id}
+          onClick={() => navigator.beginEdit(item.id, 'value')}
+        >
+          Edit {item.id}
+        </button>
+      ))}
+      <span>Cursor: {navigator.cursor?.id ?? 'none'}</span>
+      <span>Checked: {[...checked].join(',') || 'none'}</span>
+    </div>
+  );
+}
+
+function CheckableTable({ items }: { items: CheckableItem[] }) {
+  const selected = useSelected('items', items, []);
+  return (
+    <SelectedProvider instance={selected}>
+      <CheckableRows items={items} />
+    </SelectedProvider>
   );
 }
 
@@ -75,7 +115,10 @@ describe('CustomCell edit sessions', () => {
       } else if (action === 'save unchanged') {
         fireEvent.click(screen.getByRole('button', { name: 'Save unchanged' }));
       } else {
+        const hasFocus = vi.spyOn(document, 'hasFocus').mockReturnValue(true);
         fireEvent.blur(input);
+        hasFocus.mockRestore();
+        expect(onUpdate).toHaveBeenCalledTimes(1);
       }
       setEditing(false);
       onUpdate.mockClear();
@@ -201,6 +244,32 @@ describe('InputCell edit sessions', () => {
     expect(onUpdate).toHaveBeenCalledExactlyOnceWith('2', true);
   });
 
+  it('still reports the blur after escape, without saving', () => {
+    const onUpdate = vi.fn();
+    const onBlur = vi.fn();
+    render(
+      <TestProviders>
+        <InputCell
+          width={100}
+          value="1.50"
+          exposed
+          onUpdate={onUpdate}
+          onBlur={onBlur}
+        />
+      </TestProviders>,
+    );
+    const input = screen.getByRole('textbox');
+    fireEvent.change(input, { target: { value: '2' } });
+    fireEvent.keyDown(input, { key: 'Escape' });
+
+    const hasFocus = vi.spyOn(document, 'hasFocus').mockReturnValue(true);
+    fireEvent.blur(input);
+    hasFocus.mockRestore();
+
+    expect(onBlur).toHaveBeenCalledTimes(1);
+    expect(onUpdate).not.toHaveBeenCalled();
+  });
+
   it('discards a typed value on escape', () => {
     const { onUpdate, input } = renderInputCell();
     fireEvent.change(input, { target: { value: '2' } });
@@ -256,4 +325,69 @@ it('keys on other controls inside the table are not taken as cell navigation', a
   } finally {
     hasFocus.mockRestore();
   }
+});
+
+it('escape during the edge flash does not reopen the cell', async () => {
+  const hasFocus = vi.spyOn(document, 'hasFocus').mockReturnValue(true);
+  try {
+    render(
+      <TestProviders>
+        <NavigableTable />
+      </TestProviders>,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Edit cell' }));
+    // Enter on the last row flashes the cell, then reopens it
+    await userEvent.keyboard('[Enter][Escape]');
+    await new Promise(resolve => setTimeout(resolve, 150));
+
+    expect(screen.getByText('Idle')).toBeInTheDocument();
+  } finally {
+    hasFocus.mockRestore();
+  }
+});
+
+it('drops the selected cell when its row leaves the data', async () => {
+  const items = [
+    { id: 'a', checkable: true },
+    { id: 'b', checkable: true },
+  ];
+  const { rerender } = render(
+    <TestProviders>
+      <CheckableTable items={items} />
+    </TestProviders>,
+  );
+  await userEvent.click(screen.getByRole('button', { name: 'Edit b' }));
+  await userEvent.keyboard('[Escape]');
+  expect(screen.getByText('Cursor: b')).toBeInTheDocument();
+
+  rerender(
+    <TestProviders>
+      <CheckableTable items={items.slice(0, 1)} />
+    </TestProviders>,
+  );
+  screen.getByTestId('table').focus();
+  await userEvent.keyboard('[Space]');
+
+  expect(screen.getByText('Cursor: none')).toBeInTheDocument();
+  expect(screen.getByText('Checked: none')).toBeInTheDocument();
+});
+
+it('space does not check a row without a checkbox', async () => {
+  render(
+    <TestProviders>
+      <CheckableTable
+        items={[
+          { id: 'a', checkable: true },
+          { id: 'b', checkable: false },
+        ]}
+      />
+    </TestProviders>,
+  );
+  await userEvent.click(screen.getByRole('button', { name: 'Edit b' }));
+  await userEvent.keyboard('[Escape][Space]');
+  expect(screen.getByText('Checked: none')).toBeInTheDocument();
+
+  await userEvent.click(screen.getByRole('button', { name: 'Edit a' }));
+  await userEvent.keyboard('[Escape][Space]');
+  expect(screen.getByText('Checked: a')).toBeInTheDocument();
 });
