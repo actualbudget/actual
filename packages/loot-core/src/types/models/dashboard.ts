@@ -1,4 +1,8 @@
-import type { ForecastSeries, ForecastSource } from './forecast';
+import type {
+  ForecastAssumptions,
+  ForecastSeries,
+  ForecastSource,
+} from './forecast';
 import type { CustomReportEntity } from './reports';
 import type { RuleConditionEntity } from './rule';
 
@@ -521,5 +525,6 @@ export type BalanceForecastWidget = AbstractWidget<
     series?: ForecastSeries[];
     // Opt-in rolling duration for schedules; absent means the saved timeFrame applies.
     monthsFromToday?: number;
+    assumptions?: ForecastAssumptions;
   } | null
 >;

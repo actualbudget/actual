@@ -21,12 +21,14 @@ import {
   YAxis,
 } from 'recharts';
 
+import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Container } from '#components/reports/Container';
 import { DateRange } from '#components/reports/DateRange';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
+import { ForecastAssumptionsSummary } from '#components/reports/reports/ForecastAssumptionsSummary';
 import { useBalanceForecastSeries } from '#hooks/useBalanceForecast';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -101,6 +103,7 @@ export function BalanceForecastCard({
       ? undefined
       : meta?.accounts === undefined,
     source,
+    assumptions: meta?.assumptions,
   });
   const forecastData = forecasts?.[0]?.forecast;
   const errorMessage =
@@ -142,9 +145,16 @@ export function BalanceForecastCard({
   });
   const visibleChartData = series ? comparison.chartData : chartData;
   const endingPoint = chartData.at(-1);
+  const activeAssumptions = normalizedForecastData?.scenario?.assumptions;
   const lowestPoint = getLowestChartDataPoint(chartData);
   const hasNegativeEndingBalance = endingPoint && endingPoint.balance < 0;
-  const hasNegativeBalance = comparison.balances.some(balance => balance < 0);
+  // Only the single-line view draws the dashed baseline beside the scenario.
+  const baselineBalances = series
+    ? []
+    : chartData.flatMap(point => point.baselineBalance ?? []);
+  const hasNegativeBalance = [...comparison.balances, ...baselineBalances].some(
+    balance => balance < 0,
+  );
   const zeroCrossingGradientOffset = getZeroCrossingGradientOffset(chartData);
   const gradientId = `balance-forecast-card-line-gradient-${widgetId}`;
   const isUpdatingForecast = isFetching && isPlaceholderData;
@@ -215,8 +225,12 @@ export function BalanceForecastCard({
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  <Trans>Ending</Trans>:{' '}
-                  {format(endingPoint.balance, 'financial')}
+                  {activeAssumptions ? (
+                    <Trans>Purchasing power</Trans>
+                  ) : (
+                    <Trans>Ending</Trans>
+                  )}
+                  : {format(endingPoint.balance, 'financial')}
                 </PrivacyFilter>
               </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
@@ -244,6 +258,14 @@ export function BalanceForecastCard({
           )}
         </View>
 
+        {activeAssumptions && (
+          <View style={{ padding: '0 20px 12px' }}>
+            <ForecastAssumptionsSummary
+              assumptions={activeAssumptions}
+              source={source}
+            />
+          </View>
+        )}
         {series && !errorMessage && (
           <View style={{ padding: '0 20px', minHeight: 0, flexShrink: 1 }}>
             <ForecastSeriesSummary
@@ -303,7 +325,7 @@ export function BalanceForecastCard({
                           <stop
                             offset="0%"
                             stopColor={
-                              hasNegativeBalance
+                              chartData.some(point => point.balance < 0)
                                 ? theme.reportsNumberNegative
                                 : theme.reportsChartFill
                             }
@@ -350,12 +372,28 @@ export function BalanceForecastCard({
                               <div style={{ marginBottom: 5 }}>
                                 <strong>{payload[0].payload.date}</strong>
                               </div>
-                              <div>
-                                {format(
-                                  payload[0].value as number,
-                                  'financial',
-                                )}
-                              </div>
+                              {activeAssumptions ? (
+                                payload.map(entry => (
+                                  <div key={String(entry.dataKey)}>
+                                    {entry.name}:{' '}
+                                    <FinancialText>
+                                      <PrivacyFilter>
+                                        {format(
+                                          Number(entry.value),
+                                          'financial',
+                                        )}
+                                      </PrivacyFilter>
+                                    </FinancialText>
+                                  </div>
+                                ))
+                              ) : (
+                                <div>
+                                  {format(
+                                    payload[0].value as number,
+                                    'financial',
+                                  )}
+                                </div>
+                              )}
                             </div>
                           );
                         }
@@ -388,15 +426,33 @@ export function BalanceForecastCard({
                         />
                       ))
                     ) : (
-                      <Line
-                        type="monotone"
-                        dataKey="balance"
-                        stroke={`url(#${gradientId})`}
-                        strokeWidth={2}
-                        dot={false}
-                        activeDot={{ r: 4 }}
-                        opacity={isUpdatingForecast ? 0.45 : 1}
-                      />
+                      <>
+                        {activeAssumptions && (
+                          <Line
+                            type="monotone"
+                            dataKey="baselineBalance"
+                            name={t('Baseline (nominal)')}
+                            stroke={theme.pageTextSubdued}
+                            strokeDasharray="3 3"
+                            dot={false}
+                            opacity={isUpdatingForecast ? 0.45 : 1}
+                          />
+                        )}
+                        <Line
+                          name={
+                            activeAssumptions
+                              ? t('Purchasing power')
+                              : undefined
+                          }
+                          type="monotone"
+                          dataKey="balance"
+                          stroke={`url(#${gradientId})`}
+                          strokeWidth={2}
+                          dot={false}
+                          activeDot={{ r: 4 }}
+                          opacity={isUpdatingForecast ? 0.45 : 1}
+                        />
+                      </>
                     )}
                   </LineChart>
                 </ResponsiveContainer>
