@@ -1155,6 +1155,28 @@ describe('schedule app', () => {
           });
         });
 
+        it('posts nothing when the selected occurrence is already paid', async () => {
+          expect(
+            await postOccurrences(
+              '2017-01-05',
+              [{ date: '2017-01-12' }],
+              ['2017-01-05', '2017-01-12'],
+            ),
+          ).toEqual({
+            dates: ['2017-01-05', '2017-01-12'],
+            nextDate: '2017-01-05',
+          });
+        });
+
+        it('skips a later occurrence paid on its date when posting early', async () => {
+          expect(
+            await postOccurrences('2017-01-05', [{}], ['2017-01-12']),
+          ).toEqual({
+            dates: ['2017-01-05', '2017-01-12'],
+            nextDate: '2017-01-19',
+          });
+        });
+
         it('moves a daily schedule with an approximate date by one day', async () => {
           const accountId = await db.insertAccount({ name: 'Checking' });
           const id = await createSchedule({

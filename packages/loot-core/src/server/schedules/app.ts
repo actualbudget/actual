@@ -600,7 +600,8 @@ export async function postTransactionForSchedule({
 }: {
   id: string;
   today?: boolean;
-  // The upcoming occurrence to pay; `next_date` when not given
+  // The selected upcoming date; `next_date` when not given. An earlier unpaid
+  // date is paid first.
   date?: string;
 }) {
   const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
@@ -615,14 +616,20 @@ export async function postTransactionForSchedule({
   // Pay the earliest unpaid occurrence first. A later upcoming date gets its
   // own date only when every date before it is paid, so a missed payment never
   // drops out of the schedule.
-  const occurrence =
-    dateCond && date && date > schedule.next_date
-      ? (findFirstUnpaidOccurrence(
-          dateCond,
-          schedule.next_date,
-          await getIsOccurrencePaid(schedule),
-        ).date ?? schedule.next_date)
-      : schedule.next_date;
+  let occurrence = schedule.next_date;
+  if (dateCond && date && date > schedule.next_date) {
+    const firstUnpaid = findFirstUnpaidOccurrence(
+      dateCond,
+      schedule.next_date,
+      await getIsOccurrencePaid(schedule),
+    ).date;
+    // The selected date is already paid (e.g. a stale row): posting again
+    // would pay it twice.
+    if (firstUnpaid == null || firstUnpaid > date) {
+      return;
+    }
+    occurrence = firstUnpaid;
+  }
   const transaction = {
     payee: schedule._payee,
     account: schedule._account,
