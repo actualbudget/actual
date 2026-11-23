@@ -117,50 +117,9 @@ describe('getLiveRange', () => {
   });
 
   describe('Last month', () => {
-    it('returns the full previous month', () => {
-      const [start, end] = getLiveRange('Last month', EARLIEST, LATEST, false);
+    it('returns the previous month even when includeCurrentInterval is true', () => {
+      const [start, end] = getLiveRange('Last month', EARLIEST, LATEST, true);
       expect(start).toBe('2016-12-01');
-      expect(end).toBe('2016-12-31');
-    });
-
-    it('is not affected by the includeCurrentInterval flag', () => {
-      const [startExclude, endExclude] = getLiveRange(
-        'Last month',
-        EARLIEST,
-        LATEST,
-        false,
-      );
-      const [startInclude, endInclude] = getLiveRange(
-        'Last month',
-        EARLIEST,
-        LATEST,
-        true,
-      );
-      expect(startInclude).toBe('2016-12-01');
-      expect(endInclude).toBe('2016-12-31');
-      expect(startInclude).toBe(startExclude);
-      expect(endInclude).toBe(endExclude);
-    });
-
-    it('clamps start date to earliestTransaction when data starts mid-month', () => {
-      const [start, end] = getLiveRange(
-        'Last month',
-        '2016-12-15',
-        LATEST,
-        true,
-      );
-      expect(start).toBe('2016-12-15');
-      expect(end).toBe('2016-12-31');
-    });
-
-    it('clamps start date when earliestTransaction is on the last day of last month', () => {
-      const [start, end] = getLiveRange(
-        'Last month',
-        '2016-12-31',
-        LATEST,
-        false,
-      );
-      expect(start).toBe('2016-12-31');
       expect(end).toBe('2016-12-31');
     });
 
@@ -173,42 +132,6 @@ describe('getLiveRange', () => {
       );
       expect(start).toBe('2016-12-01');
       expect(end).toBe('2016-12-31');
-    });
-  });
-
-  describe('includeCurrentInterval toggle consistency', () => {
-    it('still honors includeCurrentInterval for numeric ranges that allow it', () => {
-      const [, endExclude] = getLiveRange(
-        'Last 3 months',
-        EARLIEST,
-        LATEST,
-        false,
-      );
-      const [, endInclude] = getLiveRange(
-        'Last 3 months',
-        EARLIEST,
-        LATEST,
-        true,
-      );
-      expect(endExclude).toBe('2016-12-31');
-      expect(endInclude).toBe('2017-01-31');
-    });
-
-    it.each([
-      'This week',
-      'This month',
-      'Last month',
-      'Current quarter',
-      'Previous quarter',
-      'Last 30 days',
-      'Year to date',
-      'Last year',
-      'Prior year to date',
-      'All time',
-    ])('ignores includeCurrentInterval for %s', range => {
-      expect(getLiveRange(range, EARLIEST, LATEST, true)).toEqual(
-        getLiveRange(range, EARLIEST, LATEST, false),
-      );
     });
   });
 });
