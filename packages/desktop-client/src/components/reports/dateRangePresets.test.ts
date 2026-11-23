@@ -246,6 +246,22 @@ describe('buildDateRangePresets', () => {
       expect(end).toBe('2016-12');
     });
 
+    it('last-month does not invert when earliestTransaction is in the current month', () => {
+      const presets = buildDateRangePresets({
+        t: mockT,
+        onSelectRange: mockOnSelectRange,
+        earliestTransaction: '2017-01-01',
+        latestTransaction: LATEST_TRANSACTION,
+        show1Month: false,
+        includeAllTime: true,
+      });
+
+      const lastMonthPreset = presets.find(p => p.key === 'last-month');
+      const [start, end] = lastMonthPreset!.getRange();
+      expect(start).toBe('2016-12');
+      expect(end).toBe('2016-12');
+    });
+
     it('all-time returns full transaction range as month bounds', () => {
       const presets = buildDateRangePresets({
         t: mockT,
