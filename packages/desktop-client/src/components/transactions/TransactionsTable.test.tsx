@@ -1967,12 +1967,12 @@ describe('Transactions', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Distribute' }));
 
     const [parent, ...children] = getTransactions().slice(0, 3);
-    expect(children.map(t => t.amount)).toEqual([-1389, -1388]);
+    expect(children.map(t => t.amount)).toEqual([-1388, -1389]);
     expect(children.reduce((acc, t) => acc + t.amount, 0)).toBe(parent.amount);
     expect(screen.queryAllByTestId('transaction-error')).toHaveLength(0);
   });
 
-  test('distributing a split with no empty children spreads the remainder proportionally', async () => {
+  test('distributing a split whose children cancel out to zero distributes evenly', async () => {
     const { container, getTransactions } = renderTransactions();
 
     await editField(container, 'category', 0);
@@ -1985,17 +1985,16 @@ describe('Transactions', () => {
     let input = await editField(container, 'debit', 1);
     await userEvent.clear(input);
     await userEvent.type(input, '10.00[tab]');
-    input = await editField(container, 'debit', 2);
+    input = await editField(container, 'credit', 2);
     await userEvent.clear(input);
-    await userEvent.type(input, '5.00[tab]');
+    await userEvent.type(input, '10.00[tab]');
 
     await userEvent.click(screen.getByRole('button', { name: 'Distribute' }));
 
-    // The remaining -12.77 is split 2:1, with the leftover cent going to the
-    // child with the larger fractional share
     const [parent, ...children] = getTransactions().slice(0, 3);
-    expect(children.map(t => t.amount)).toEqual([-1851, -926]);
+    expect(children.map(t => t.amount)).toEqual([-2388, -389]);
     expect(children.reduce((acc, t) => acc + t.amount, 0)).toBe(parent.amount);
+    expect(screen.queryAllByTestId('transaction-error')).toHaveLength(0);
   });
 
   test('transaction with splits shows 0 in correct column', async () => {

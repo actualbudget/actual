@@ -55,7 +55,6 @@ import { DEFAULT_UPCOMING_SCHEDULE_DAYS } from '@actual-app/core/shared/schedule
 import {
   addSplitTransaction,
   deleteTransaction,
-  distributeAmount,
   groupTransaction,
   isPreviewId,
   isTemporaryId,
@@ -3999,22 +3998,76 @@ export const TransactionTable = forwardRef(
           return;
         }
 
-        const remainingAmount =
-          parentTransaction.amount -
-          siblingTransactions.reduce((acc, t) => acc + t.amount, 0);
-
         if (siblingTransactions.length === 0) {
           return;
         }
 
-        // Fill the empty splits evenly if there are any, otherwise spread the
-        // remainder across all splits proportionally to their amounts.
-        const increments = distributeAmount(
-          remainingAmount,
-          emptyTransactions.length > 0
-            ? siblingTransactions.map(t => (t.amount === 0 ? 1 : 0))
-            : siblingTransactions.map(t => t.amount),
+        const siblingTotal = siblingTransactions.reduce(
+          (acc, t) => acc + t.amount,
+          0,
         );
+        const remainingAmount = parentTransaction.amount - siblingTotal;
+
+        const evenTargets =
+          emptyTransactions.length > 0
+            ? emptyTransactions
+            : siblingTotal === 0
+              ? siblingTransactions
+              : [];
+
+        let updatedSiblings: TransactionEntity[];
+        if (evenTargets.length > 0) {
+          const amountPerTransaction = Math.floor(
+            remainingAmount / evenTargets.length,
+          );
+          let remainingCents =
+            remainingAmount - amountPerTransaction * evenTargets.length;
+          const isEvenTarget =
+            emptyTransactions.length > 0
+              ? (t: TransactionEntity) => t.amount === 0
+              : () => true;
+
+          updatedSiblings = siblingTransactions.map(t => {
+            if (!isEvenTarget(t)) {
+              return t;
+            }
+            const extraCent = remainingCents > 0 ? 1 : 0;
+            if (remainingCents > 0) {
+              remainingCents--;
+            }
+            return {
+              ...t,
+              amount: t.amount + amountPerTransaction + extraCent,
+            };
+          });
+        } else {
+          const amounts = siblingTransactions.map(
+            t =>
+              Math.floor((t.amount / siblingTotal) * remainingAmount) +
+              t.amount,
+          );
+
+          let remainingCents =
+            parentTransaction.amount - amounts.reduce((acc, a) => acc + a, 0);
+
+          let amountIndex = 0;
+          while (remainingCents !== 0) {
+            amountIndex = amountIndex % amounts.length;
+            if (remainingCents > 0) {
+              amounts[amountIndex] += 1;
+              remainingCents--;
+            } else {
+              amounts[amountIndex] -= 1;
+              remainingCents++;
+            }
+            amountIndex++;
+          }
+
+          updatedSiblings = siblingTransactions.map((t, index) => ({
+            ...t,
+            amount: amounts[index],
+          }));
+        }
 
         if (isTemporaryId(id)) {
           newNavigator.onEdit(null);
@@ -4022,16 +4075,7 @@ export const TransactionTable = forwardRef(
           tableNavigator.onEdit(null);
         }
 
-        // Save the whole split at once. Saving each child separately races:
-        // every save is built from a snapshot of the split, so later saves
-        // can overwrite the amounts written by earlier ones.
-        await onSave(
-          parentTransaction,
-          siblingTransactions.map((t, index) => ({
-            ...t,
-            amount: t.amount + increments[index],
-          })),
-        );
+        await onSave(parentTransaction, updatedSiblings);
       },
       [latestState, onSave],
     );

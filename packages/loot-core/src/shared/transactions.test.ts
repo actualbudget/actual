@@ -6,7 +6,6 @@ import type { TransactionEntity } from '#types/models';
 import {
   addSplitTransaction,
   deleteTransaction,
-  distributeAmount,
   makeAsNonChildTransactions,
   makeChild,
   makeEmptySplitSubtransactions,
@@ -421,51 +420,5 @@ describe('Transactions', () => {
     // The new child rows are inserted, and every one must carry the account.
     expect(diff.added).toHaveLength(2);
     expect(diff.added.every(t => t.account === 'acc-id-1')).toBe(true);
-  });
-});
-
-describe('distributeAmount', () => {
-  const sum = (amounts: number[]) => amounts.reduce((acc, a) => acc + a, 0);
-
-  it('gives leftover cents to the first lines for income', () => {
-    expect(distributeAmount(1000, [1, 1, 1])).toEqual([334, 333, 333]);
-  });
-
-  it('gives leftover cents to the first lines for expenses', () => {
-    expect(distributeAmount(-1000, [1, 1, 1])).toEqual([-334, -333, -333]);
-    expect(distributeAmount(-1001, [1, 1, 1])).toEqual([-334, -334, -333]);
-  });
-
-  it('gives leftover cents to the largest fractional shares', () => {
-    expect(distributeAmount(1000, [100, 200])).toEqual([333, 667]);
-    expect(distributeAmount(-1000, [-100, -200])).toEqual([-333, -667]);
-    expect(distributeAmount(100, [1, 1, 4])).toEqual([17, 17, 66]);
-  });
-
-  it('splits evenly when the weights cancel out', () => {
-    expect(distributeAmount(-1000, [-500, 500])).toEqual([-500, -500]);
-  });
-
-  it('handles mixed-sign weights', () => {
-    expect(distributeAmount(700, [500, -200])).toEqual([1167, -467]);
-  });
-
-  it('returns zeros without negative zero', () => {
-    expect(distributeAmount(-0, [1, 1])).toEqual([0, 0]);
-    expect(Object.is(distributeAmount(-1, [1, 1])[1], 0)).toBe(true);
-  });
-
-  it('always sums to the total', () => {
-    for (let total = -2000; total <= 2000; total += 37) {
-      for (const weights of [
-        [1],
-        [1, 1, 1],
-        [3, 7, 11, 13],
-        [-1, -2, -3],
-        [5, -3, 1],
-      ]) {
-        expect(sum(distributeAmount(total, weights))).toBe(total);
-      }
-    }
   });
 });

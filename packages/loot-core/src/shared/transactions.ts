@@ -67,58 +67,6 @@ export function makeEmptySplitSubtransactions(
   ];
 }
 
-// Splits the integer `total` into integer amounts proportional to the integer
-// `weights` so that the result always sums to exactly `total`. Leftover cents
-// go to the shares with the largest fractional part (earliest index on ties),
-// and the allocation is mirrored for negative totals so expenses round the
-// same way as income. Falls back to an even split when the weights sum to zero.
-export function distributeAmount(total: number, weights: number[]): number[] {
-  if (weights.length === 0) {
-    return [];
-  }
-
-  const weightTotal = weights.reduce((acc, w) => acc + w, 0);
-  const effectiveWeights = weightTotal === 0 ? weights.map(() => 1) : weights;
-
-  // BigInt keeps the shares and their remainders exact, so ties are real ties
-  // and large amounts don't lose precision.
-  let denominator = BigInt(weightTotal === 0 ? weights.length : weightTotal);
-  const sign = denominator < 0n ? -1n : 1n;
-  denominator *= sign;
-  const absTotal = BigInt(Math.abs(total));
-
-  const shares = effectiveWeights.map((w, index) => {
-    const numerator = absTotal * BigInt(w) * sign;
-    let quotient = numerator / denominator;
-    let remainder = numerator - quotient * denominator;
-    // BigInt division truncates toward zero; adjust to floor.
-    if (remainder < 0n) {
-      quotient -= 1n;
-      remainder += denominator;
-    }
-    return { index, quotient, remainder };
-  });
-
-  let leftover = shares.reduce((acc, s) => acc - s.quotient, absTotal);
-
-  const byRemainder = [...shares].sort((a, b) =>
-    a.remainder === b.remainder
-      ? a.index - b.index
-      : a.remainder < b.remainder
-        ? 1
-        : -1,
-  );
-  for (const share of byRemainder) {
-    if (leftover <= 0n) break;
-    share.quotient += 1n;
-    leftover--;
-  }
-
-  return shares.map(({ quotient }) =>
-    quotient === 0n ? 0 : Number(quotient) * (total < 0 ? -1 : 1),
-  );
-}
-
 function makeNonChild<T extends GenericTransactionEntity>(
   parent: T,
   data: object,
