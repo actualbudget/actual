@@ -5,6 +5,7 @@ import { batchMessages } from '#server/sync';
 // @ts-strict-ignore
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
+import { isTemplateExpired } from '#shared/templates';
 import type { CategoryEntity, CategoryGroupEntity } from '#types/models';
 import type { CleanupTemplate } from '#types/models/cleanup-templates';
 import type { Template } from '#types/models/templates';
@@ -71,8 +72,18 @@ export async function storeTemplates({
     await tombstoneOrphanCleanupGroups();
   }
   if (month) {
+    const isTracking = isTrackingBudget();
+    const { data: categories }: { data: CategoryEntity[] } = await aqlQuery(
+      q('categories')
+        .filter({ id: { $oneof: categoriesWithTemplates.map(({ id }) => id) } })
+        .select('*'),
+    );
+    const skippedIds = new Set(
+      categories.filter(c => !acceptsTemplates(c, isTracking)).map(c => c.id),
+    );
     const goals: TemplateGoal[] = [];
     for (const { id, templates } of categoriesWithTemplates) {
+      if (skippedIds.has(id)) continue;
       goals.push(await getMonthGoal(month, id, templates));
     }
     await setGoals(month, goals);
@@ -149,6 +160,11 @@ export function runCheckTemplates() {
   return checkTemplateNotes();
 }
 
+// Income categories only take templates in tracking budgets
+function acceptsTemplates(category: CategoryEntity, isTracking: boolean) {
+  return isTracking || !category.is_income;
+}
+
 async function getCategories(): Promise<CategoryEntity[]> {
   const { data: categoryGroups }: { data: CategoryGroupEntity[] } =
     await aqlQuery(q('category_groups').filter({ hidden: false }).select('*'));
@@ -223,6 +239,7 @@ type ComputedTemplates = {
   contexts: CategoryTemplateContext[];
   errors: string[];
   orphanGoals: TemplateGoal[];
+  warnings: string[];
 };
 
 async function computeTemplates(
@@ -235,10 +252,9 @@ async function computeTemplates(
   // setup categories
   const isTracking = isTrackingBudget();
   if (!categories.length) {
-    categories = (await getCategories()).filter(
-      c => isTracking || !c.is_income,
-    );
+    categories = await getCategories();
   }
+  categories = categories.filter(c => acceptsTemplates(c, isTracking));
 
   // setup categories to process
   const templateContexts: CategoryTemplateContext[] = [];
@@ -249,6 +265,8 @@ async function computeTemplates(
   const prioritiesSet = new Set<number>();
   const errors: string[] = [];
   const orphanGoals: TemplateGoal[] = [];
+  const warnings: string[] = [];
+  const currentMonth = monthUtils.currentMonth();
   for (const category of categories) {
     const { id } = category;
     const sheetName = monthUtils.sheetForMonth(month);
@@ -266,6 +284,21 @@ async function computeTemplates(
           budgeted,
           skipAvailableClamp,
         );
+        // budgeting ahead of a target that hasn't passed yet isn't worth a nudge
+        templateContext
+          .getExpiredTemplates()
+          .filter(t => isTemplateExpired(t, currentMonth))
+          .forEach(t => {
+            warnings.push(
+              `${category.name}: Ignoring ${t.amount} by ${t.month} because the target month has passed. You can remove it.`,
+            );
+          });
+        if (templateContext.hasOnlyExpiredTemplates()) {
+          if (existingGoal !== null) {
+            orphanGoals.push({ category: id, goal: null, longGoal: null });
+          }
+          continue;
+        }
         // don't use the funds that are not from templates
         if (!templateContext.isGoalOnly()) {
           availBudget += budgeted;
@@ -288,7 +321,7 @@ async function computeTemplates(
   }
 
   if (errors.length > 0) {
-    return { contexts: templateContexts, errors, orphanGoals };
+    return { contexts: templateContexts, errors, orphanGoals, warnings };
   }
 
   const priorities = new Int32Array([...prioritiesSet]).sort((a, b) => a - b);
@@ -307,7 +340,7 @@ async function computeTemplates(
 
   distributeRemainder(templateContexts, availBudget);
 
-  return { contexts: templateContexts, errors, orphanGoals };
+  return { contexts: templateContexts, errors, orphanGoals, warnings };
 }
 
 async function processTemplate(
@@ -316,19 +349,23 @@ async function processTemplate(
   categoryTemplates: Record<CategoryEntity['id'], Template[]>,
   categories: CategoryEntity[] = [],
 ): Promise<TemplateNotification> {
-  const { contexts, errors, orphanGoals } = await computeTemplates(
+  const { contexts, errors, orphanGoals, warnings } = await computeTemplates(
     month,
     force,
     categoryTemplates,
     categories,
   );
+  const notice: Pick<TemplateNotification, 'type' | 'sticky' | 'pre'> =
+    warnings.length > 0
+      ? { type: 'warning', sticky: true, pre: warnings.join(`\n\n`) }
+      : { type: 'message' };
 
   if (contexts.length === 0 && errors.length === 0) {
     if (orphanGoals.length > 0) {
       await setGoals(month, orphanGoals);
     }
     return {
-      type: 'message',
+      ...notice,
       message: 'templates-up-to-date',
     };
   }
@@ -358,7 +395,7 @@ async function processTemplate(
   await setGoals(month, goalList);
 
   return {
-    type: 'message',
+    ...notice,
     message: 'templates-applied',
     count: contexts.length,
   };
@@ -369,6 +406,7 @@ export type DryRunCategoryResult = {
   perTemplate: number[];
   goal: number | null;
   longGoal: boolean;
+  errors: string[];
 };
 
 export async function dryRunCategoryTemplate({
@@ -388,12 +426,13 @@ export async function dryRunCategoryTemplate({
     perTemplate: templates.map(() => 0),
     goal: null,
     longGoal: false,
+    errors: [],
   };
   const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
     q('categories').filter({ id: categoryId }).select('*'),
   );
   if (categoryData.length === 0) return empty;
-  const { contexts } = await computeTemplates(
+  const { contexts, errors } = await computeTemplates(
     month,
     true,
     { [categoryId]: templates },
@@ -401,13 +440,14 @@ export async function dryRunCategoryTemplate({
     true,
   );
   const ctx = contexts.find(c => c.category.id === categoryId);
-  if (!ctx) return empty;
+  if (!ctx) return { ...empty, errors };
   const values = ctx.getValues();
   return {
     budgeted: values.budgeted,
     perTemplate: templates.map(t => values.perTemplateContribution.get(t) ?? 0),
     goal: values.goal,
     longGoal: !!values.longGoal,
+    errors,
   };
 }
 

@@ -32,15 +32,11 @@ export function isSettingsSection(
 }
 
 export function isSidebarMenuItemLocked(id: SidebarMenuItemId): boolean {
-  return !isSettingsSection(id);
+  return id === 'budget';
 }
 
 export function isSettingsSectionOnMobile(id: SettingsSectionId): boolean {
   return id !== 'schedules';
-}
-
-export function isInMobileSettingsNav(id: SettingsSectionId): boolean {
-  return isSettingsSectionOnMobile(id) && id !== 'tags';
 }
 
 function isHiddenByDefault(id: SidebarMenuItemId): boolean {

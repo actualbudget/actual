@@ -9,11 +9,16 @@ import { theme } from '@actual-app/components/theme';
 import { Toggle } from '@actual-app/components/toggle';
 import { css } from '@emotion/css';
 
-import { isSidebarMenuItemLocked } from '#components/sidebar/sidebarMenu';
+import {
+  getSidebarMenuItemPath,
+  isSettingsSection,
+  isSidebarMenuItemLocked,
+} from '#components/sidebar/sidebarMenu';
 import type {
   SidebarMenuItem,
   SidebarMenuItemId,
 } from '#components/sidebar/sidebarMenu';
+import { useNavigate } from '#hooks/useNavigate';
 
 type SidebarMenuListItemProps = {
   item: SidebarMenuItem;
@@ -33,6 +38,7 @@ export function SidebarMenuListItem({
   onToggle,
 }: SidebarMenuListItemProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   return (
     <GridListItem
@@ -92,6 +98,15 @@ export function SidebarMenuListItem({
         <Text size="small" style={{ color: theme.pageTextSubdued }}>
           <Trans>Start page</Trans>
         </Text>
+      )}
+      {item.hidden && !isSettingsSection(item.id) && (
+        <Button
+          variant="bare"
+          aria-label={t('Open {{ pageName }}', { pageName: label })}
+          onPress={() => navigate(getSidebarMenuItemPath(item.id, false))}
+        >
+          <Trans>Open</Trans>
+        </Button>
       )}
       {isSidebarMenuItemLocked(item.id) ? (
         <Text

@@ -4,7 +4,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 
 import { useSyncServerStatus } from './useSyncServerStatus';
 
-export function useEnableBankingStatus(enabled = true) {
+export function useEnableBankingStatus() {
   const [configuredEnableBanking, setConfiguredEnableBanking] = useState<
     boolean | null
   >(null);
@@ -12,8 +12,6 @@ export function useEnableBankingStatus(enabled = true) {
   const status = useSyncServerStatus();
 
   useEffect(() => {
-    if (!enabled) return;
-
     async function fetch() {
       setIsLoading(true);
       try {
@@ -29,7 +27,7 @@ export function useEnableBankingStatus(enabled = true) {
     if (status === 'online') {
       void fetch();
     }
-  }, [status, enabled]);
+  }, [status]);
 
   return {
     configuredEnableBanking,

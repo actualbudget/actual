@@ -3,7 +3,12 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import fsPromises from 'node:fs/promises';
 
-import { create, SyncRequestSchema, toBinary } from '@actual-app/crdt';
+import {
+  create,
+  MessageEnvelopeSchema,
+  SyncRequestSchema,
+  toBinary,
+} from '@actual-app/crdt';
 import request from 'supertest';
 
 import { getAccountDb } from './account-db';
@@ -1608,6 +1613,75 @@ describe('/sync', () => {
     expect(res.text).toEqual('file-access-not-allowed');
   });
 
+  it.each([
+    { reason: 'clock-drift', timestamp: futureTimestamp() },
+    { reason: 'invalid-timestamp', timestamp: 'invalid' },
+  ])(
+    'returns 400 $reason for a new message without storing it',
+    async ({ reason, timestamp }) => {
+      const fileId = crypto.randomBytes(16).toString('hex');
+      const keyId = 'key-id';
+      addMockFile(fileId, 'group-id', keyId, JSON.stringify({ keyId }), 2);
+
+      const syncRequest = createMinimalSyncRequest(fileId, 'group-id', keyId);
+      syncRequest.messages = [createMessage(timestamp)];
+      const res = await sendSyncRequest(syncRequest);
+      // A stored message would be accepted as a duplicate on retry
+      const retryRes = await sendSyncRequest(syncRequest);
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.text).toEqual(reason);
+      expect(retryRes.statusCode).toEqual(400);
+      expect(retryRes.text).toEqual(reason);
+    },
+  );
+
+  it.each([
+    { offset: 5 * 60 * 1000, status: 200 },
+    { offset: 5 * 60 * 1000 + 1, status: 400 },
+  ])(
+    'returns $status for a message $offset ms ahead',
+    async ({ offset, status }) => {
+      const fileId = crypto.randomBytes(16).toString('hex');
+      const groupId = crypto.randomBytes(16).toString('hex');
+      const keyId = 'key-id';
+      addMockFile(fileId, groupId, keyId, JSON.stringify({ keyId }), 2);
+
+      const syncRequest = createMinimalSyncRequest(fileId, groupId, keyId);
+
+      vi.useFakeTimers({ toFake: ['Date'], now: Date.now() });
+      try {
+        syncRequest.messages = [createMessage(futureTimestamp(offset))];
+        const res = await sendSyncRequest(syncRequest);
+
+        expect(res.statusCode).toEqual(status);
+      } finally {
+        vi.useRealTimers();
+      }
+    },
+  );
+
+  it('accepts a resent far-future message the server already has', async () => {
+    const fileId = crypto.randomBytes(16).toString('hex');
+    const groupId = crypto.randomBytes(16).toString('hex');
+    const keyId = 'key-id';
+    addMockFile(fileId, groupId, keyId, JSON.stringify({ keyId }), 2);
+
+    const syncRequest = createMinimalSyncRequest(fileId, groupId, keyId);
+    syncRequest.messages = [createMessage(futureTimestamp())];
+
+    vi.useFakeTimers({ toFake: ['Date'], now: Date.now() + 2 * DAY_MS });
+    try {
+      await sendSyncRequest(syncRequest);
+    } finally {
+      vi.useRealTimers();
+    }
+
+    const res = await sendSyncRequest(syncRequest);
+
+    expect(res.statusCode).toEqual(200);
+  });
+
   it("allows an admin to sync another user's file", async () => {
     const fileId = crypto.randomBytes(16).toString('hex');
     const groupId = 'group-id';
@@ -1652,6 +1726,20 @@ function createMinimalSyncRequest(fileId, groupId, keyId) {
     groupId,
     keyId,
     since: '2024-01-01T00:00:00.000Z',
+  });
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function futureTimestamp(offset = 2 * DAY_MS) {
+  return `${new Date(Date.now() + offset).toISOString()}-0000-0000000000000000`;
+}
+
+function createMessage(timestamp: string) {
+  return create(MessageEnvelopeSchema, {
+    timestamp,
+    isEncrypted: false,
+    content: new Uint8Array(),
   });
 }
 

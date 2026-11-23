@@ -75,7 +75,7 @@ export const RichContent: Story = {
 export const CustomPlacement: Story = {
   args: {
     content: 'Tooltip',
-    children: <></>,
+    children: null,
   },
   render: () => (
     <View style={{ gap: 10, display: 'flex', flexDirection: 'row' }}>

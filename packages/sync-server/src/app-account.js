@@ -20,6 +20,7 @@ import {
   loginWithPassword,
 } from './accounts/password';
 import { errorMiddleware, requestLoggerMiddleware } from './util/middlewares';
+import { validateBudgetSession } from './util/validate-budget-session';
 import { validateAuthHeader, validateSession } from './util/validate-user';
 
 const app = express();
@@ -211,7 +212,14 @@ app.post('/server-prefs', (req, res) => {
 });
 
 app.get('/validate', (req, res) => {
-  const session = validateSession(req, res);
+  const session = validateBudgetSession(req, res);
+  if (session?.apiKeyFileIds) {
+    res.send({
+      status: 'ok',
+      data: { validated: true, loginMethod: 'api-key' },
+    });
+    return;
+  }
   if (session) {
     const user = getUserInfo(session.user_id);
     if (!user) {

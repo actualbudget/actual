@@ -19,6 +19,7 @@ import * as statements from './statements';
 // Mock getSheetValue and getCategories
 vi.mock('./actions', () => ({
   getCategoryAverage: vi.fn(),
+  getCategoryWeeklyAverage: vi.fn(),
   getSheetValue: vi.fn(),
   getSheetBoolean: vi.fn(),
   isTrackingBudget: vi.fn(),
@@ -512,6 +513,25 @@ describe('CategoryTemplateContext', () => {
       expect(result).toBe(60000);
     });
 
+    it('should not budget a negative amount when the target is over-funded', async () => {
+      const template: Template = {
+        type: 'spend',
+        amount: 1000,
+        from: '2023-11',
+        month: '2024-01',
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-10000) // spent in Nov
+        .mockResolvedValueOnce(120000) // leftover in Nov
+        .mockResolvedValueOnce(10000); // budgeted in Dec
+
+      const result = await CategoryTemplateContext.runSpend(template, instance);
+      expect(result).toBe(0);
+    });
+
     it('should handle repeating spend template', async () => {
       const template: Template = {
         type: 'spend',
@@ -675,6 +695,29 @@ describe('CategoryTemplateContext', () => {
     afterEach(() => {
       global.currentMonth = originalCurrentMonth;
     });
+
+    // January 2024 has five Mondays but only four Fridays.
+    it.each([
+      ['monday', 1250],
+      ['friday', 1000],
+    ] as const)(
+      'budgets a weekly average for every %s in the month',
+      async (weekday, expected) => {
+        vi.mocked(actions.getCategoryWeeklyAverage).mockResolvedValue(-250);
+
+        const result = await CategoryTemplateContext.runAverage(
+          {
+            type: 'weeklyAverage',
+            numWeeks: 4,
+            weekday,
+            directive: 'template',
+            priority: 1,
+          },
+          instance,
+        );
+        expect(result).toBe(expected);
+      },
+    );
 
     it('should calculate average of 3 months', async () => {
       const template: Template = {
@@ -1959,25 +2002,148 @@ describe('CategoryTemplateContext', () => {
       );
     });
 
-    it('throws when a non-recurring `by` target month is in the past', async () => {
-      vi.mocked(statements.getActiveSchedules).mockResolvedValue(
-        [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
-      );
-      const templates: Template[] = [
-        {
-          type: 'by',
+    describe('expired targets', () => {
+      const expiredBy: Template = {
+        type: 'by',
+        amount: 1200,
+        month: '2023-12',
+        annual: false,
+        directive: 'template',
+        priority: 1,
+      };
+      const activeBy: Template = {
+        type: 'by',
+        amount: 600,
+        month: '2024-07',
+        annual: false,
+        directive: 'template',
+        priority: 1,
+      };
+
+      beforeEach(() => {
+        vi.mocked(statements.getActiveSchedules).mockResolvedValue(
+          [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
+        );
+        vi.mocked(actions.getSheetBoolean).mockResolvedValue(false);
+        vi.mocked(actions.isTrackingBudget).mockReturnValue(false);
+        mockPreferences();
+      });
+
+      function mockBalance(balance: number) {
+        vi.mocked(actions.getSheetValue).mockResolvedValue(balance);
+      }
+
+      it('sets aside a non-recurring `by` target whose month has passed', async () => {
+        mockBalance(0);
+        const context = await CategoryTemplateContext.init(
+          [expiredBy],
+          category,
+          '2024-06',
+          0,
+        );
+
+        expect(context.getExpiredTemplates()).toEqual([expiredBy]);
+        expect(context.hasOnlyExpiredTemplates()).toBe(true);
+        expect(context.getPriorities()).toEqual([]);
+      });
+
+      it('sets aside a non-recurring `spend` target whose month has passed', async () => {
+        mockBalance(0);
+        const expiredSpend: Template = {
+          type: 'spend',
           amount: 1200,
           month: '2023-12',
+          from: '2023-11',
           annual: false,
           directive: 'template',
           priority: 1,
-        },
-      ];
-      await expect(
-        CategoryTemplateContext.init(templates, category, '2024-06', 0),
-      ).rejects.toThrow(
-        /Target month has passed, remove or update the target month/,
-      );
+        };
+        const context = await CategoryTemplateContext.init(
+          [expiredSpend],
+          category,
+          '2024-06',
+          0,
+        );
+
+        expect(context.getExpiredTemplates()).toEqual([expiredSpend]);
+        expect(context.hasOnlyExpiredTemplates()).toBe(true);
+      });
+
+      it('keeps a target in the month being budgeted', async () => {
+        mockBalance(0);
+        const context = await CategoryTemplateContext.init(
+          [expiredBy],
+          category,
+          '2023-12',
+          0,
+        );
+
+        expect(context.getExpiredTemplates()).toEqual([]);
+        expect(await context.runAll(1000000)).toBe(120000);
+      });
+
+      it('funds the remaining targets without the expired one', async () => {
+        mockBalance(0);
+        const context = await CategoryTemplateContext.init(
+          [expiredBy, activeBy],
+          category,
+          '2024-06',
+          0,
+        );
+
+        expect(context.hasOnlyExpiredTemplates()).toBe(false);
+        expect(await context.runAll(1000000)).toBe(30000);
+      });
+
+      it('still rejects an expired target with a different priority', async () => {
+        mockBalance(0);
+        await expect(
+          CategoryTemplateContext.init(
+            [{ ...expiredBy, priority: 2 }, activeBy],
+            category,
+            '2024-06',
+            0,
+          ),
+        ).rejects.toThrow(
+          'Schedule and By templates must be the same priority level',
+        );
+      });
+
+      it('leaves a surplus from an expired target in the category', async () => {
+        mockBalance(100000);
+        const context = await CategoryTemplateContext.init(
+          [expiredBy, activeBy],
+          category,
+          '2024-06',
+          0,
+        );
+
+        expect(await context.runAll(1000000)).toBe(0);
+      });
+
+      it('does not pull back a surplus when no target has expired', async () => {
+        mockBalance(100000);
+        const context = await CategoryTemplateContext.init(
+          [activeBy],
+          category,
+          '2024-06',
+          0,
+        );
+
+        expect(await context.runAll(1000000)).toBe(0);
+      });
+
+      it('does not treat a category with a goal as expired-only', async () => {
+        mockBalance(0);
+        const context = await CategoryTemplateContext.init(
+          [expiredBy, { type: 'goal', amount: 500, directive: 'goal' }],
+          category,
+          '2024-06',
+          0,
+        );
+
+        expect(context.hasOnlyExpiredTemplates()).toBe(false);
+      });
     });
 
     it('accepts a past `by` target when annual or repeat is set (engine rolls it forward)', async () => {

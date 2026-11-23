@@ -242,6 +242,10 @@ it.each([false, true])(
 );
 
 describe('private network allowlist', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   const options = {
     allowedNetworks: [
       '192.168.1.20',
@@ -292,6 +296,11 @@ describe('private network allowlist', () => {
   });
 
   it('checks DNS again at connection time and connects only after approval', async () => {
+    vi.stubEnv('http_proxy', '');
+    vi.stubEnv('HTTP_PROXY', '');
+    vi.stubEnv('https_proxy', '');
+    vi.stubEnv('HTTPS_PROXY', '');
+
     const received = vi.fn();
     const server = createServer((_req, res) => {
       received();

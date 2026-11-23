@@ -18,6 +18,7 @@ import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AccountReconcileModal } from './modals/AccountReconcileModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
 import { AllAccountsMenuModal } from './modals/AllAccountsMenuModal';
+import { ApiKeyModal } from './modals/ApiKeyModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
@@ -76,6 +77,8 @@ import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
+import { StorageMigrationFailedModal } from './modals/StorageMigrationFailedModal';
+import { TagColorModal } from './modals/TagColorModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
 import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuModal';
@@ -98,7 +101,11 @@ export function Modals() {
   const [budgetId] = useMetadataPref('id');
 
   const onCloseModal = useEffectEvent(() => {
-    if (modalStack.length > 0) {
+    // A budget that failed to move is reported while the app is still
+    // settling on its first page, which must not dismiss the report
+    const isReportingFailedMove =
+      modalStack.at(-1)?.name === 'storage-migration-failed';
+    if (modalStack.length > 0 && !isReportingFailedMove) {
       dispatch(closeModal());
     }
   });
@@ -318,6 +325,9 @@ export function Modals() {
         case 'category-group-menu':
           return <CategoryGroupMenuModal key={key} {...modal.options} />;
 
+        case 'tag-color':
+          return <TagColorModal key={key} {...modal.options} />;
+
         case 'notes':
           return <NotesModal key={key} {...modal.options} />;
 
@@ -413,6 +423,9 @@ export function Modals() {
         case 'out-of-sync-migrations':
           return <OutOfSyncMigrationsModal key={key} />;
 
+        case 'storage-migration-failed':
+          return <StorageMigrationFailedModal key={key} {...modal.options} />;
+
         case 'edit-access':
           return <EditUserAccess key={key} {...modal.options} />;
 
@@ -422,6 +435,8 @@ export function Modals() {
         case 'transfer-ownership':
           return <TransferOwnership key={key} {...modal.options} />;
 
+        case 'api-key':
+          return <ApiKeyModal key={key} {...modal.options} />;
         case 'enable-openid':
           return <OpenIDEnableModal key={key} {...modal.options} />;
 

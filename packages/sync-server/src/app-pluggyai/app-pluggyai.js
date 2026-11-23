@@ -8,6 +8,7 @@ import {
   validateSessionMiddleware,
 } from '#util/middlewares';
 import { isValidFileId } from '#util/paths';
+import { validateBankSyncSession } from '#util/validate-budget-session';
 
 import { pluggyaiService } from './pluggyai-service';
 
@@ -15,9 +16,23 @@ const app = express();
 export { app as handlers };
 app.use(requestLoggerMiddleware);
 app.use(express.json());
+// SECURITY NOTE (intended behaviour - not a vulnerability):
+// Routes below that read bank data with stored credentials only require a
+// valid session; they deliberately do NOT check the user's role. Setting
+// server-wide (global) bank-sync credentials is admin-only, but every
+// signed-in user on that server may use them. This is a supported feature
+// and will remain; budgets with their own credentials use those instead.
+// API keys need explicit permission to use shared credentials.
+// All users on one server are trusted; roles are not a security boundary.
+// See SECURITY.md ("Threat model" and "Out of scope").
+const bankSync = express.Router();
+bankSync.use(validateBankSyncSession({ allowGlobalCredentials: true }));
+const budgetAccounts = express.Router();
+budgetAccounts.use(validateBankSyncSession());
+app.use(bankSync, budgetAccounts);
 app.use(validateSessionMiddleware);
 
-app.post(
+bankSync.post(
   '/status',
   handleError(async (req, res) => {
     const fileId = req.get('X-Actual-File-Id');
@@ -41,7 +56,10 @@ app.post(
       }
     }
 
-    const source = pluggyaiService.getCredentialSource(fileId);
+    const source = pluggyaiService.getCredentialSource(
+      fileId,
+      res.locals.allowGlobalBankSync,
+    );
 
     res.send({
       status: 'ok',
@@ -53,7 +71,7 @@ app.post(
   }),
 );
 
-app.post(
+budgetAccounts.post(
   '/accounts',
   handleError(async (req, res) => {
     const fileId = req.get('X-Actual-File-Id');
@@ -78,7 +96,10 @@ app.post(
     }
 
     try {
-      const source = pluggyaiService.getCredentialSource(fileId);
+      const source = pluggyaiService.getCredentialSource(
+        fileId,
+        res.locals.allowGlobalBankSync,
+      );
       if (!source) {
         res.status(400).send({
           status: 'error',
@@ -99,7 +120,11 @@ app.post(
       let accounts = [];
 
       for (const item of itemIds) {
-        const partial = await pluggyaiService.getAccountsByItemId(item, fileId);
+        const partial = await pluggyaiService.getAccountsByItemId(
+          item,
+          fileId,
+          res.locals.allowGlobalBankSync,
+        );
         accounts = accounts.concat(partial.results);
       }
 
@@ -120,7 +145,7 @@ app.post(
   }),
 );
 
-app.post(
+bankSync.post(
   '/transactions',
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
@@ -146,7 +171,10 @@ app.post(
     }
 
     try {
-      const source = pluggyaiService.getCredentialSource(fileId);
+      const source = pluggyaiService.getCredentialSource(
+        fileId,
+        res.locals.allowGlobalBankSync,
+      );
       if (!source) {
         res.status(400).send({
           status: 'error',
@@ -156,13 +184,34 @@ app.post(
         return;
       }
 
+      const account = await pluggyaiService.getAccountById(
+        accountId,
+        fileId,
+        res.locals.allowGlobalBankSync,
+      );
+      if (res.locals.apiKeyFileIds) {
+        const itemIds = (
+          secretsService.get(
+            SecretName.pluggyai_itemIds,
+            source === 'per-budget-file' ? fileId : null,
+          ) ?? ''
+        )
+          .split(',')
+          .map(item => item.trim());
+        if (!itemIds.includes(account.itemId)) {
+          res
+            .status(403)
+            .send({ status: 'error', reason: 'file-access-denied' });
+          return;
+        }
+      }
+
       const transactions = await pluggyaiService.getTransactionsByAccountId(
         accountId,
         startDate,
         fileId,
+        res.locals.allowGlobalBankSync,
       );
-
-      const account = await pluggyaiService.getAccountById(accountId, fileId);
 
       let startingBalance = parseInt(
         Math.round(account.balance * 100).toString(),

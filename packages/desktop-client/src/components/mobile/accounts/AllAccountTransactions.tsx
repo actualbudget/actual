@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
@@ -13,6 +19,7 @@ import type {
 import { TransactionListWithBalances } from '#components/mobile/transactions/TransactionListWithBalances';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { usePreviewTransactions } from '#hooks/usePreviewTransactions';
 import { getSchedulesQuery } from '#hooks/useSchedules';
@@ -43,6 +50,7 @@ function TransactionListWithPreviews() {
 
   const [hideReconciled] = useSyncedPref('hide-reconciled-all');
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const currencySymbol = useFormat().currency.symbol;
 
   const makeRootTransactionsQuery = useCallback(() => {
     let query = queries.transactions().options({ splits: 'all' }).select('*');
@@ -67,8 +75,12 @@ function TransactionListWithPreviews() {
   });
 
   const [searchText, setSearchText] = useState('');
+  // The ref lets the filter effect below re-run the current search without
+  // depending on (and re-running for) every keystroke.
+  const searchTextRef = useRef('');
   const onSearch = useCallback(
     (text: string) => {
+      searchTextRef.current = text;
       setSearchText(text);
       search(text);
     },
@@ -83,11 +95,20 @@ function TransactionListWithPreviews() {
       setCurrentQuery(query);
       setTransactionsQuery(
         searchText !== ''
-          ? queries.transactionsSearch(query, searchText, dateFormat)
+          ? queries.transactionsSearch(
+              query,
+              searchText,
+              dateFormat,
+              currencySymbol,
+            )
           : query,
       );
     }
   }
+
+  // Keyed on the serialized conditions, not location.state: updating the URL
+  // (e.g. the search param) gives location.state a new identity each time.
+  const filterConditionsKey = JSON.stringify(filterConditions);
 
   useEffect(() => {
     let isStale = false;
@@ -101,19 +122,43 @@ function TransactionListWithPreviews() {
       const query = rootQuery.filter({ $and: queryFilters });
       if (!isStale) {
         setCurrentQuery(query);
-        setTransactionsQuery(query);
+        // A search typed or restored before the filters loaded had no query
+        // to apply to; apply it now so rows that only match the filters
+        // never show.
+        const text = searchTextRef.current;
+        setTransactionsQuery(
+          text !== ''
+            ? queries.transactionsSearch(
+                query,
+                text,
+                dateFormat,
+                currencySymbol,
+              )
+            : query,
+        );
+        // Restart any pending debounced search so it can't fire with the
+        // query from before the filters loaded.
+        if (text !== '') {
+          search(text);
+        }
       }
     };
 
-    const conditions = location?.state?.filterConditions;
-    if (conditions?.length) {
+    const conditions: RuleConditionEntity[] = JSON.parse(filterConditionsKey);
+    if (conditions.length) {
       void applyFilters(conditions);
     }
 
     return () => {
       isStale = true;
     };
-  }, [location.state, makeRootTransactionsQuery]);
+  }, [
+    filterConditionsKey,
+    makeRootTransactionsQuery,
+    search,
+    dateFormat,
+    currencySymbol,
+  ]);
 
   const {
     transactions,

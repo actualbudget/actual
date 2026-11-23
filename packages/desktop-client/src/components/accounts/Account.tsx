@@ -60,6 +60,7 @@ import { useAccounts } from '#hooks/useAccounts';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { usePayees } from '#hooks/usePayees';
 import { getSchedulesQuery } from '#hooks/useSchedules';
@@ -108,6 +109,7 @@ type AllTransactionsProps = {
   account?: AccountEntity | undefined;
   transactions: TransactionEntity[];
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
+  balancesTotal: IntegerAmount | null;
   showBalances?: boolean | undefined;
   filtered?: boolean | undefined;
   children: (
@@ -120,6 +122,7 @@ function AllTransactions({
   account,
   transactions,
   balances,
+  balancesTotal,
   showBalances,
   filtered,
   children,
@@ -144,15 +147,7 @@ function AllTransactions({
 
   transactions ??= [];
 
-  const runningBalance = useMemo(() => {
-    if (!showBalances) {
-      return 0;
-    }
-
-    return balances && transactions?.length > 0
-      ? (balances[transactions[0].id] ?? 0)
-      : 0;
-  }, [showBalances, balances, transactions]);
+  const runningBalance = showBalances ? (balancesTotal ?? 0) : 0;
 
   const prependBalances = useMemo(() => {
     if (!showBalances) {
@@ -261,6 +256,7 @@ type AccountInternalProps = {
   categoryId?: string;
   location: ReturnType<typeof useLocation>;
   dateFormat: ReturnType<typeof useDateFormat>;
+  currencySymbol: string;
   payees: PayeeEntity[];
   categoryGroups: CategoryGroupEntity[];
   hideFraction: boolean;
@@ -286,6 +282,7 @@ type AccountInternalState = {
   transactionsFiltered?: boolean;
   showBalances?: boolean | undefined;
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
+  balancesTotal: IntegerAmount | null;
   showCleared?: boolean | undefined;
   prevShowCleared?: boolean | undefined;
   showReconciled: boolean;
@@ -340,6 +337,7 @@ class AccountInternal extends PureComponent<
       transactions: [],
       showBalances: props.showBalances,
       balances: null,
+      balancesTotal: null,
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
       nameError: '',
@@ -513,9 +511,7 @@ class AccountInternal extends PureComponent<
         if (this._isOptimisticUpdate) {
           this._isOptimisticUpdate = false;
           const transactionsSnapshot = data;
-          const balances = this.state.showBalances
-            ? await this.calculateBalances()
-            : null;
+          const balances = await this.calculateBalances();
           // Wrap in startTransition so React treats this as a low-priority
           // update. Without this, setState blocks the main thread for the
           // full duration of the re-render (~40–220ms with large transaction
@@ -526,7 +522,7 @@ class AccountInternal extends PureComponent<
           startTransition(() => {
             this.setState({
               transactions: transactionsSnapshot,
-              balances,
+              ...balances,
             });
           });
           return;
@@ -548,9 +544,7 @@ class AccountInternal extends PureComponent<
           }
         }
 
-        const balances = this.state.showBalances
-          ? await this.calculateBalances()
-          : null;
+        const balances = await this.calculateBalances();
         const filteredAmount = await this.getFilteredAmount();
         this.setState(
           {
@@ -558,7 +552,7 @@ class AccountInternal extends PureComponent<
             transactionsFiltered: isFiltered,
             loading: false,
             workingHard: false,
-            balances,
+            ...balances,
             filteredAmount,
           },
           () => {
@@ -594,6 +588,7 @@ class AccountInternal extends PureComponent<
           search: '',
           showBalances: nextProps.showBalances,
           balances: null,
+          balancesTotal: null,
           showCleared: nextProps.showCleared,
           showReconciled: nextProps.showReconciled,
           reconcileAmount: null,
@@ -660,6 +655,7 @@ class AccountInternal extends PureComponent<
           this.currentQuery,
           this.state.search,
           this.props.dateFormat,
+          this.props.currencySymbol,
         ),
         true,
       );
@@ -765,28 +761,35 @@ class AccountInternal extends PureComponent<
     if (this.state.sort === null) {
       return true;
     } else {
-      return (
-        this.state.sort.field === 'date' && this.state.sort.ascDesc === 'desc'
-      );
+      return this.state.sort.field === 'date';
     }
   };
 
   async calculateBalances() {
-    if (!this.canCalculateBalance() || !this.paged) {
-      return null;
+    if (
+      !this.state.showBalances ||
+      !this.canCalculateBalance() ||
+      !this.paged
+    ) {
+      return { balances: null, balancesTotal: null };
     }
 
-    const { data }: { data: { id: string; balance: number }[] } =
+    // `$sumOver` sums from each row to the last one in the sort order, which
+    // is the running balance only when the newest transaction comes first.
+    const { data }: { data: { id: string; amount: number; sum: number }[] } =
       await aqlQuery(
         this.paged.query
           .options({ splits: 'none' })
-          .select([{ balance: { $sumOver: '$amount' } }]),
+          .select(['amount', { sum: { $sumOver: '$amount' } }]),
       );
+    const total = data[0]?.sum ?? 0;
+    const isOldestFirst = this.state.sort?.ascDesc === 'asc';
 
-    return data.reduce((balances: Record<string, number>, row) => {
-      balances[row.id] = row.balance;
-      return balances;
+    const balances = data.reduce((acc: Record<string, number>, row) => {
+      acc[row.id] = isOldestFirst ? total - row.sum + row.amount : row.sum;
+      return acc;
     }, {});
+    return { balances, balancesTotal: total };
   }
 
   onRunRules = async (ids: string[]) => {
@@ -1049,7 +1052,11 @@ class AccountInternal extends PureComponent<
     const isBalanceVisible = balance && !balance.hidden;
     if (balance && isBalanceVisible !== !!this.state.showBalances) {
       if (!isBalanceVisible) {
-        this.setState({ showBalances: false, balances: null });
+        this.setState({
+          showBalances: false,
+          balances: null,
+          balancesTotal: null,
+        });
       } else {
         this.setState(
           {
@@ -1864,6 +1871,7 @@ class AccountInternal extends PureComponent<
       transactionsFiltered,
       showBalances,
       balances,
+      balancesTotal,
       showCleared,
       showReconciled,
       filteredAmount,
@@ -1905,6 +1913,7 @@ class AccountInternal extends PureComponent<
         account={account}
         transactions={transactions}
         balances={balances}
+        balancesTotal={balancesTotal}
         showBalances={showBalances}
         filtered={transactionsFiltered}
       >
@@ -2127,6 +2136,7 @@ export function Account() {
   const { data: accounts = [] } = useAccounts();
   const { data: payees = [] } = usePayees();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const currencySymbol = useFormat().currency.symbol;
   const [hideFraction] = useSyncedPref('hideFraction');
   const [expandSplits] = useLocalPref('expand-splits');
   const [showNetWorthChart, setShowNetWorthChart] = useSyncedPref(
@@ -2187,6 +2197,7 @@ export function Account() {
             matchedTransactions={matchedTransactions}
             accounts={accounts}
             dateFormat={dateFormat}
+            currencySymbol={currencySymbol}
             hideFraction={String(hideFraction) === 'true'}
             expandSplits={expandSplits}
             showBalances={showBalances}
