@@ -69,6 +69,7 @@ export type ForecastScheduleOccurrence = {
   scheduleId: string;
   scheduleName: string;
   occurrenceDate: string;
+  isMissed?: boolean;
 };
 
 async function getSchedules() {

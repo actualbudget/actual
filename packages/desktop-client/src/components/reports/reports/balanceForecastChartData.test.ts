@@ -276,6 +276,64 @@ describe('buildBalanceForecastChartData', () => {
 });
 
 describe('countForecastScheduledOccurrences', () => {
+  it('counts only missed occurrences when asked, keeping their original dates', () => {
+    const missed = {
+      amount: -100,
+      payee: 'Rent',
+      scheduleId: 'schedule-rent',
+      scheduleName: 'Rent',
+      isMissed: true,
+    };
+    const forecastData = {
+      dataPoints: [
+        {
+          date: '2024-05-20',
+          balance: -200,
+          accountId: 'checking',
+          accountName: 'Checking',
+          transactions: [
+            { ...missed, occurrenceDate: '2024-04-15' },
+            { ...missed, occurrenceDate: '2024-05-15' },
+          ],
+        },
+        {
+          date: '2024-06-15',
+          balance: -300,
+          accountId: 'checking',
+          accountName: 'Checking',
+          transactions: [
+            {
+              amount: -100,
+              payee: 'Rent',
+              scheduleId: 'schedule-rent',
+              scheduleName: 'Rent',
+              occurrenceDate: '2024-06-15',
+            },
+          ],
+        },
+      ],
+      lowestBalance: {
+        date: '2024-06-15',
+        balance: -300,
+        accountId: '',
+        accountName: '',
+      },
+      forecastStartDate: '2024-05-20',
+      forecastEndDate: '2024-06-30',
+    };
+    const range = {
+      forecastData,
+      start: '2024-05',
+      end: '2024-06',
+      granularity: 'Monthly' as const,
+    };
+
+    expect(countForecastScheduledOccurrences(range)).toBe(3);
+    expect(
+      countForecastScheduledOccurrences({ ...range, missedOnly: true }),
+    ).toBe(2);
+  });
+
   it('counts a transfer occurrence once even when rules move one account leg', () => {
     const forecastData = {
       dataPoints: [

@@ -59,6 +59,23 @@ describe('buildBalanceForecastRequest', () => {
     });
   });
 
+  it('passes chosen missed schedule options through', () => {
+    expect(
+      buildBalanceForecastRequest({
+        startDate: '2024-03-01',
+        endDate: '2024-03-31',
+        missedSchedules: 'payments',
+        missedOccurrences: 'all',
+      }),
+    ).toEqual({
+      startDate: '2024-03-01',
+      endDate: '2024-03-31',
+      source: 'schedules',
+      missedSchedules: 'payments',
+      missedOccurrences: 'all',
+    });
+  });
+
   it('defaults to schedules when source is omitted', () => {
     expect(
       buildBalanceForecastRequest({

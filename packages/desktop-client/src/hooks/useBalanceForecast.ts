@@ -3,6 +3,8 @@ import { useEffect, useEffectEvent } from 'react';
 import { listen, send } from '@actual-app/core/platform/client/connection';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import type {
+  ForecastMissedOccurrences,
+  ForecastMissedSchedules,
   ForecastSeries,
   ForecastSource,
 } from '@actual-app/core/types/models/forecast';
@@ -17,6 +19,8 @@ type UseBalanceForecastParams = {
   endDate: string;
   includeAccountlessSchedules?: boolean;
   source?: ForecastSource;
+  missedSchedules?: ForecastMissedSchedules;
+  missedOccurrences?: ForecastMissedOccurrences;
   enabled?: boolean;
 };
 
@@ -28,6 +32,8 @@ export function buildBalanceForecastRequest({
   endDate,
   includeAccountlessSchedules,
   source = 'schedules',
+  missedSchedules,
+  missedOccurrences,
 }: UseBalanceForecastParams) {
   return Object.fromEntries(
     Object.entries({
@@ -38,6 +44,8 @@ export function buildBalanceForecastRequest({
       endDate,
       includeAccountlessSchedules,
       source,
+      missedSchedules,
+      missedOccurrences,
     }).filter(([, value]) => value !== undefined),
   );
 }

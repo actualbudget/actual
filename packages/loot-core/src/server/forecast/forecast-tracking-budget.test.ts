@@ -5,6 +5,7 @@ import type { ForecastDateContext } from './forecast-projection';
 import { projectTrackingBudgetForecast } from './forecast-tracking-budget';
 
 const dateContext: ForecastDateContext = {
+  today: '2024-03-10',
   forecastStartDate: '2024-03-01',
   forecastEndDate: '2024-05-31',
   forecastDays: [],
