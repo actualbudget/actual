@@ -315,6 +315,8 @@ export function ConfigServer() {
         return t(
           'Connection failed. If you use a self-signed certificate or were recently offline, try refreshing the page. Otherwise ensure you have HTTPS set up properly.',
         );
+      case 'sign-out-failure':
+        return t('Could not sign out of the current server. Please try again.');
       default:
         return t(
           'Server does not look like an Actual server. Is it set up correctly?',
@@ -338,30 +340,43 @@ export function ConfigServer() {
     const urlChanged = httpUrl.replace(/\/+$/, '') !== currentUrl;
     setUrl(httpUrl);
 
-    if (urlChanged) {
-      const result = await send('subscribe-needs-bootstrap', { url: httpUrl });
-      if ('error' in result) {
-        setLoading(false);
-        setError(result.error);
+    try {
+      if (urlChanged) {
+        const result = await send('subscribe-needs-bootstrap', {
+          url: httpUrl,
+        });
+        if ('error' in result) {
+          setError(result.error);
+          return;
+        }
+        // Sign out before switching so the current server revokes the session.
+        const signOutResult = await dispatch(signOut());
+        if (signOut.rejected.match(signOutResult)) {
+          setError('sign-out-failure');
+          return;
+        }
+      }
+
+      const { error } = await setServerUrl(httpUrl, {
+        validate: !urlChanged,
+      });
+      if (error) {
+        setError(error);
         return;
       }
-      // Sign out before switching so the current server revokes the session.
-      await dispatch(signOut());
+    } catch {
+      setError('validation-failure');
+      return;
+    } finally {
+      setLoading(false);
     }
 
-    const { error } = await setServerUrl(httpUrl, { validate: !urlChanged });
-    setLoading(false);
-
-    if (error) {
-      setError(error);
+    if (urlChanged) {
+      await dispatch(getUserData());
     } else {
-      if (urlChanged) {
-        await dispatch(getUserData());
-      } else {
-        await dispatch(loggedIn());
-      }
-      void navigate('/');
+      await dispatch(loggedIn());
     }
+    void navigate('/');
   }
 
   function onSameDomain() {
