@@ -252,6 +252,45 @@ test.describe('Schedules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('posts a later upcoming occurrence on its own date', async () => {
+    const scheduleEditModal = await schedulesPage.addNewSchedule();
+    await scheduleEditModal.fill({
+      payee: 'Home Depot',
+      account: 'HSBC',
+      amount: 25,
+    });
+    await scheduleEditModal.locator
+      .getByRole('checkbox', { name: 'Repeats' })
+      .check();
+    await scheduleEditModal.locator
+      .getByRole('button', { name: 'Every month on the 1st' })
+      .click();
+    // The start date calendar opens with the picker and covers the controls
+    await page.getByRole('textbox', { name: 'From' }).press('Enter');
+    await page.getByRole('button', { name: 'Months' }).click();
+    await page.getByRole('button', { name: 'Weeks' }).click();
+    await page.getByRole('button', { name: 'Apply' }).click();
+    await scheduleEditModal.add();
+
+    // Upcoming rows come first, newest first: 01/08, then 01/01 (due)
+    const accountPage = await navigation.goToAccountPage('HSBC');
+    const homeDepot = accountPage.transactionTableRow.filter({
+      hasText: 'Home Depot',
+    });
+    await expect(homeDepot).toHaveCount(2);
+
+    await accountPage.selectNthTransaction(1);
+    await accountPage.clickSelectAction(/^Post transaction$/);
+    await expect(homeDepot.filter({ hasText: 'Due' })).toHaveCount(0);
+
+    await accountPage.selectNthTransaction(0);
+    await accountPage.clickSelectAction(/^Post transaction$/);
+
+    await expect(homeDepot.filter({ hasText: 'Upcoming' })).toHaveCount(0);
+    await expect(homeDepot.filter({ hasText: '01/08/2017' })).toHaveCount(1);
+    await expect(homeDepot.filter({ hasText: '01/01/2017' })).toHaveCount(1);
+  });
+
   test('creates a "full" list of schedules', async () => {
     // Schedules search shouldn't shrink with many schedules
     for (let i = 0; i < 10; i++) {

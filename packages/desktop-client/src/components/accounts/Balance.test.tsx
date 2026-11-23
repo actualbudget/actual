@@ -50,6 +50,7 @@ function mockedSchedules(schedules: ScheduleEntity[]) {
     schedules,
     statuses: new Map(),
     statusLabels: new Map(),
+    postedTransactions: [],
   };
 }
 

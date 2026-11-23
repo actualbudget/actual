@@ -225,6 +225,47 @@ describe('schedules', () => {
       });
     });
 
+    it('leaves out later occurrences posted on their date', () => {
+      const schedule: ScheduleEntity = {
+        id: 'sched-1',
+        rule: 'rule-1',
+        next_date: '2017-01-05',
+        completed: false,
+        posts_transaction: false,
+        tombstone: false,
+        _payee: 'payee-1',
+        _account: 'acct-1',
+        _amount: -10000,
+        _amountOp: 'is',
+        _date: '2017-01-05',
+        _conditions: [
+          {
+            field: 'date',
+            op: 'isapprox',
+            value: { start: '2017-01-05', frequency: 'weekly' },
+          },
+        ],
+        _actions: [],
+      };
+
+      const result = computeSchedulePreviewTransactions(
+        [schedule],
+        new Map([['sched-1', 'upcoming']]),
+        '3-week',
+        undefined,
+        [
+          { schedule: 'sched-1', date: '2017-01-12' },
+          // Not on an occurrence date: it pays nothing here
+          { schedule: 'sched-1', date: '2017-01-18' },
+        ],
+      );
+
+      expect(result.map(r => r.date).sort()).toEqual([
+        '2017-01-05',
+        '2017-01-19',
+      ]);
+    });
+
     it('does not crash when a recurring schedule has an end date in the past', () => {
       function makeSchedule(
         overrides: Partial<ScheduleEntity> &

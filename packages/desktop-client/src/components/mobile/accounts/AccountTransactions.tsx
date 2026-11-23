@@ -193,6 +193,7 @@ function TransactionListWithPreviews({
                   const parts = transactionId.split('/');
                   await send('schedule/post-transaction', {
                     id: parts[1],
+                    date: parts[2],
                     today,
                   });
                   dispatch(
