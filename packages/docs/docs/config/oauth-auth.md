@@ -62,6 +62,7 @@ If your OpenId provider does not supports discovery, use the following variables
 - `ACTUAL_OPENID_CLIENT_ID`: client_id given by the provider
 - `ACTUAL_OPENID_CLIENT_SECRET`: client_secret given by the provider
 - `ACTUAL_OPENID_SERVER_HOSTNAME`: Your Actual Server URL (so the provider redirects you to this)
+- `ACTUAL_OPENID_ID_TOKEN_SIGNED_RESPONSE_ALG` (optional): Algorithm your provider signs ID tokens with, for example `ES256`. Only needed when the provider advertises several algorithms but signs with one that is not RS256
 
 :::tip
 To keep the client secret out of your environment, set `ACTUAL_OPENID_CLIENT_SECRET_FILE` to the path of a file containing it instead. See [Configuring the Server](index.md).
@@ -144,6 +145,11 @@ The first user to log in with OpenID/OAuth2 will be granted admin permissions an
 
 - **Purpose:** The public URL of your Actual Server, which the provider redirects to after authentication.
   **Example Value:** `https://<actual.myserver.com>`
+
+#### `ACTUAL_OPENID_ID_TOKEN_SIGNED_RESPONSE_ALG`
+
+- **Purpose:** Optional. The algorithm your provider signs ID tokens with. When it is empty, Actual reads the algorithm from the provider's discovery document and keeps RS256 whenever the provider lists it. Set it when the provider lists several algorithms but signs with one that is not RS256.
+  **Example Value:** `ES256`
 
 #### `ACTUAL_OPENID_AUTHORIZATION_ENDPOINT`
 

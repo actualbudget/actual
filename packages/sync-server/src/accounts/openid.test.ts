@@ -136,3 +136,36 @@ it.each([
     );
   },
 );
+
+it.each([
+  ['both algorithms are advertised', ['RS256', 'ES256'], 'ES256', 'ES256'],
+  ['only RS256 is advertised', ['RS256'], 'EdDSA', 'EdDSA'],
+  ['the provider lists no algorithms', undefined, 'ES384', 'ES384'],
+  ['the override is empty', ['RS256', 'ES256'], '', 'RS256'],
+])(
+  'uses the configured ID token algorithm when %s',
+  async (_name, algs, override, expected) => {
+    provider.metadata = algs
+      ? { id_token_signing_alg_values_supported: algs }
+      : {};
+    getAccountDb().mutate(
+      "UPDATE auth SET extra_data = ? WHERE method = 'openid'",
+      [
+        JSON.stringify({
+          issuer: 'https://identity.example',
+          client_id: 'client',
+          client_secret: 'secret',
+          server_hostname: 'https://actual.example',
+          id_token_signed_response_alg: override,
+        }),
+      ],
+    );
+
+    const result = await loginWithOpenIdSetup('https://actual.example');
+
+    expect(result.error).toBeUndefined();
+    expect(provider.clientCreated).toHaveBeenCalledWith(
+      expect.objectContaining({ id_token_signed_response_alg: expected }),
+    );
+  },
+);

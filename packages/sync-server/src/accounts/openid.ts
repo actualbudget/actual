@@ -114,7 +114,9 @@ async function setupOpenIdClient(configParameter) {
       configParameter.server_hostname,
     ).toString(),
     validate_id_token: true,
-    id_token_signed_response_alg: pickIdTokenSignedResponseAlg(issuer),
+    id_token_signed_response_alg:
+      configParameter.id_token_signed_response_alg ||
+      pickIdTokenSignedResponseAlg(issuer),
   });
 
   return client;
