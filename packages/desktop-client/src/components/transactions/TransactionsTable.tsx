@@ -3810,10 +3810,9 @@ export const TransactionTable = forwardRef(
             );
           }
 
-          const newTrans = latestState.current.newTransactions;
           // Future refactor: we shouldn't need to iterate through the entire
           // transaction list to ungroup, just the new transactions.
-          setNewTransactions(
+          setNewTransactions(newTrans =>
             ungroupTransactions(
               updateTransaction(newTrans, groupedTransaction).data,
             ),
@@ -3822,7 +3821,7 @@ export const TransactionTable = forwardRef(
           onSaveProp(groupedTransaction);
         }
       },
-      [latestState, onSaveProp, onApplyRulesProp],
+      [onSaveProp, onApplyRulesProp],
     );
 
     const onDelete = useCallback(
@@ -3998,54 +3997,67 @@ export const TransactionTable = forwardRef(
           return;
         }
 
-        if (siblingTransactions.length === 0) {
-          return;
-        }
-
         const siblingTotal = siblingTransactions.reduce(
           (acc, t) => acc + t.amount,
           0,
         );
         const remainingAmount = parentTransaction.amount - siblingTotal;
 
-        const evenTargets =
-          emptyTransactions.length > 0
-            ? emptyTransactions
-            : siblingTotal === 0
-              ? siblingTransactions
-              : [];
+        // Children that cancel out can't be scaled proportionally, so spread
+        // the remainder evenly across all of them instead.
+        const evenTransactions =
+          emptyTransactions.length === 0 && siblingTotal === 0
+            ? siblingTransactions
+            : emptyTransactions;
 
-        let updatedSiblings: TransactionEntity[];
-        if (evenTargets.length > 0) {
+        let amounts: number[] = [];
+        if (evenTransactions.length > 0) {
           const amountPerTransaction = Math.floor(
-            remainingAmount / evenTargets.length,
+            remainingAmount / evenTransactions.length,
           );
           let remainingCents =
-            remainingAmount - amountPerTransaction * evenTargets.length;
-          const isEvenTarget =
-            emptyTransactions.length > 0
-              ? (t: TransactionEntity) => t.amount === 0
-              : () => true;
+            remainingAmount - amountPerTransaction * evenTransactions.length;
 
-          updatedSiblings = siblingTransactions.map(t => {
-            if (!isEvenTarget(t)) {
-              return t;
-            }
-            const extraCent = remainingCents > 0 ? 1 : 0;
-            if (remainingCents > 0) {
-              remainingCents--;
-            }
-            return {
-              ...t,
-              amount: t.amount + amountPerTransaction + extraCent,
-            };
-          });
-        } else {
-          const amounts = siblingTransactions.map(
-            t =>
-              Math.floor((t.amount / siblingTotal) * remainingAmount) +
-              t.amount,
+          amounts = new Array(evenTransactions.length).fill(
+            amountPerTransaction,
           );
+
+          for (const [amountIndex] of amounts.entries()) {
+            if (remainingCents === 0) break;
+
+            amounts[amountIndex] += 1;
+            remainingCents--;
+          }
+
+          if (isTemporaryId(id)) {
+            newNavigator.onEdit(null);
+          } else {
+            tableNavigator.onEdit(null);
+          }
+
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of evenTransactions.entries()) {
+            await onSave({
+              ...transaction,
+              amount: transaction.amount + amounts[transactionIndex],
+            });
+          }
+        } else if (siblingTransactions.length > 0) {
+          const siblingProportions = siblingTransactions.map(
+            t => t.amount / siblingTotal,
+          );
+
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of siblingTransactions.entries()) {
+            amounts[transactionIndex] =
+              Math.floor(
+                siblingProportions[transactionIndex] * remainingAmount,
+              ) + transaction.amount;
+          }
 
           let remainingCents =
             parentTransaction.amount - amounts.reduce((acc, a) => acc + a, 0);
@@ -4063,46 +4075,24 @@ export const TransactionTable = forwardRef(
             amountIndex++;
           }
 
-          updatedSiblings = siblingTransactions.map((t, index) => ({
-            ...t,
-            amount: amounts[index],
-          }));
-        }
-
-        if (isTemporaryId(id)) {
-          newNavigator.onEdit(null);
-          savePending.current = true;
-
-          let finalSiblings = updatedSiblings;
-          if (onApplyRulesProp) {
-            finalSiblings = [];
-            for (const [index, sibling] of updatedSiblings.entries()) {
-              if (sibling.amount !== siblingTransactions[index].amount) {
-                finalSiblings.push(
-                  await onApplyRulesProp(sibling, null, clearedFields.current),
-                );
-              } else {
-                finalSiblings.push(sibling);
-              }
-            }
+          if (isTemporaryId(id)) {
+            newNavigator.onEdit(null);
+          } else {
+            tableNavigator.onEdit(null);
           }
 
-          setNewTransactions(current =>
-            current !== newTransactions
-              ? current
-              : ungroupTransactions(
-                  updateTransaction(
-                    current,
-                    groupTransaction([parentTransaction, ...finalSiblings]),
-                  ).data,
-                ),
-          );
-        } else {
-          tableNavigator.onEdit(null);
-          await onSave(parentTransaction, updatedSiblings);
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of siblingTransactions.entries()) {
+            await onSave({
+              ...transaction,
+              amount: amounts[transactionIndex],
+            });
+          }
         }
       },
-      [latestState, onSave, onApplyRulesProp],
+      [latestState, onSave],
     );
 
     function onCloseAddTransaction() {

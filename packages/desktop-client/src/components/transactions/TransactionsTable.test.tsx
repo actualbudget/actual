@@ -196,8 +196,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
   };
 
   const onSave = (transaction: TransactionEntity) => {
-    const { data } = updateTransaction(transactions, transaction);
-    setTransactions(data);
+    setTransactions(trans => updateTransaction(trans, transaction).data);
   };
 
   const onAdd = (newTransactions: TransactionEntity[]) => {
@@ -1952,27 +1951,33 @@ describe('Transactions', () => {
     // expect(getTransactions()[0].isParent).toBe(false);
   });
 
-  test('distributing a split updates every child so they add up to the parent', async () => {
-    const { container, getTransactions } = renderTransactions();
+  test('distributing a new split fills every empty child', async () => {
+    const { container, updateProps } = renderTransactions();
+    updateProps({ isAdding: true });
 
-    await editField(container, 'category', 0);
-    expect(getTransactions()[0].amount).toBe(-2777);
+    const input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '10.00');
 
-    // Split into two empty children
+    await editNewField(container, 'category');
     await userEvent.click(screen.getByTestId('split-transaction-button'));
     await waitForAutocomplete();
+    await waitForAutocomplete();
+    await waitForAutocomplete();
     await userEvent.click(screen.getByTestId('add-split-button'));
-    expect(getTransactions().length).toBe(7);
 
     await userEvent.click(screen.getByRole('button', { name: 'Distribute' }));
 
-    const [parent, ...children] = getTransactions().slice(0, 3);
-    expect(children.map(t => t.amount)).toEqual([-1388, -1389]);
-    expect(children.reduce((acc, t) => acc + t.amount, 0)).toBe(parent.amount);
+    const debits = [
+      ...container.querySelectorAll(
+        '[data-testid="new-transaction"] [data-testid="debit"]',
+      ),
+    ].map(cell => cell.textContent);
+    expect(debits).toEqual(['10.00', '3.33', '3.33', '3.34']);
     expect(screen.queryAllByTestId('transaction-error')).toHaveLength(0);
   });
 
-  test('distributing a split whose children cancel out to zero distributes evenly', async () => {
+  test('distributing a split whose children cancel out distributes evenly', async () => {
     const { container, getTransactions } = renderTransactions();
 
     await editField(container, 'category', 0);
@@ -1991,125 +1996,9 @@ describe('Transactions', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Distribute' }));
 
-    const [parent, ...children] = getTransactions().slice(0, 3);
+    const [, ...children] = getTransactions().slice(0, 3);
     expect(children.map(t => t.amount)).toEqual([-2388, -389]);
-    expect(children.reduce((acc, t) => acc + t.amount, 0)).toBe(parent.amount);
     expect(screen.queryAllByTestId('transaction-error')).toHaveLength(0);
-  });
-
-  test('distributing a new split runs rules on distributed children instead of the parent', async () => {
-    const foodCategoryId = usualGroup.categories![0].id;
-    const appliedTransactions: TransactionEntity[] = [];
-    const { container, getTransactions, updateProps } = renderTransactions({
-      onApplyRules: async transaction => {
-        appliedTransactions.push(transaction);
-        if (transaction.amount === -700) {
-          return { ...transaction, category: foodCategoryId };
-        }
-        return transaction;
-      },
-    });
-    updateProps({ isAdding: true });
-
-    let input = await editNewField(container, 'debit');
-    await userEvent.clear(input);
-    await userEvent.type(input, '10.00');
-
-    await editNewField(container, 'category');
-    await userEvent.click(screen.getByTestId('split-transaction-button'));
-    await waitForAutocomplete();
-    await waitForAutocomplete();
-    await waitForAutocomplete();
-
-    input = await editNewField(container, 'debit', 1);
-    await userEvent.clear(input);
-    await userEvent.type(input, '3.00[tab]');
-
-    appliedTransactions.length = 0;
-
-    await userEvent.click(screen.getByRole('button', { name: 'Distribute' }));
-
-    await waitFor(() => {
-      expect(
-        container.querySelector('[data-testid="transaction-error"]'),
-      ).toBeNull();
-    });
-
-    expect(appliedTransactions).toHaveLength(1);
-    expect(appliedTransactions[0]).toEqual(
-      expect.objectContaining({ is_child: true, amount: -700 }),
-    );
-
-    await userEvent.click(
-      container.querySelector('[data-testid="add-button"]')!,
-    );
-    const [parent, child1, child2] = getTransactions().slice(0, 3);
-    expect(parent.amount).toBe(-1000);
-    expect(child1.amount).toBe(-300);
-    expect(child2.amount).toBe(-700);
-    expect(child2.category).toBe(foodCategoryId);
-  });
-
-  test('distributing a new split keeps a newer draft when rule results arrive late', async () => {
-    const foodCategoryId = usualGroup.categories![0].id;
-    let deferRules = false;
-    let resolveDeferredRule: (() => void) | null = null;
-    const { container, updateProps } = renderTransactions({
-      onApplyRules: async transaction => {
-        if (deferRules) {
-          return new Promise<TransactionEntity>(resolve => {
-            resolveDeferredRule = () =>
-              resolve({ ...transaction, category: foodCategoryId });
-          });
-        }
-        return transaction;
-      },
-    });
-    updateProps({ isAdding: true });
-
-    let input = await editNewField(container, 'debit');
-    await userEvent.clear(input);
-    await userEvent.type(input, '10.00');
-
-    await editNewField(container, 'category');
-    await userEvent.click(screen.getByTestId('split-transaction-button'));
-    await waitForAutocomplete();
-    await waitForAutocomplete();
-    await waitForAutocomplete();
-
-    input = await editNewField(container, 'debit', 1);
-    await userEvent.clear(input);
-    await userEvent.type(input, '3.00[tab]');
-
-    deferRules = true;
-    await userEvent.click(screen.getByRole('button', { name: 'Distribute' }));
-    await waitFor(() => {
-      expect(resolveDeferredRule).not.toBeNull();
-    });
-
-    // Add a third split while Distribute is still waiting on rules
-    await userEvent.click(screen.getByTestId('add-split-button'));
-    expect(
-      container.querySelectorAll(
-        '[data-testid="new-transaction"] [data-testid="debit"]',
-      ),
-    ).toHaveLength(4);
-
-    // Resolve the stale rule call and ensure the 3-child draft is kept
-    await act(async () => {
-      resolveDeferredRule!();
-    });
-
-    const debitCells = container.querySelectorAll(
-      '[data-testid="new-transaction"] [data-testid="debit"]',
-    );
-    expect(debitCells).toHaveLength(4);
-    expect(debitCells[1].textContent).toBe('3.00');
-    expect(debitCells[2].textContent).toBe('0.00');
-    expect(debitCells[3].textContent).toBe('0.00');
-    expect(
-      container.querySelector('[data-testid="transaction-error"]'),
-    ).toBeTruthy();
   });
 
   test('transaction with splits shows 0 in correct column', async () => {

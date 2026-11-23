@@ -3,4 +3,4 @@ category: Bugfix
 authors: [LostNSeeker]
 ---
 
-Fix Distribute in split transactions freezing when split amounts cancel out, and save all split amounts at once.
+Fix Distribute in split transactions freezing when the split amounts cancel out, and dropping amounts on new transactions.
