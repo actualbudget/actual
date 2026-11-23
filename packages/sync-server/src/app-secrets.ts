@@ -17,19 +17,22 @@ app.use(requestLoggerMiddleware);
 app.use(validateSessionMiddleware);
 
 // Global secrets are admin-managed.
-function canManageGlobalSecrets(userId) {
+function canManageGlobalSecrets(userId: string): boolean {
   return isAdmin(userId);
 }
 
 // Per-budget-file secrets are managed by file owners
-function isBudgetFileOwner(fileId, userId) {
+function isBudgetFileOwner(fileId: string, userId: string): boolean {
   const { granted } = UserService.checkFilePermission(fileId, userId) || {
     granted: 0,
   };
   return granted > 0;
 }
 
-function canManagePerBudgetFileSecrets(fileId, userId) {
+function canManagePerBudgetFileSecrets(
+  fileId: string,
+  userId: string,
+): boolean {
   return isAdmin(userId) || isBudgetFileOwner(fileId, userId);
 }
 
@@ -74,7 +77,7 @@ app.post('/', async (req, res) => {
     return;
   }
 
-  const secretFileId = perBudgetFile ? fileId : null;
+  const secretFileId = perBudgetFile ? fileId : undefined;
   secretsService.set(name, value, secretFileId);
 
   res.status(200).send({ status: 'ok' });
@@ -166,7 +169,10 @@ app.get('/:name', async (req, res) => {
     }
   }
 
-  const keyExists = secretsService.exists(name, perBudgetFile ? fileId : null);
+  const keyExists = secretsService.exists(
+    name,
+    perBudgetFile ? fileId : undefined,
+  );
   if (keyExists) {
     res.sendStatus(204);
   } else {
