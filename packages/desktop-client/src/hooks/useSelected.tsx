@@ -124,7 +124,13 @@ export function useSelected<T extends Item>(
         }
 
         case 'select-none':
-          return { ...state, selectedItems: new Set<string>() };
+          // With nothing checked, the next range select starts fresh rather
+          // than from a row that's no longer checked
+          return {
+            ...state,
+            selectedItems: new Set<string>(),
+            selectedRange: null,
+          };
 
         case 'select-all':
           let selectedItems: string[] = [];

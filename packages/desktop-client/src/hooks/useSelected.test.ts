@@ -47,6 +47,26 @@ describe('useSelected', () => {
     expect(result.current.items).toEqual(new Set(['one', 'three', 'five']));
   });
 
+  it('starts a new range after everything is unchecked', () => {
+    const { result } = renderUseSelected([
+      { id: 'one' },
+      { id: 'two' },
+      { id: 'three' },
+    ]);
+
+    act(() => result.current.dispatch({ type: 'select', id: 'one' }));
+    act(() => result.current.dispatch({ type: 'select-none' }));
+    act(() =>
+      result.current.dispatch({
+        type: 'select',
+        id: 'three',
+        isRangeSelect: true,
+      }),
+    );
+
+    expect(result.current.items).toEqual(new Set(['three']));
+  });
+
   it('removes selected ids that are no longer in items', () => {
     // Simulates hiding transactions (e.g. toggling “hide reconciled
     // transactions”) while they are selected: the selection must be
