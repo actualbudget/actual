@@ -1977,6 +1977,43 @@ describe('Transactions', () => {
     expect(screen.queryAllByTestId('transaction-error')).toHaveLength(0);
   });
 
+  test('distributing a new split ignores rule results that arrive after cancel', async () => {
+    let resolveRule: (() => void) | null = null;
+    let deferRules = false;
+    const { container, updateProps } = renderTransactions({
+      onApplyRules: transaction =>
+        deferRules
+          ? new Promise(resolve => {
+              deferRules = false;
+              resolveRule = () => resolve(transaction);
+            })
+          : Promise.resolve(transaction),
+      onCloseAddTransaction: () => updateProps({ isAdding: false }),
+    });
+    updateProps({ isAdding: true });
+
+    let input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '10.00');
+
+    await editNewField(container, 'category');
+    await userEvent.click(screen.getByTestId('split-transaction-button'));
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+
+    deferRules = true;
+    await userEvent.click(screen.getByRole('button', { name: 'Distribute' }));
+    await userEvent.click(screen.getByTestId('cancel-button'));
+    updateProps({ isAdding: true });
+    await act(async () => resolveRule!());
+
+    input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '5.00');
+    expect(input.value).toBe('5.00');
+  });
+
   test('distributing a split whose children cancel out distributes evenly', async () => {
     const { container, getTransactions } = renderTransactions();
 

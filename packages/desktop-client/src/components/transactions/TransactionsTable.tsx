@@ -3813,9 +3813,12 @@ export const TransactionTable = forwardRef(
           // Future refactor: we shouldn't need to iterate through the entire
           // transaction list to ungroup, just the new transactions.
           setNewTransactions(newTrans =>
-            ungroupTransactions(
-              updateTransaction(newTrans, groupedTransaction).data,
-            ),
+            // The form may have been cancelled while rules were running
+            newTrans.some(t => t.id === groupedTransaction.id)
+              ? ungroupTransactions(
+                  updateTransaction(newTrans, groupedTransaction).data,
+                )
+              : newTrans,
           );
         } else {
           onSaveProp(groupedTransaction);
