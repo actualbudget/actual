@@ -83,32 +83,30 @@ export function nearestWithContrast(
   target: number,
 ) {
   const start = formatHex(toColor(css));
-  if (lowestContrast(start, backgrounds) >= target) {
-    return start;
-  }
-
-  const startLightness = toColor(css).l;
-  let nearest: { color: string; distance: number } | null = null;
   let strongest = {
     color: start,
     contrast: lowestContrast(start, backgrounds),
   };
-  for (let step = 0; step <= lightnessSteps; step += 1) {
-    const lightness = step / lightnessSteps;
+  if (strongest.contrast >= target) {
+    return start;
+  }
+
+  const startLightness = toColor(css).l;
+  const nearestFirst = Array.from(
+    { length: lightnessSteps + 1 },
+    (_, step) => step / lightnessSteps,
+  ).sort((a, b) => Math.abs(a - startLightness) - Math.abs(b - startLightness));
+  for (const lightness of nearestFirst) {
     const color = withLightness(css, lightness);
     const contrast = lowestContrast(color, backgrounds);
-    const distance = Math.abs(lightness - startLightness);
+    if (contrast >= target) {
+      return color;
+    }
     if (contrast > strongest.contrast) {
       strongest = { color, contrast };
     }
-    if (
-      contrast >= target &&
-      (nearest == null || distance < nearest.distance)
-    ) {
-      nearest = { color, distance };
-    }
   }
-  return nearest?.color ?? strongest.color;
+  return strongest.color;
 }
 
 function pickContrast(fill: string) {
