@@ -178,6 +178,7 @@ export function TagAutocomplete({
         className={css(styles.darkScrollbar, {
           background: theme.menuAutoCompleteBackground,
           borderRadius: 6,
+          // oxlint-disable-next-line actual/no-color-literals
           boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
           width: inputRef.current?.offsetWidth ?? 100,
         })}

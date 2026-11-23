@@ -80,13 +80,25 @@ export async function createScheduleList(
     const conditions = rule.serialize().conditions;
     const { date: dateConditions, amount: amountCondition } =
       extractScheduleConds(conditions);
-    let scheduleAmount =
-      amountCondition.op === 'isbetween'
-        ? Math.round(amountCondition.value.num1 + amountCondition.value.num2) /
-          2
-        : amountCondition.value;
+    // The amount condition can be removed from a schedule's rule on the Rules
+    // page. The Schedules page shows such a schedule as 0, so budget it as 0
+    // too. There is then nothing to adjust, and a fixed adjustment can't tell
+    // which way 0 should move.
+    let scheduleAmount = 0;
+    if (amountCondition != null) {
+      scheduleAmount =
+        amountCondition.op === 'isbetween'
+          ? Math.round(
+              amountCondition.value.num1 + amountCondition.value.num2,
+            ) / 2
+          : amountCondition.value;
+    }
     // Apply adjustment percentage if specified
-    if (template.adjustment !== undefined && template.adjustmentType) {
+    if (
+      amountCondition != null &&
+      template.adjustment !== undefined &&
+      template.adjustmentType
+    ) {
       switch (template.adjustmentType) {
         case 'percent': {
           const adjustmentFactor = 1 + template.adjustment / 100;

@@ -89,6 +89,34 @@ test.describe('Mobile Accounts', () => {
     await expect(accountPage.transactions).toHaveCount(searchedCount);
   });
 
+  test('selects the last search result while the selection bar is shown', async () => {
+    const accountsPage = await navigation.goToAccountsPage();
+    await accountsPage.waitFor();
+
+    const accountPage = await accountsPage.openNthAccount(0);
+    await accountPage.waitFor();
+
+    await accountPage.searchByText('Kroger');
+    // Wait until only search results are listed, so the long press does not
+    // land on a row that is about to be replaced.
+    await expect(
+      accountPage.transactions.filter({ hasNotText: 'Kroger' }),
+    ).toHaveCount(0);
+
+    await accountPage.longPressTransaction(accountPage.transactions.first());
+    await expect(accountPage.selectedCount).toHaveText(
+      '1 transaction selected',
+    );
+
+    await accountPage.scrollToEndOfList();
+    // Forced so the click lands on whatever is on top at the row's centre:
+    // the selection bar must not cover the last row.
+    await accountPage.transactions.last().click({ force: true });
+    await expect(accountPage.selectedCount).toHaveText(
+      '2 transactions selected',
+    );
+  });
+
   test('reconciles an account', async () => {
     const accountsPage = await navigation.goToAccountsPage();
     await accountsPage.waitFor();

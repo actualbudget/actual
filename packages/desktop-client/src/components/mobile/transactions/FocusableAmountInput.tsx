@@ -373,6 +373,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
             style={{
               borderTopWidth: 1,
               borderBottomWidth: 1,
+              // oxlint-disable-next-line actual/no-color-literals
               borderColor: '#e0e0e0',
               borderTopColor: 'transparent',
               justifyContent: 'center',

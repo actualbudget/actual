@@ -12,7 +12,11 @@ import {
 } from '#platform/server/sqlite';
 
 import * as absurdMigration from './absurd-migration';
-import { BudgetInUseError, StorageUnavailableError } from './errors';
+import {
+  BudgetInUseError,
+  StorageMigrationError,
+  StorageUnavailableError,
+} from './errors';
 import {
   getSqliteFileRow,
   putSqliteFileRow,
@@ -21,11 +25,13 @@ import {
 import { createMemoryIdbStore, isByteContents } from './idb-memory';
 import { legacyDatabaseName } from './paths';
 import {
+  holdLegacyConnection,
   initWasmEngine,
   listIndexedDbNames,
   resetIndexedDb,
   seedLegacyDatabase,
   sleep,
+  writeToLegacyDatabase,
 } from './test-helpers';
 
 import { getSqliteStore, setSqliteStore } from './index';
@@ -199,6 +205,86 @@ describe('IndexedDB in-memory store', () => {
     expect(row?.storage).toBe('memory-idb');
     expect(ArrayBuffer.isView(row?.contents)).toBe(true);
   });
+
+  it('keeps the absurd-sql copy when what was read differs from it', async () => {
+    const source = await openDatabase();
+    execQuery(source, SCHEMA);
+    runQuery(source, "INSERT INTO t (v) VALUES ('from legacy')");
+    const bytes = await exportDatabase(source);
+    closeDatabase(source);
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, bytes);
+    await putSqliteFileRow({ filepath: PATH, contents: '' });
+    const comparison = vi
+      .spyOn(absurdMigration, 'matchesLegacyDatabase')
+      .mockResolvedValueOnce(false);
+    try {
+      await expect(openDatabase(PATH)).rejects.toBeInstanceOf(
+        StorageMigrationError,
+      );
+    } finally {
+      comparison.mockRestore();
+    }
+    // Nothing was taken over, and the copy is still the budget
+    expect(await listIndexedDbNames()).toContain(name);
+    expect((await getSqliteFileRow(PATH))?.storage).toBeUndefined();
+
+    // The next open moves it
+    const db = await openDatabase(PATH);
+    expect(runQuery(db, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'from legacy' },
+    ]);
+    closeDatabase(db);
+    await sleep(10);
+    expect(await listIndexedDbNames()).not.toContain(name);
+  });
+
+  it.each([
+    [
+      'holds on to the copy',
+      (name: string) => holdLegacyConnection(name, { stubborn: true }),
+    ],
+    [
+      'writes to the copy',
+      async (name: string) => {
+        await writeToLegacyDatabase(name);
+        return undefined;
+      },
+    ],
+  ])(
+    'reports the budget in use when a tab on the previous engine %s during the move',
+    async (_what, interfere) => {
+      const source = await openDatabase();
+      execQuery(source, SCHEMA);
+      runQuery(source, "INSERT INTO t (v) VALUES ('from legacy')");
+      const bytes = await exportDatabase(source);
+      closeDatabase(source);
+      const name = legacyDatabaseName(PATH);
+      await seedLegacyDatabase(name, bytes);
+      await putSqliteFileRow({ filepath: PATH, contents: '' });
+      // The tab comes back once the copy has been read
+      const readLegacy = absurdMigration.readLegacyDatabaseBytes;
+      let other: IDBDatabase | undefined;
+      const read = vi
+        .spyOn(absurdMigration, 'readLegacyDatabaseBytes')
+        .mockImplementationOnce(async (...args) => {
+          const result = await readLegacy(...args);
+          other = await interfere(name);
+          return result;
+        });
+      try {
+        await expect(openDatabase(PATH)).rejects.toBeInstanceOf(
+          BudgetInUseError,
+        );
+      } finally {
+        read.mockRestore();
+        other?.close();
+      }
+      // Nothing was taken over, and the copy is still the budget
+      expect(await listIndexedDbNames()).toContain(name);
+      expect((await getSqliteFileRow(PATH))?.storage).toBeUndefined();
+    },
+  );
 
   it('keeps a snapshot whose write on close failed for the next open', async () => {
     await strandSnapshot('rescued');
@@ -509,6 +595,82 @@ describe('IndexedDB in-memory store', () => {
     expect(await store.exists(other)).toBe(false);
   });
 
+  it('leaves the legacy marker and the absurd-sql copy when a file moves back', async () => {
+    const store = getSqliteStore();
+    await store.writeFile(PATH, new Uint8Array([1]));
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, new Uint8Array([1]));
+
+    await store.revertFile(PATH);
+    expect(await getSqliteFileRow(PATH)).toEqual({
+      filepath: PATH,
+      contents: '',
+    });
+    expect(await listIndexedDbNames()).toContain(name);
+
+    // A plain removal takes the copy with it
+    await store.removeFile(PATH);
+    expect(await getSqliteFileRow(PATH)).toBeUndefined();
+    expect(await listIndexedDbNames()).not.toContain(name);
+  });
+
+  it('leaves alone a file another worker has already moved back', async () => {
+    // What a finished revert leaves: the legacy marker and its copy. A
+    // second revert that listed the file earlier finds them once it has
+    // the lock
+    await putSqliteFileRow({ filepath: PATH, contents: '' });
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, new Uint8Array([1]));
+
+    await getSqliteStore().revertFile(PATH);
+    expect(await getSqliteFileRow(PATH)).toEqual({
+      filepath: PATH,
+      contents: '',
+    });
+    expect(await listIndexedDbNames()).toContain(name);
+  });
+
+  it('waits out a slow hand-over before it reports the budget in use', async () => {
+    // A lock that is never granted, and gives up only when told to
+    const request = vi.fn(
+      (_name: string, options: { signal: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          options.signal.addEventListener('abort', () =>
+            reject(new DOMException('aborted', 'AbortError')),
+          );
+        }),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    vi.useFakeTimers();
+    try {
+      let outcome = 'waiting';
+      const opening = getSqliteStore().open(PATH);
+      opening.then(
+        () => {
+          outcome = 'opened';
+        },
+        () => {
+          outcome = 'refused';
+        },
+      );
+      // A leaving leader gets three seconds to save and let go
+      await vi.advanceTimersByTimeAsync(3000);
+      expect(outcome).toBe('waiting');
+
+      await vi.advanceTimersByTimeAsync(7000);
+      await expect(opening).rejects.toBeInstanceOf(BudgetInUseError);
+    } finally {
+      vi.useRealTimers();
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+  });
+
   it('writes a row only at the revision it expects', async () => {
     await putSqliteFileRow({ filepath: PATH, contents: '', rev: 1 });
     const next = { filepath: PATH, contents: new Uint8Array([1]), rev: 2 };
@@ -560,6 +722,36 @@ describe('IndexedDB in-memory store', () => {
       { v: 'from elsewhere' },
     ]);
     closeDatabase(reopened);
+  });
+
+  it('reads and moves back the row another worker wrote, not a snapshot it moved past', async () => {
+    await strandSnapshot('stranded');
+    const source = await openDatabase();
+    execQuery(source, SCHEMA);
+    runQuery(source, "INSERT INTO t (v) VALUES ('from elsewhere')");
+    await putSqliteFileRow({
+      filepath: PATH,
+      contents: await exportDatabase(source),
+      storage: 'memory-idb',
+      rev: 9,
+    });
+    closeDatabase(source);
+    const store = getSqliteStore();
+
+    const read = await openDatabase(await store.readFile(PATH));
+    expect(runQuery(read, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'from elsewhere' },
+    ]);
+    closeDatabase(read);
+
+    await store.revertFile(PATH);
+    const back = await openDatabase(
+      (await absurdMigration.readLegacyDatabaseBytes(PATH)) as Uint8Array,
+    );
+    expect(runQuery(back, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'from elsewhere' },
+    ]);
+    closeDatabase(back);
   });
 
   it('refuses a new file another worker created meanwhile', async () => {

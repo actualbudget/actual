@@ -11,15 +11,7 @@ You get a $ 5.00 credit when you sign up, which means that you should be able to
 For web clients, PikaPods will automatically update about a week or so after the latest monthly release is deployed. PikaPods tests each new release before deploying it. If you have the Notification setting in PikaPods checked, you will get an email notifying you that the server has been updated.
 
 For desktop clients, you will need to reinstall the desktop client to update to the latest version.
-First check on the web client to see if PikaPods has updated, then reinstall the desktop client.
-
-:::caution[Desktop App Not Recommended with PikaPods]
-
-Using the Actual desktop app with PikaPods is not recommended. The desktop client version can fall out of sync with the server version, causing compatibility issues.
-
-It is best to install Actual as a PWA (Progressive Web App) instead. See the [Using a PWA](#using-a-pwa) section below for step-by-step instructions for Chrome, Firefox, Safari, and other browsers.
-
-:::
+The desktop client does not need to be on the same version as your Pod, so you can update it as soon as a new release is available, without waiting for PikaPods to update. See [Using the Desktop App with Your Own Server](desktop-app.md#using-the-desktop-app-with-your-own-server) for more details.
 
 ## Deploying Actual on PikaPods
 

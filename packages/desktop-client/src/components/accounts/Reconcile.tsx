@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Form } from 'react-aria-components';
 import { Trans } from 'react-i18next';
@@ -13,6 +13,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { Query } from '@actual-app/core/shared/query';
 import { tsToRelativeTime } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { AccountEntity } from '@actual-app/core/types/models';
 import type { TransObjectLiteral } from '@actual-app/core/types/util';
 import { format as formatDate } from 'date-fns';
@@ -144,10 +145,14 @@ export function ReconcileMenu({
   const locale = useLocale();
 
   const [inputValue, setInputValue] = useState<string | null>();
+  // The exact amount the text shows until the user types. The text can be
+  // rounded (hidden decimals), so parsing it would lose a stored fraction
+  const exactAmount = useRef<IntegerAmount | null>(null);
   // useEffect is needed here. clearedBalance does not work as a default value for inputValue and
   // to use a button to update inputValue we can't use defaultValue in the input form below
   useEffect(() => {
     if (clearedBalance != null) {
+      exactAmount.current = clearedBalance;
       setInputValue(format(clearedBalance, 'financial'));
     }
   }, [clearedBalance, format]);
@@ -160,9 +165,9 @@ export function ReconcileMenu({
     }
 
     const amount =
-      inputValue != null
-        ? format.fromEdit(inputValue, clearedBalance)
-        : clearedBalance;
+      inputValue == null
+        ? clearedBalance
+        : (exactAmount.current ?? format.fromEdit(inputValue, clearedBalance));
 
     onReconcile(amount);
     onClose();
@@ -181,7 +186,10 @@ export function ReconcileMenu({
           <InitialFocus>
             <Input
               value={inputValue}
-              onChangeValue={setInputValue}
+              onChangeValue={value => {
+                exactAmount.current = null;
+                setInputValue(value);
+              }}
               style={{ margin: '7px 0', textAlign: 'right' }}
             />
           </InitialFocus>
@@ -193,9 +201,10 @@ export function ReconcileMenu({
               {format(lastSyncedBalance, 'financial')}
             </Text>
             <Button
-              onPress={() =>
-                setInputValue(format(lastSyncedBalance, 'financial'))
-              }
+              onPress={() => {
+                exactAmount.current = lastSyncedBalance;
+                setInputValue(format(lastSyncedBalance, 'financial'));
+              }}
               style={{ marginBottom: 7 }}
             >
               <Trans>Use last synced total</Trans>
