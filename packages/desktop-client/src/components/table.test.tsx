@@ -327,24 +327,30 @@ it('keys on other controls inside the table are not taken as cell navigation', a
   }
 });
 
-it('escape during the edge flash does not reopen the cell', async () => {
-  const hasFocus = vi.spyOn(document, 'hasFocus').mockReturnValue(true);
-  try {
-    render(
-      <TestProviders>
-        <NavigableTable />
-      </TestProviders>,
-    );
-    await userEvent.click(screen.getByRole('button', { name: 'Edit cell' }));
-    // Enter on the last row flashes the cell, then reopens it
-    await userEvent.keyboard('[Enter][Escape]');
-    await new Promise(resolve => setTimeout(resolve, 150));
+it.each([
+  ['one Enter', 1],
+  ['two Enters', 2],
+])(
+  'escape after %s on the last row does not reopen the cell',
+  async (_, presses) => {
+    const hasFocus = vi.spyOn(document, 'hasFocus').mockReturnValue(true);
+    try {
+      render(
+        <TestProviders>
+          <NavigableTable />
+        </TestProviders>,
+      );
+      await userEvent.click(screen.getByRole('button', { name: 'Edit cell' }));
+      // Each Enter on the last row starts a flash that reopens the cell
+      await userEvent.keyboard('[Enter]'.repeat(presses) + '[Escape]');
+      await new Promise(resolve => setTimeout(resolve, 150));
 
-    expect(screen.getByText('Idle')).toBeInTheDocument();
-  } finally {
-    hasFocus.mockRestore();
-  }
-});
+      expect(screen.getByText('Idle')).toBeInTheDocument();
+    } finally {
+      hasFocus.mockRestore();
+    }
+  },
+);
 
 it('drops the selected cell when its row leaves the data', async () => {
   const items = [

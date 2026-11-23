@@ -1521,6 +1521,7 @@ export function useTableNavigator<T extends TableItem>(
     setIsEditing(false);
 
     if (currentCursor) {
+      cancelFlash();
       isFlashing.current = true;
       flashTimer.current = setTimeout(() => {
         beginEdit(currentCursor.id, currentCursor.field);
