@@ -1510,6 +1510,46 @@ describe('SharedWorker coordinator', () => {
       );
     });
 
+    it('sends a request again when the backend it was sent on to goes away too', () => {
+      const { lobbyLeader, opener, bystander } = startThreeTabs();
+      sendMsg(bystander, { id: 'last-1', name: 'get-last-opened-backup' });
+      sendMsg(lobbyLeader, { id: 'prefs-3', name: 'load-global-prefs' });
+      sendMsg(opener, {
+        id: 'load-2',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      sendMsg(lobbyLeader, {
+        id: 'load-3',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+
+      // Both go on to the opener's backend, the lobby leader's own request
+      // now coming from a follower of the budget
+      simulateWorkerConnect(opener);
+      expect(forwardedIds(opener)).toEqual(['load-3', 'last-1', 'prefs-3']);
+
+      // That backend goes away as well before it answers, and the former
+      // lobby leader takes the budget over
+      lobbyLeader.postMessage.mockClear();
+      sendMsg(opener, { type: 'tab-closing' });
+      sendMsg(lobbyLeader, {
+        type: '__track-restore',
+        requestId: '__restore-budget',
+        budgetId: 'budget-1',
+      });
+      simulateWorkerConnect(lobbyLeader);
+      expect(forwardedIds(lobbyLeader)).toEqual([]);
+      replyFrom(lobbyLeader, '__restore-budget');
+
+      expect(forwardedIds(lobbyLeader)).toEqual(['last-1', 'prefs-3']);
+      replyFrom(lobbyLeader, 'prefs-3');
+      expect(lobbyLeader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'prefs-3' }),
+      );
+    });
+
     it('does not send an answered request again', () => {
       const { lobbyLeader, opener, bystander } = startThreeTabs();
 

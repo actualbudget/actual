@@ -57,12 +57,15 @@ export function createCoordinator({
   // tabs without a budget, and those made in the lobby. Any backend can
   // answer them, so they are kept until one has. `waitingRequests` have no
   // backend to go to yet; `sentRequests` are with a backend that has not
-  // answered, and go back to waiting if that backend goes away.
+  // answered, and go back to waiting if that backend goes away. A request
+  // stays one of these however often it is sent again, and whatever its
+  // tab has become since: `replayedRequest` is the one being sent again.
   const waitingRequests: RoutedRequest[] = [];
   const sentRequests = new Map<
     string,
     RoutedRequest & { group: BudgetGroup }
   >();
+  let replayedRequest: Record<string, unknown> | null = null;
 
   // ── Console forwarding ─────────────────────────────────────────────────
 
@@ -196,7 +199,12 @@ export function createCoordinator({
     logger.log(`[SharedWorker] Sending ${requests.length} held request(s)`);
     for (const { port, msg } of requests) {
       if (isTrackedPort(port)) {
-        port.onmessage?.({ data: msg });
+        replayedRequest = msg;
+        try {
+          port.onmessage?.({ data: msg });
+        } finally {
+          replayedRequest = null;
+        }
       }
     }
   }
@@ -956,6 +964,11 @@ export function createCoordinator({
         let targetGroup = group;
         const isUnassigned =
           !targetGroup && unassignedPorts.has(port) && isTrackedPort(port);
+        // Whether any backend can answer is decided when a request is first
+        // made. Sent again, it may come from a tab that has joined a budget
+        // since, and must still be kept until it is answered
+        const isBackendIndependent =
+          isUnassigned || portBudget === '__lobby' || msg === replayedRequest;
         if (isUnassigned) {
           for (const [, g] of budgetGroups) {
             if (g.backendConnected) {
@@ -999,7 +1012,7 @@ export function createCoordinator({
 
         if (targetGroup) {
           if (msg.id) {
-            if (isUnassigned || portBudget === '__lobby') {
+            if (isBackendIndependent) {
               sentRequests.set(msg.id as string, {
                 port,
                 msg,
