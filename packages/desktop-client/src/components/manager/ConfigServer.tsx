@@ -21,7 +21,7 @@ import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useNavigate } from '#hooks/useNavigate';
 import { saveGlobalPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
-import { loggedIn, signOut } from '#users/usersSlice';
+import { getUserData, loggedIn, signOut } from '#users/usersSlice';
 
 import { Title } from './subscribe/common';
 
@@ -336,29 +336,27 @@ export function ConfigServer() {
     }
 
     const urlChanged = httpUrl.replace(/\/+$/, '') !== currentUrl;
+    setUrl(httpUrl);
 
     if (urlChanged) {
       const result = await send('subscribe-needs-bootstrap', { url: httpUrl });
       if ('error' in result) {
-        setUrl(httpUrl);
         setLoading(false);
         setError(result.error);
         return;
       }
-      // Revoke the session while the current server is still active.
-      await send('subscribe-sign-out');
+      // Sign out before switching so the current server revokes the session.
+      await dispatch(signOut());
     }
 
     const { error } = await setServerUrl(httpUrl, { validate: !urlChanged });
-    setUrl(httpUrl);
+    setLoading(false);
 
     if (error) {
-      setLoading(false);
       setError(error);
     } else {
-      setLoading(false);
       if (urlChanged) {
-        await dispatch(signOut());
+        await dispatch(getUserData());
       } else {
         await dispatch(loggedIn());
       }
