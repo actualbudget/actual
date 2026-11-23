@@ -34,6 +34,10 @@ import type {
 } from 'electron';
 
 import { openExternalUrl, revealLocalFile } from './external-links';
+import {
+  getLastFileDialogFolder,
+  rememberFileDialogSelection,
+} from './file-dialog-folder';
 import { getMenu } from './menu';
 import { retry as promiseRetry } from './retry';
 import type { AppInitFailurePayload } from './server';
@@ -799,11 +803,31 @@ export type OpenFileDialogPayload = {
 
 ipcMain.handle(
   'open-file-dialog',
-  (_event, { filters, properties }: OpenFileDialogPayload) => {
-    return dialog.showOpenDialogSync({
-      properties: properties || ['openFile'],
+  async (_event, { filters, properties }: OpenFileDialogPayload) => {
+    const dialogProperties = properties || ['openFile'];
+    const isFilePicker = !dialogProperties.includes('openDirectory');
+    const dataDir = process.env.ACTUAL_DATA_DIR!;
+
+    const selectedFiles = dialog.showOpenDialogSync({
+      properties: dialogProperties,
       filters,
+      defaultPath: isFilePicker
+        ? await getLastFileDialogFolder(dataDir)
+        : undefined,
     });
+
+    if (isFilePicker) {
+      try {
+        await rememberFileDialogSelection(dataDir, selectedFiles);
+      } catch (error) {
+        logMessage(
+          'error',
+          `Could not remember the last file dialog folder: ${String(error)}`,
+        );
+      }
+    }
+
+    return selectedFiles;
   },
 );
 
@@ -821,18 +845,12 @@ ipcMain.handle(
   ) => {
     const fileLocation = await dialog.showSaveDialog({ title, defaultPath });
 
-    return new Promise<void>((resolve, reject) => {
-      if (fileLocation) {
-        const contents =
-          typeof fileContents === 'string'
-            ? fileContents
-            : new Uint8Array(fileContents.buffer);
-        fs.writeFile(fileLocation.filePath, contents, error => {
-          return reject(error);
-        });
-      }
-      resolve();
-    });
+    if (fileLocation.canceled || !fileLocation.filePath) {
+      return;
+    }
+
+    // A Buffer's .buffer can be a shared pool slab, so write the Buffer view itself.
+    await fs.promises.writeFile(fileLocation.filePath, fileContents);
   },
 );
 

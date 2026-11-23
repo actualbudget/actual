@@ -30,6 +30,8 @@ export function getFailedSyncError(
       return { type: 'RATE_LIMIT_EXCEEDED', code: 'RATE_LIMIT_EXCEEDED' };
     case 'timed-out':
       return { type: 'TIMED_OUT', code: 'TIMED_OUT' };
+    case 'server-down':
+      return { type: 'SERVER_DOWN', code: 'SERVER_DOWN' };
     case 'account-missing':
       return { type: 'ACCOUNT_MISSING', code: 'ACCOUNT_MISSING' };
     case 'not-configured':

@@ -41,12 +41,15 @@ typography:
     fontWeight: 400
 rounded:
   sm: '4px'
-  md: '6px'
+  sheet: '18px'
+  pill: '999px'
 spacing:
-  xs: '5px'
-  sm: '10px'
-  md: '16px'
-  lg: '20px'
+  xxs: '2px'
+  xs: '4px'
+  sm: '8px'
+  md: '12px'
+  lg: '16px'
+  xl: '24px'
 components:
   button-primary:
     backgroundColor: '{colors.actual-purple}'
@@ -132,6 +135,7 @@ All hex values in this file (frontmatter included) are the light-theme palette m
 - **Display** (600, 30px): Page-level headings and large balances. Rare.
 - **Headline** (700, 20px, 0.5px letter-spacing): Section titles.
 - **Title** (500, 15px): Emphasized in-table and card text.
+- **Sheet title** (600, 18px): Centred title of a mobile bottom sheet. Mobile only.
 - **Body** (400, 16px): Default text.
 - **Label** (400, 13px): Table meta, menus, dense secondary text; 12px and 10px steps exist for the tightest spots.
 
@@ -181,6 +185,10 @@ Flat-first with ambient shadows. Structure comes from 1px borders (Navy Mist) an
 
 Utilitarian and quick: compact paddings, instant state feedback, built for daily repetition. All values below are the light theme; every color routes through the semantic token layer.
 
+### Spacing and Radius Scale
+
+Spacing comes from the `spacing` scale in `packages/component-library/src/tokens.ts`, a 4px grid: `xxs` 2, `xs` 4, `sm` 8, `md` 12, `lg` 16, `xl` 24. Radius comes from `radius` in the same file: `sm` 4, `sheet` 18, `pill` 999. New code uses these tokens. Many existing screens predate the scale and use 5, 10, 15 and 20px values, and table containers use a 6px radius that has no token.
+
 ### Buttons
 
 - **Shape:** Gently rounded (4px radius), compact padding (5px 10px)
@@ -196,7 +204,7 @@ Utilitarian and quick: compact paddings, instant state feedback, built for daily
 
 ### Cards / Containers
 
-- **Corner Style:** 6px radius on table containers (top corners), 4px elsewhere
+- **Corner Style:** 6px radius on table containers (top corners), 4px elsewhere; mobile bottom sheets use 18px top corners and a flat bottom edge
 - **Background:** Surface White on Navy Mist page background
 - **Shadow Strategy:** Card shadow at most; structure via 1px Navy Mist border
 - **Internal Padding:** 16-20px
@@ -205,6 +213,7 @@ Utilitarian and quick: compact paddings, instant state feedback, built for daily
 
 - **Sidebar:** Navy Ink background, light navy text; hover darkens the row, selection marked with a purple accent and purple text. Status states (pending/positive/failed) tint the item background gold/green/red
 - **Mobile:** Purple header, white nav bar, purple selected item
+- **Mobile sheets:** Menus open as bottom sheets on the modal surface (`modalBackground`) with a grab handle in `pageTextSubdued` and hairline row dividers in `tooltipBorder`. Rows are full-width bare buttons, destructive rows in `errorText`, section labels in sentence case only when a sheet has two or more groups. Dismiss by swipe down, tap outside or Escape; no close button
 
 ### Pills / Chips
 

@@ -243,7 +243,7 @@ describe('goCardlessService', () => {
   describe('#createRequisition', () => {
     const institutionId = 'some-institution-id' as GoCardlessInstitutionId;
     const params = {
-      host: 'https://exemple.com',
+      redirectUrl: 'https://exemple.com/gocardless/link',
       institutionId,
       accessValidForDays: 90,
     };

@@ -32,15 +32,16 @@ export function MobileRuleEditPage() {
   const [rule, setRule] = useState<RuleEntity | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const ruleId = rule?.id;
   const { schedules = [] } = useSchedules({
     query: useMemo(
       () =>
-        rule?.id
+        ruleId
           ? q('schedules')
-              .filter({ rule: rule.id, completed: false })
+              .filter({ rule: ruleId, completed: false })
               .select('*')
           : q('schedules').filter({ id: null }).select('*'), // Return empty result when no rule
-      [rule?.id],
+      [ruleId],
     ),
   });
 

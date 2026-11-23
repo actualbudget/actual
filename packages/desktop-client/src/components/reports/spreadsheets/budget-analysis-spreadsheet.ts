@@ -39,8 +39,12 @@ type createBudgetAnalysisSpreadsheetProps = {
 export function isBaseCategory(
   cat: CategoryEntity,
   showHiddenCategories: boolean,
+  hiddenGroupIds: ReadonlySet<string>,
 ): boolean {
-  return !cat.is_income && (showHiddenCategories || !cat.hidden);
+  return (
+    !cat.is_income &&
+    (showHiddenCategories || !(cat.hidden || hiddenGroupIds.has(cat.group)))
+  );
 }
 
 /**
@@ -201,10 +205,18 @@ export function createBudgetAnalysisSpreadsheet({
         (cond.field === 'category' || cond.field === 'category_group'),
     );
 
-    // Base set: expense categories only; hidden categories are included when
-    // showHiddenCategories is true so historic data is not misrepresented.
+    // Hiding a group only sets `hidden` on the group, not on its categories.
+    const hiddenGroupIds = new Set<string>(
+      allCategoryGroups
+        .filter((g: { hidden?: boolean }) => g.hidden)
+        .map((g: { id: string }) => g.id),
+    );
+
+    // Base set: expense categories only; hidden categories and categories in
+    // hidden groups are included when showHiddenCategories is true so historic
+    // data is not misrepresented.
     const baseCategories = allCategories.filter((cat: CategoryEntity) =>
-      isBaseCategory(cat, showHiddenCategories),
+      isBaseCategory(cat, showHiddenCategories, hiddenGroupIds),
     );
 
     let categoriesToInclude: CategoryEntity[];
@@ -311,18 +323,20 @@ export function createBudgetAnalysisSpreadsheet({
     });
 
     // Calculate the carryover from the previous month
-    let runningBalance = summarizeMonthCategories(
+    const previousMonth = summarizeMonthCategories(
       prevMonthData,
       categoriesToInclude,
-    ).carryoverToNextMonth;
+    );
+    let runningBalance = previousMonth.carryoverToNextMonth;
 
     // Track totals across all months
     let totalBudgeted = 0;
     let totalSpent = 0;
     let totalOverspendingAdjustment = 0;
 
-    // Track overspending from previous month to apply in next month
-    let overspendingFromPrevMonth = 0;
+    // Track overspending from previous month to apply in next month, starting
+    // with the month before the period
+    let overspendingFromPrevMonth = previousMonth.overspendingThisMonth;
 
     // Process each month
     for (const month of intervals) {

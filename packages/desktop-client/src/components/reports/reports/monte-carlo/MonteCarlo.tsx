@@ -92,7 +92,8 @@ export function MonteCarlo() {
       ? selectedRun.index
       : null;
 
-  const resolvedConfig = useResolvedMonteCarloConfig(config);
+  const { resolvedConfig, hasLiveBalances } =
+    useResolvedMonteCarloConfig(config);
 
   // reset when widget changes
   useEffect(() => {
@@ -168,9 +169,10 @@ export function MonteCarlo() {
   // The simulation is the expensive part of this page (thousands of
   // runs on the main thread), so it is memoised by hand on its actual
   // inputs: view switches, run selection and other UI state must not
-  // re-run it. Nothing runs until the saved config has been loaded
+  // re-run it. Nothing runs until the saved config has been loaded and
+  // every linked balance has arrived
   const simulation = useMemo(() => {
-    if (!selectionsInitialized) {
+    if (!selectionsInitialized || !hasLiveBalances) {
       return null;
     }
     const params = {
@@ -179,7 +181,7 @@ export function MonteCarlo() {
       deflateToTodaysMoney: showTodaysMoney,
     };
     return { params, result: runMonteCarloSimulation(params) };
-  }, [resolvedConfig, showTodaysMoney, selectionsInitialized]);
+  }, [resolvedConfig, showTodaysMoney, selectionsInitialized, hasLiveBalances]);
 
   // The worst-first ranking shared by the runs table and the cashflow
   // view's percentile picker, sorted once per simulation
@@ -242,6 +244,7 @@ export function MonteCarlo() {
     contributions: resolvedConfig.contributions,
     incomeStreams: resolvedConfig.incomeStreams,
     spendingPhases: resolvedConfig.spendingPhases,
+    lumpSums: resolvedConfig.lumpSums,
     startAge: config.currentAge,
   };
 
@@ -588,7 +591,8 @@ export function MonteCarlo() {
                   <Trans>
                     Money flowing in and out each year of this simulated run:
                     withdrawals and income above zero; planned spending, tax,
-                    contributions and money saved into the surplus pot below.
+                    contributions, money saved into the surplus pot and any
+                    one-off withdrawals below.
                   </Trans>
                 </Text>
                 <MonteCarloCashflowGraph
@@ -634,6 +638,7 @@ export function MonteCarlo() {
                 config.pots.some(pot => pot.isSurplus)
               }
               incomeStreams={resolvedConfig.incomeStreams}
+              lumpSums={resolvedConfig.lumpSums}
               withdrawalRule={resolvedConfig.withdrawalRule}
               cashflowGraph={
                 <MonteCarloCashflowGraph

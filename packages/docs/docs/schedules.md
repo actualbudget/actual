@@ -39,7 +39,7 @@ You can control how far in advance scheduled transactions _appear_ in the Schedu
 
 For example, in the image at the top of this page, the upcoming length is set to _1 week_.
 
-By clicking on the **Change upcoming length** button, you can select how far in advance you want to see forthcoming transactions (e.g., 1 day, 1 week, 2 weeks, 1 month, End of the current month, or Custom length).
+By choosing **Change upcoming length** from the menu at the top right of the Schedules page, you can select how far in advance you want to see forthcoming transactions (e.g., 1 day, 1 week, 2 weeks, 1 month, End of the current month, or Custom length).
 
 <img width="598" alt="The Change upcoming length dialog" src="/img/schedules/schedules-upcoming-length-dialog@2x.webp" />
 
@@ -56,7 +56,7 @@ Changing the upcoming length only affects how schedules are displayed in your le
 
 ## Creating a Schedule
 
-Clicking on the **Add new schedule** button in the bottom right of the Schedules screen will add a new schedule.
+Clicking on the **Add new schedule** button above the list of schedules will add a new schedule.
 
 Some of the available options to tailor schedules to your needs are:
 
@@ -123,7 +123,7 @@ On mobile, a **Schedule** button also appears in the transaction editor when you
 
 Instead of manually entering each schedule, you can let Actual find and suggest schedules for you.
 
-Click the **Find schedules** button in the bottom left corner of the Schedules page to let Actual automatically search for transactions that appear to be recurring.
+Choose **Find schedules** from the menu at the top right of the Schedules page to let Actual automatically search for transactions that appear to be recurring.
 
 <img width="848" alt="The Found Schedules dialog with three suggested schedules" src="/img/schedules/schedules-find-matches@2x.webp" />
 
@@ -166,15 +166,12 @@ If you click on the ellipsis at the end of the schedule line, you will see vario
 In addition to the requirements you have specified when creating a schedule, a transaction must also meet the date requirements to be matched to a schedule. Transactions must be dated within 2 days before or after the scheduled date.
 
 For example, you have a schedule set up for your power bill to be paid on the 15th of every month. Today is the 10th of the month, and you can see an upcoming scheduled transaction of your bill in Actual.
-The utility company decided to withdraw the funds on the 10th of this month. Therefore, post the transaction to Actual early and update the transaction date to match your bank statement.
+The utility company decided to withdraw the funds on the 10th of this month.
 
-A problem has occurred because the posted transaction is now outside the 2-day window to match scheduled transactions.
-You'll see your bill posted in the Actual account ledger, but you'll also see an upcoming transaction for the power bill on the 15th, even though you just entered it. This is the expected behaviour when using schedules.
+If you post the bill from the schedule menu or from the upcoming transaction in the account, Actual treats it as the payment for the 15th. **Post transaction** dates the transaction on the scheduled date (the 15th). **Post transaction today** dates it today (the 10th), so it matches your bank statement. The schedule moves on to the 15th of next month, and no upcoming transaction shows for this month. A one-time schedule is marked as completed.
 
-You can resolve this issue in one of two ways.
-
-1. Skip the next schedule by selecting the upcoming scheduled transaction and choosing the "Skip Scheduled Date" from the menu options.
-2. Accept that the date doesn't match and leave it as is so the schedule doesn't prompt a second transaction.
+If you enter the transaction yourself instead, it is outside the 2-day window and does not match the schedule.
+You'll see your bill in the Actual account ledger, but you'll also see an upcoming transaction for the power bill on the 15th. To remove it, select the upcoming scheduled transaction and choose "Skip Scheduled Date" from the menu options.
 
 ## How To Use Rules With Schedules
 

@@ -16,7 +16,6 @@ const copyLastMonthBudget = async (
 ) => {
   const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
   await budgetMenuModal.copyLastMonthBudget();
-  await budgetMenuModal.close();
 };
 
 const setTo3MonthAverage = async (
@@ -25,7 +24,6 @@ const setTo3MonthAverage = async (
 ) => {
   const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
   await budgetMenuModal.setTo3MonthAverage();
-  await budgetMenuModal.close();
 };
 
 const setTo6MonthAverage = async (
@@ -34,7 +32,6 @@ const setTo6MonthAverage = async (
 ) => {
   const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
   await budgetMenuModal.setTo6MonthAverage();
-  await budgetMenuModal.close();
 };
 
 const setToYearlyAverage = async (
@@ -43,7 +40,6 @@ const setToYearlyAverage = async (
 ) => {
   const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
   await budgetMenuModal.setToYearlyAverage();
-  await budgetMenuModal.close();
 };
 
 function getAverageStartMonth(month: string) {
@@ -297,6 +293,26 @@ budgetTypes.forEach(budgetType => {
       await expect(page).toMatchThemeScreenshots();
     });
 
+    test('moves a category to another group with drag and drop', async () => {
+      // Keep both rows on screen so the drag doesn't scroll the page midway.
+      await page.setViewportSize({ width: 350, height: 1000 });
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const giftRow = budgetPage.categoryRows.filter({ hasText: 'Gift' });
+      const internetRow = budgetPage.categoryRows.filter({
+        hasText: 'Internet',
+      });
+
+      // Drop on the top edge of "Internet" to place "Gift" before it.
+      await giftRow.dragTo(internetRow, { targetPosition: { x: 20, y: 5 } });
+
+      await expect(
+        page
+          .getByRole('grid', { name: 'Bills expense group categories' })
+          .getByTestId('category-name'),
+      ).toHaveText(['Cell', 'Gift', 'Internet', 'Mortgage', 'Water', 'Power']);
+    });
+
     test('opens the transfer confirmation when deleting a category group with transactions', async () => {
       const budgetPage = await navigation.goToBudgetPage();
 
@@ -306,13 +322,14 @@ budgetTypes.forEach(budgetType => {
 
       await categoryGroupMenuModal.delete();
 
-      const confirmDeleteModal = page.getByTestId(
-        'confirm-category-delete-modal',
+      await expect(categoryGroupMenuModal.locator).toContainText(
+        'Are you sure you want to delete it?',
       );
-      await expect(confirmDeleteModal.getByRole('heading')).toHaveText(
-        'Confirm Delete',
-      );
-      await expect(confirmDeleteModal).toContainText('Transfer to:');
+      await expect(
+        categoryGroupMenuModal.locator.getByRole('button', {
+          name: 'Category',
+        }),
+      ).toBeVisible();
     });
 
     test('opens the transfer confirmation when deleting a category with transactions', async () => {
@@ -323,13 +340,12 @@ budgetTypes.forEach(budgetType => {
 
       await categoryMenuModal.delete();
 
-      const confirmDeleteModal = page.getByTestId(
-        'confirm-category-delete-modal',
+      await expect(categoryMenuModal.locator).toContainText(
+        'Are you sure you want to delete it?',
       );
-      await expect(confirmDeleteModal.getByRole('heading')).toHaveText(
-        'Confirm Delete',
-      );
-      await expect(confirmDeleteModal).toContainText('Transfer to:');
+      await expect(
+        categoryMenuModal.locator.getByRole('button', { name: 'Category' }),
+      ).toBeVisible();
     });
 
     // Budgeted Cell Tests
@@ -455,7 +471,6 @@ budgetTypes.forEach(budgetType => {
 
       const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
       await budgetMenuModal.applyBudgetTemplate();
-      await budgetMenuModal.close();
 
       await expect(budgetedButton).toHaveText(
         amountToCurrency(amountToTemplate),

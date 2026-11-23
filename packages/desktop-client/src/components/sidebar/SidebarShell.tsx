@@ -84,6 +84,10 @@ export function SidebarShell({
               color: theme.sidebarItemText,
               height: '100%',
               backgroundColor: theme.sidebarBackground,
+              // Keep clear of the status bar and screen edges in the mobile
+              // apps (zero elsewhere).
+              paddingTop: 'env(safe-area-inset-top)',
+              paddingLeft: 'env(safe-area-inset-left)',
               '& .float': {
                 opacity: isFloating ? 1 : 0,
                 transition: 'opacity .25s, width .25s',

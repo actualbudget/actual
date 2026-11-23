@@ -3,6 +3,8 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import { post } from '#server/post';
+import * as requests from '#server/post';
+import { loadPrefs, savePrefs } from '#server/prefs';
 import { getServer } from '#server/server-config';
 import { setSyncingMode } from '#server/sync';
 import { handlers } from '#server/tests/mockSyncServer';
@@ -1004,6 +1006,98 @@ describe('SimpleFin batch sync', () => {
     }
   });
 
+  test.each(['individual', 'batch'])(
+    'sends the budget ID for %s sync',
+    async mode => {
+      await loadPrefs();
+      await savePrefs({ cloudFileId: 'simplefin-budget' });
+      vi.mocked(asyncStorage.multiGet).mockResolvedValue({});
+      db.runQuery(
+        'INSERT INTO banks (id, bank_id, name, tombstone) VALUES (?, ?, ?, 0)',
+        ['sf-bank', 'sf-bank', 'Bank'],
+      );
+      const id = await db.insertAccount({
+        id: 'sf-account',
+        bank: 'sf-bank',
+        account_id: 'external-account',
+        name: 'Checking',
+        account_sync_source: 'simpleFin',
+      });
+      mockSimpleFinTransactions({
+        error_type: 'INVALID_ACCESS_TOKEN',
+        error_code: 'INVALID_ACCESS_TOKEN',
+      });
+      const request = vi.spyOn(requests, 'post');
+      try {
+        const handler =
+          mode === 'batch' ? 'simplefin-batch-sync' : 'accounts-bank-sync';
+        await accountsApp.handlers[handler]({ ids: [id] });
+        expect(request).toHaveBeenCalledWith(
+          getServer().SIMPLEFIN_SERVER + '/transactions',
+          expect.objectContaining({
+            accountId:
+              mode === 'batch' ? ['external-account'] : 'external-account',
+          }),
+          expect.objectContaining({ 'X-Actual-File-Id': 'simplefin-budget' }),
+          expect.any(Number),
+        );
+      } finally {
+        request.mockRestore();
+        await loadPrefs();
+      }
+    },
+  );
+
+  test('derives the opening balance from amounts without two decimal places', async () => {
+    const providerAccountId = 'sf-account-decimals';
+    const acctId = await db.insertAccount({
+      id: 'acct-decimals',
+      account_id: providerAccountId,
+      name: 'Checking',
+      account_sync_source: 'simpleFin',
+    });
+
+    const transactions = [
+      {
+        booked: true,
+        date: '2017-10-03',
+        payeeName: 'Coffee Shop',
+        transactionAmount: { amount: '-25.5' },
+        transactionId: 'provider-tx-1',
+      },
+      {
+        booked: true,
+        date: '2017-10-02',
+        payeeName: 'Bookstore',
+        transactionAmount: { amount: '-10' },
+        transactionId: 'provider-tx-2',
+      },
+    ];
+    mockSimpleFinTransactions({
+      [providerAccountId]: {
+        transactions: { all: transactions, booked: transactions, pending: [] },
+        balances: [],
+        startingBalance: 10000,
+      },
+      errors: {},
+    });
+
+    const result = await accountsApp.handlers['simplefin-batch-sync']({
+      ids: [acctId],
+    });
+    expect(result[0].res.errors).toHaveLength(0);
+
+    const imported = await getAllTransactions();
+    const openingBalance = imported.find(t => t.starting_balance_flag);
+    expect(openingBalance?.amount).toBe(13550);
+    expect(
+      imported
+        .filter(t => !t.starting_balance_flag)
+        .map(t => t.amount)
+        .sort((a, b) => a - b),
+    ).toEqual([-2550, -1000]);
+  });
+
   test('does not emit transaction CRDT messages when provider category appears later', async () => {
     const providerAccountId = 'sf-account-1';
     const acctId = await db.insertAccount({
@@ -1254,4 +1348,109 @@ describe('SimpleFin batch sync', () => {
     );
     expect(account!.bank_sync_status).toBe('not-configured');
   });
+});
+
+describe('Enable Banking sync', () => {
+  afterEach(() => {
+    delete handlers['/enablebanking/transactions'];
+  });
+
+  async function prepareEnableBankingAccount() {
+    vi.mocked(asyncStorage.getItem).mockResolvedValue('test-token');
+    vi.mocked(asyncStorage.multiGet).mockResolvedValue({
+      'user-id': 'user-1',
+      'user-key': 'key-1',
+    });
+
+    db.runQuery(
+      'INSERT INTO banks (id, bank_id, name, tombstone) VALUES (?, ?, ?, 0)',
+      ['bank-eb', 'eb-acct-1', 'Enable Bank'],
+    );
+    const acctId = await db.insertAccount({
+      id: 'acct-eb-1',
+      account_id: 'eb-acct-1',
+      name: 'Checking',
+      bank: 'bank-eb',
+      account_sync_source: 'enableBanking',
+    });
+    await db.insertPayee({
+      id: 'transfer-' + acctId,
+      name: '',
+      transfer_acct: acctId,
+    });
+    return acctId;
+  }
+
+  test.each([
+    ['reports no balance', null],
+    ['omits the balance field', undefined],
+  ])(
+    'imports transactions without an opening balance when the bank %s',
+    async (_case, startingBalance) => {
+      const acctId = await prepareEnableBankingAccount();
+
+      const transaction = {
+        transactionId: 'eb-tx-1',
+        date: '2017-10-02',
+        payeeName: 'Coffee Shop',
+        transactionAmount: { amount: '-12.34', currency: 'EUR' },
+        booked: true,
+      };
+      // The sync server reports `null` when the bank's balance request failed.
+      handlers['/enablebanking/transactions'] = () => ({
+        transactions: {
+          all: [transaction],
+          booked: [transaction],
+          pending: [],
+        },
+        balances: [],
+        startingBalance,
+      });
+
+      const result = await accountsApp.handlers['accounts-bank-sync']({
+        ids: [acctId],
+      });
+      expect(result.errors).toHaveLength(0);
+
+      const transactions = await getAllTransactions();
+      expect(transactions.map(t => t.imported_id)).toEqual(['eb-tx-1']);
+      expect(transactions.some(t => t.starting_balance_flag)).toBe(false);
+
+      const account = await db.first<db.DbAccount>(
+        'SELECT * FROM accounts WHERE id = ?',
+        [acctId],
+      );
+      expect(account!.balance_current).toBeNull();
+    },
+  );
+
+  test.each([
+    ['is off', 'false', false],
+    ['is not set', undefined, true],
+  ])(
+    'tells the server whether to fetch pending transactions when the setting %s',
+    async (_case, pref, expected) => {
+      const acctId = await prepareEnableBankingAccount();
+      if (pref !== undefined) {
+        db.runQuery('INSERT INTO preferences (id, value) VALUES (?, ?)', [
+          `sync-import-pending-${acctId}`,
+          pref,
+        ]);
+      }
+
+      let sent: { importPending?: boolean } = {};
+      handlers['/enablebanking/transactions'] = body => {
+        sent = body;
+        return {
+          transactions: { all: [], booked: [], pending: [] },
+          balances: [],
+          startingBalance: null,
+        };
+      };
+
+      await accountsApp.handlers['accounts-bank-sync']({ ids: [acctId] });
+
+      expect(sent.importPending).toBe(expected);
+    },
+  );
 });

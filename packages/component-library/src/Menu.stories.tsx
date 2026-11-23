@@ -4,7 +4,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { SvgAdd, SvgTrash } from './icons/v1';
 import { SvgPencil1 } from './icons/v2';
-import { Menu, type MenuItem } from './Menu';
+import { Menu } from './Menu';
+import type { MenuItem } from './Menu';
 import { Text } from './Text';
 import { View } from './View';
 

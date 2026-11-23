@@ -15,7 +15,6 @@ import type {
   balanceTypeOpType,
   CategoryEntity,
   CustomReportEntity,
-  DataEntity,
   RuleConditionEntity,
   sortByOpType,
   TransactionEntity,
@@ -350,7 +349,11 @@ function CustomReportInner({
         interval === 'Weekly'
           ? 'dayFromDate'
           : (((ReportOptions.intervalMap.get(interval) || 'Day').toLowerCase() +
-              'FromDate') as 'dayFromDate' | 'monthFromDate' | 'yearFromDate');
+              'FromDate') as
+              | 'dayFromDate'
+              | 'monthFromDate'
+              | 'quarterFromDate'
+              | 'yearFromDate');
 
       const earliestInterval =
         interval === 'Weekly'
@@ -375,7 +378,9 @@ function CustomReportInner({
             ? monthUtils.currentDay()
             : interval === 'Yearly'
               ? monthUtils.currentYear()
-              : monthUtils.currentMonth();
+              : interval === 'Quarterly'
+                ? monthUtils.currentQuarter()
+                : monthUtils.currentMonth();
 
       const maxInterval =
         latestInterval > currentInterval ? latestInterval : currentInterval;
@@ -608,9 +613,8 @@ function CustomReportInner({
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
 
-  const data: DataEntity | null = graphData
-    ? { ...graphData, groupedData }
-    : null;
+  const data = graphData ? { ...graphData, groupedData } : null;
+  const averageIntervalsCount = data?.filteredIntervalCount ?? intervals.length;
 
   const customReportItems: CustomReportEntity = {
     id: '',
@@ -1074,7 +1078,7 @@ function CustomReportInner({
                     showHiddenCategories={showHiddenCategories}
                     showOffBudget={showOffBudget}
                     showTrendLines={showTrendLines}
-                    intervalsCount={intervals.length}
+                    intervalsCount={averageIntervalsCount}
                   />
                 ) : (
                   <LoadingIndicator message={t('Loading report...')} />
@@ -1096,7 +1100,7 @@ function CustomReportInner({
                     balanceTypeOp={balanceTypeOp}
                     data={data}
                     interval={interval}
-                    intervalsCount={intervals.length}
+                    intervalsCount={averageIntervalsCount}
                   />
                 )}
                 {viewLegend && (

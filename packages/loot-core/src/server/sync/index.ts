@@ -18,14 +18,18 @@ import {
 import * as db from '#server/db';
 import { PostError, SyncError } from '#server/errors';
 import { app } from '#server/main-app';
-import { runMutator } from '#server/mutators';
+import {
+  flushRunningMutators,
+  getCurrentMutatorRequestId,
+  runMutator,
+} from '#server/mutators';
 import { postBinary } from '#server/post';
 import * as prefs from '#server/prefs';
 import { getServer } from '#server/server-config';
 import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
 import * as undo from '#server/undo';
-import { once, sequential } from '#shared/async';
+import { sequential } from '#shared/async';
 import { isMissingSchemaError } from '#shared/errors';
 import { getIn, setIn } from '#shared/util';
 import type { MetadataPrefs } from '#types/prefs';
@@ -399,7 +403,7 @@ export type Message = {
   value: string | number | null | UnknownFormatValue;
 };
 
-async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
+async function _applyMessages(messages: Message[], isReceived = false) {
   if (checkSyncingMode('import')) {
     applyMessagesForImport(messages);
     return undefined;
@@ -484,7 +488,9 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
         const applied = apply(
           msg,
           getIn(oldData, [dataset, row]) || added.has(dataset + row),
-          deferUnknownSchema,
+          // Inbound messages may come from a newer version of the app, so
+          // unknown-schema errors defer instead of failing the batch
+          isReceived,
         );
 
         if (applied) {
@@ -543,7 +549,11 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
 
     newData = fetchData(idsPerTable);
   };
-  db.transaction(applyInTransaction, { immediate: true });
+  if (isReceived) {
+    receiveInTransaction(messages, applyInTransaction);
+  } else {
+    db.transaction(applyInTransaction, { immediate: true });
+  }
 
   // The transaction succeeded, so we can update in-memory objects now
   undo.appendMessages(messages, oldData);
@@ -612,11 +622,16 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
   const tables = getTablesFromMessages(
     messages.filter(msg => !msg.old && !deferredMessages.has(msg)),
   );
+
+  // Remote messages do not originate from a local tab request.
+  const requestId = isReceived ? undefined : getCurrentMutatorRequestId();
+
   app.events.emit('sync', {
     type: 'applied',
     tables,
     data: newData,
     prevData: oldData,
+    ...(requestId ? { requestId } : {}),
   });
 
   if (deferredMessages.size > 0) {
@@ -634,34 +649,54 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
 
 export const applyMessages = sequential(_applyMessages);
 
-export function receiveMessages(messages: Message[]): Promise<Message[]> {
+// Receiving the batch's latest timestamp inside the transaction advances
+// the clock once per batch and includes it in the saved `messages_clock`
+// row. If the transaction fails, the clock is restored along with it.
+function receiveInTransaction(
+  messages: Message[],
+  applyInTransaction: () => void,
+) {
+  let latest: Timestamp | null = null;
+  for (const { timestamp } of messages) {
+    if (
+      latest === null ||
+      timestamp.millis() > latest.millis() ||
+      (timestamp.millis() === latest.millis() &&
+        timestamp.counter() > latest.counter())
+    ) {
+      latest = timestamp;
+    }
+  }
+
+  const clock = getClock();
+  const savedMillis = clock.timestamp.millis();
+  const savedCounter = clock.timestamp.counter();
   try {
-    // Receiving the latest timestamp preserves the clock and drift check while
-    // advancing the counter once per batch.
-    let latest = null;
-    for (const { timestamp } of messages) {
-      if (
-        latest === null ||
-        timestamp.millis() > latest.millis() ||
-        (timestamp.millis() === latest.millis() &&
-          timestamp.counter() > latest.counter())
-      ) {
-        latest = timestamp;
-      }
-    }
-    if (latest !== null) {
-      Timestamp.recv(latest);
-    }
+    db.transaction(
+      () => {
+        if (latest !== null) {
+          Timestamp.recv(latest);
+        }
+        applyInTransaction();
+      },
+      { immediate: true },
+    );
+  } catch (e) {
+    clock.timestamp.setMillis(savedMillis);
+    clock.timestamp.setCounter(savedCounter);
+    throw e;
+  }
+}
+
+export async function receiveMessages(messages: Message[]): Promise<Message[]> {
+  try {
+    return await runMutator(() => applyMessages(messages, true));
   } catch (e) {
     if (e instanceof Timestamp.ClockDriftError) {
       throw new SyncError('clock-drift');
     }
     throw e;
   }
-
-  // Inbound messages may come from a newer version of the app, so
-  // unknown-schema errors defer instead of failing the batch
-  return runMutator(() => applyMessages(messages, true));
 }
 
 async function errorHandler(e: Error) {
@@ -736,6 +771,41 @@ export async function sendMessages(messages: Message[]) {
   }
 }
 
+// The server rejects sync requests over 20MB by default, so large
+// uploads are split into batches of roughly this size
+export const SYNC_BATCH_MAX_BYTES = 4 * 1024 * 1024;
+
+// Generous allowance for the timestamp, protobuf framing and encryption
+const SYNC_MESSAGE_OVERHEAD_BYTES = 100;
+
+function estimateMessageSize({ dataset, row, column, value }: Message) {
+  return (
+    Buffer.byteLength(dataset) +
+    Buffer.byteLength(row) +
+    Buffer.byteLength(column) +
+    Buffer.byteLength(String(value ?? '')) +
+    SYNC_MESSAGE_OVERHEAD_BYTES
+  );
+}
+
+// Always returns at least one batch so that a sync with nothing to send
+// still fetches the server's messages. A message over the limit gets a
+// batch of its own.
+function splitIntoSyncBatches(messages: Message[]): Message[][] {
+  const batches: Message[][] = [[]];
+  let size = 0;
+  for (const msg of messages) {
+    const msgSize = estimateMessageSize(msg);
+    if (size > 0 && size + msgSize > SYNC_BATCH_MAX_BYTES) {
+      batches.push([]);
+      size = 0;
+    }
+    batches[batches.length - 1].push(msg);
+    size += msgSize;
+  }
+  return batches;
+}
+
 export function getMessagesSince(since: string): Message[] {
   return db.runQuery(
     'SELECT timestamp, dataset, row, column, value FROM messages_crdt WHERE timestamp > ?',
@@ -799,10 +869,36 @@ export async function initialFullSync(): Promise<{
   return {};
 }
 
-export const fullSync = once(async function (): Promise<
+type FullSyncResult =
   | { messages: Message[] }
-  | { error: { message: string; reason: string; meta: unknown } }
-> {
+  | { error: { message: string; reason: string; meta: unknown } };
+
+let runningFullSync: Promise<FullSyncResult> | null = null;
+let isFullSyncStopped = false;
+export function fullSync(): Promise<FullSyncResult> {
+  if (isFullSyncStopped) {
+    return Promise.resolve({ messages: [] });
+  }
+  runningFullSync ??= runFullSync().finally(() => {
+    runningFullSync = null;
+  });
+  return runningFullSync;
+}
+
+// Stops new syncs, then waits for the running sync and all queued mutators so
+// the budget can be closed.
+export async function stopFullSync(): Promise<void> {
+  isFullSyncStopped = true;
+  clearFullSyncTimeout();
+  await Promise.allSettled([runningFullSync]);
+  await flushRunningMutators();
+}
+
+export function resumeFullSync(): void {
+  isFullSyncStopped = false;
+}
+
+async function runFullSync(): Promise<FullSyncResult> {
   app.events.emit('sync', { type: 'start' });
   let messages;
 
@@ -873,7 +969,7 @@ export const fullSync = once(async function (): Promise<
     syncDisabled: checkSyncingMode('disabled'),
   });
   return { messages };
-});
+}
 
 async function _fullSync(
   sinceTimestamp: string,
@@ -917,27 +1013,46 @@ async function _fullSync(
     '(attempt: ' + count + ')',
   );
 
-  const buffer = await encoder.encode(groupId, cloudFileId, since, messages);
+  const batches = splitIntoSyncBatches(messages);
+  const serverMessages = new Map<string, Message>();
+  let serverMerkle;
 
-  // TODO: There a limit on how many messages we can send because of
-  // the payload size. Right now it's at 20MB on the server. We should
-  // check the worst case here and make multiple requests if it's
-  // really large.
-  const resBuffer = await postBinary(
-    getServer().SYNC_SERVER + '/sync',
-    buffer,
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-  );
+  for (const [i, batch] of batches.entries()) {
+    if (batches.length > 1) {
+      logger.info(`Sending sync batch ${i + 1}/${batches.length}`);
+    }
 
-  // Abort if the file is either no longer loaded, the group id has
-  // changed because of a sync reset
-  if (!prefs.getPrefs() || prefs.getPrefs().groupId !== groupId) {
-    return [];
+    // Later batches only fetch messages newer than the snapshot; older ones
+    // came back with the first batch or are caught by the merkle diff below
+    const buffer = await encoder.encode(
+      groupId,
+      cloudFileId,
+      i === 0 ? since : currentTime,
+      batch,
+    );
+
+    const resBuffer = await postBinary(
+      getServer().SYNC_SERVER + '/sync',
+      buffer,
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+
+    // Abort if the file is either no longer loaded, the group id has
+    // changed because of a sync reset
+    if (!prefs.getPrefs() || prefs.getPrefs().groupId !== groupId) {
+      return [];
+    }
+
+    const batchRes = await encoder.decode(resBuffer);
+    for (const msg of batchRes.messages) {
+      serverMessages.set(msg.timestamp.toString(), msg);
+    }
+    serverMerkle = batchRes.merkle;
   }
 
-  const res = await encoder.decode(resBuffer);
+  const res = { messages: [...serverMessages.values()], merkle: serverMerkle };
 
   logger.info('Got messages from server', res.messages.length);
 

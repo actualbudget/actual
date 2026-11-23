@@ -5,7 +5,7 @@ expr
     { return { type: 'percentage', percent: +percentOf.percent, previous: percentOf.prev, category, priority: template.priority, directive: template.directive }}
   / template: template _ amount: amount _ repeatEvery _ period: periodCount _ starting _ starting: date limit: limit?
     { return { type: 'periodic', amount, period, starting, limit, priority: template.priority, directive: template.directive }}
-  / template: template _ amount: amount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)?
+  / template: template _ amount: unsignedAmount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)?
     { return {
       type: from ? 'spend' : 'by',
       amount,
@@ -22,6 +22,8 @@ expr
     { return { type: 'schedule', name: name.trim(), priority: template.priority, directive: template.directive, full, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType  }}
   / template: template _ remainder: remainder limit: limit?
     { return { type: 'remainder', priority: null, directive: template.directive, weight: remainder, limit }}
+  / template: template _ 'average'i _ amount: positive _ ('weeks'i / 'week'i) _ 'on'i _ weekday: weekday modifiers:modifiers?
+    { return { type: 'weeklyAverage', numWeeks: +amount, weekday, priority: template.priority, directive: template.directive, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType  }}
   / template: template _ 'average'i _ amount: positive _ 'months'i? modifiers:modifiers?
     { return { type: 'average', numMonths: +amount, priority: template.priority, directive: template.directive, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType  }}
   / template: template _ 'copy from'i _ lookBack: positive _ 'months ago'i limit:limit?
@@ -57,12 +59,16 @@ percentOf = percent:percent _ of _ 'previous'i _ { return { percent: percent, pr
 		/ percent:percent _ of _ { return { percent: percent, prev: false}}
 
 periodCount = 'day'i { return {period: 'day', amount: 1 }}
-           / n: number _ 'days'i _ { return { period: 'day', amount: +n }} 
+           / n: positive _ 'days'i _ { return { period: 'day', amount: +n }}
            / week _ { return {period: 'week', amount: 1 }}
-           / n: number _ weeks { return {period: 'week', amount: +n }}
-           / n: number _ 'months'i _ {return {period: 'month', amount: +n }}
+           / n: positive _ weeks { return {period: 'week', amount: +n }}
+           / n: positive _ 'months'i _ {return {period: 'month', amount: +n }}
            / 'year'i _ { return {period: 'year', amount: 1 }}
-           / n: number _ 'years'i _ { return { period: 'year', amount: +n }}
+           / n: positive _ 'years'i _ { return { period: 'year', amount: +n }}
+
+weekday 'weekday'
+  = day: ('sunday'i / 'monday'i / 'tuesday'i / 'wednesday'i / 'thursday'i / 'friday'i / 'saturday'i)
+    { return day.toLowerCase() }
 
 spendFrom = _ 'spend'i _ 'from'i _ month: month { return month }
 
@@ -88,6 +94,8 @@ d 'digit' = [0-9]
 number 'number' = $(d+)
 positive = $([1-9][0-9]*)
 amount 'amount' = currencySymbol? _? amount: $('-'?d+ ('.' (d d?)?)?) { return +amount }
+// `by` and `spend` targets can't be negative
+unsignedAmount 'amount' = currencySymbol? _? amount: $(d+ ('.' (d d?)?)?) { return +amount }
 percent 'percentage' = percent: $(d+ ('.' (d+)?)?) _? '%' { return percent }
 year 'year' = $(d d d d)
 month 'month' = $(year '-' d d)
