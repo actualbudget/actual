@@ -1,3 +1,5 @@
+import { fetch, Response } from 'undici';
+import type * as Undici from 'undici';
 import type { MockInstance } from 'vitest';
 
 import {
@@ -41,6 +43,11 @@ import {
   mockRequisitionWithExampleAccounts,
   mockTransactions,
 } from './fixtures';
+
+vi.mock('undici', async importOriginal => ({
+  ...(await importOriginal<typeof Undici>()),
+  fetch: vi.fn(),
+}));
 
 describe('goCardlessService', () => {
   const accountId = mockAccountMetaData.id;
@@ -296,19 +303,19 @@ describe('goCardlessService', () => {
     it('skips the end-user agreement for ING Italy without retrying', async () => {
       setTokenSpy.mockResolvedValue(undefined);
       getInstitutionSpy.mockResolvedValue(mockInstitution);
-      createRequisitionSpy.mockRejectedValue(new Error('failed'));
+      vi.mocked(fetch).mockResolvedValue(new Response(null, { status: 500 }));
 
       await expect(
         goCardlessService.createRequisition({
           ...params,
           institutionId: 'ING_INGBITMM' as GoCardlessInstitutionId,
         }),
-      ).rejects.toThrow(GenericGoCardlessError);
+      ).rejects.toThrow(UnknownError);
 
-      expect(createRequisitionSpy).toHaveBeenCalledTimes(1);
-      expect(createRequisitionSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ skipEndUserAgreement: true }),
-      );
+      expect(fetch).toHaveBeenCalledTimes(1);
+      const [url, init] = vi.mocked(fetch).mock.calls[0];
+      expect(String(url)).toMatch(/\/requisitions\/$/);
+      expect(JSON.parse(String(init?.body))).not.toHaveProperty('agreement');
     });
   });
 
