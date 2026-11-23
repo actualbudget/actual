@@ -1046,6 +1046,8 @@ describe('schedule app', () => {
         async function postOccurrences(
           start: string,
           posts: Array<{ date?: string; today?: boolean }>,
+          // Dates of transactions linked to the schedule before the posts
+          linkedDates: string[] = [],
         ) {
           const accountId = await db.insertAccount({ name: 'Checking' });
           const id = await createSchedule({
@@ -1060,6 +1062,14 @@ describe('schedule app', () => {
             ],
           });
 
+          for (const date of linkedDates) {
+            await db.insertTransaction({
+              account: accountId,
+              amount: -10000,
+              date,
+              schedule: id,
+            });
+          }
           for (const post of posts) {
             await postTransactionForSchedule({ id, ...post });
           }
@@ -1128,6 +1138,19 @@ describe('schedule app', () => {
             await postOccurrences('2017-01-01', [{}, { date: '2017-01-15' }]),
           ).toEqual({
             dates: ['2017-01-01', '2017-01-08'],
+            nextDate: '2017-01-15',
+          });
+        });
+
+        it('counts a late payment of `next_date` as paid, like its status', async () => {
+          expect(
+            await postOccurrences(
+              '2017-01-01',
+              [{ date: '2017-01-08' }],
+              ['2017-01-03'],
+            ),
+          ).toEqual({
+            dates: ['2017-01-03', '2017-01-08'],
             nextDate: '2017-01-15',
           });
         });

@@ -34,7 +34,6 @@ import {
   getNextDateAfter,
   getScheduledAmount,
   getStatus,
-  isScheduleOccurrencePosted,
   recurConfigToRSchedule,
 } from '#shared/schedules';
 import type {
@@ -673,22 +672,16 @@ async function skipPaidOccurrences(
   }
 }
 
-// `next_date` counts as paid like its status does, with the match window.
-// Later occurrences need a transaction on their exact date; with the window,
-// one transaction would pay several days of a daily schedule.
+// `next_date` is paid exactly when its status says so: any transaction of the
+// schedule from its match start on. Later occurrences need a transaction on
+// their exact date; with the window, one transaction would pay several days of
+// a daily schedule.
 async function getIsOccurrencePaid(schedule: ScheduleEntity) {
-  const { data: postedTransactions } = await aqlQuery(
-    getHasTransactionsQuery([schedule]),
-  );
+  const { data } = await aqlQuery(getHasTransactionsQuery([schedule]));
+  const postedTransactions = data.filter(Boolean);
   return (date: string) =>
     postedTransactions.some(t => t.date === date) ||
-    (date === schedule.next_date &&
-      isScheduleOccurrencePosted({
-        schedule,
-        scheduleId: schedule.id,
-        occurrenceDate: date,
-        postedTransactions,
-      }));
+    (date === schedule.next_date && postedTransactions.length > 0);
 }
 
 function findFirstUnpaidOccurrence(
