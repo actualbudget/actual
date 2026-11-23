@@ -313,17 +313,11 @@ async function signOut(options?: SignOutOptions) {
     }
   }
 
-  const keysToRemove: Parameters<typeof asyncStorage.multiRemove>[0] = [
-    'user-token',
-    'lastBudget',
-    'readOnly',
-  ];
+  await asyncStorage.multiRemove(['user-token', 'lastBudget', 'readOnly']);
   if (options?.clearEncryptionKeys) {
     encryption.unloadAllKeys();
-    keysToRemove.push('encrypt-keys');
+    await asyncStorage.removeItem('encrypt-keys');
   }
-
-  await asyncStorage.multiRemove(keysToRemove);
   return 'ok';
 }
 

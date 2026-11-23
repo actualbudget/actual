@@ -3,4 +3,4 @@ category: Bugfix
 authors: [isihussain]
 ---
 
-Preserve saved end-to-end encryption keys across non-explicit sign-outs and unchanged server URL saves
+Keep saved encryption keys when a session expires or the server URL changes; only signing out clears them.

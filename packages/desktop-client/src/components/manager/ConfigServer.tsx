@@ -334,8 +334,7 @@ export function ConfigServer() {
       httpUrl = 'https://' + url;
     }
 
-    const previousUrl = currentUrl ? currentUrl.replace(/\/+$/, '') : null;
-    const urlChanged = httpUrl.replace(/\/+$/, '') !== previousUrl;
+    const urlChanged = httpUrl.replace(/\/+$/, '') !== currentUrl;
 
     const { error } = await setServerUrl(httpUrl);
     setUrl(httpUrl);
@@ -347,8 +346,6 @@ export function ConfigServer() {
       setLoading(false);
       if (urlChanged) {
         await dispatch(signOut());
-      } else {
-        await dispatch(loggedIn());
       }
       void navigate('/');
     }
@@ -428,8 +425,8 @@ export function ConfigServer() {
           >
             {currentUrl ? (
               <Trans>
-                Existing sessions will be logged out and you will log in to this
-                server. We will validate that Actual is running at this URL.
+                Changing the server will log you out. We will validate that
+                Actual is running at this URL.
               </Trans>
             ) : (
               <Trans>

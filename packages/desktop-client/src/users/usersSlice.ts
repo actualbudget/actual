@@ -42,14 +42,13 @@ export const loggedIn = createAppAsyncThunk(
   },
 );
 
-type SignOutPayload = {
-  clearEncryptionKeys?: boolean;
-};
-
 export const signOut = createAppAsyncThunk(
   `${sliceName}/signOut`,
-  async (options: SignOutPayload | void, { dispatch }) => {
-    await send('subscribe-sign-out', options ? options : undefined);
+  async (
+    options: Parameters<Handlers['subscribe-sign-out']>[0] | void,
+    { dispatch },
+  ) => {
+    await send('subscribe-sign-out', options || undefined);
 
     void dispatch(getUserData());
     void dispatch(loadGlobalPrefs());
