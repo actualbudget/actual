@@ -96,7 +96,7 @@ async function buildSessionResult(
           account.uid,
           accessHeaders,
         );
-        balances = balanceResult.balances.map(normalizeBalance);
+        balances = balanceResult.balances.map(bal => normalizeBalance(bal));
       } catch (err) {
         debug('Failed to fetch account balances');
         debugSensitive(
@@ -545,6 +545,9 @@ app.post(
   '/transactions',
   handleError(async (req: Request, res: Response) => {
     const { accountId, startDate, aspspName } = req.body || {};
+    const normalizeOptions = {
+      swapCreditDebit: req.body?.swapCreditDebit === true,
+    };
 
     if (!accountId || !startDate) {
       res.send({
@@ -578,7 +581,9 @@ app.post(
           accountId,
           psuHeaders,
         );
-        balances = balanceResult.balances.map(normalizeBalance);
+        balances = balanceResult.balances.map(bal =>
+          normalizeBalance(bal, normalizeOptions),
+        );
       } catch (err) {
         debug('Failed to fetch account balances');
         debugSensitive(
@@ -609,7 +614,10 @@ app.post(
       const booked: ReturnType<typeof normalizeTransactions> = [];
       const pending: ReturnType<typeof normalizeTransactions> = [];
 
-      for (const normalized of normalizeTransactions(rawTransactions)) {
+      for (const normalized of normalizeTransactions(
+        rawTransactions,
+        normalizeOptions,
+      )) {
         // Drop records Actual's client can't insert (empty/non-ISO date or
         // non-numeric amount) — one of them would otherwise abort the entire
         // account sync. Pending transactions that carry a date are unaffected.

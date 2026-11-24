@@ -158,6 +158,9 @@ type BankSyncCheckboxOptionsProps = {
   setUpdateDates: (value: boolean) => void;
   reverseAmounts: boolean;
   setReverseAmounts: (value: boolean) => void;
+  // The option swaps the credit/debit indicator in the Enable Banking server,
+  // so it only applies to accounts synced through it.
+  isEnableBanking?: boolean;
   helpMode?: 'desktop' | 'mobile';
 };
 
@@ -174,6 +177,7 @@ export function BankSyncCheckboxOptions({
   setUpdateDates,
   reverseAmounts,
   setReverseAmounts,
+  isEnableBanking = false,
   helpMode = 'desktop',
 }: BankSyncCheckboxOptionsProps) {
   const { t } = useTranslation();
@@ -227,13 +231,13 @@ export function BankSyncCheckboxOptions({
         <Trans>Update Dates</Trans>
       </CheckboxOptionWithHelp>
 
-      {isReverseAmountsEnabled && (
+      {isReverseAmountsEnabled && isEnableBanking && (
         <CheckboxOptionWithHelp
           id="form_reverse_amounts"
           checked={reverseAmounts}
           onChange={() => setReverseAmounts(!reverseAmounts)}
           helpText={t(
-            'Invert the sign of imported transaction amounts for this bank connection.',
+            'Use when the bank reports credit and debit the wrong way round (for example card purchases shown as credits): swaps them so imported amounts get the opposite sign.',
           )}
           helpMode={helpMode}
         >

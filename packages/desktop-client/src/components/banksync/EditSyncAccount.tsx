@@ -245,6 +245,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             setUpdateDates={setUpdateDates}
             reverseAmounts={reverseAmounts}
             setReverseAmounts={setReverseAmounts}
+            isEnableBanking={account.account_sync_source === 'enableBanking'}
             helpMode="desktop"
           />
 

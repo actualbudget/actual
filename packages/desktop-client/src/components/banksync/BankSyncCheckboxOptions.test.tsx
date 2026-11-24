@@ -31,7 +31,10 @@ function mockPrefs(initial: Record<string, string>) {
 
 const setReverseAmounts = vi.fn();
 
-function renderOptions({ reverseAmounts = false } = {}) {
+function renderOptions({
+  reverseAmounts = false,
+  isEnableBanking = true,
+} = {}) {
   render(
     <TestProviders>
       <BankSyncCheckboxOptions
@@ -47,6 +50,7 @@ function renderOptions({ reverseAmounts = false } = {}) {
         setUpdateDates={vi.fn()}
         reverseAmounts={reverseAmounts}
         setReverseAmounts={setReverseAmounts}
+        isEnableBanking={isEnableBanking}
       />
     </TestProviders>,
   );
@@ -76,6 +80,13 @@ describe('BankSyncCheckboxOptions', () => {
     await userEvent.click(reverseAmountsOption()!);
 
     expect(setReverseAmounts).toHaveBeenCalledWith(true);
+  });
+
+  it('hides the reverse amounts option for accounts not synced via Enable Banking', () => {
+    mockPrefs({ 'flags.bankSyncReverseAmounts': 'true' });
+    renderOptions({ isEnableBanking: false });
+
+    expect(reverseAmountsOption()).not.toBeInTheDocument();
   });
 
   it('reflects the saved value of the option', () => {

@@ -160,6 +160,7 @@ export function MobileBankSyncAccountEditPage() {
               setUpdateDates={setUpdateDates}
               reverseAmounts={reverseAmounts}
               setReverseAmounts={setReverseAmounts}
+              isEnableBanking={account.account_sync_source === 'enableBanking'}
               helpMode="mobile"
             />
           </View>
