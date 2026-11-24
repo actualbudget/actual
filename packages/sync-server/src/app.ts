@@ -230,14 +230,13 @@ export async function run() {
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    listen(
-      https.createServer(httpsOptions, app),
-      port,
-      hostname,
-      sendServerStartedMessage,
+    sendServerStartedMessage(
+      await listen(https.createServer(httpsOptions, app), port, hostname),
     );
   } else {
     const http = await import('node:http');
-    listen(http.createServer(app), port, hostname, sendServerStartedMessage);
+    sendServerStartedMessage(
+      await listen(http.createServer(app), port, hostname),
+    );
   }
 }

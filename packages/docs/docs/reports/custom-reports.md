@@ -58,6 +58,8 @@ Icons in the first group of the center menu are used to select the displayed rep
 - **C. Filter.** Filter the transactions in the report.
 - **D. Save menu.** Save, update or reset the report.
 
+In a transaction report, a date filter from the toolbar limits the average to the reporting periods it covers. Each covered period counts once, including partial periods and periods with no matching transactions. If the filter and report range do not overlap, the average is zero.
+
 ## Saving a Report
 
 A custom report can be saved by using the menu on the right-hand side. If a saved report is modified it is possible to either overwrite the existing report or save the changes as a new report. The same menu can be used to **Revert changes** if you'd like to quickly return to your saved version. Otherwise if no action is taken, the changes will be automatically discarded when leaving the current report.

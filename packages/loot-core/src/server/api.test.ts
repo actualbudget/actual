@@ -9,6 +9,7 @@ import { app as accountsApp } from './accounts/app';
 import { installAPI } from './api';
 import { createBudget } from './budget/base';
 import * as prefs from './prefs';
+import { app as transactionsApp } from './transactions/app';
 
 vi.mock('#shared/errors', () => ({
   getBankSyncError: vi.fn(error => `Bank sync error: ${error.message}`),
@@ -303,6 +304,42 @@ describe('API handlers', () => {
       expect(group?.categories?.[0]).toHaveProperty('received', 5000);
       expect(group?.categories?.[0]).toHaveProperty('balance', 1000);
       expect(group?.categories?.[0]).toHaveProperty('carryover', false);
+    });
+  });
+
+  describe('api/transaction-delete', () => {
+    beforeEach(global.emptyDatabase());
+
+    beforeEach(async () => {
+      await prefs.loadPrefs();
+
+      await db.insertAccount({ id: 'acct1', name: 'Checking' });
+      await db.insertTransaction({
+        id: 'tx1',
+        date: '2026-03-15',
+        account: 'acct1',
+        amount: -100,
+      });
+    });
+
+    it('resolves with the deleted transaction once the delete is applied', async () => {
+      handlers['transactions-batch-update'] =
+        transactionsApp.handlers['transactions-batch-update'];
+
+      await expect(
+        handlers['api/transaction-delete']({ id: 'tx1' }),
+      ).resolves.toEqual([expect.objectContaining({ id: 'tx1' })]);
+      expect(await db.getTransaction('tx1')).toBeUndefined();
+    });
+
+    it('rejects when the batch update fails', async () => {
+      handlers['transactions-batch-update'] = vi
+        .fn()
+        .mockRejectedValue(new Error('batch update failed'));
+
+      await expect(
+        handlers['api/transaction-delete']({ id: 'tx1' }),
+      ).rejects.toThrow('batch update failed');
     });
   });
 

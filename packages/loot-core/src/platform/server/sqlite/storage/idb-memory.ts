@@ -12,8 +12,10 @@ import {
   completeMigration,
   deleteLegacyDatabase,
   legacySnapshot,
+  matchesLegacyDatabase,
   readLegacyDatabaseBytes,
   verifyMigratedDatabase,
+  writeLegacyDatabaseBytes,
 } from './absurd-migration';
 import {
   BudgetInUseError,
@@ -26,7 +28,11 @@ import {
   putSqliteFileRow,
   putSqliteFileRowIfRev,
 } from './files-store';
-import { acquireWebLock, budgetLockName } from './locks';
+import {
+  acquireWebLock,
+  BUDGET_LOCK_TIMEOUT_MS,
+  budgetLockName,
+} from './locks';
 import { legacyDatabaseName } from './paths';
 import type { MigrationProgress, SqliteFileStore } from './types';
 
@@ -40,7 +46,6 @@ import type { MigrationProgress, SqliteFileStore } from './types';
 
 const DEFAULT_DEBOUNCE_MS = 1000;
 const DEFAULT_MAX_DIRTY_MS = 5000;
-const DEFAULT_LOCK_TIMEOUT_MS = 2000;
 
 export type MemoryIdbStoreOptions = {
   onMigrationProgress?: MigrationProgress;
@@ -75,7 +80,7 @@ export function createMemoryIdbStore({
   onMigrationProgress,
   debounceMs = DEFAULT_DEBOUNCE_MS,
   maxDirtyMs = DEFAULT_MAX_DIRTY_MS,
-  lockTimeoutMs = DEFAULT_LOCK_TIMEOUT_MS,
+  lockTimeoutMs = BUDGET_LOCK_TIMEOUT_MS,
 }: MemoryIdbStoreOptions = {}): SqliteFileStore {
   const entries = new Map<string, Entry>();
   const byDb = new Map<WasmDatabase, Entry>();
@@ -200,27 +205,47 @@ export function createMemoryIdbStore({
       return { bytes: null, rev };
     }
     onMigrationProgress?.('verify');
+    const snapshot = legacySnapshot(bytes);
     const check = openMemoryDatabase(bytes);
     try {
       verifyMigratedDatabase(check);
+      // On this store this guards the read, not the write: the row is
+      // written by the cutover below and is not read back
+      if (!(await matchesLegacyDatabase(path, bytes, snapshot))) {
+        throw new Error('the moved file differs from the absurd-sql copy');
+      }
     } catch (error) {
       onMigrationProgress?.('failed');
-      throw new StorageMigrationError(path, error);
+      throw error instanceof BudgetInUseError
+        ? error
+        : new StorageMigrationError(path, error);
     } finally {
       check.close();
     }
     await completeMigration(
       { filepath: path, contents: bytes, storage: 'memory-idb', rev: rev + 1 },
       rev,
-      legacySnapshot(bytes),
+      snapshot,
       onMigrationProgress,
     );
     return { bytes, rev: rev + 1 };
   }
 
+  // A snapshot stranded by a failed close is only current while the row is
+  // still at the revision it was taken from; a write by another worker
+  // since supersedes it
+  function currentStranded(path: string, row: Data | undefined) {
+    const stranded = unsaved.get(path);
+    if (stranded && (row?.rev ?? 0) !== stranded.rev) {
+      unsaved.delete(path);
+      return undefined;
+    }
+    return stranded;
+  }
+
   function lockBudget(path: string): Promise<() => void> {
     return acquireWebLock(budgetLockName(path), lockTimeoutMs).catch(() => {
-      throw new BudgetInUseError(path);
+      throw new BudgetInUseError(path, 'the storage lock could not be taken');
     });
   }
 
@@ -252,13 +277,7 @@ export function createMemoryIdbStore({
     try {
       const row = await getSqliteFileRow(path);
       assertNotInOpfs(path, row);
-      // A snapshot stranded by a failed close is only current while the
-      // row is still at the revision it was taken from
-      let stranded = unsaved.get(path);
-      if (stranded && (row?.rev ?? 0) !== stranded.rev) {
-        unsaved.delete(path);
-        stranded = undefined;
-      }
+      const stranded = currentStranded(path, row);
       const { bytes, rev } = stranded ?? (await loadBytes(path, row));
       const db = openMemoryDatabase(bytes ?? undefined);
       const entry: Entry = {
@@ -288,7 +307,10 @@ export function createMemoryIdbStore({
         );
         if (!written) {
           db.close();
-          throw new BudgetInUseError(path);
+          throw new BudgetInUseError(
+            path,
+            'another worker created it meanwhile',
+          );
         }
       }
       if (bytes == null || stranded) {
@@ -376,15 +398,17 @@ export function createMemoryIdbStore({
       if (entry) {
         return exportBytes(entry.db);
       }
-      const stranded = unsaved.get(path);
-      if (stranded) {
-        return stranded.bytes;
-      }
       // Loading may migrate the absurd-sql copy, so hold the budget lock
       // as an open does
       const releaseLock = await lockBudget(path);
       try {
-        const { bytes } = await loadBytes(path, await getSqliteFileRow(path));
+        const row = await getSqliteFileRow(path);
+        assertNotInOpfs(path, row);
+        const stranded = currentStranded(path, row);
+        if (stranded) {
+          return stranded.bytes;
+        }
+        const { bytes } = await loadBytes(path, row);
         if (bytes == null) {
           throw new Error('File does not exist: ' + path);
         }
@@ -465,6 +489,39 @@ export function createMemoryIdbStore({
       }
     },
 
+    // Bytes a failed save left in memory count as the file's, as in a read
+    async revertFile(path) {
+      await opening.get(path)?.catch(() => undefined);
+      await pendingWrites.get(path);
+      if (entries.has(path)) {
+        throw new Error(`cannot revert an open database: ${path}`);
+      }
+      const releaseLock = await lockBudget(path);
+      try {
+        const row = await getSqliteFileRow(path);
+        // Another worker moved it back while this one waited for the lock,
+        // or it is gone: the legacy marker is not this store's to touch
+        if (row?.storage == null) {
+          return;
+        }
+        assertNotInOpfs(path, row);
+        const stranded = currentStranded(path, row);
+        const bytes =
+          stranded?.bytes ??
+          (isByteContents(row.contents) ? row.contents : null);
+        if (bytes == null) {
+          // Recorded but never saved: nothing to copy, the row just goes
+          await deleteSqliteFileRow(path);
+          return;
+        }
+        await writeLegacyDatabaseBytes(legacyDatabaseName(path), bytes);
+        await putSqliteFileRow({ filepath: path, contents: '' });
+        unsaved.delete(path);
+      } finally {
+        releaseLock();
+      }
+    },
+
     async exists(path) {
       return (await getSqliteFileRow(path)) != null;
     },
@@ -485,6 +542,13 @@ export function createMemoryIdbStore({
           'sqlite storage: not written: ' + notWritten.join(', '),
         );
       }
+    },
+
+    async releaseAll() {
+      for (const entry of [...entries.values()]) {
+        store.close(entry.path, entry.db);
+      }
+      await Promise.all([...pendingWrites.values()]);
     },
 
     onWrite(db) {

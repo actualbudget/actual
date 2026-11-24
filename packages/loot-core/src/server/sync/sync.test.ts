@@ -2,6 +2,8 @@
 import { getClock, Timestamp } from '@actual-app/crdt';
 
 import * as db from '#server/db';
+import { app } from '#server/main-app';
+import { runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
 import * as mockSyncServer from '#server/tests/mockSyncServer';
@@ -17,6 +19,7 @@ import {
   receiveMessages,
   sendMessages,
   setSyncingMode,
+  SYNC_BATCH_MAX_BYTES,
 } from './index';
 
 beforeEach(() => {
@@ -31,6 +34,50 @@ afterEach(() => {
 });
 
 describe('Sync', () => {
+  it('emits a local applied event before the mutation completes', async () => {
+    const order: string[] = [];
+
+    const onSync = event => {
+      if (
+        event.type === 'applied' &&
+        event.requestId === 'origin-order-check'
+      ) {
+        order.push('applied');
+      }
+    };
+
+    app.events.on('sync', onSync);
+
+    try {
+      await runMutator(
+        async () => {
+          await sendMessages([
+            {
+              dataset: 'transactions',
+              row: 'origin-order-transaction',
+              column: 'amount',
+              value: 3200,
+              timestamp: Timestamp.send(),
+            },
+          ]);
+
+          order.push('mutation-complete');
+        },
+        { requestId: 'origin-order-check' },
+      );
+
+      order.push('handler-returned');
+
+      expect(order).toEqual([
+        'applied',
+        'mutation-complete',
+        'handler-returned',
+      ]);
+    } finally {
+      app.events.off('sync', onSync);
+    }
+  });
+
   it('should send messages to the server', async () => {
     void prefs.loadPrefs();
     void prefs.savePrefs({ groupId: 'group' });
@@ -106,6 +153,90 @@ describe('Sync', () => {
     if (isError(result)) throw result.error;
     expect(result.messages.length).toBe(0);
     expect(mockSyncServer.getMessages().length).toBe(2);
+  });
+
+  it('should send a large backlog to the server in batches', async () => {
+    void prefs.loadPrefs();
+    void prefs.savePrefs({ groupId: 'group' });
+
+    // Another client already synced a message to the server
+    await mockSyncServer.handlers['/sync/sync'](
+      await encoder.encode('group', 'client', Timestamp.zero, [
+        {
+          dataset: 'transactions',
+          row: 'other',
+          column: 'amount',
+          value: 'N:100',
+          timestamp: Timestamp.parse(
+            '2018-11-13T13:00:00.000Z-0000-0000testinguuid2',
+          ),
+        },
+      ]),
+    );
+
+    global.stepForwardInTime(Date.parse('2018-11-13T13:20:00.000Z'));
+
+    // Each message is ~1.5MB, so together they exceed a single request
+    const bigValue = 'x'.repeat(1.5 * 1024 * 1024);
+    const local = [];
+    for (let i = 0; i < 6; i++) {
+      global.stepForwardInTime();
+      local.push({
+        dataset: 'notes',
+        row: `note-${i}`,
+        column: 'note',
+        value: bigValue,
+        timestamp: Timestamp.send(),
+      });
+    }
+    await applyMessages(local);
+
+    // Like a budget imported into a fresh server: nothing is sent
+    // automatically, the whole history goes out via the merkle diff
+    void prefs.savePrefs({
+      lastSyncedTimestamp: getClock().timestamp.toString(),
+    });
+
+    // Another client syncs while the batches are being sent; only a
+    // later batch's response can return this message
+    const later = {
+      dataset: 'transactions',
+      row: 'later',
+      column: 'amount',
+      value: 'N:200',
+      timestamp: Timestamp.parse(
+        '2018-11-13T13:21:00.000Z-0000-0000testinguuid3',
+      ),
+    };
+    const originalHandler = mockSyncServer.handlers['/sync/sync'];
+    const requestSizes: number[] = [];
+    mockSyncServer.handlers['/sync/sync'] = async (data: Uint8Array) => {
+      requestSizes.push(data.length);
+      if (requestSizes.length === 3) {
+        await originalHandler(
+          await encoder.encode('group', 'client', Timestamp.zero, [later]),
+        );
+      }
+      return originalHandler(data);
+    };
+
+    try {
+      const result = await fullSync();
+      if (isError(result)) throw result.error;
+
+      expect(result.messages.map(msg => msg.row)).toEqual(['other', 'later']);
+    } finally {
+      mockSyncServer.handlers['/sync/sync'] = originalHandler;
+    }
+
+    // One empty request, then the 6 messages in 3 batches. Any further
+    // request would be a merkle retry fetching a dropped response.
+    expect(requestSizes.length).toBe(4);
+    for (const size of requestSizes) {
+      expect(size).toBeLessThan(SYNC_BATCH_MAX_BYTES + 1024 * 1024);
+    }
+    expect(mockSyncServer.getMessages().length).toBe(8);
+    expect(mockSyncServer.getClock().merkle.hash).toBe(getClock().merkle.hash);
   });
 
   it('should sync multiple clients', async () => {

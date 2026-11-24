@@ -18,5 +18,8 @@ module.exports = eslintCompatPlugin({
     'prefer-subpath-imports': require('./rules/prefer-subpath-imports'),
     'enforce-boundaries': require('./rules/enforce-boundaries'),
     'no-extraneous-dependencies': require('./rules/no-extraneous-dependencies'),
+    'no-color-literals': require('./rules/no-color-literals'),
+    'no-raw-color-variables': require('./rules/no-raw-color-variables'),
+    'theme-token-roles': require('./rules/theme-token-roles'),
   },
 });

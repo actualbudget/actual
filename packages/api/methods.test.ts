@@ -1210,6 +1210,47 @@ describe('API CRUD operations', () => {
     expect(parent.amount).toBe(300);
   });
 
+  test('Transactions: update and delete are applied before they resolve', async () => {
+    const fromId = await api.createAccount({ name: 'from-account' }, 0);
+    const toId = await api.createAccount({ name: 'to-account' }, 0);
+    await api.addTransactions(fromId, [
+      { date: '2023-11-03', amount: -100 },
+      { date: '2023-11-04', amount: -200 },
+    ]);
+    const [first, second] = await api.getTransactions(
+      fromId,
+      '2023-11-01',
+      '2023-11-30',
+    );
+    const transferPayee = (await api.getPayees()).find(
+      payee => payee.transfer_acct === toId,
+    );
+    if (!transferPayee) {
+      throw new Error('transfer payee not found');
+    }
+
+    // Setting a transfer payee creates the other leg in the target account
+    expect(
+      await api.updateTransaction(first.id, { payee: transferPayee.id }),
+    ).toBeDefined();
+    expect(
+      await api.updateTransaction(second.id, { payee: transferPayee.id }),
+    ).toBeDefined();
+    expect(
+      await api.getTransactions(toId, '2023-11-01', '2023-11-30'),
+    ).toHaveLength(2);
+
+    // Deleting one leg of a transfer removes the other leg too
+    expect(await api.deleteTransaction(first.id)).toBeDefined();
+    expect(await api.deleteTransaction(second.id)).toBeDefined();
+    expect(
+      await api.getTransactions(fromId, '2023-11-01', '2023-11-30'),
+    ).toHaveLength(0);
+    expect(
+      await api.getTransactions(toId, '2023-11-01', '2023-11-30'),
+    ).toHaveLength(0);
+  });
+
   // apis: mergeTransactions
   test('Transactions: successfully merge two transactions', async () => {
     const accountId = await api.createAccount({ name: 'test-account' }, 0);

@@ -11,8 +11,8 @@ import {
   componentSizeControl,
   componentSizeText,
   sizeResponsiveStyles,
-  type ComponentSize,
 } from './tokens';
+import type { ComponentSize } from './tokens';
 import { View } from './View';
 
 const backgroundColor: {

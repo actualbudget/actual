@@ -48,6 +48,49 @@ test.describe('Payees', () => {
     await expect(page.getByText('Create rule')).toBeVisible();
   });
 
+  test('table can be entered and left with the keyboard', async () => {
+    const table = page.getByTestId('table');
+    const firstRow = table.getByTestId('row').first();
+    const selectButton = firstRow
+      .getByTestId('select')
+      .getByTestId('cell-button');
+    const isFocusInTable = () =>
+      table.evaluate(el => el.contains(document.activeElement));
+
+    await table.focus();
+    await page.keyboard.press('Shift+Tab');
+    const previous = page.locator(':focus');
+    await expect(previous).toHaveCount(1);
+    expect(await isFocusInTable()).toBe(false);
+
+    await page.keyboard.press('Tab');
+    await expect(table).toBeFocused();
+    expect(
+      await table.evaluate(
+        el => getComputedStyle(el, '::after').borderTopStyle,
+      ),
+    ).toBe('solid');
+
+    await page.keyboard.press('Tab');
+    expect(await isFocusInTable()).toBe(false);
+
+    await table.focus();
+    await page.keyboard.press('Enter');
+    await expect(selectButton).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    await expect(firstRow.locator('input')).toBeFocused();
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(selectButton).toBeFocused();
+
+    await page.keyboard.press('Escape');
+    await expect(table).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    expect(await isFocusInTable()).toBe(false);
+  });
+
   test('filters out unrelated payees', async () => {
     await payeesPage.searchFor('asdfasdf-nonsense');
 
