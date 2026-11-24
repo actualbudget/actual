@@ -68,7 +68,7 @@ Maintainers are compensated for the administrative work that keeps the project h
 
 ### How Points Are Earned
 
-- **Reviewing pull requests.** Larger pull requests earn more points than small ones.
+- **Reviewing pull requests.** Only approving reviews on pull requests that get merged count. Larger pull requests earn more points than small ones.
 - **Triaging issues.** Removing the `needs triage` label from an issue earns a point. So does closing an issue as "not planned" or as a duplicate. Closing an issue as completed does not earn points.
 - **Getting your own pull requests merged.** Points depend on the type of change (for example, a bug fix or a feature).
 - **Merging the release pull request.**
