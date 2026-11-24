@@ -54,6 +54,7 @@ export function BudgetAutomationMigrationWarning({
               // Translucent overlay rather than a theme token so the inset
               // effect works regardless of the surrounding Warning colour
               // (which differs between light/dark/midnight themes).
+              // oxlint-disable-next-line actual/no-color-literals
               backgroundColor: 'rgba(0, 0, 0, 0.15)',
               maxHeight: 120,
               overflowY: 'auto',

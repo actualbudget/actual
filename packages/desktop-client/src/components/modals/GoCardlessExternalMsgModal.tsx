@@ -215,7 +215,7 @@ export function GoCardlessExternalMsgModal({
                 <Link
                   variant="text"
                   onClick={onGoCardlessInit}
-                  style={{ color: theme.formLabelText, display: 'inline' }}
+                  style={{ color: 'inherit', display: 'inline' }}
                 >
                   set them up
                 </Link>{' '}
@@ -228,7 +228,7 @@ export function GoCardlessExternalMsgModal({
                 <Link
                   variant="text"
                   onClick={onGoCardlessInit}
-                  style={{ color: theme.formLabelText, display: 'inline' }}
+                  style={{ color: 'inherit', display: 'inline' }}
                 >
                   set them up
                 </Link>{' '}
@@ -268,7 +268,7 @@ export function GoCardlessExternalMsgModal({
             <Link
               variant="external"
               to="https://gocardless.com/privacy/"
-              linkColor="purple"
+              linkColor="muted"
             >
               Privacy Policy
             </Link>{' '}

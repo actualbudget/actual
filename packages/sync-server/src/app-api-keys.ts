@@ -23,9 +23,12 @@ app.use((_req, res, next) => {
 });
 
 app.post('/', (req, res) => {
-  const { name: rawName, fileIds } = req.body ?? {};
+  const { name: rawName, fileIds, permissions = [] } = req.body ?? {};
   const name = typeof rawName === 'string' ? rawName.trim() : '';
   if (
+    !Array.isArray(permissions) ||
+    permissions.some(permission => permission !== 'bank-sync-global') ||
+    new Set(permissions).size !== permissions.length ||
     !name ||
     name.length > 100 ||
     !Array.isArray(fileIds) ||
@@ -55,6 +58,12 @@ app.post('/', (req, res) => {
        VALUES (?, ?, ?, ?, ?)`,
       [id, userId, name, keyHash, createdAt],
     );
+    for (const permission of permissions) {
+      db.mutate(
+        'INSERT INTO api_key_permissions (key_id, permission) VALUES (?, ?)',
+        [id, permission],
+      );
+    }
     for (const fileId of fileIds) {
       db.mutate('INSERT INTO api_key_budgets (key_id, file_id) VALUES (?, ?)', [
         id,
@@ -65,7 +74,7 @@ app.post('/', (req, res) => {
 
   res.status(201).send({
     status: 'ok',
-    data: { id, name, fileIds, createdAt, key },
+    data: { id, name, fileIds, permissions, createdAt, key },
   });
 });
 
@@ -75,17 +84,20 @@ app.get('/', (_req, res) => {
     name: string;
     createdAt: number;
     fileIds: string;
+    permissions: string;
   }[] = getAccountDb().all(
     `SELECT id, name, created_at AS createdAt,
-       (SELECT json_group_array(file_id) FROM api_key_budgets WHERE key_id = api_keys.id) AS fileIds
+       (SELECT json_group_array(file_id) FROM api_key_budgets WHERE key_id = api_keys.id) AS fileIds,
+       (SELECT json_group_array(permission) FROM api_key_permissions WHERE key_id = api_keys.id) AS permissions
      FROM api_keys WHERE user_id = ? ORDER BY created_at DESC, id`,
     [res.locals.user_id],
   );
   res.send({
     status: 'ok',
-    data: keys.map(({ fileIds, ...key }) => ({
+    data: keys.map(({ fileIds, permissions, ...key }) => ({
       ...key,
       fileIds: JSON.parse(fileIds),
+      permissions: JSON.parse(permissions),
     })),
   });
 });

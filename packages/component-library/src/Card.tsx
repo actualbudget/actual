@@ -19,6 +19,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
           borderRadius: 6,
           backgroundColor: theme.cardBackground,
           borderColor: theme.cardBorder,
+          // oxlint-disable-next-line actual/no-color-literals
           boxShadow: '0 1px 2px #9594A8',
           ...props.style,
         }}

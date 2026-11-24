@@ -86,7 +86,12 @@ Use custom hooks from `src/hooks` instead of importing directly from react-route
 
 - **`uuid` without destructuring**: Use `import { v4 as uuidv4 } from 'uuid'`
 - **Direct color imports**: Use theme instead of importing colors directly
+- **Hard-coded colors**: Use a `theme` token instead of a hex, `rgb()` or named color in styles
+- **Hand-written `var(--color-*)` strings**: Use the matching `theme` token
+- **Theme tokens outside their role**: Don't put a text token on a background or a background token on text
 - **`@actual-app/web/*` imports in `loot-core`**: Don't import from web package in core
+
+The three color rules are enforced by lint on `.ts` and `.tsx` files in `packages/component-library/src` and `packages/desktop-client/src`. Tests, stories, icons and the theme source files are skipped. Code that broke them before the rules existed carries an `oxlint-disable-next-line` comment naming the rule. Remove the comment when you fix one.
 
 ## File Structure Patterns
 

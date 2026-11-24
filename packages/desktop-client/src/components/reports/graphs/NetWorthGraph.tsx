@@ -60,6 +60,7 @@ function TrendTooltip({ active, payload, style }: TrendTooltipProps) {
             zIndex: 1000,
             pointerEvents: 'none',
             borderRadius: 2,
+            // oxlint-disable-next-line actual/no-color-literals
             boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
             backgroundColor: theme.menuBackground,
             color: theme.menuItemText,
@@ -139,6 +140,7 @@ function StackedTooltip({
             zIndex: 1000,
             pointerEvents: 'auto',
             borderRadius: 2,
+            // oxlint-disable-next-line actual/no-color-literals
             boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
             backgroundColor: theme.menuBackground,
             color: theme.menuItemText,

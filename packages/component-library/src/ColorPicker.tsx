@@ -28,6 +28,7 @@ function ColorSwatch(props: ColorSwatchProps) {
         width: '32px',
         height: '32px',
         borderRadius: '4px',
+        // oxlint-disable-next-line actual/no-color-literals
         boxShadow: 'inset 0 0 0 1px rgba(0, 0, 0, 0.1)',
       })}
     />
@@ -113,7 +114,9 @@ function ColorSwatchPicker({
               content: '""',
               position: 'absolute',
               inset: 0,
+              // oxlint-disable-next-line actual/no-color-literals
               border: '2px solid black',
+              // oxlint-disable-next-line actual/no-color-literals
               outline: '2px solid white',
               outlineOffset: '-4px',
               borderRadius: 'inherit',

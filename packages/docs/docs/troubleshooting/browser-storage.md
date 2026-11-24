@@ -4,7 +4,9 @@ The web app keeps each budget file in the browser’s private file system ([OPFS
 
 ## Existing Budgets
 
-A budget is moved to the new storage the first time it is opened after updating. The loading screen shows the progress. The old copy is deleted only after the moved budget has been checked. Budgets synced with a server are unaffected either way: the server keeps its own copy.
+A budget is moved to the new storage the first time it is opened after updating. The loading screen shows the progress. The old copy is deleted only after the contents of the moved budget have been checked against it. Budgets synced with a server are unaffected either way: the server keeps its own copy.
+
+If a budget cannot be moved, nothing is deleted and Actual tells you so. Opening the budget again tries once more. While no other budget in the browser uses the new storage yet, the message also offers **Go back to previous storage**. This goes back to the previous engine, as described under [Going Back to the Previous Engine](#going-back-to-the-previous-engine), and tries to open the budget the way it was opened before. If the budget does not open by itself, pick it from the list of files. If it cannot be opened on the previous storage either, the copy in this browser may be damaged: download the budget again from your sync server, or [restore it from a backup](../backup-restore/restore.md).
 
 ## Browser Requirements
 

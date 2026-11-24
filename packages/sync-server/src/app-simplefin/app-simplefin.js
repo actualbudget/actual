@@ -3,10 +3,14 @@ import express from 'express';
 import { fetch } from 'undici';
 
 import { handleError } from '#app-gocardless/util/handle-error';
+import { amountToInteger } from '#app-gocardless/utils';
 import { config } from '#load-config';
 import { SecretName, secretsService } from '#services/secrets-service';
 import * as UserService from '#services/user-service';
-import { requestLoggerMiddleware } from '#util/middlewares';
+import {
+  requestLoggerMiddleware,
+  validateSessionMiddleware,
+} from '#util/middlewares';
 import { isValidFileId } from '#util/paths';
 import { assertUrlAllowed, createSsrfDispatcher } from '#util/ssrf';
 import { validateBankSyncSession } from '#util/validate-budget-session';
@@ -27,12 +31,17 @@ app.use(express.json());
 // server-wide (global) bank-sync credentials is admin-only, but every
 // signed-in user on that server may use them. This is a supported feature
 // and will remain; budgets with their own credentials use those instead.
-// API keys may only use credentials configured for an accessible budget.
+// API keys need explicit permission to use shared credentials.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
-app.use(validateBankSyncSession);
+const bankSync = express.Router();
+bankSync.use(validateBankSyncSession({ allowGlobalCredentials: true }));
+const budgetAccounts = express.Router();
+budgetAccounts.use(validateBankSyncSession());
+app.use(bankSync, budgetAccounts);
+app.use(validateSessionMiddleware);
 
-app.use((req, res, next) => {
+function selectCredentials(req, res, next) {
   const fileId = req.get('X-Actual-File-Id');
   if (fileId != null) {
     if (!isValidFileId(fileId)) {
@@ -49,16 +58,17 @@ app.use((req, res, next) => {
   // Falling back in that case could expose global accounts unexpectedly.
   res.locals.credentialFileId =
     fileId != null &&
-    (res.locals.apiKeyFileIds ||
+    (!res.locals.allowGlobalBankSync ||
       secretsService.exists(SecretName.simplefin_token, fileId) ||
       secretsService.exists(SecretName.simplefin_accessKey, fileId))
       ? fileId
       : null;
   next();
-});
+}
 
-app.post(
+bankSync.post(
   '/status',
+  selectCredentials,
   handleError(async (req, res) => {
     const token = secretsService.get(
       SecretName.simplefin_token,
@@ -80,8 +90,9 @@ app.post(
   }),
 );
 
-app.post(
+budgetAccounts.post(
   '/accounts',
+  selectCredentials,
   handleError(async (req, res) => {
     let accessKey = secretsService.get(
       SecretName.simplefin_accessKey,
@@ -148,8 +159,9 @@ app.post(
   }),
 );
 
-app.post(
+bankSync.post(
   '/transactions',
+  selectCredentials,
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
 
@@ -260,7 +272,7 @@ function getAccountResponse(results, accountId, startDate) {
     });
   }
 
-  const startingBalance = parseInt(account.balance.replace('.', ''));
+  const startingBalance = amountToInteger(account.balance);
   const date = getDate(new Date(account['balance-date'] * 1000));
 
   const balances = [

@@ -426,5 +426,31 @@
       "#b03b4a"
     ],
     "mode": "light"
+  },
+  {
+    "name": "Tokyo Night",
+    "repo": "williamcorsel/actual-tokyo-night",
+    "colors": [
+      "#1a1b26",
+      "#16161e",
+      "#292e42",
+      "#7aa2f7",
+      "#bb9af7",
+      "#c0caf5"
+    ],
+    "mode": "dark"
+  },
+  {
+    "name": "Amethyst",
+    "repo": "geogabrielp/actual-amethyst",
+    "colors": [
+      "#18171d",
+      "#1d1c23",
+      "#742ed5",
+      "#a98bf9",
+      "#00e676",
+      "#f59e0b"
+    ],
+    "mode": "dark"
   }
 ]

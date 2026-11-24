@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  buildCustomThemeCss,
   embedThemeFonts,
   extractLegacyOverride,
   MAX_FONT_FILE_SIZE,
@@ -1924,5 +1925,123 @@ describe('usesRedesignSidebarPalette', () => {
         ':root { --color-sidebarBackground: navy; }\n:root { --color-sidebarRedesignBackground: #eef; }',
       ),
     ).toBe(true);
+  });
+});
+
+describe('buildCustomThemeCss', () => {
+  const theme = (cssContent: string, baseTheme?: InstalledTheme['baseTheme']) =>
+    ({
+      id: 'theme-test',
+      name: 'Test',
+      repo: 'owner/repo',
+      cssContent,
+      baseTheme,
+    }) satisfies InstalledTheme;
+  const none = {
+    darkThemePreference: 'dark',
+    lightTheme: null,
+    darkTheme: null,
+    cssOverride: undefined,
+  };
+
+  it('returns nothing when no theme or override is set', () => {
+    expect(buildCustomThemeCss({ ...none, activeTheme: 'light' })).toBe(null);
+    expect(buildCustomThemeCss({ ...none, activeTheme: 'auto' })).toBe(null);
+  });
+
+  it('passes a theme through unchanged when it sets no accent input', () => {
+    const css = ':root { --color-pageText: #111111; }';
+    expect(
+      buildCustomThemeCss({
+        ...none,
+        activeTheme: 'light',
+        lightTheme: theme(css),
+      }),
+    ).toBe(css);
+  });
+
+  it('puts the derived accent colors before the theme so the theme wins', () => {
+    const css =
+      ':root { --color-accent: #0a7d5a; --color-accentHover: #123456; }';
+    const result = buildCustomThemeCss({
+      ...none,
+      activeTheme: 'light',
+      lightTheme: theme(css),
+    });
+
+    expect(result).toContain('--color-accentText: ');
+    expect(result).not.toMatch(/--color-accentHover: (?!#123456)/);
+    expect(result?.indexOf('--color-accentText')).toBeLessThan(
+      result?.indexOf('--color-accent: #0a7d5a') ?? -1,
+    );
+  });
+
+  it('derives from an accent set only in the css override', () => {
+    const result = buildCustomThemeCss({
+      ...none,
+      activeTheme: 'midnight',
+      cssOverride: ':root { --color-accent: #0a7d5a; }',
+    });
+
+    expect(result).toContain('--color-accentContrast: #ffffff;');
+    expect(result).toContain(':root { --color-accent: #0a7d5a; }');
+  });
+
+  it("uses the theme's base theme for the surfaces it does not set", () => {
+    const css = ':root { --color-accent: #0a7d5a; }';
+    const onLight = buildCustomThemeCss({
+      ...none,
+      activeTheme: 'dark',
+      lightTheme: theme(css, 'light'),
+    });
+    const onDark = buildCustomThemeCss({
+      ...none,
+      activeTheme: 'dark',
+      lightTheme: theme(css),
+    });
+
+    expect(onLight).not.toBe(onDark);
+    expect(onDark).toBe(
+      buildCustomThemeCss({
+        ...none,
+        activeTheme: 'light',
+        lightTheme: theme(css, 'dark'),
+      }),
+    );
+  });
+
+  it('scopes each theme and its derived colors to its color scheme in auto mode', () => {
+    const result = buildCustomThemeCss({
+      activeTheme: 'auto',
+      darkThemePreference: 'midnight',
+      lightTheme: theme(':root { --color-accent: #0a7d5a; }'),
+      darkTheme: theme(':root { --color-accent: #7ad3a0; }'),
+      cssOverride: undefined,
+    });
+    const blocks = result?.split('\n').filter(Boolean) ?? [];
+
+    expect(blocks.filter(line => line.startsWith('@media'))).toHaveLength(4);
+    expect(result).toMatch(
+      /@media \(prefers-color-scheme: light\) \{ :root \{\n {2}--color-accentContrast: #ffffff;/,
+    );
+    expect(result).toMatch(
+      /@media \(prefers-color-scheme: dark\) \{ :root \{\n {2}--color-accentContrast: #000000;/,
+    );
+  });
+
+  it('reports invalid css and leaves it out', () => {
+    const onError = vi.fn();
+    const result = buildCustomThemeCss({
+      ...none,
+      activeTheme: 'light',
+      lightTheme: theme('body { color: red; }'),
+      onError,
+    });
+
+    expect(result).toBe(null);
+    expect(onError).toHaveBeenCalledWith(
+      'Invalid custom theme CSS',
+      expect.any(Error),
+    );
   });
 });

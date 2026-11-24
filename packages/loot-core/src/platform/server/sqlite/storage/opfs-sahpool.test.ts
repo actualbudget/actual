@@ -21,10 +21,12 @@ import { getSqliteFileRow, putSqliteFileRow } from './files-store';
 import { applyFilePragmas, createOpfsStore, POOL_ROOT } from './opfs-sahpool';
 import { legacyDatabaseName } from './paths';
 import {
+  holdLegacyConnection,
   initWasmEngine,
   listIndexedDbNames,
   resetIndexedDb,
   seedLegacyDatabase,
+  writeToLegacyDatabase,
 } from './test-helpers';
 
 const noSleep = () => Promise.resolve();
@@ -38,6 +40,14 @@ function fakePool(
 ) {
   let paused = false;
   let unpauses = 0;
+  // As the real pool does after every import: the two file-format bytes
+  // of the header are set to 1, which takes a file out of WAL mode
+  function storeImported(name: string, bytes: Uint8Array) {
+    if (bytes.length >= 20) {
+      bytes.set([1, 1], 18);
+    }
+    files.set(name, bytes);
+  }
   const util = {
     vfsName: 'actual-test',
     files,
@@ -75,17 +85,18 @@ function fakePool(
             bytes.set(chunk, offset);
             offset += chunk.length;
           }
-          files.set(name, bytes);
+          storeImported(name, bytes);
           return bytes.length;
         }
-        files.set(name, data);
+        storeImported(name, data.slice());
         return data.length;
       },
     ),
+    // A copy of the file, as the real pool reads one out
     exportFile: vi.fn((name: string) => {
       const bytes = files.get(name);
       if (!bytes) throw new Error('no such file ' + name);
-      return bytes;
+      return bytes.slice();
     }),
     unlink: vi.fn((name: string) => files.delete(name)),
     wipeFiles: vi.fn(async () => files.clear()),
@@ -141,15 +152,6 @@ function fakeSqlite3(
     execLog,
   };
   return api as unknown as Sqlite3Static & { execLog: string[] };
-}
-
-// A previous-release tab's absurd-sql connection, which never closes
-function holdStubbornConnection(name: string): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(name, 2);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
 }
 
 function neverLock() {
@@ -428,6 +430,42 @@ describe('OPFS pool store', () => {
     );
   });
 
+  it.each([
+    [
+      'an absurd-sql copy is moved in',
+      (bytes: Uint8Array) =>
+        seedLegacyDatabase(legacyDatabaseName(PATH), bytes),
+    ],
+    [
+      'a fallback row is taken over',
+      (bytes: Uint8Array) =>
+        putSqliteFileRow({
+          filepath: PATH,
+          contents: bytes,
+          storage: 'memory-idb',
+          rev: 1,
+        }),
+    ],
+  ])('drops a leftover journal before %s', async (_what, arrange) => {
+    await arrange(await budgetBytes('kept'));
+    // Left by a crash: the first connection would roll it back into the
+    // file that was just imported
+    const pool = fakePool(
+      new Map([['/db.sqlite-journal', new Uint8Array([2])]]),
+    );
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    await store.open(PATH);
+    expect(pool.files.has('/db.sqlite-journal')).toBe(false);
+    expect(pool.unlink.mock.invocationCallOrder[0]).toBeLessThan(
+      pool.importDb.mock.invocationCallOrder[0],
+    );
+  });
+
   it('keeps the pool live while operations overlap', async () => {
     await seedLegacyDatabase(
       legacyDatabaseName(PATH),
@@ -476,6 +514,143 @@ describe('OPFS pool store', () => {
     } finally {
       exportSpy.mockRestore();
     }
+  });
+
+  it('moves a closed file in once when a read and an open of it overlap', async () => {
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, await budgetBytes('shared'));
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+    const exportSpy = vi
+      .spyOn(wasm, 'exportBytes')
+      .mockReturnValue(new Uint8Array([7]));
+    try {
+      // The read comes first, so there is no open in flight for it to
+      // wait on: the two share the move instead of each making one
+      const reading = store.readFile(PATH);
+      const opening = store.open(PATH);
+      expect(await reading).toEqual(new Uint8Array([7]));
+      // Read from the handle the open ended with
+      expect(exportSpy).toHaveBeenCalledWith(await opening);
+      expect(pool.importDb).toHaveBeenCalledTimes(1);
+    } finally {
+      exportSpy.mockRestore();
+    }
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+    expect(await listIndexedDbNames()).not.toContain(name);
+  });
+
+  it('reads a closed file from the pool when the open sharing its move fails afterwards', async () => {
+    const name = legacyDatabaseName(PATH);
+    const bytes = await budgetBytes('shared');
+    await seedLegacyDatabase(name, bytes);
+    const pool = fakePool();
+    const store = createOpfsStore({
+      // An open fails on its first statement, which comes after the move
+      sqlite3: () => fakeSqlite3(pool, { failExec: true }),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    // The read comes first, so the two share the move
+    const [read, opened] = await Promise.allSettled([
+      store.readFile(PATH),
+      store.open(PATH),
+    ]);
+    expect(opened.status).toBe('rejected');
+    // The move went through, so the file is there to be read
+    expect(read.status).toBe('fulfilled');
+    expect(
+      read.status === 'fulfilled' &&
+        Buffer.from(read.value).equals(Buffer.from(bytes)),
+    ).toBe(true);
+    expect(pool.importDb).toHaveBeenCalledTimes(1);
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+    expect(await listIndexedDbNames()).not.toContain(name);
+  });
+
+  it('moves a closed file in once when two reads of it overlap', async () => {
+    const name = legacyDatabaseName(PATH);
+    const bytes = await budgetBytes('shared');
+    await seedLegacyDatabase(name, bytes);
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    const [first, second] = await Promise.all([
+      store.readFile(PATH),
+      store.readFile(PATH),
+    ]);
+    expect(pool.importDb).toHaveBeenCalledTimes(1);
+    // What was seeded, but for the two bytes the pool writes on import
+    const expected = bytes.slice();
+    expected.set([1, 1], 18);
+    expect(Buffer.from(first).equals(Buffer.from(expected))).toBe(true);
+    expect(Buffer.from(second).equals(Buffer.from(expected))).toBe(true);
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+    expect(await listIndexedDbNames()).not.toContain(name);
+  });
+
+  it('fails both reads when the move they share goes wrong, and moves the file on a later read', async () => {
+    const name = legacyDatabaseName(PATH);
+    const bytes = await budgetBytes('shared');
+    await seedLegacyDatabase(name, bytes);
+    const pool = fakePool();
+    const realImport = pool.importDb.getMockImplementation();
+    if (!realImport) {
+      throw new Error('the fake pool has no import');
+    }
+    // The import waits until both reads are under way, and what it then
+    // leaves in the pool is one byte off
+    let startImport = () => undefined as void;
+    pool.importDb.mockImplementationOnce(async (fileName, data) => {
+      await new Promise<void>(resolve => {
+        startImport = resolve;
+      });
+      return realImport(fileName, data);
+    });
+    pool.exportFile.mockImplementationOnce((fileName: string) => {
+      const altered = (pool.files.get(fileName) as Uint8Array).slice();
+      altered[altered.length - 1] ^= 0xff;
+      return altered;
+    });
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    const reads = Promise.allSettled([
+      store.readFile(PATH),
+      store.readFile(PATH),
+    ]);
+    await vi.waitFor(() => expect(pool.importDb).toHaveBeenCalledTimes(1));
+    startImport();
+    for (const read of await reads) {
+      expect(read.status).toBe('rejected');
+      expect(read.status === 'rejected' && read.reason).toBeInstanceOf(
+        StorageMigrationError,
+      );
+    }
+    // One move was made, it was undone, and the copy is still the budget
+    expect(pool.importDb).toHaveBeenCalledTimes(1);
+    expect(pool.files.size).toBe(0);
+    expect(await listIndexedDbNames()).toContain(name);
+    expect(await getSqliteFileRow(PATH)).toBeUndefined();
+
+    // Nothing of the failed move is in the way of the next one
+    const read = await store.readFile(PATH);
+    expect(pool.importDb).toHaveBeenCalledTimes(2);
+    expect(Buffer.from(read).equals(Buffer.from(bytes))).toBe(true);
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+    expect(await listIndexedDbNames()).not.toContain(name);
   });
 
   it('waits for an open in flight before removing its file', async () => {
@@ -603,7 +778,7 @@ describe('OPFS pool store', () => {
     }
     let other: IDBDatabase | undefined;
     pool.importDb.mockImplementationOnce(async (fileName, data) => {
-      other = await holdStubbornConnection(name);
+      other = await holdLegacyConnection(name, { stubborn: true });
       return realImport(fileName, data);
     });
     const store = createOpfsStore({
@@ -617,6 +792,31 @@ describe('OPFS pool store', () => {
     } finally {
       other?.close();
     }
+    // Nothing of the move is left, and the copy with its edits is intact
+    expect(pool.files.size).toBe(0);
+    expect(await getSqliteFileRow(PATH)).toBeUndefined();
+    expect(await listIndexedDbNames()).toContain(name);
+  });
+
+  it('reports the budget in use when a tab writes to the legacy copy during the move', async () => {
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, await budgetBytes('kept'));
+    const pool = fakePool();
+    const realImport = pool.importDb.getMockImplementation();
+    if (!realImport) {
+      throw new Error('the fake pool has no import');
+    }
+    pool.importDb.mockImplementationOnce(async (fileName, data) => {
+      await writeToLegacyDatabase(name);
+      return realImport(fileName, data);
+    });
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    await expect(store.open(PATH)).rejects.toBeInstanceOf(BudgetInUseError);
     // Nothing of the move is left, and the copy with its edits is intact
     expect(pool.files.size).toBe(0);
     expect(await getSqliteFileRow(PATH)).toBeUndefined();
@@ -799,6 +999,89 @@ describe('OPFS pool store', () => {
     });
   });
 
+  it.each([
+    [
+      'in a place the structural check would not look',
+      (moved: Uint8Array) => {
+        moved[moved.length - 1] ^= 0xff;
+      },
+    ],
+    [
+      'in the file-format bytes the pool writes itself',
+      (moved: Uint8Array) => {
+        moved[18] = 3;
+      },
+    ],
+  ])(
+    'keeps the absurd-sql copy when the moved file is off %s',
+    async (_where, alter) => {
+      const name = legacyDatabaseName(PATH);
+      await seedLegacyDatabase(name, await budgetBytes('legacy'));
+      const pool = fakePool();
+      // What landed in the pool is one byte off
+      pool.exportFile.mockImplementationOnce((fileName: string) => {
+        const altered = (pool.files.get(fileName) as Uint8Array).slice();
+        alter(altered);
+        return altered;
+      });
+      const phases: string[] = [];
+      const store = createOpfsStore({
+        sqlite3: () => fakeSqlite3(pool),
+        acquireLock: trackingLock().acquire,
+        sleep: noSleep,
+        onMigrationProgress: phase => phases.push(phase),
+      });
+
+      await expect(store.open(PATH)).rejects.toBeInstanceOf(
+        StorageMigrationError,
+      );
+      // The move is undone and the copy is still the budget
+      expect(phases).toContain('failed');
+      expect(pool.files.size).toBe(0);
+      expect(await listIndexedDbNames()).toContain(name);
+      expect(await getSqliteFileRow(PATH)).toBeUndefined();
+
+      // The next open moves it
+      await store.open(PATH);
+      expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+      expect(await listIndexedDbNames()).not.toContain(name);
+    },
+  );
+
+  it('leaves a file another call committed when its own move fails', async () => {
+    await seedLegacyDatabase(
+      legacyDatabaseName(PATH),
+      await budgetBytes('kept'),
+    );
+    const pool = fakePool();
+    const realImport = pool.importDb.getMockImplementation();
+    if (!realImport) {
+      throw new Error('the fake pool has no import');
+    }
+    // By the time this move finds its file off, the row names the pool
+    pool.importDb.mockImplementationOnce(async (fileName, data) => {
+      const imported = await realImport(fileName, data);
+      await putSqliteFileRow({ filepath: PATH, contents: '', storage: 'opfs' });
+      return imported;
+    });
+    pool.exportFile.mockImplementationOnce((fileName: string) => {
+      const altered = (pool.files.get(fileName) as Uint8Array).slice();
+      altered[altered.length - 1] ^= 0xff;
+      return altered;
+    });
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    await expect(store.open(PATH)).rejects.toBeInstanceOf(
+      StorageMigrationError,
+    );
+    // The pooled file is all there is of a budget whose row says so
+    expect(pool.files.has('/db.sqlite')).toBe(true);
+  });
+
   it('imports an absurd-sql database into the pool and verifies it', async () => {
     const bytes = await budgetBytes('legacy');
     const name = legacyDatabaseName(PATH);
@@ -824,6 +1107,30 @@ describe('OPFS pool store', () => {
     );
     expect(await listIndexedDbNames()).not.toContain(name);
     expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+  });
+
+  it('moves a copy whose header says WAL, which the pool rewrites on import', async () => {
+    const bytes = await budgetBytes('wal');
+    bytes.set([2, 2], 18);
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, bytes);
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    await store.open(PATH);
+    // The pooled file is the copy but for those two bytes
+    const expected = bytes.slice();
+    expected.set([1, 1], 18);
+    const imported = pool.files.get('/db.sqlite');
+    expect(
+      imported && Buffer.from(imported).equals(Buffer.from(expected)),
+    ).toBe(true);
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+    expect(await listIndexedDbNames()).not.toContain(name);
   });
 
   it('prefers the fallback row over a stale absurd-sql copy', async () => {

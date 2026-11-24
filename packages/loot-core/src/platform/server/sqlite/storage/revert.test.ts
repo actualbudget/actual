@@ -80,6 +80,23 @@ describe('reverting to the legacy storage layout', () => {
     closeDatabase(db);
   });
 
+  it('moves back only the budget it is given', async () => {
+    await createBudget(PATH, 'one');
+    await createBudget(OTHER, 'two');
+
+    await revertToLegacy(PATH);
+
+    expect(await getSqliteFileRow(PATH)).toEqual({
+      filepath: PATH,
+      contents: '',
+    });
+    expect(await listIndexedDbNames()).toContain(legacyDatabaseName(PATH));
+    // The other budget is where it was, in the new storage
+    expect((await getSqliteFileRow(OTHER))?.storage).toBe('memory-idb');
+    expect(await listIndexedDbNames()).not.toContain(legacyDatabaseName(OTHER));
+    expect(await hasMigratedSqliteFiles()).toBe(true);
+  });
+
   it('refuses while a database is open', async () => {
     const db = await openDatabase(PATH);
     execQuery(db, SCHEMA);

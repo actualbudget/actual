@@ -62,7 +62,7 @@ Note that if you restart your computer, you'll have to run this command again to
 
 On Linux systems you can configure a systemd unit file to have Actual run on system startup. This needs to be done as the root user (open a root terminal session or preface each command with sudo to run the commands below)
 
-1. Create the file /etc/systemd/service/actual-server.service with the contents below using your text editor of choice (ex. `vi /etc/systemd/service/actual-server.service`). Note the WorkingDirectory= parameter needs to be set to your Actual install folder
+1. Create the file /etc/systemd/system/actual-server.service with the contents below using your text editor of choice (ex. `vi /etc/systemd/system/actual-server.service`). Note the WorkingDirectory= parameter needs to be set to your Actual install folder
 
 ```
 [Unit]
@@ -79,7 +79,7 @@ WantedBy=multi-user.target
 ```
 
 2. Have systemd rescan for the unit file you created -> `systemctl daemon-reload`
-3. Install and start the systemd unit file -> `systemctl enable --now /etc/systemd/system/multi-user.target.wants/actual-server.service`
+3. Install and start the systemd unit file -> `systemctl enable --now actual-server`
 4. Confirm that the Actual server is running -> `systemctl status actual-server`
 
 ```

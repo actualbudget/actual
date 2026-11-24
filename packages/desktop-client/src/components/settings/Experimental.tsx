@@ -186,7 +186,6 @@ export function ExperimentalFeatures() {
   const [, setGoalTemplatesUIPref] = useSyncedPref(
     'flags.goalTemplatesUIEnabled',
   );
-  const isUsingServer = useSyncServerStatus() !== 'no-server';
 
   const showServerPrefs =
     localStorage.getItem('devEnableServerPrefs') === 'true';
@@ -277,14 +276,6 @@ export function ExperimentalFeatures() {
       >
         <Trans>Monte Carlo Analysis Report</Trans>
       </FeatureToggle>
-      {isUsingServer && (
-        <FeatureToggle
-          flag="enableBanking"
-          feedbackLink="https://github.com/actualbudget/actual/issues/7799"
-        >
-          <Trans>Enable Banking sync (EU banks)</Trans>
-        </FeatureToggle>
-      )}
       {showServerPrefs && (
         <ServerFeatureToggle
           prefName="flags.plugins"

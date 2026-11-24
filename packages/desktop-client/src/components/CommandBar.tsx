@@ -275,6 +275,7 @@ export function CommandBar() {
         border: `1px solid ${theme.modalBorder}`,
         color: theme.pageText,
         borderRadius: '8px',
+        // oxlint-disable-next-line actual/no-color-literals
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden',
         zIndex: 3001,
