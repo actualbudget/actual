@@ -46,7 +46,7 @@ jobs:
 
             - ✅ All CI checks pass
             - ✅ The PR is moved from draft to open (if applicable)
-            - ✅ **The PR proves that the change works**: you verified it in a real browser and the "Proof" section has a before and an after screenshot, or a video. Changes must be manually tested, and we will not manually test _your_ changes for you
+            - ✅ **The PR proves that the change works**: you verified it in a real browser and the "Proof" section has a before and an after screenshot, or a video. Changes must be manually tested, and we may not manually test _your_ changes for you
             - ✅ The PR description follows the provided template, with the "Human Summary" written in your own words and every box in the "Checklist" section ticked
             - ✅ All CodeRabbit code review comments are resolved (if you disagree with anything - reply to the bot with your reasoning so we can read through it). The bot will eventually approve the PR.
 
