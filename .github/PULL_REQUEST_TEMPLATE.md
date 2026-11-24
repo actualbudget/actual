@@ -4,6 +4,8 @@
 
 <!-- Written by you, in your own words - not by an AI tool. A sentence or two is enough: why do we need this change? What problem is it solving for you? -->
 
+<!-- If you didn't use AI tools to write this PR description, you may remove the line below. -->
+
 > 🤖 The sections below this line are mostly written by AI tools.
 
 ## Description
