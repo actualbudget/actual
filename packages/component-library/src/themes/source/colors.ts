@@ -388,7 +388,12 @@ export const colors = {
     midnight: 'gray500',
   },
   calendarSelectedBackground: { all: { ref: 'accent' } },
-  calendarSelectedText: { all: { contrastOn: 'calendarSelectedBackground' } },
+  calendarSelectedText: {
+    all: {
+      contrastOn: 'calendarSelectedBackground',
+      over: 'calendarBackground',
+    },
+  },
   datePickerRangeBackground: { all: { ref: 'accentSubtle' } },
 
   buttonBareText: { all: { ref: 'pageText' } },

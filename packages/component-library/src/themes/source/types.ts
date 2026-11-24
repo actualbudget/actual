@@ -11,7 +11,7 @@ export type TokenValue =
   | { raw: string }
   | { derive: DerivedAccentToken }
   | { accentTextOn: string; contrast?: number }
-  | { contrastOn: string };
+  | { contrastOn: string; over?: string };
 
 type TokenValues = { all: TokenValue } | Record<ThemeName, TokenValue>;
 

@@ -142,11 +142,17 @@ function resolveAccentTextOn(
   );
 }
 
-function resolveContrastOn(fillName: string, context: Context): ResolvedColor {
-  return resolveCss(
-    pickContrast(toHex(resolveName(fillName, context))),
-    context,
-  );
+function resolveContrastOn(
+  fillName: string,
+  backdropName: string | undefined,
+  context: Context,
+): ResolvedColor {
+  const fill = resolveName(fillName, context);
+  const visibleFill =
+    backdropName == null
+      ? fill
+      : composite(fill, resolveName(backdropName, context));
+  return resolveCss(pickContrast(toHex(visibleFill)), context);
 }
 
 export function isComputedValue(value: TokenValue) {
@@ -171,7 +177,7 @@ function resolveValue(value: TokenValue, context: Context): ResolvedColor {
     );
   }
   if ('contrastOn' in value) {
-    return resolveContrastOn(value.contrastOn, context);
+    return resolveContrastOn(value.contrastOn, value.over, context);
   }
   if ('ref' in value) {
     return resolveName(value.ref, context);

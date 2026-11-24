@@ -100,6 +100,7 @@ describe('resolveToken', () => {
     ink: { light: 'black', dark: 'white', midnight: 'white' },
     alias: { all: { ref: 'ink' } },
     label: { all: { contrastOn: 'ink' } },
+    washLabel: { all: { contrastOn: 'wash', over: 'surface' } },
     wash: {
       all: { raw: 'color-mix(in srgb, var(--color-ink) 25%, transparent)' },
     },
@@ -142,6 +143,12 @@ describe('resolveToken', () => {
       b: 0,
       alpha: 1,
     });
+  });
+
+  it('lays a see-through fill over its backdrop before picking text', () => {
+    expect(resolveToken('washLabel', 'light', testColors, testPalette)).toEqual(
+      { r: 0, g: 0, b: 0, alpha: 1 },
+    );
   });
 
   it('resolves a mix with transparent to the color at that alpha', () => {

@@ -44,7 +44,7 @@ function contrastOnTokens(theme: ThemeName) {
   return Object.entries(definitions).flatMap(([name, definition]) => {
     const value = 'all' in definition ? definition.all : definition[theme];
     return typeof value === 'object' && 'contrastOn' in value
-      ? [{ name, fill: value.contrastOn }]
+      ? [{ name, fill: value.contrastOn, over: value.over }]
       : [];
   });
 }
@@ -147,10 +147,17 @@ function derive(theme: ThemeName, css: string) {
     ...definitions,
     accent: { all: { raw: accentSet.accent } },
   };
-  const readFill = (token: string) =>
-    declarations.has(`color-${token}`)
-      ? readSurface(token)
-      : resolveToken(token, theme, themed, palette);
+  const readFill = (token: string, over?: string) => {
+    const declared = declarations.has(`color-${token}`)
+      ? resolveProperty(`color-${token}`, theme, declarations)
+      : null;
+    const fill = declared ?? resolveToken(token, theme, themed, palette);
+    const backdrop =
+      over == null
+        ? resolveToken(token, theme, colors, palette)
+        : readSurface(over);
+    return composite(fill, backdrop);
+  };
   const derived = [
     ...derivedAccentTokens.map(name => ({ name, value: accentSet[name] })),
     ...textOnTokens.map(token => ({
@@ -163,7 +170,7 @@ function derive(theme: ThemeName, css: string) {
     })),
     ...contrastTokens.map(token => ({
       name: token.name,
-      value: pickContrast(toHex(readFill(token.fill))),
+      value: pickContrast(toHex(readFill(token.fill, token.over))),
     })),
   ]
     .filter(({ name }) => !declarations.has(`color-${name}`))

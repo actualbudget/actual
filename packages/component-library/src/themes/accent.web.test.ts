@@ -105,6 +105,24 @@ describe('deriveAccentCss', () => {
     expect(own.calendarSelectedText).toBeUndefined();
   });
 
+  it('lays a see-through selected day fill over the calendar background', () => {
+    const pale = declarations(
+      deriveAccentCss(
+        'light',
+        ':root { --color-calendarBackground: #fffbeb; --color-calendarSelectedBackground: rgba(100, 74, 201, 0.2); }',
+      ),
+    );
+    const deep = declarations(
+      deriveAccentCss(
+        'light',
+        ':root { --color-calendarBackground: #000000; --color-calendarSelectedBackground: rgba(255, 255, 255, 0.2); }',
+      ),
+    );
+
+    expect(pale.calendarSelectedText).toBe('#000000');
+    expect(deep.calendarSelectedText).toBe('#ffffff');
+  });
+
   it('matches the built-in values when given the built-in accent', () => {
     const builtIn = declarations(lightThemeCss);
     const derived = declarations(
