@@ -1,5 +1,12 @@
-import { converter, parse, wcagContrast } from 'culori';
-
+import { converter, formatHex, parse, wcagContrast } from './color';
+import {
+  accentSurfaceTokens,
+  deriveAccent,
+  nearestWithContrast,
+  pickContrast,
+  textContrast,
+} from './derive';
+import type { DerivedAccentToken } from './derive';
 import type { ThemeName, TokenDefinition, TokenValue } from './types';
 
 type Palette = Record<string, string>;
@@ -109,9 +116,68 @@ function resolveCss(input: string, context: Context): ResolvedColor {
   return { r: parsed.r, g: parsed.g, b: parsed.b, alpha: parsed.alpha ?? 1 };
 }
 
+function resolveDerived(
+  token: DerivedAccentToken,
+  context: Context,
+): ResolvedColor {
+  const input = (name: string) => toHex(resolveName(name, context));
+  const accentSet = deriveAccent(input('accent'), {
+    surface: input(accentSurfaceTokens.surface),
+    page: input(accentSurfaceTokens.page),
+    mobilePage: input(accentSurfaceTokens.mobilePage),
+  });
+  return resolveCss(accentSet[token], context);
+}
+
+function resolveAccentTextOn(
+  surfaceName: string,
+  contrast: number,
+  context: Context,
+): ResolvedColor {
+  const surface = resolveName(surfaceName, context);
+  const accent = resolveName('accent', context);
+  return resolveCss(
+    nearestWithContrast(toHex(accent), [toHex(surface)], contrast),
+    context,
+  );
+}
+
+function resolveContrastOn(
+  fillName: string,
+  backdropName: string | undefined,
+  context: Context,
+): ResolvedColor {
+  const fill = resolveName(fillName, context);
+  const visibleFill =
+    backdropName == null
+      ? fill
+      : composite(fill, resolveName(backdropName, context));
+  return resolveCss(pickContrast(toHex(visibleFill)), context);
+}
+
+export function isComputedValue(value: TokenValue) {
+  return (
+    typeof value === 'object' &&
+    ('derive' in value || 'accentTextOn' in value || 'contrastOn' in value)
+  );
+}
+
 function resolveValue(value: TokenValue, context: Context): ResolvedColor {
   if (typeof value === 'string') {
     return resolveCss(context.palette[value], context);
+  }
+  if ('derive' in value) {
+    return resolveDerived(value.derive, context);
+  }
+  if ('accentTextOn' in value) {
+    return resolveAccentTextOn(
+      value.accentTextOn,
+      value.contrast ?? textContrast,
+      context,
+    );
+  }
+  if ('contrastOn' in value) {
+    return resolveContrastOn(value.contrastOn, value.over, context);
   }
   if ('ref' in value) {
     return resolveName(value.ref, context);
@@ -132,6 +198,10 @@ function resolveName(name: string, context: Context): ResolvedColor {
   const value =
     'all' in definition ? definition.all : definition[context.theme];
   return resolveValue(value, { ...context, path: [...context.path, name] });
+}
+
+export function toHex(color: ResolvedColor) {
+  return formatHex({ mode: 'rgb', ...color });
 }
 
 export function resolveToken(

@@ -6,40 +6,23 @@ import { themeNames } from './types';
 import type { ThemeName, TokenDefinition } from './types';
 
 const knownFailures = new Set<string>([
-  'light: pageTextLink on pageBackground',
-  'light: pageTextLink on tableBackground',
   'light: pageTextSubdued on pageBackground',
   'light: pageTextSubdued on tableBackground',
   'light: tableTextLight on tableBackground',
-  'light: menuItemTextSelected on menuBackground',
-  'light: menuItemTextHeader on menuBackground',
-  'light: menuKeybindingText on menuBackground',
-  'light: mobileHeaderTextSubdued on mobileHeaderBackground',
   'light: mobileNavItem on mobileNavBackground',
-  'light: buttonPrimaryTextHover on buttonPrimaryBackgroundHover',
-  'light: buttonNormalSelectedText on buttonNormalSelectedBackground',
   'light: noticeText on noticeBackground',
   'light: noticeTextLight on tableBackground',
   'light: warningText on warningBackground',
   'light: warningText on tableBackground',
   'light: errorText on errorBackground',
-  'light: formLabelText on tableBackground',
   'light: formInputTextPlaceholder on formInputBackground',
-  'dark: pageTextLink on pageBackground',
-  'dark: pageTextLink on tableBackground',
   'dark: pageTextSubdued on tableBackground',
   'dark: tableHeaderText on tableHeaderBackground',
   'dark: menuItemTextHover on menuItemBackgroundHover',
-  'dark: menuItemTextSelected on menuBackground',
-  'dark: mobileNavItemSelected on mobileNavBackground',
   'dark: noticeText on noticeBackground',
   'dark: noticeTextLight on tableBackground',
-  'midnight: pageTextLink on pageBackground',
   'midnight: pageTextSubdued on pageBackground',
-  'midnight: menuItemTextSelected on menuBackground',
   'midnight: menuAutoCompleteTextHover on menuAutoCompleteBackgroundHover',
-  'midnight: buttonPrimaryText on buttonPrimaryBackground',
-  'midnight: buttonPrimaryTextHover on buttonPrimaryBackgroundHover',
   'midnight: buttonNormalTextHover on buttonNormalBackgroundHover',
   'midnight: noticeText on noticeBackground',
   'midnight: noticeTextDark on noticeBackground',
@@ -116,6 +99,8 @@ describe('resolveToken', () => {
     surface: { all: 'white' },
     ink: { light: 'black', dark: 'white', midnight: 'white' },
     alias: { all: { ref: 'ink' } },
+    label: { all: { contrastOn: 'ink' } },
+    washLabel: { all: { contrastOn: 'wash', over: 'surface' } },
     wash: {
       all: { raw: 'color-mix(in srgb, var(--color-ink) 25%, transparent)' },
     },
@@ -145,6 +130,24 @@ describe('resolveToken', () => {
   it('follows references', () => {
     expect(resolveToken('alias', 'dark', testColors, testPalette)).toEqual(
       resolveToken('ink', 'dark', testColors, testPalette),
+    );
+  });
+
+  it('picks black or white text for a fill', () => {
+    expect(resolveToken('label', 'light', testColors, testPalette)).toEqual(
+      resolveToken('surface', 'light', testColors, testPalette),
+    );
+    expect(resolveToken('label', 'dark', testColors, testPalette)).toEqual({
+      r: 0,
+      g: 0,
+      b: 0,
+      alpha: 1,
+    });
+  });
+
+  it('lays a see-through fill over its backdrop before picking text', () => {
+    expect(resolveToken('washLabel', 'light', testColors, testPalette)).toEqual(
+      { r: 0, g: 0, b: 0, alpha: 1 },
     );
   });
 

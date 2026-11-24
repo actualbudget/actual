@@ -1,6 +1,38 @@
 import type { TokenDefinition } from './types';
 
 export const colors = {
+  accent: {
+    light: 'purple500',
+    dark: 'purple400',
+    midnight: 'purple400',
+    description:
+      'The one color a theme sets to restyle primary buttons, links, focus rings and selection.',
+  },
+  accentContrast: {
+    all: { derive: 'accentContrast' },
+    description: 'Text and icons on an accent fill.',
+  },
+  accentHover: {
+    all: { derive: 'accentHover' },
+    description: 'Hovered and pressed accent fill.',
+  },
+  accentText: {
+    all: { derive: 'accentText' },
+    description: 'The accent as text or an icon on the page and on tables.',
+  },
+  accentBorder: {
+    all: { derive: 'accentBorder' },
+    description: 'Selected outlines and focus rings.',
+  },
+  accentSubtle: {
+    all: { derive: 'accentSubtle' },
+    description: 'Tinted surface for selected rows and pills.',
+  },
+  accentSubtleText: {
+    all: { derive: 'accentSubtleText' },
+    description: 'Accent text on the tinted surface.',
+  },
+
   pageBackground: { light: 'navy100', dark: 'gray900', midnight: 'gray600' },
   pageBackgroundTopLeft: {
     light: 'navy100',
@@ -31,20 +63,12 @@ export const colors = {
   pageTextLight: { light: 'navy500', dark: 'navy300', midnight: 'gray200' },
   pageTextSubdued: { light: 'navy300', dark: 'navy500', midnight: 'gray400' },
   pageTextDark: { light: 'navy800', dark: 'navy100', midnight: 'gray100' },
-  pageTextPositive: {
-    light: 'purple600',
-    dark: 'purple200',
-    midnight: 'purple200',
-  },
-  pageTextLink: { light: 'blue600', dark: 'purple400', midnight: 'purple300' },
-  pageTextLinkLight: {
-    light: 'blue300',
-    dark: 'purple200',
-    midnight: 'purple300',
-  },
+  pageTextPositive: { all: { ref: 'accentText' } },
+  pageTextLink: { all: { ref: 'accentText' } },
+  pageTextLinkLight: { all: { ref: 'accentText' } },
 
   cardBackground: { light: 'white', dark: 'gray800', midnight: 'gray800' },
-  cardBorder: { light: 'purple700', dark: 'purple400', midnight: 'purple300' },
+  cardBorder: { all: { ref: 'accentBorder' } },
   cardShadow: { light: 'navy700', dark: 'navy700', midnight: 'gray900' },
 
   tableBackground: { light: 'white', dark: 'navy800', midnight: 'gray800' },
@@ -69,7 +93,7 @@ export const colors = {
     midnight: { ref: 'tableText' },
   },
   tableTextSubdued: { light: 'navy500', dark: 'navy300', midnight: 'gray300' },
-  tableTextSelected: { light: 'navy700', dark: 'navy150', midnight: 'gray800' },
+  tableTextSelected: { all: { ref: 'tableText' } },
   tableTextInactive: { light: 'navy500', dark: 'navy500', midnight: 'gray400' },
   tableHeaderText: { light: 'navy600', dark: 'navy300', midnight: 'gray200' },
   tableHeaderBackground: {
@@ -78,31 +102,15 @@ export const colors = {
     midnight: 'gray900',
   },
   tableBorder: { light: 'navy100', dark: 'navy600', midnight: 'gray600' },
-  tableBorderSelected: {
-    light: 'purple500',
-    dark: 'purple400',
-    midnight: 'purple400',
-  },
-  tableBorderHover: {
-    light: 'purple400',
-    dark: 'purple300',
-    midnight: 'purple300',
-  },
+  tableBorderSelected: { all: { ref: 'accentBorder' } },
+  tableBorderHover: { all: { ref: 'accentBorder' } },
   tableBorderSeparator: {
     light: 'navy400',
     dark: 'navy400',
     midnight: 'gray400',
   },
-  tableRowBackgroundHighlight: {
-    light: 'blue150',
-    dark: 'purple800',
-    midnight: 'purple150',
-  },
-  tableRowBackgroundHighlightText: {
-    light: 'navy700',
-    dark: 'navy150',
-    midnight: 'gray800',
-  },
+  tableRowBackgroundHighlight: { all: { ref: 'accentSubtle' } },
+  tableRowBackgroundHighlightText: { all: { ref: 'tableText' } },
   tableRowHeaderBackground: {
     light: 'navy50',
     dark: 'navy700',
@@ -144,21 +152,17 @@ export const colors = {
     dark: 'navy700',
     midnight: 'gray700',
   },
-  sidebarItemAccentSelected: { all: 'purple200' },
+  sidebarItemAccentSelected: {
+    all: { accentTextOn: 'sidebarBackground', contrast: 7 },
+  },
   sidebarItemBackgroundSelected: {
-    light: {
+    all: {
       raw: 'color-mix(in srgb, var(--color-sidebarItemAccentSelected) 22%, transparent)',
-    },
-    dark: {
-      raw: 'color-mix(in srgb, var(--color-sidebarItemAccentSelected) 22%, transparent)',
-    },
-    midnight: {
-      raw: 'color-mix(in srgb, var(--color-sidebarItemAccentSelected) 35%, transparent)',
     },
   },
   sidebarItemText: { light: 'navy150', dark: 'navy150', midnight: 'gray100' },
   sidebarItemTextUpdated: { all: { ref: 'sidebarItemText' } },
-  sidebarItemTextSelected: { all: 'purple200' },
+  sidebarItemTextSelected: { all: { ref: 'sidebarItemAccentSelected' } },
   sidebarBudgetName: { light: 'navy150', dark: 'navy300', midnight: 'gray300' },
   sidebarHeaderText: { light: 'white', dark: 'white', midnight: 'gray100' },
   sidebarTextSubdued: {
@@ -192,27 +196,11 @@ export const colors = {
       raw: 'color-mix(in srgb, var(--color-settingsNavItemText) 8%, transparent)',
     },
   },
-  settingsNavItemAccentSelected: {
-    light: 'purple500',
-    dark: 'purple200',
-    midnight: 'purple200',
-  },
+  settingsNavItemAccentSelected: { all: { ref: 'accentSubtleText' } },
   settingsNavItemTextSelected: {
-    light: 'purple600',
-    dark: { ref: 'settingsNavItemAccentSelected' },
-    midnight: { ref: 'settingsNavItemAccentSelected' },
+    all: { ref: 'settingsNavItemAccentSelected' },
   },
-  settingsNavItemBackgroundSelected: {
-    light: {
-      raw: 'color-mix(in srgb, var(--color-settingsNavItemAccentSelected) 10%, transparent)',
-    },
-    dark: {
-      raw: 'color-mix(in srgb, var(--color-settingsNavItemAccentSelected) 22%, transparent)',
-    },
-    midnight: {
-      raw: 'color-mix(in srgb, var(--color-settingsNavItemAccentSelected) 22%, transparent)',
-    },
-  },
+  settingsNavItemBackgroundSelected: { all: { ref: 'accentSubtle' } },
 
   menuBackground: { light: 'white', dark: 'navy800', midnight: 'gray700' },
   menuItemBackgroundHover: {
@@ -226,22 +214,10 @@ export const colors = {
     dark: 'navy50',
     midnight: 'gray50',
   },
-  menuItemTextSelected: {
-    light: 'purple300',
-    dark: 'purple400',
-    midnight: 'purple400',
-  },
-  menuItemTextHeader: {
-    light: 'navy400',
-    dark: 'purple200',
-    midnight: 'purple200',
-  },
+  menuItemTextSelected: { all: { ref: 'accentText' } },
+  menuItemTextHeader: { all: { accentTextOn: 'menuBackground' } },
   menuBorder: { light: 'navy100', dark: 'navy900', midnight: 'gray800' },
-  menuKeybindingText: {
-    light: 'navy400',
-    dark: 'purple200',
-    midnight: 'purple200',
-  },
+  menuKeybindingText: { all: { accentTextOn: 'menuBackground' } },
   menuAutoCompleteBackground: {
     light: 'navy900',
     dark: 'navy900',
@@ -263,9 +239,7 @@ export const colors = {
     midnight: 'green400',
   },
   menuAutoCompleteTextHeader: {
-    light: 'orange150',
-    dark: 'purple200',
-    midnight: 'purple200',
+    all: { accentTextOn: 'menuAutoCompleteBackground', contrast: 7 },
   },
   menuAutoCompleteItemTextHover: {
     light: { ref: 'menuAutoCompleteText' },
@@ -280,13 +254,13 @@ export const colors = {
 
   modalBackground: { light: 'white', dark: 'gray800', midnight: 'gray700' },
   modalBorder: { light: 'white', dark: 'navy600', midnight: 'gray200' },
-  mobileHeaderBackground: {
-    light: 'purple400',
-    dark: 'purple800',
-    midnight: 'gray900',
+  mobileHeaderBackground: { all: { ref: 'accent' } },
+  mobileHeaderText: { all: { ref: 'accentContrast' } },
+  mobileHeaderTextSubdued: {
+    all: {
+      raw: 'color-mix(in srgb, var(--color-mobileHeaderText) 75%, transparent)',
+    },
   },
-  mobileHeaderText: { light: 'navy50', dark: 'navy150', midnight: 'purple200' },
-  mobileHeaderTextSubdued: { all: 'gray200' },
   mobileHeaderTextHover: { all: { raw: 'rgba(200, 200, 200, 0.15)' } },
   mobilePageBackground: {
     light: 'navy50',
@@ -295,36 +269,20 @@ export const colors = {
   },
   mobileNavBackground: { light: 'white', dark: 'navy800', midnight: 'gray600' },
   mobileNavItem: { light: 'gray300', dark: 'navy150', midnight: 'gray150' },
-  mobileNavItemSelected: {
-    light: 'purple500',
-    dark: 'purple400',
-    midnight: 'purple200',
-  },
+  mobileNavItemSelected: { all: { ref: 'accentText' } },
   mobileAccountText: { all: 'blue800' },
-  mobileTransactionSelected: {
-    light: 'purple500',
-    dark: 'purple400',
-    midnight: 'purple300',
-  },
+  mobileTransactionSelected: { all: { ref: 'accentBorder' } },
 
   mobileViewTheme: { all: { ref: 'mobileHeaderBackground' } },
-  mobileConfigServerViewTheme: { all: 'purple500' },
+  mobileConfigServerViewTheme: { all: { ref: 'accent' } },
 
   markdownNormal: {
-    light: 'purple150',
-    dark: 'purple700',
-    midnight: 'purple700',
+    all: {
+      raw: 'color-mix(in srgb, var(--color-accent) 30%, transparent)',
+    },
   },
-  markdownDark: {
-    light: 'purple400',
-    dark: 'purple500',
-    midnight: 'purple500',
-  },
-  markdownLight: {
-    light: 'purple100',
-    dark: 'purple800',
-    midnight: 'purple800',
-  },
+  markdownDark: { all: { ref: 'accentBorder' } },
+  markdownLight: { all: { ref: 'accentSubtle' } },
 
   buttonMenuText: { light: 'navy100', dark: 'navy200', midnight: 'gray200' },
   buttonMenuTextHover: {
@@ -349,18 +307,10 @@ export const colors = {
   },
   buttonMenuSelectedBorder: { all: { ref: 'buttonMenuSelectedBackground' } },
 
-  buttonPrimaryText: { all: 'white' },
+  buttonPrimaryText: { all: { ref: 'accentContrast' } },
   buttonPrimaryTextHover: { all: { ref: 'buttonPrimaryText' } },
-  buttonPrimaryBackground: {
-    light: 'purple500',
-    dark: 'purple400',
-    midnight: 'purple300',
-  },
-  buttonPrimaryBackgroundHover: {
-    light: 'purple300',
-    dark: 'purple600',
-    midnight: { ref: 'buttonPrimaryBackground' },
-  },
+  buttonPrimaryBackground: { all: { ref: 'accent' } },
+  buttonPrimaryBackgroundHover: { all: { ref: 'accentHover' } },
   buttonPrimaryBorder: { all: { ref: 'buttonPrimaryBackground' } },
   buttonPrimaryShadow: {
     light: { raw: 'rgba(0, 0, 0, 0.3)' },
@@ -407,12 +357,8 @@ export const colors = {
     dark: { raw: 'rgba(0, 0, 0, 0.4)' },
     midnight: { raw: 'rgba(0, 0, 0, 0.4)' },
   },
-  buttonNormalSelectedText: { all: 'white' },
-  buttonNormalSelectedBackground: {
-    light: 'blue600',
-    dark: 'purple600',
-    midnight: 'purple500',
-  },
+  buttonNormalSelectedText: { all: { ref: 'accentContrast' } },
+  buttonNormalSelectedBackground: { all: { ref: 'accent' } },
   buttonNormalDisabledText: {
     light: 'navy300',
     dark: 'navy500',
@@ -435,22 +381,20 @@ export const colors = {
     dark: 'navy900',
     midnight: 'gray700',
   },
-  calendarItemText: { light: 'navy150', dark: 'navy150', midnight: 'gray150' },
+  calendarItemText: { all: 'white' },
   calendarItemBackground: {
     light: 'navy800',
     dark: 'navy800',
     midnight: 'gray500',
   },
-  calendarSelectedBackground: {
-    light: 'navy500',
-    dark: { ref: 'buttonNormalSelectedBackground' },
-    midnight: { ref: 'buttonNormalSelectedBackground' },
+  calendarSelectedBackground: { all: { ref: 'accent' } },
+  calendarSelectedText: {
+    all: {
+      contrastOn: 'calendarSelectedBackground',
+      over: 'calendarBackground',
+    },
   },
-  datePickerRangeBackground: {
-    light: 'purple150',
-    dark: 'purple600',
-    midnight: 'purple600',
-  },
+  datePickerRangeBackground: { all: { ref: 'accentSubtle' } },
 
   buttonBareText: { all: { ref: 'pageText' } },
   buttonBareTextHover: { all: { ref: 'pageText' } },
@@ -509,23 +453,11 @@ export const colors = {
   },
   errorTextMenu: { all: 'red200' },
   errorBorder: { all: 'red500' },
-  upcomingBackground: {
-    light: 'purple100',
-    dark: 'purple700',
-    midnight: 'purple800',
-  },
-  upcomingText: {
-    light: 'purple700',
-    dark: 'purple100',
-    midnight: 'purple200',
-  },
+  upcomingBackground: { all: { ref: 'accentSubtle' } },
+  upcomingText: { all: { ref: 'accentSubtleText' } },
 
-  formLabelText: { light: 'blue600', dark: 'purple150', midnight: 'purple150' },
-  formLabelBackground: {
-    light: 'blue200',
-    dark: 'blue900',
-    midnight: 'blue900',
-  },
+  formLabelText: { all: { ref: 'accentText' } },
+  formLabelBackground: { all: { ref: 'tableBackground' } },
   formInputBackground: {
     light: 'navy50',
     dark: 'navy800',
@@ -536,22 +468,14 @@ export const colors = {
     dark: 'navy700',
     midnight: 'gray700',
   },
-  formInputBackgroundSelection: {
-    light: 'purple500',
-    dark: 'purple400',
-    midnight: 'purple400',
-  },
+  formInputBackgroundSelection: { all: { ref: 'accent' } },
   formInputBorder: { light: 'navy150', dark: 'navy600', midnight: 'gray600' },
   formInputTextReadOnlySelection: {
     light: 'navy50',
     dark: 'navy800',
     midnight: 'gray800',
   },
-  formInputBorderSelected: {
-    light: 'purple500',
-    dark: 'purple400',
-    midnight: 'purple300',
-  },
+  formInputBorderSelected: { all: { ref: 'accentBorder' } },
   formInputText: { light: 'navy900', dark: 'navy150', midnight: 'gray150' },
   formInputTextPlaceholder: {
     light: 'navy300',
@@ -563,46 +487,18 @@ export const colors = {
     dark: 'navy100',
     midnight: 'gray100',
   },
-  formInputShadowSelected: {
-    light: 'purple300',
-    dark: 'purple200',
-    midnight: 'purple400',
-  },
-  formInputTextHighlight: {
-    light: 'purple200',
-    dark: 'purple400',
-    midnight: 'purple200',
-  },
-  checkboxText: {
-    light: { ref: 'tableBackground' },
-    dark: { ref: 'tableText' },
-    midnight: { ref: 'tableText' },
-  },
-  checkboxBackgroundSelected: {
-    light: 'blue500',
-    dark: 'purple300',
-    midnight: 'purple300',
-  },
-  checkboxBorderSelected: {
-    light: 'blue500',
-    dark: 'purple300',
-    midnight: 'purple300',
-  },
-  checkboxShadowSelected: {
-    light: 'blue300',
-    dark: 'purple500',
-    midnight: 'purple500',
-  },
+  formInputShadowSelected: { all: { ref: 'accentBorder' } },
+  formInputTextHighlight: { all: { ref: 'accentText' } },
+  checkboxText: { all: { ref: 'accentContrast' } },
+  checkboxBackgroundSelected: { all: { ref: 'accent' } },
+  checkboxBorderSelected: { all: { ref: 'accent' } },
+  checkboxShadowSelected: { all: { ref: 'accentBorder' } },
   checkboxToggleBackground: {
     light: 'gray400',
     dark: 'gray700',
     midnight: 'gray400',
   },
-  checkboxToggleBackgroundSelected: {
-    light: 'purple600',
-    dark: 'purple300',
-    midnight: 'purple300',
-  },
+  checkboxToggleBackgroundSelected: { all: { ref: 'accent' } },
   checkboxToggleDisabled: {
     light: 'gray200',
     dark: 'gray400',
@@ -617,9 +513,7 @@ export const colors = {
   },
   pillText: { light: 'navy800', dark: 'navy200', midnight: 'gray200' },
   pillTextHighlighted: {
-    light: 'purple600',
-    dark: 'purple200',
-    midnight: 'purple200',
+    all: { accentTextOn: 'pillBackgroundLight', contrast: 7 },
   },
   pillBorder: { light: 'navy150', dark: 'navy700', midnight: 'gray500' },
   pillBorderDark: {
@@ -627,17 +521,9 @@ export const colors = {
     dark: { ref: 'pillBorder' },
     midnight: { ref: 'pillBorder' },
   },
-  pillBackgroundSelected: {
-    light: 'blue150',
-    dark: 'purple600',
-    midnight: 'purple600',
-  },
-  pillTextSelected: { light: 'blue900', dark: 'navy150', midnight: 'gray150' },
-  pillBorderSelected: {
-    light: 'purple500',
-    dark: 'purple400',
-    midnight: 'purple300',
-  },
+  pillBackgroundSelected: { all: { ref: 'accentSubtle' } },
+  pillTextSelected: { all: { ref: 'accentSubtleText' } },
+  pillBorderSelected: { all: { ref: 'accentBorder' } },
 
   reportsRed: { all: 'red300' },
   reportsBlue: { all: 'blue400' },
@@ -654,17 +540,13 @@ export const colors = {
   reportsNumberNeutral: { all: { ref: 'numberNeutral' } },
   reportsChartFill: { all: { ref: 'reportsNumberPositive' } },
 
-  noteTagBackground: {
-    light: 'purple125',
-    dark: 'purple700',
-    midnight: 'purple800',
-  },
+  noteTagBackground: { all: { ref: 'accentSubtle' } },
   noteTagBackgroundHover: {
-    light: 'purple150',
-    dark: 'purple500',
-    midnight: 'purple600',
+    all: {
+      raw: 'color-mix(in srgb, var(--color-accentSubtle) 50%, var(--color-tableBackground))',
+    },
   },
-  noteTagText: { light: 'black', dark: 'purple100', midnight: 'purple100' },
+  noteTagText: { all: { ref: 'accentSubtleText' } },
 
   budgetCurrentMonth: { all: { ref: 'tableBackground' } },
   budgetOtherMonth: { light: 'gray50', dark: 'navy900', midnight: 'gray700' },
@@ -679,21 +561,11 @@ export const colors = {
     midnight: 'gray800',
   },
 
-  floatingActionBarBackground: {
-    light: 'purple400',
-    dark: 'purple800',
-    midnight: 'gray900',
-  },
+  floatingActionBarBackground: { all: { ref: 'accent' } },
   floatingActionBarBorder: {
-    light: { ref: 'floatingActionBarBackground' },
-    dark: { ref: 'floatingActionBarBackground' },
-    midnight: 'purple300',
+    all: { ref: 'floatingActionBarBackground' },
   },
-  floatingActionBarText: {
-    light: 'navy50',
-    dark: 'navy150',
-    midnight: 'purple200',
-  },
+  floatingActionBarText: { all: { ref: 'accentContrast' } },
 
   tooltipText: { light: 'navy900', dark: 'navy100', midnight: 'gray100' },
   tooltipBackground: { light: 'white', dark: 'navy800', midnight: 'gray800' },
