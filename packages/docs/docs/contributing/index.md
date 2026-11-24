@@ -28,12 +28,12 @@ Here are some initial guidelines for how contributions will be treated:
 (sorted alphabetically)
 
 - @jfdoming
-- @joel-jeremy
 - @MatissJanis
 - @matt-fidd
 - @MikesGlitch
 - @tabedzki
 - @tim-smart
+- @UnderKoen
 - @youngcw
 
 ### Alumni
@@ -45,6 +45,7 @@ Here are some initial guidelines for how contributions will be treated:
 - @carkom
 - @j-f1
 - @jlongster
+- @joel-jeremy
 - @Kidglove57
 - @lelemm
 - @rich-howell
@@ -54,7 +55,6 @@ Here are some initial guidelines for how contributions will be treated:
 - @teprifer
 - @trevdor
 - @twk3
-- @UnderKoen
 
 ### Getting Started
 
