@@ -1,0 +1,268 @@
+name: PR QA
+# Runs an AI agent that QAs a pull request in the browser (before/after
+# screenshots and a video) and posts the result as a PR comment.
+#
+# Dispatched by actual-gh-bot when a PR is opened, and re-dispatched (after
+# cancelling the active run) when commits are pushed. The bot relies on:
+#   - `run-name` being exactly "PR QA #<pr_number>"
+#   - the comment containing the marker "<!-- actual-bot-qa -->"
+#
+# SECURITY: this runs for PRs from forks, so everything derived from the PR is
+# untrusted, including whatever the agent writes.
+#   - No job checks out or executes PR code; the agent only drives the PR's
+#     Netlify deploy preview in a browser.
+#   - The agent has no GitHub token, no shell and no network tools. Its only
+#     tools are reading its working directory and .github/scripts/pr-qa/server.mjs.
+#   - A separate job, without the agent, validates the output and posts it.
+run-name: 'PR QA #${{ inputs.pr_number }}'
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number
+        required: true
+      head_sha:
+        description: Head commit of the pull request to QA
+        required: true
+
+permissions: {}
+
+concurrency:
+  group: pr-qa-${{ inputs.pr_number }}
+  cancel-in-progress: true
+
+env:
+  PR_NUMBER: ${{ inputs.pr_number }}
+  HEAD_SHA: ${{ inputs.head_sha }}
+  DEPLOY_STATUS_CONTEXT: netlify/actualbudget/deploy-preview
+  BEFORE_URL: https://edge.actualbudget.org
+  ASSETS_BRANCH: pr-qa-assets
+
+jobs:
+  prepare:
+    name: Wait for the deploy preview
+    runs-on: depot-ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      pull-requests: read
+      statuses: read
+    outputs:
+      ready: ${{ steps.preview.outputs.ready }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Validate inputs
+        run: |
+          [[ "$PR_NUMBER" =~ ^[0-9]+$ ]] || { echo "Invalid PR number"; exit 1; }
+          [[ "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "Invalid head SHA"; exit 1; }
+
+      - name: Wait for the deploy preview
+        id: preview
+        run: |
+          echo "ready=false" >> "$GITHUB_OUTPUT"
+          for _ in $(seq 1 80); do
+            current=$(gh api "repos/$GH_REPO/pulls/$PR_NUMBER" --jq '.state + " " + .head.sha')
+            if [ "$current" != "open $HEAD_SHA" ]; then
+              echo "The PR is closed or has moved on from $HEAD_SHA, skipping."
+              exit 0
+            fi
+
+            # Statuses are listed newest first.
+            status=$(gh api "repos/$GH_REPO/commits/$HEAD_SHA/statuses?per_page=100" \
+              --jq "[.[] | select(.context == \"$DEPLOY_STATUS_CONTEXT\")][0] | .state + \" \" + .description")
+            case "$status" in
+              "success Deploy Preview ready!")
+                echo "ready=true" >> "$GITHUB_OUTPUT"
+                exit 0
+                ;;
+              success*|failure*|error*)
+                echo "No deploy preview for this commit ($status), skipping."
+                exit 0
+                ;;
+            esac
+            sleep 20
+          done
+          echo "Timed out waiting for the deploy preview, skipping."
+
+      - name: Collect pull request details
+        if: steps.preview.outputs.ready == 'true'
+        run: |
+          mkdir pr
+          gh pr view "$PR_NUMBER" --json title,body,files > pr.json
+          jq -r .title pr.json > pr/title.txt
+          jq -r .body pr.json > body.txt
+          jq -r '.files[].path' pr.json > files.txt
+          gh pr diff "$PR_NUMBER" > diff.patch
+          # Cap what the agent has to read.
+          head -c 20000 body.txt > pr/body.txt
+          head -n 500 files.txt > pr/files.txt
+          head -c 400000 diff.patch > pr/diff.patch
+
+      - name: Upload pull request details
+        if: steps.preview.outputs.ready == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pr-qa-input
+          path: pr/
+          retention-days: 1
+
+  qa:
+    name: QA in the browser
+    needs: prepare
+    if: needs.prepare.outputs.ready == 'true'
+    runs-on: depot-ubuntu-latest
+    timeout-minutes: 40
+    # No write access and no GitHub token is handed to any step of this job.
+    permissions:
+      contents: read
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-jammy
+    env:
+      CLAUDE_CODE_VERSION: 2.1.331
+      PLAYWRIGHT_VERSION: 1.61.1
+    steps:
+      # The default branch, never the PR: this job holds the Claude token.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts/pr-qa
+
+      - name: Install the agent and the browser driver
+        run: |
+          mkdir -p "$RUNNER_TEMP/tools" "$RUNNER_TEMP/qa/out"
+          cd "$RUNNER_TEMP/tools"
+          npm install --no-save --ignore-scripts \
+            "@anthropic-ai/claude-code@$CLAUDE_CODE_VERSION" \
+            "playwright@$PLAYWRIGHT_VERSION"
+          # Kept outside the agent's working directory so it cannot be read
+          # or changed by the agent.
+          cp "$GITHUB_WORKSPACE/.github/scripts/pr-qa/server.mjs" \
+            "$GITHUB_WORKSPACE/.github/scripts/pr-qa/prompt.md" .
+          cat > mcp.json <<JSON
+          {
+            "mcpServers": {
+              "pr-qa": {
+                "command": "node",
+                "args": ["$RUNNER_TEMP/tools/server.mjs"],
+                "env": {
+                  "QA_OUT_DIR": "$RUNNER_TEMP/qa/out",
+                  "QA_BEFORE_URL": "$BEFORE_URL",
+                  "QA_AFTER_URL": "https://deploy-preview-$PR_NUMBER.demo.actualbudget.org"
+                }
+              }
+            }
+          }
+          JSON
+
+      # Artifact steps use workspace-relative paths: runner.temp points at the
+      # host, not at this container.
+      - name: Download pull request details
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: pr-qa-input
+          path: pr-qa-input
+
+      - name: Run the QA agent
+        # A failed or timed-out session is still published as "did not finish".
+        continue-on-error: true
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          cp -r pr-qa-input "$RUNNER_TEMP/qa/pr"
+          cd "$RUNNER_TEMP/qa"
+          timeout 30m "$RUNNER_TEMP/tools/node_modules/.bin/claude" \
+            --print "$(cat "$RUNNER_TEMP/tools/prompt.md")" \
+            --restricted \
+            --tools "Read,Glob,Grep" \
+            --mcp-config "$RUNNER_TEMP/tools/mcp.json" \
+            --strict-mcp-config \
+            --allowedTools "Read" "Glob" "Grep" \
+              "mcp__pr-qa__run_scenario" "mcp__pr-qa__submit_result" \
+            --permission-mode dontAsk < /dev/null
+
+      - name: Collect the QA output
+        run: cp -r "$RUNNER_TEMP/qa/out" pr-qa-output
+
+      - name: Upload the QA output
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pr-qa-output
+          path: pr-qa-output/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  publish:
+    name: Post the QA comment
+    needs: [prepare, qa]
+    if: needs.prepare.outputs.ready == 'true' && !cancelled()
+    runs-on: depot-ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # to store the screenshots on the assets branch
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts/pr-qa
+
+      - name: Download the QA output
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        continue-on-error: true
+        with:
+          name: pr-qa-output
+          path: ${{ runner.temp }}/qa-output
+
+      - name: Validate the output and build the comment
+        env:
+          ASSET_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ env.ASSETS_BRANCH }}/pr-${{ inputs.pr_number }}/${{ inputs.head_sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/qa-output"
+          node .github/scripts/pr-qa/publish.mjs "$RUNNER_TEMP/qa-output" "$RUNNER_TEMP/publish"
+          mv "$RUNNER_TEMP/publish/comment.md" "$RUNNER_TEMP/comment.md"
+
+      - name: Store the screenshots
+        run: |
+          if [ -z "$(ls -A "$RUNNER_TEMP/publish")" ]; then
+            echo "Nothing to store."
+            exit 0
+          fi
+
+          git init -q "$RUNNER_TEMP/assets"
+          cd "$RUNNER_TEMP/assets"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add origin "https://x-access-token:$GH_TOKEN@github.com/$GH_REPO.git"
+
+          for attempt in 1 2 3; do
+            if git fetch -q --depth 1 origin "$ASSETS_BRANCH"; then
+              git checkout -q -B "$ASSETS_BRANCH" FETCH_HEAD
+            else
+              git checkout -q --orphan "$ASSETS_BRANCH"
+            fi
+            mkdir -p "pr-$PR_NUMBER/$HEAD_SHA"
+            cp "$RUNNER_TEMP/publish/"* "pr-$PR_NUMBER/$HEAD_SHA/"
+            git add "pr-$PR_NUMBER/$HEAD_SHA"
+            git commit -q -m "QA assets for #$PR_NUMBER at $HEAD_SHA"
+            if git push -q origin "$ASSETS_BRANCH"; then
+              exit 0
+            fi
+            echo "Push failed (attempt $attempt), retrying."
+            sleep 5
+          done
+          exit 1
+
+      - name: Post the comment
+        run: |
+          current=$(gh api "repos/$GH_REPO/pulls/$PR_NUMBER" --jq '.state + " " + .head.sha')
+          if [ "$current" != "open $HEAD_SHA" ]; then
+            echo "The PR is closed or has moved on from $HEAD_SHA, not commenting."
+            exit 0
+          fi
+          gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/comment.md"
