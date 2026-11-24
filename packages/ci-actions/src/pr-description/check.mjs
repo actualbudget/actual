@@ -112,9 +112,9 @@ export function checkPrDescription(
         'Leave every "Checklist" box unchecked: the human author ticks them.',
       );
     }
-  } else if (!humanSummary) {
+  } else if (!humanSummary || humanSummary.length < 10) {
     errors.push(
-      'The "Human Summary" section is empty. Write a sentence or two, in your own words, on why this change is needed.',
+      'The "Human Summary" section is empty or too short. Write a sentence or two, in your own words, on why this change is needed.',
     );
   }
 

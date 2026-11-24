@@ -67,6 +67,17 @@ describe('checkPrDescription', () => {
     }
   });
 
+  it('requires a non-trivial human summary', () => {
+    for (const trivial of ['-', '.', '...', 'x', 'todo']) {
+      expect(
+        checkPrDescription(fill({ 'Human Summary': trivial }))[0],
+      ).toContain('"Human Summary" section is empty or too short');
+    }
+    expect(
+      checkPrDescription(fill({ 'Human Summary': 'I wanted this feature.' })),
+    ).toEqual([]);
+  });
+
   it('requires every template heading', () => {
     expect(checkPrDescription('Just some prose')).toEqual([
       expect.stringContaining('Missing section(s): "## Human Summary"'),
