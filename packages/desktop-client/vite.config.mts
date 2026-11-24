@@ -287,7 +287,7 @@ export default defineConfig(async ({ mode, command }) => {
     envPrefix: 'REACT_APP_',
     build: {
       minify: 'oxc',
-      target: 'es2022',
+      target: mode === 'desktop' ? 'es2022' : ['es2022', 'safari16.2'],
       sourcemap: true,
       outDir: mode === 'desktop' ? 'build-electron' : 'build',
       assetsDir: 'static',

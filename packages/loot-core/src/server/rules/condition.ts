@@ -17,7 +17,7 @@ import {
   isValidOp,
   sortNumbers,
 } from '#shared/rules';
-import { extractTagsForFilter } from '#shared/tags';
+import { extractTagsForFilter, makeTagAqlRegex } from '#shared/tags';
 
 import {
   assert,
@@ -352,10 +352,7 @@ export class Condition {
         const normalizedFieldValue = String(fieldValue);
         const tags = extractTagsForFilter(this.value);
         return !tags.some(tag => {
-          const escapedTag = tag
-            .toLowerCase()
-            .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const pattern = new RegExp(`(?<!#)${escapedTag}([\\s#]|$)`);
+          const pattern = new RegExp(makeTagAqlRegex(tag.toLowerCase()));
           return !pattern.test(normalizedFieldValue);
         });
 
@@ -366,10 +363,7 @@ export class Condition {
         const normalizedFieldValue = String(fieldValue);
         const tags = extractTagsForFilter(this.value);
         return tags.some(tag => {
-          const escapedTag = tag
-            .toLowerCase()
-            .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const pattern = new RegExp(`(?<!#)${escapedTag}([\\s#]|$)`);
+          const pattern = new RegExp(makeTagAqlRegex(tag.toLowerCase()));
           return pattern.test(normalizedFieldValue);
         });
       }
