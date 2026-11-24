@@ -263,15 +263,20 @@ export function normalizeTransactions(
   const derivedIdCounts = new Map<string, number>();
 
   for (const isBooked of [true, false]) {
-    for (const tx of normalized) {
+    normalized.forEach((tx, index) => {
       if (
         !tx.transactionId &&
         tx.booked === isBooked &&
         isImportableTransaction(tx)
       ) {
-        tx.transactionId = deriveTransactionId(tx, derivedIdCounts);
+        // Derive the id from the transaction as the bank sent it, so it does
+        // not change with the swapCreditDebit option.
+        tx.transactionId = deriveTransactionId(
+          transactions[index],
+          derivedIdCounts,
+        );
       }
-    }
+    });
   }
 
   return normalized;

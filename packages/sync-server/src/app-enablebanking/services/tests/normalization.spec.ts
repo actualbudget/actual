@@ -605,6 +605,27 @@ describe('swapCreditDebit', () => {
     ]);
   });
 
+  it('derives ids from the bank fields, not from the swapped indicator', () => {
+    const withoutId = (
+      indicator: 'CRDT' | 'DBIT',
+    ): EnableBankingTransaction => ({
+      transaction_amount: { currency: 'EUR', amount: '10.00' },
+      credit_debit_indicator: indicator,
+      status: 'BOOK',
+      booking_date: '2026-11-12',
+      remittance_information: ['Same text'],
+    });
+    const idOf = (indicator: 'CRDT' | 'DBIT', swapCreditDebit: boolean) =>
+      normalizeTransactions([withoutId(indicator)], { swapCreditDebit })[0]
+        .transactionId;
+
+    // The same bank transaction keeps its id when the option is toggled...
+    expect(idOf('DBIT', true)).toBe(idOf('DBIT', false));
+    expect(idOf('CRDT', true)).toBe(idOf('CRDT', false));
+    // ...and two distinct transactions never share one.
+    expect(idOf('DBIT', true)).not.toBe(idOf('CRDT', false));
+  });
+
   it('reverses the balance with the transactions', () => {
     expect(
       normalizeBalance(mockBalance, { swapCreditDebit: true }).balanceAmount
