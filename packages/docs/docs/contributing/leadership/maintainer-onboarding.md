@@ -62,7 +62,7 @@ As a maintainer you are expected to take part in these votes.
 
 Maintainers are compensated for the administrative work that keeps the project healthy. The full details are on the [Paying Reviewers for Administrative Work](./paying-contributors.md) page. In short:
 
-- **Points are counted every month.** A script counts the points each maintainer earned during the month.
+- **Points are counted every month.** A script counts the points each maintainer earned during the month. Points for a pull request are counted in the month the pull request is merged, not the month you reviewed it (see the [points script](https://github.com/actualbudget/actual/blob/master/.github/scripts/count-points.mjs)).
 - **The monthly pool is split by points.** The pool is divided by the total number of points earned, and each maintainer receives their share.
 - **You request the payout yourself.** Submit an invoice on Open Collective for the amount you earned. Earnings that are not claimed are reset twice a year, on the 1st of January and the 1st of July.
 
