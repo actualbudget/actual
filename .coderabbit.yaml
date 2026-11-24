@@ -27,3 +27,5 @@ reviews:
     - label: 'size small'
       instructions: 'This issue or PR is a small change (less than 50 lines of code) that is expected to have a small impact on the codebase.'
   auto_apply_labels: true
+  auto_review:
+    drafts: true
