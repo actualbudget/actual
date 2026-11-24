@@ -15,6 +15,7 @@ import { Search } from '#components/common/Search';
 import { ruleToString } from '#components/ManageRules';
 import { withFilterParam } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
+import { SettingsBackButton } from '#components/settings/SettingsBackButton';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useNavigate } from '#hooks/useNavigate';
@@ -184,7 +185,11 @@ export function MobileRulesPage() {
   return (
     <Page
       header={
-        <MobilePageHeader title={t('Rules')} rightContent={<AddRuleButton />} />
+        <MobilePageHeader
+          title={t('Rules')}
+          leftContent={<SettingsBackButton />}
+          rightContent={<AddRuleButton />}
+        />
       }
       padding={0}
     >

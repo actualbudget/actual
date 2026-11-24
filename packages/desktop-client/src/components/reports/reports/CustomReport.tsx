@@ -15,7 +15,6 @@ import type {
   balanceTypeOpType,
   CategoryEntity,
   CustomReportEntity,
-  DataEntity,
   RuleConditionEntity,
   sortByOpType,
   TransactionEntity,
@@ -53,6 +52,7 @@ import type { SavedStatus } from '#components/reports/SaveReportMenu';
 import { setSessionReport } from '#components/reports/setSessionReport';
 import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
+import { normalizeTagScope } from '#components/reports/tagScope';
 import { useReport } from '#components/reports/useReport';
 import { calculateHasWarning, fromDateRepr } from '#components/reports/util';
 import { useAccounts } from '#hooks/useAccounts';
@@ -66,6 +66,7 @@ import { usePayees } from '#hooks/usePayees';
 import { useReport as useCustomReport } from '#hooks/useReport';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useTags } from '#hooks/useTags';
 
 /**
  * Transform `selectedCategories` into `conditions`.
@@ -150,6 +151,7 @@ function CustomReportInner({
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   const { data: categories = { grouped: [], list: [] } } = useCategories();
+  const { data: tags = [] } = useTags();
   const { isNarrowWidth } = useResponsive();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
@@ -270,6 +272,10 @@ function CustomReportInner({
   const [mode, setMode] = useState(loadReport.mode);
   const [isDateStatic, setIsDateStatic] = useState(loadReport.isDateStatic);
   const [groupBy, setGroupBy] = useState(loadReport.groupBy);
+  const [tagScope, setTagScope] = useState(
+    normalizeTagScope(loadReport.tagScope),
+  );
+  const [metadata, setMetadata] = useState(loadReport.metadata);
   const [interval, setInterval] = useState(loadReport.interval);
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
   const [sortBy, setSortBy] = useState(loadReport.sortBy);
@@ -343,7 +349,11 @@ function CustomReportInner({
         interval === 'Weekly'
           ? 'dayFromDate'
           : (((ReportOptions.intervalMap.get(interval) || 'Day').toLowerCase() +
-              'FromDate') as 'dayFromDate' | 'monthFromDate' | 'yearFromDate');
+              'FromDate') as
+              | 'dayFromDate'
+              | 'monthFromDate'
+              | 'quarterFromDate'
+              | 'yearFromDate');
 
       const earliestInterval =
         interval === 'Weekly'
@@ -368,7 +378,9 @@ function CustomReportInner({
             ? monthUtils.currentDay()
             : interval === 'Yearly'
               ? monthUtils.currentYear()
-              : monthUtils.currentMonth();
+              : interval === 'Quarterly'
+                ? monthUtils.currentQuarter()
+                : monthUtils.currentMonth();
 
       const maxInterval =
         latestInterval > currentInterval ? latestInterval : currentInterval;
@@ -489,6 +501,8 @@ function CustomReportInner({
     categories: categories.list,
     payees,
     accounts,
+    tags,
+    tagScope: groupBy === 'Tag' ? tagScope : undefined,
   });
 
   useEffect(() => {
@@ -566,6 +580,8 @@ function CustomReportInner({
       sortByOp,
       payees,
       accounts,
+      tags,
+      tagScope,
       graphType,
       firstDayOfWeekIdx,
       dateFormat,
@@ -580,6 +596,8 @@ function CustomReportInner({
     categories,
     payees,
     accounts,
+    tags,
+    tagScope,
     conditions,
     conditionsOp,
     showEmpty,
@@ -595,9 +613,8 @@ function CustomReportInner({
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
 
-  const data: DataEntity | null = graphData
-    ? { ...graphData, groupedData }
-    : null;
+  const data = graphData ? { ...graphData, groupedData } : null;
+  const averageIntervalsCount = data?.filteredIntervalCount ?? intervals.length;
 
   const customReportItems: CustomReportEntity = {
     id: '',
@@ -608,6 +625,8 @@ function CustomReportInner({
     dateRange,
     mode,
     groupBy,
+    tagScope,
+    metadata,
     interval,
     balanceType,
     sortBy,
@@ -696,7 +715,7 @@ function CustomReportInner({
     const defaultSort = defaultsGraphList(mode, chooseGraph, 'defaultSort');
     if (defaultSort) {
       setSessionReport('sortBy', defaultSort);
-      setSortBy(defaultSort as CustomReportEntity['sortBy']);
+      setSortBy(defaultSort);
     }
   };
 
@@ -755,6 +774,8 @@ function CustomReportInner({
     setDateRange(input.dateRange);
     setMode(input.mode);
     setGroupBy(input.groupBy);
+    setTagScope(normalizeTagScope(input.tagScope));
+    setMetadata(input.metadata);
     setInterval(input.interval);
     setBalanceType(input.balanceType);
     setSortBy(input.sortBy);
@@ -893,11 +914,13 @@ function CustomReportInner({
             customReportItems={customReportItems}
             selectedCategories={selectedCategories}
             categories={categories}
+            tags={tags}
             dateRangeLine={dateRangeLine}
             allIntervals={allIntervals}
             setDateRange={setDateRange}
             setGraphType={setGraphType}
             setGroupBy={setGroupBy}
+            setTagScope={setTagScope}
             setInterval={setInterval}
             setBalanceType={setBalanceType}
             setSortBy={setSortBy}
@@ -943,7 +966,7 @@ function CustomReportInner({
               defaultItems={defaultItems}
             />
           )}
-          {conditions && conditions.length > 0 && (
+          {(conditions.length > 0 || hasWarning) && (
             <View
               style={{
                 marginBottom: 10,
@@ -953,44 +976,46 @@ function CustomReportInner({
                 flexShrink: 0,
               }}
             >
-              <View
-                style={{
-                  flexShrink: 0,
-                  flexDirection: 'row',
-                  alignItems: 'flex-start',
-                  justifyContent: 'flex-start',
-                }}
-              >
-                <AppliedFilters
-                  conditions={conditions}
-                  onUpdate={(oldFilter, newFilter) => {
-                    setSessionReport(
-                      'conditions',
-                      conditions.map(f => (f === oldFilter ? newFilter : f)),
-                    );
-                    onReportChange({ type: 'modify' });
-                    onUpdateFilter(oldFilter, newFilter);
+              {conditions.length > 0 && (
+                <View
+                  style={{
+                    flexShrink: 0,
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
+                    justifyContent: 'flex-start',
                   }}
-                  onDelete={deletedFilter => {
-                    setSessionReport(
-                      'conditions',
-                      conditions.filter(f => f !== deletedFilter),
-                    );
-                    onDeleteFilter(deletedFilter);
-                    onReportChange({ type: 'modify' });
-                  }}
-                  conditionsOp={conditionsOp}
-                  onConditionsOpChange={co => {
-                    onConditionsOpChange(co);
-                    onReportChange({ type: 'modify' });
-                  }}
-                />
-              </View>
+                >
+                  <AppliedFilters
+                    conditions={conditions}
+                    onUpdate={(oldFilter, newFilter) => {
+                      setSessionReport(
+                        'conditions',
+                        conditions.map(f => (f === oldFilter ? newFilter : f)),
+                      );
+                      onReportChange({ type: 'modify' });
+                      onUpdateFilter(oldFilter, newFilter);
+                    }}
+                    onDelete={deletedFilter => {
+                      setSessionReport(
+                        'conditions',
+                        conditions.filter(f => f !== deletedFilter),
+                      );
+                      onDeleteFilter(deletedFilter);
+                      onReportChange({ type: 'modify' });
+                    }}
+                    conditionsOp={conditionsOp}
+                    onConditionsOpChange={co => {
+                      onConditionsOpChange(co);
+                      onReportChange({ type: 'modify' });
+                    }}
+                  />
+                </View>
+              )}
 
               {hasWarning && (
                 <Warning style={{ paddingTop: 5, paddingBottom: 5 }}>
                   {t(
-                    'This report is configured to use a non-existing filter value (i.e. category/account/payee).',
+                    'This report is configured to use a non-existing filter or tag value.',
                   )}
                 </Warning>
               )}
@@ -1053,7 +1078,7 @@ function CustomReportInner({
                     showHiddenCategories={showHiddenCategories}
                     showOffBudget={showOffBudget}
                     showTrendLines={showTrendLines}
-                    intervalsCount={intervals.length}
+                    intervalsCount={averageIntervalsCount}
                   />
                 ) : (
                   <LoadingIndicator message={t('Loading report...')} />
@@ -1075,7 +1100,7 @@ function CustomReportInner({
                     balanceTypeOp={balanceTypeOp}
                     data={data}
                     interval={interval}
-                    intervalsCount={intervals.length}
+                    intervalsCount={averageIntervalsCount}
                   />
                 )}
                 {viewLegend && (

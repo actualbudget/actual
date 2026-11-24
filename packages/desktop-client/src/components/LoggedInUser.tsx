@@ -68,24 +68,9 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
 
   useEffect(() => {
     return listen('sync-event', ({ type }) => {
-      if (type === 'start') {
-        setLoading(true);
-
-        return;
-      }
-
-      const shouldReinitialize =
-        userData &&
-        ((type === 'success' && userData.offline) ||
-          (type === 'error' && !userData.offline));
-
-      if (shouldReinitialize) {
-        void initializeUserData();
-      } else {
-        setLoading(false);
-      }
+      setLoading(type === 'start');
     });
-  }, [initializeUserData, userData]);
+  }, []);
 
   async function onCloseBudget() {
     await dispatch(closeBudget());

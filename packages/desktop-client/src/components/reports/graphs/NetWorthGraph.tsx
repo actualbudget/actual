@@ -33,6 +33,8 @@ import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { computePadding } from './util/computePadding';
 
+const PARSE_REFERENCE_DATE = new Date(0);
+
 type NetWorthDataPoint = {
   x: string;
   y: number;
@@ -58,6 +60,7 @@ function TrendTooltip({ active, payload, style }: TrendTooltipProps) {
             zIndex: 1000,
             pointerEvents: 'none',
             borderRadius: 2,
+            // oxlint-disable-next-line actual/no-color-literals
             boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
             backgroundColor: theme.menuBackground,
             color: theme.menuItemText,
@@ -137,6 +140,7 @@ function StackedTooltip({
             zIndex: 1000,
             pointerEvents: 'auto',
             borderRadius: 2,
+            // oxlint-disable-next-line actual/no-color-literals
             boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
             backgroundColor: theme.menuBackground,
             color: theme.menuItemText,
@@ -334,7 +338,7 @@ export function NetWorthGraph({
     const pointFormat = getIntervalFormat(interval, dateFormat);
     return graphData.data
       .filter(point => {
-        const date = parse(point.x, pointFormat, new Date());
+        const date = parse(point.x, pointFormat, PARSE_REFERENCE_DATE);
         return getDay(date) === 1; // Monday
       })
       .map(point => point.x);

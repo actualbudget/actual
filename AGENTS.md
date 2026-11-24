@@ -177,6 +177,8 @@ Custom ESLint rules specific to Actual.
 - `prefer-logger-over-console`: Enforces using logger instead of console in `packages/loot-core/`
 - `typography`: Typography rules
 - `prefer-if-statement`: Prefers explicit if statements
+- `no-color-literals`, `no-raw-color-variables`, `theme-token-roles`: Keep colors
+  on theme tokens used for their role
 
 #### 10. **docs** (`packages/docs/`)
 
@@ -601,7 +603,7 @@ When running the app for manual testing or demos, use **"View demo"** on the ini
 
 ### Gotchas
 
-- The `engines` field requires **Node.js >=22** and **Yarn ^4.9.1**. The `.nvmrc` specifies `v24.18.1`.
+- The `engines` field requires **Node.js >=22** and **Yarn ^4.9.1**. The `.nvmrc` specifies `v24.22.1`.
 - Pre-commit hook runs `nano-staged` (oxfmt + oxlint, configured in `.nano-staged.json`) via Husky. Run `yarn prepare` once after install to set up hooks.
 - Lage caches test results in `.lage/`. If tests behave unexpectedly, clear with `rm -rf .lage`.
 - Native modules (`better-sqlite3`, `bcrypt`) require build tools (`gcc`, `make`, `python3`). These are pre-installed in the Cloud VM.

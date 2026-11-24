@@ -1,18 +1,15 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { ComponentProps, ComponentType, CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NavLink } from 'react-router';
+import { NavLink, useLocation } from 'react-router';
 import { animated, config, useSpring } from 'react-spring';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   SvgAdd,
   SvgCog,
-  SvgCreditCard,
   SvgPiggyBank,
   SvgReports,
-  SvgStoreFront,
-  SvgTuning,
   SvgWallet,
 } from '@actual-app/components/icons/v1';
 import { SvgCalendar3 } from '@actual-app/components/icons/v2';
@@ -23,24 +20,26 @@ import { useDrag } from '@use-gesture/react';
 
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useScrollListener } from '#hooks/useScrollListener';
-import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
+import { setNotificationInset } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 const COLUMN_COUNT = 3;
+const ROW_COUNT = 2;
 const PILL_HEIGHT = 15;
 const ROW_HEIGHT = 70;
-const TOTAL_HEIGHT = ROW_HEIGHT * COLUMN_COUNT;
+const TOTAL_HEIGHT = ROW_HEIGHT * ROW_COUNT;
 const OPEN_FULL_Y = 1;
 const OPEN_DEFAULT_Y = TOTAL_HEIGHT - ROW_HEIGHT;
 const HIDDEN_Y = TOTAL_HEIGHT;
+const NOTIFICATION_GAP = 15;
 
 export const MOBILE_NAV_HEIGHT = ROW_HEIGHT + PILL_HEIGHT;
 
 export function MobileNavTabs() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
-  const syncServerStatus = useSyncServerStatus();
   const isTestEnv = useIsTestEnv();
-  const isUsingServer = syncServerStatus !== 'no-server' || isTestEnv;
+  const dispatch = useDispatch();
   const [navbarState, setNavbarState] = useState<'default' | 'open' | 'hidden'>(
     'default',
   );
@@ -92,6 +91,37 @@ export function MobileNavTabs() {
     [api, isTestEnv],
   );
 
+  // The same route element serves every settings page (/settings/*), so the
+  // navbar isn't remounted when navigating between them. Reset it on every
+  // route change so a navbar hidden by scrolling doesn't stay hidden.
+  const { pathname } = useLocation();
+  useEffect(() => {
+    openDefault();
+  }, [pathname, openDefault]);
+
+  useEffect(() => {
+    if (!isNarrowWidth) {
+      return;
+    }
+
+    const navHeight =
+      navbarState === 'open'
+        ? TOTAL_HEIGHT + PILL_HEIGHT
+        : navbarState === 'hidden'
+          ? PILL_HEIGHT
+          : MOBILE_NAV_HEIGHT;
+
+    dispatch(
+      setNotificationInset({
+        inset: { bottom: navHeight + NOTIFICATION_GAP },
+      }),
+    );
+
+    return () => {
+      dispatch(setNotificationInset(null));
+    };
+  }, [dispatch, isNarrowWidth, navbarState]);
+
   const navTabs = [
     {
       name: t('Budget'),
@@ -124,28 +154,6 @@ export function MobileNavTabs() {
       Icon: SvgCalendar3,
     },
     {
-      name: t('Payees'),
-      path: '/payees',
-      style: navTabStyle,
-      Icon: SvgStoreFront,
-    },
-    {
-      name: t('Rules'),
-      path: '/rules',
-      style: navTabStyle,
-      Icon: SvgTuning,
-    },
-    ...(isUsingServer
-      ? [
-          {
-            name: t('Bank Sync'),
-            path: '/bank-sync',
-            style: navTabStyle,
-            Icon: SvgCreditCard,
-          },
-        ]
-      : []),
-    {
       name: t('Settings'),
       path: '/settings',
       style: navTabStyle,
@@ -153,11 +161,6 @@ export function MobileNavTabs() {
     },
   ].map(tab => (
     <NavTab key={tab.path} onClick={() => openDefault()} {...tab} />
-  ));
-
-  const bufferTabsCount = COLUMN_COUNT - (navTabs.length % COLUMN_COUNT);
-  const bufferTabs = Array.from({ length: bufferTabsCount }).map((_, idx) => (
-    <div key={idx} style={navTabStyle} />
   ));
 
   useScrollListener(
@@ -250,7 +253,7 @@ export function MobileNavTabs() {
             width: '100%',
           }}
         >
-          {[navTabs, bufferTabs]}
+          {navTabs}
         </View>
       </View>
     </animated.div>

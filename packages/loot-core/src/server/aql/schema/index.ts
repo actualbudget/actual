@@ -203,6 +203,7 @@ export const schema = {
   dashboard_pages: {
     id: f('id'),
     name: f('string'),
+    sort_order: f('float'),
     tombstone: f('boolean'),
   },
   dashboard: {
@@ -295,6 +296,8 @@ export const schemaConfig: SchemaConfig = {
         case 'accounts':
           return ['sort_order', 'name'];
         case 'account_groups':
+          return ['sort_order', 'id'];
+        case 'dashboard_pages':
           return ['sort_order', 'id'];
         case 'schedules':
           return [{ $condition: { completed: true } }, 'next_date'];

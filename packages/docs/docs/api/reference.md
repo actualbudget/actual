@@ -11,7 +11,9 @@ import APIList from './APIList';
 "setBudgetAmount",
 "setBudgetCarryover",
 "holdBudgetForNextMonth",
-"resetBudgetHold"
+"resetBudgetHold",
+"applyCategoryTemplate",
+"getCategoryTemplateAmount"
 ]} />
 
 <APIList title="Transactions" sections={[
@@ -84,12 +86,27 @@ import APIList from './APIList';
 "getSchedules",
 "createSchedule",
 "updateSchedule",
-"deleteSchedule"
+"deleteSchedule",
+"getScheduleDates"
 ]} />
 
 <APIList title="Notes" sections={[
 "getNote",
 "updateNote"
+]} />
+
+<APIList title="Dashboards" sections={[
+"getDashboardPages",
+"createDashboardPage",
+"renameDashboardPage",
+"deleteDashboardPage",
+"resetDashboard",
+"getDashboardWidgets",
+"addDashboardWidget",
+"updateDashboardWidget",
+"removeDashboardWidget",
+"updateDashboard",
+"copyDashboardWidget"
 ]} />
 
 <APIList title="Misc" sections={[
@@ -162,6 +179,18 @@ These are types.
 #### `resetBudgetHold`
 
 <Method name="resetBudgetHold" args={[{ name: 'month', type: 'month' }]} returns="Promise<null>" />
+
+#### `applyCategoryTemplate`
+
+<Method name="applyCategoryTemplate" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }]} returns="Promise<null>" />
+
+Budgets the category for the month from its [budget templates](../experimental/goal-templates.md), replacing the amount already budgeted. It fails when the category has no template or one of its templates has an error.
+
+#### `getCategoryTemplateAmount`
+
+<Method name="getCategoryTemplateAmount" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }]} returns="Promise<amount>" />
+
+Returns the amount the category's templates would budget for the month, without budgeting it. The amount ignores how much is available to budget, so it can be higher than what `applyCategoryTemplate` budgets. It fails when the category has no template.
 
 ## Transactions
 
@@ -788,6 +817,44 @@ Update fields of a rule. `fields` can specify any field described in [`Schedule`
 
 <Method name="deleteSchedule" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
 
+#### `getScheduleDates`
+
+<Method name="getScheduleDates" args={[{ name: 'date', type: 'date | RecurConfig' }, { name: 'options', type: '{ start?: date, end?: date, count?: number }' }]} returns="Promise<date[]>" />
+
+Expands the `date` of a [`Schedule`](#schedule) into the dates it falls on, in ascending order. Pass a schedule's `date` field as returned by `getSchedules`, or any [`RecurConfig`](#recurconfig).
+
+Every recurrence setting is taken into account: `frequency`, `interval`, `patterns` (including the last day or the last weekday of the month), `endMode` and, when `skipWeekend` is set, the move to the Friday before or the Monday after the weekend (`weekendSolveMode`).
+
+- `start`: first date to include. Defaults to today.
+- `end`: last date to include.
+- `count`: maximum number of dates to return.
+
+The window applies to the dates after the weekend move, so the result matches the dates Actual shows for the schedule. A date that several occurrences move onto (a daily schedule's Saturday and Sunday both landing on Monday) is listed once, and `count` counts distinct dates. A recurrence that never ends needs an `end` or a `count`.
+
+```js
+const [rent] = await api.getSchedules();
+
+// Every date the schedule falls on in 2025
+await api.getScheduleDates(rent.date, {
+  start: '2025-01-01',
+  end: '2025-12-31',
+});
+
+// The next three dates from today
+await api.getScheduleDates(rent.date, { count: 3 });
+
+// The same helper works on a recurrence that is not saved yet
+await api.getScheduleDates(
+  {
+    frequency: 'monthly',
+    start: '2025-01-01',
+    patterns: [{ type: 'FR', value: -1 }],
+  },
+  { start: '2025-01-01', count: 2 },
+);
+// ['2025-01-31', '2025-02-28']
+```
+
 ## Notes
 
 Notes can be attached to any entity (categories, budget months, etc.) by ID. They are also used to define budget templates and savings goals (e.g. `#template 250`, `#goal 1000`).
@@ -803,6 +870,76 @@ Returns the note for the given entity ID, or `null` if no note has been set.
 <Method name="updateNote" args={[{ name: 'id', type: 'id' }, { name: 'note', type: 'string' }]} returns="Promise<void>" />
 
 Sets the note on the entity with the given ID. Pass an empty string to clear the note.
+
+## Dashboards
+
+Dashboards consist of dashboard pages and widgets displayed on those pages.
+
+#### `getDashboardPages`
+
+<Method name="getDashboardPages" args={[]} returns="Promise<DashboardPageEntity[]>" />
+
+Returns all dashboard pages in the budget.
+
+#### `createDashboardPage`
+
+<Method name="createDashboardPage" args={[{ name: 'name', type: 'string' }]} returns="Promise<id>" />
+
+Creates a new dashboard page with the given name. Returns the `id` of the created dashboard page.
+
+#### `renameDashboardPage`
+
+<Method name="renameDashboardPage" args={[{ name: 'id', type: 'id' }, { name: 'name', type: 'string' }]} returns="Promise<void>" />
+
+Renames an existing dashboard page.
+
+#### `deleteDashboardPage`
+
+<Method name="deleteDashboardPage" args={[{ name: 'id', type: 'id' }]} returns="Promise<void>" />
+
+Deletes the dashboard page with the given ID and all of its associated widgets.
+
+#### `resetDashboard`
+
+<Method name="resetDashboard" args={[{ name: 'id', type: 'id' }]} returns="Promise<void>" />
+
+Resets the dashboard page to its default state.
+
+#### `getDashboardWidgets`
+
+<Method name="getDashboardWidgets" args={[{ name: 'pageId', type: 'id?' }]} returns="Promise<DashboardWidgetEntity[]>" />
+
+Returns all dashboard widgets. If `pageId` is specified, returns only the widgets belonging to that dashboard page.
+
+#### `addDashboardWidget`
+
+<Method name="addDashboardWidget" args={[{ name: 'widget', type: 'AddDashboardWidgetInput' }]} returns="Promise<void>" />
+
+Adds a new widget to a dashboard page. If `x` and `y` coordinates are omitted, they are calculated automatically.
+
+#### `updateDashboardWidget`
+
+<Method name="updateDashboardWidget" args={[{ name: 'widget', type: 'object' }]} returns="Promise<void>" />
+
+Updates properties of a single dashboard widget. The `widget` object must include the widget `id`.
+
+#### `removeDashboardWidget`
+
+<Method name="removeDashboardWidget" args={[{ name: 'id', type: 'id' }]} returns="Promise<void>" />
+
+Removes the dashboard widget with the specified ID.
+
+#### `updateDashboard`
+
+<Method name="updateDashboard" args={[{ name: 'widgets', type: 'object[]' }]} returns="Promise<void>" />
+
+Batch updates multiple dashboard widgets (for example, when updating a grid layout). Each item in `widgets` must include the widget `id`.
+
+#### `copyDashboardWidget`
+
+<Method name="copyDashboardWidget" args={[{ name: 'id', type: 'id' }, { name: 'targetDashboardPageId', type: 'id' }]} returns="Promise<void>" />
+
+Copies an existing dashboard widget to another dashboard page.
 
 ## Misc
 
@@ -836,9 +973,23 @@ Synchronizes the locally cached budget files with the server's copy.
 
 #### `runBankSync`
 
-<Method name="runBankSync" args={[{ properties: [{ name: 'accountId', type: 'string' }] }]} returns="Promise<void>" />
+<Method name="runBankSync" args={[{ name: 'args?', properties: [{ name: 'accountId', type: 'string' }] }]} returns="Promise<{ newTransactions: string[]; matchedTransactions: string[]; updatedAccounts: string[] }>" />
 
 Run the 3rd party (GoCardless, SimpleFIN) bank sync operation. This will download the transactions and insert them into the ledger.
+
+Omit the argument to sync every linked account. If you pass the argument, include `accountId`.
+
+Resolves with what the sync reconciled, so a caller can tell an idle sync from one that imported something without querying the ledger:
+
+```js
+{
+  newTransactions: ['id', ...],     // transactions the sync added
+  matchedTransactions: ['id', ...], // existing transactions it updated
+  updatedAccounts: ['id', ...]      // accounts the sync added transactions to
+}
+```
+
+A sync that adds or updates nothing resolves with three empty arrays. Errors still reject, so a resolved promise always means the sync succeeded. When syncing every account, one failing account rejects the whole call, but transactions already imported for the other accounts stay in the ledger and are not reported. After a rejection, check the ledger instead of assuming nothing was imported.
 
 #### `runImport`
 

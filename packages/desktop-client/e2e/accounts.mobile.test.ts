@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
+import { MobileTransactionEntryPage } from './page-models/mobile-transaction-entry-page';
 
 test.describe('Mobile Accounts', () => {
   let page: Page;
@@ -63,6 +64,59 @@ test.describe('Mobile Accounts', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('keeps the search after opening a transaction and going back', async () => {
+    const accountsPage = await navigation.goToAccountsPage();
+    await accountsPage.waitFor();
+
+    const accountPage = await accountsPage.openNthAccount(0);
+    await accountPage.waitFor();
+
+    await accountPage.searchByText('Kroger');
+    await expect(page).toHaveURL(/[?&]search=Kroger/);
+    // Wait for the filtered list; unfiltered, the first rows are schedules.
+    await expect(accountPage.transactions.first()).toContainText('Kroger');
+    const searchedCount = await accountPage.transactions.count();
+
+    await accountPage.transactions.first().click();
+    const transactionPage = new MobileTransactionEntryPage(page);
+    await transactionPage.waitFor();
+
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await accountPage.waitFor();
+
+    await expect(accountPage.searchBox).toHaveValue('Kroger');
+    await expect(page).toHaveURL(/[?&]search=Kroger/);
+    await expect(accountPage.transactions).toHaveCount(searchedCount);
+  });
+
+  test('selects the last search result while the selection bar is shown', async () => {
+    const accountsPage = await navigation.goToAccountsPage();
+    await accountsPage.waitFor();
+
+    const accountPage = await accountsPage.openNthAccount(0);
+    await accountPage.waitFor();
+
+    await accountPage.searchByText('Kroger');
+    // Wait until only search results are listed, so the long press does not
+    // land on a row that is about to be replaced.
+    await expect(
+      accountPage.transactions.filter({ hasNotText: 'Kroger' }),
+    ).toHaveCount(0);
+
+    await accountPage.longPressTransaction(accountPage.transactions.first());
+    await expect(accountPage.selectedCount).toHaveText(
+      '1 transaction selected',
+    );
+
+    await accountPage.scrollToEndOfList();
+    // Forced so the click lands on whatever is on top at the row's centre:
+    // the selection bar must not cover the last row.
+    await accountPage.transactions.last().click({ force: true });
+    await expect(accountPage.selectedCount).toHaveText(
+      '2 transactions selected',
+    );
+  });
+
   test('reconciles an account', async () => {
     const accountsPage = await navigation.goToAccountsPage();
     await accountsPage.waitFor();
@@ -86,5 +140,8 @@ test.describe('Mobile Accounts', () => {
 
     await accountPage.lockTransactions();
     await expect(accountPage.reconcilingBanner).not.toBeVisible();
+
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await expect(accountsPage.accountList).toBeVisible();
   });
 });

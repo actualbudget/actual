@@ -8,7 +8,7 @@ The bell sits in the top bar, next to the Help menu. When there are notification
 
 ## The Notifications Page
 
-![Image of Notifications](/img/using-actual/in-app-notifications.webp)
+![The Notifications page with a release card](/img/notifications/notifications-page@2x.webp)
 
 Each notification is shown as a card:
 

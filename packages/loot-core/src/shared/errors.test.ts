@@ -60,4 +60,26 @@ describe('getSyncError', () => {
       SCHEMA_MISMATCH_MESSAGE,
     );
   });
+
+  it('explains how to recover from an out-of-sync local budget', () => {
+    expect(getSyncError('out-of-sync', 'budget-id')).toBe(
+      'The local copy of budget "budget-id" is out of sync with the server. Delete the "budget-id" folder from your data directory and download the budget again (any changes not yet synced to the server will be lost).',
+    );
+  });
+
+  it('says when the browser no longer has the local copy, and what to do', () => {
+    expect(getSyncError('storage-lost', 'budget-id')).toBe(
+      'This browser no longer has the local copy of budget "budget-id". Browsers can discard it, mostly in private windows. Delete this copy and download the budget again, or restore it from a backup.',
+    );
+    // Not the message for storage that is only out of reach
+    expect(getSyncError('storage-unavailable', 'budget-id')).toContain(
+      'Nothing was deleted',
+    );
+  });
+
+  it('falls back to the generic message for unknown errors', () => {
+    expect(getSyncError('something-else', 'budget-id')).toBe(
+      'We had an unknown problem opening "budget-id".',
+    );
+  });
 });

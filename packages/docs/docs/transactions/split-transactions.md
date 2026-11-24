@@ -8,7 +8,10 @@ Oftentimes a single transaction covers multiple categories. For example, a trip 
 2. Add more splits of the original transaction as needed by clicking the **Add Split** button.
 3. Assign a category and amount to each split. The sum of the amounts of all child transactions must equal the amount of the parent transaction.
 
-![Image of buttons when managing split transactions](/img/split-transactions/split-transactions-buttons.png)
+<img width="860" alt="A 40.00 transaction split into 20.00 and 10.00, with the Add Split and Distribute buttons labeled" src="/img/transactions/split-transactions-buttons@2x.webp" />
+
+- **A. Add Split.** Adds another split below the existing ones.
+- **B. Distribute.** Shares the amount left between the splits. See [Distributing the Remainder](#distributing-the-remainder).
 
 ## Distributing the Remainder
 

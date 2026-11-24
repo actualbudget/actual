@@ -1,10 +1,10 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type {
   ComponentPropsWithoutRef,
   ComponentPropsWithRef,
   CSSProperties,
   ReactNode,
 } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   Dialog,
   Modal as ReactAriaModal,
@@ -24,17 +24,94 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
-import { tokens } from '@actual-app/components/tokens';
+import { radius, spacing, tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
+import { css, keyframes } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { useModalState } from '#hooks/useModalState';
+import { useReducedMotion } from '#hooks/useReducedMotion';
+import { useSwipeToDismiss } from '#hooks/useSwipeToDismiss';
+import { useVisualViewport } from '#hooks/useVisualViewport';
+import { collapseModals } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 export const MODAL_Z_INDEX = 3000;
 
+const mobileSheetContainerStyle: CSSProperties = {
+  minWidth: '100%',
+  maxWidth: '100%',
+  borderRadius: `${radius.sheet}px ${radius.sheet}px 0 0`,
+  ...styles.shadowSheet,
+};
+
+const SHEET_EXIT_MS = 180;
+const KEYBOARD_FOLLOW_TRANSITION = '300ms cubic-bezier(0.22, 1, 0.36, 1)';
+
+// A registered length can be transitioned; unregistered variables cannot.
+const canTransitionViewportHeightVariable = registerViewportHeightVariable();
+
+function registerViewportHeightVariable() {
+  if (typeof CSS === 'undefined' || !('registerProperty' in CSS)) {
+    return false;
+  }
+  try {
+    CSS.registerProperty({
+      name: '--visual-viewport-height',
+      syntax: '<length>',
+      inherits: true,
+      initialValue: '0px',
+    });
+  } catch {
+    // Already registered.
+  }
+  return true;
+}
+
+const sheetSlideIn = keyframes({
+  from: { transform: 'translateY(100%)' },
+  to: { transform: 'translateY(0)' },
+});
+
+const sheetSlideOut = keyframes({
+  to: { transform: 'translateY(100%)' },
+});
+
+const overlayFadeIn = keyframes({ from: { opacity: 0 }, to: { opacity: 1 } });
+const overlayFadeOut = keyframes({ from: { opacity: 1 }, to: { opacity: 0 } });
+
+const mobileSheetModalClassName = css({
+  '&[data-entering]': {
+    animation: `${sheetSlideIn} 240ms cubic-bezier(0.22, 1, 0.36, 1)`,
+  },
+  '&[data-exiting]': {
+    animation: `${sheetSlideOut} ${SHEET_EXIT_MS}ms ease-in forwards`,
+  },
+});
+
+const mobileSheetOverlayClassName = css({
+  '&[data-entering]': { animation: `${overlayFadeIn} 180ms ease-out` },
+  '&[data-exiting]': {
+    animation: `${overlayFadeOut} ${SHEET_EXIT_MS}ms ease-in forwards`,
+  },
+});
+
+const mobileSheetHandleStyle: CSSProperties = {
+  width: 36,
+  height: 4,
+  borderRadius: radius.pill,
+  // oxlint-disable-next-line actual/theme-token-roles
+  backgroundColor: theme.pageTextSubdued,
+  alignSelf: 'center',
+  marginTop: spacing.sm,
+  marginBottom: spacing.sm,
+  flexShrink: 0,
+};
+
 type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
+  presentation?: 'dialog' | 'sheet';
+  ariaLabelledBy?: string;
   name: string;
   isLoading?: boolean;
   noAnimation?: boolean;
@@ -57,10 +134,14 @@ export const Modal = ({
   onClose,
   wrapperProps,
   containerProps,
+  presentation = 'dialog',
+  ariaLabelledBy,
   ...props
 }: ModalProps) => {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+  const isSheet = presentation === 'sheet' && isNarrowWidth;
+  const viewport = useVisualViewport();
   const { enableScope, disableScope } = useHotkeysContext();
 
   // This deactivates any key handlers in the "app" scope
@@ -69,65 +150,130 @@ export const Modal = ({
     return () => disableScope(name);
   }, [enableScope, disableScope, name]);
 
-  const { isHidden, isActive, onClose: closeModal } = useModalState();
+  const {
+    isHidden,
+    isActive,
+    modalStack,
+    onClose: closeModal,
+  } = useModalState();
+  const isDirectlyBelowTopModal =
+    !isActive(name) && modalStack.at(-2)?.name === name;
+  const dispatch = useDispatch();
+  const prefersReducedMotion = useReducedMotion();
+  const isAnimatedSheet = isSheet && !prefersReducedMotion;
+  const [isOpen, setIsOpen] = useState(true);
+  const isClosingRef = useRef(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleOnClose = () => {
-    closeModal();
-    onClose?.();
+    if (isClosingRef.current) {
+      return;
+    }
+    isClosingRef.current = true;
+    const finishClose = () => {
+      if (isSheet) {
+        dispatch(collapseModals({ rootModalName: name }));
+      } else {
+        closeModal();
+      }
+      onClose?.();
+    };
+    if (isAnimatedSheet) {
+      closeTimerRef.current = setTimeout(finishClose, SHEET_EXIT_MS);
+      return;
+    }
+    finishClose();
   };
+
+  const sheetRef = useSwipeToDismiss({
+    isEnabled: isSheet,
+    onDismiss: () => {
+      setIsOpen(false);
+      handleOnClose();
+    },
+  });
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
       <ReactAriaModalOverlay
         data-testid={`${name}-modal`}
+        className={isAnimatedSheet ? mobileSheetOverlayClassName : undefined}
         isDismissable
-        defaultOpen
-        onOpenChange={isOpen => !isOpen && handleOnClose?.()}
+        isOpen={isOpen}
+        onOpenChange={nextIsOpen => {
+          setIsOpen(nextIsOpen);
+          if (!nextIsOpen) {
+            handleOnClose();
+          }
+        }}
         style={{
           position: 'fixed',
           inset: 0,
           zIndex: MODAL_Z_INDEX,
           fontSize: 14,
-          // on mobile, we disable the blurred background for performance reasons
-          ...(isNarrowWidth
-            ? {
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
-              }
-            : {
-                backdropFilter: 'blur(1px) brightness(0.9)',
-              }),
+          ...getOverlayBackgroundStyle({
+            isNarrowWidth,
+            isTopModal: isActive(name),
+            isDirectlyBelowTopModal,
+          }),
           ...style,
         }}
         {...props}
       >
         {/* A container for positioning the modal relative to the visual viewport */}
         <View
+          nativeStyle={{
+            // React Aria's height removes pinch zoom scaling. Safari page zoom
+            // needs CSS pixels, including keyboard resizing while zoomed.
+            // Excludes the status bar area.
+            '--visual-viewport-height': `calc(${viewport.height}px - env(safe-area-inset-top, 0px))`,
+            top: viewport.offsetTop,
+          }}
           style={{
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            marginTop: 'env(safe-area-inset-top, 0px)',
+            alignItems: isSheet ? 'stretch' : 'center',
             height: 'var(--visual-viewport-height)',
+            // Follow the on-screen keyboard instead of snapping.
+            ...(isNarrowWidth &&
+              !prefersReducedMotion && {
+                transition: `${canTransitionViewportHeightVariable ? '--visual-viewport-height' : 'height'} ${KEYBOARD_FOLLOW_TRANSITION}, top ${KEYBOARD_FOLLOW_TRANSITION}`,
+              }),
             overflowY: 'auto',
             ...wrapperProps?.style,
           }}
         >
-          <ReactAriaModal>
+          <ReactAriaModal
+            ref={sheetRef}
+            className={isAnimatedSheet ? mobileSheetModalClassName : undefined}
+            // Auto margins never push an oversized modal above the container.
+            style={{ marginTop: 'auto', marginBottom: isSheet ? 0 : 'auto' }}
+          >
             {modalProps => (
               <Dialog
-                aria-label={t('Modal dialog')}
+                aria-label={ariaLabelledBy ? undefined : t('Modal dialog')}
+                aria-labelledby={ariaLabelledBy}
                 className={css(styles.lightScrollbar)}
                 style={{
                   outline: 'none', // remove focus outline
                 }}
               >
                 <ModalContentContainer
-                  noAnimation={noAnimation}
+                  noAnimation={noAnimation || isSheet}
                   isActive={isActive(name)}
                   {...containerProps}
                   style={{
                     flex: 1,
                     padding: 10,
-                    willChange: 'opacity, transform',
+                    willChange: isSheet ? undefined : 'opacity, transform',
                     maxWidth: '90vw',
                     minWidth: '90vw',
                     maxHeight: 'calc(var(--visual-viewport-height) * 0.9)',
@@ -142,9 +288,11 @@ export const Modal = ({
                     },
                     overflowY: 'auto',
                     ...styles.shadowLarge,
+                    ...(isSheet && mobileSheetContainerStyle),
                     ...containerProps?.style,
                   }}
                 >
+                  {isSheet && <View style={mobileSheetHandleStyle} />}
                   <View style={{ paddingTop: 0, flex: 1, flexShrink: 0 }}>
                     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
                       {typeof children === 'function'
@@ -182,6 +330,35 @@ export const Modal = ({
   );
 };
 
+type OverlayBackgroundStyleOptions = {
+  isNarrowWidth: boolean;
+  isTopModal: boolean;
+  isDirectlyBelowTopModal: boolean;
+};
+
+function getOverlayBackgroundStyle({
+  isNarrowWidth,
+  isTopModal,
+  isDirectlyBelowTopModal,
+}: OverlayBackgroundStyleOptions): CSSProperties {
+  // On mobile, we disable the blurred background for performance reasons.
+  if (isNarrowWidth) {
+    // oxlint-disable-next-line actual/no-color-literals
+    return { backgroundColor: 'rgba(0, 0, 0, 0.4)' };
+  }
+  // On desktop, only the top modal blurs: each stacked backdrop filter
+  // re-filters the whole viewport, which is extremely slow in Firefox.
+  if (isTopModal) {
+    return { backdropFilter: 'blur(1px) brightness(0.9)' };
+  }
+  // The modal directly below the top one gets a plain dim, equal to brightness(0.9).
+  if (isDirectlyBelowTopModal) {
+    // oxlint-disable-next-line actual/no-color-literals
+    return { backgroundColor: 'rgba(0, 0, 0, 0.1)' };
+  }
+  return {};
+}
+
 type ModalContentContainerProps = {
   style?: CSSProperties;
   noAnimation?: boolean;
@@ -197,7 +374,7 @@ const ModalContentContainer = ({
 }: ModalContentContainerProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const mounted = useRef(false);
-  const rotateFactor = useRef(Math.random() * 10 - 5);
+  const [rotateFactor] = useState(() => Math.random() * 10 - 5);
 
   useLayoutEffect(() => {
     if (!contentRef.current) {
@@ -214,7 +391,7 @@ const ModalContentContainer = ({
         contentRef.current.style.willChange = 'auto';
         contentRef.current.style.pointerEvents = 'auto';
       } else {
-        contentRef.current.style.transform = `translateY(-40px) scale(.95) rotate(${rotateFactor.current}deg)`;
+        contentRef.current.style.transform = `translateY(-40px) scale(.95) rotate(${rotateFactor}deg)`;
         contentRef.current.style.pointerEvents = 'none';
       }
     }
@@ -222,7 +399,7 @@ const ModalContentContainer = ({
     if (!mounted.current) {
       if (noAnimation) {
         contentRef.current.style.opacity = '1';
-        contentRef.current.style.transform = 'translateY(0px) scale(1)';
+        contentRef.current.style.transform = 'none';
 
         setTimeout(() => {
           if (contentRef.current) {
@@ -247,7 +424,7 @@ const ModalContentContainer = ({
     } else {
       setProps();
     }
-  }, [noAnimation, isActive]);
+  }, [noAnimation, isActive, rotateFactor]);
 
   return (
     <View

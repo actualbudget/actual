@@ -1,6 +1,7 @@
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
+import { Condition } from '#server/rules';
 // @ts-strict-ignore
 import { q } from '#shared/query';
 import { extractTagsFromText, makeExactTagSetQueryFilter } from '#shared/tags';
@@ -850,6 +851,32 @@ describe('Transaction rules', () => {
     ]);
   });
 
+  test('transactions can be queried by a notes regex that is still being typed', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+
+    await db.insertTransaction({
+      id: '1',
+      date: '2020-10-01',
+      account,
+      notes: 'Invoice #123',
+      amount: 123,
+    });
+
+    // An incomplete pattern matches nothing instead of failing the query
+    for (const value of ['#\\', '#[', '#\\d+(']) {
+      const transactions = await getMatchingTransactions([
+        { field: 'notes', op: 'matches', value },
+      ]);
+      expect(transactions).toEqual([]);
+    }
+
+    const transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'matches', value: '#\\d+' },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['1']);
+  });
+
   test('transactions can be queried by hasTags if no "#" is included', async () => {
     await loadRules();
     const account = await db.insertAccount({ name: 'bank' });
@@ -1009,6 +1036,201 @@ describe('Transaction rules', () => {
     expect(transactions.map(t => t.id)).toEqual(['2']);
   });
 
+  test('date isbetween builds an inclusive range condition', () => {
+    const { filters } = conditionsToAQL([
+      {
+        field: 'date',
+        op: 'isbetween',
+        value: { num1: '2020-10-05', num2: '2020-10-15' },
+      },
+    ]);
+    expect(filters).toStrictEqual([
+      { date: [{ $gte: '2020-10-05' }, { $lte: '2020-10-15' }] },
+    ]);
+
+    // The bounds may be given in either order
+    const { filters: reversed } = conditionsToAQL([
+      {
+        field: 'date',
+        op: 'isbetween',
+        value: { num1: '2020-10-15', num2: '2020-10-05' },
+      },
+    ]);
+    expect(reversed).toStrictEqual(filters);
+  });
+
+  test('transactions can be queried by a date range', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    const payeeId = await db.insertPayee({ name: 'payee' });
+
+    for (const [id, date] of [
+      ['1', '2020-10-04'],
+      ['2', '2020-10-05'],
+      ['3', '2020-10-10'],
+      ['4', '2020-10-15'],
+      ['5', '2020-10-16'],
+    ]) {
+      await db.insertTransaction({
+        id,
+        date,
+        account,
+        payee: payeeId,
+        amount: 1,
+      });
+    }
+
+    // Both bounds are inclusive
+    const transactions = await getMatchingTransactions([
+      {
+        field: 'date',
+        op: 'isbetween',
+        value: { num1: '2020-10-05', num2: '2020-10-15' },
+      },
+    ]);
+    expect(transactions.map(t => t.id).sort()).toEqual(['2', '3', '4']);
+  });
+
+  test('amount isbetween builds an inclusive range condition', () => {
+    const { filters } = conditionsToAQL([
+      { field: 'amount', op: 'isbetween', value: { num1: 1000, num2: 5000 } },
+    ]);
+    expect(filters).toStrictEqual([
+      { $and: [{ amount: { $gte: 1000 } }, { amount: { $lte: 5000 } }] },
+    ]);
+
+    // The bounds may be given in either order
+    const { filters: reversed } = conditionsToAQL([
+      { field: 'amount', op: 'isbetween', value: { num1: 5000, num2: 1000 } },
+    ]);
+    expect(reversed).toStrictEqual(filters);
+  });
+
+  test('amount isbetween keeps the inflow/outflow sign handling', () => {
+    const { filters: outflow } = conditionsToAQL([
+      {
+        field: 'amount',
+        op: 'isbetween',
+        options: { outflow: true },
+        value: { num1: 1000, num2: 5000 },
+      },
+    ]);
+    expect(outflow).toStrictEqual([
+      {
+        $and: [
+          { amount: { $lte: 0 } },
+          { amount: { $transform: '$neg', $gte: 1000 } },
+          { amount: { $transform: '$neg', $lte: 5000 } },
+        ],
+      },
+    ]);
+
+    const { filters: inflow } = conditionsToAQL([
+      {
+        field: 'amount',
+        op: 'isbetween',
+        options: { inflow: true },
+        value: { num1: 1000, num2: 5000 },
+      },
+    ]);
+    expect(inflow).toStrictEqual([
+      {
+        $and: [
+          { amount: { $gte: 0 } },
+          { amount: { $gte: 1000 } },
+          { amount: { $lte: 5000 } },
+        ],
+      },
+    ]);
+  });
+
+  test('transactions can be queried by an outflow amount range', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    const payeeId = await db.insertPayee({ name: 'payee' });
+
+    for (const [id, amount] of [
+      ['1', -500],
+      ['2', -1000],
+      ['3', -3000],
+      ['4', -5000],
+      ['5', -6000],
+      // An inflow of the same magnitude must not be picked up
+      ['6', 3000],
+    ]) {
+      await db.insertTransaction({
+        id,
+        date: '2020-10-01',
+        account,
+        payee: payeeId,
+        amount,
+      });
+    }
+
+    // Outflow bounds are positive magnitudes, and both are inclusive
+    const transactions = await getMatchingTransactions([
+      {
+        field: 'amount',
+        op: 'isbetween',
+        options: { outflow: true },
+        value: { num1: 1000, num2: 5000 },
+      },
+    ]);
+    expect(transactions.map(t => t.id).sort()).toEqual(['2', '3', '4']);
+
+    const inflowTransactions = await getMatchingTransactions([
+      {
+        field: 'amount',
+        op: 'isbetween',
+        options: { inflow: true },
+        value: { num1: 1000, num2: 5000 },
+      },
+    ]);
+    expect(inflowTransactions.map(t => t.id)).toEqual(['6']);
+  });
+
+  test('a zero amount stays inside a zero-bound inflow or outflow range', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    const payeeId = await db.insertPayee({ name: 'payee' });
+
+    for (const [id, amount] of [
+      ['1', 0],
+      ['2', -3000],
+      ['3', 3000],
+    ]) {
+      await db.insertTransaction({
+        id,
+        date: '2020-10-01',
+        account,
+        payee: payeeId,
+        amount,
+      });
+    }
+
+    const value = { num1: 0, num2: 5000 };
+
+    const outflow = await getMatchingTransactions([
+      { field: 'amount', op: 'isbetween', options: { outflow: true }, value },
+    ]);
+    expect(outflow.map(t => t.id).sort()).toEqual(['1', '2']);
+
+    const inflow = await getMatchingTransactions([
+      { field: 'amount', op: 'isbetween', options: { inflow: true }, value },
+    ]);
+    expect(inflow.map(t => t.id).sort()).toEqual(['1', '3']);
+
+    // The query results must agree with the in-memory rule evaluation
+    const outflowCond = new Condition('isbetween', 'amount', value, {
+      outflow: true,
+    });
+    const inflowCond = new Condition('isbetween', 'amount', value, {
+      inflow: true,
+    });
+    expect(outflowCond.eval({ amount: 0 })).toBe(true);
+    expect(inflowCond.eval({ amount: 0 })).toBe(true);
+  });
+
   test('and sub expression builds $and condition', async () => {
     const conds = [{ field: 'category', op: 'is', value: null }];
     const { filters } = conditionsToAQL(conds);
@@ -1036,7 +1258,7 @@ describe('Learning categories', () => {
     expect(rule.actions[0].value).toBe(category);
   }
 
-  async function insertTransaction(
+  async function expectRuleAfterInsert(
     transaction,
     expectedCategory,
     expectedRuleCount = 1,
@@ -1100,7 +1322,7 @@ describe('Learning categories', () => {
   test('creates rule when inserting transactions', async () => {
     await loadData();
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'one',
         date: '2016-12-01',
@@ -1112,7 +1334,7 @@ describe('Learning categories', () => {
       0,
     );
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'two',
         date: '2016-12-01',
@@ -1124,7 +1346,7 @@ describe('Learning categories', () => {
       0,
     );
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'three',
         date: '2016-12-01',
@@ -1139,7 +1361,7 @@ describe('Learning categories', () => {
   test('leaves existing rule alone if probable category is ambiguous', async () => {
     await loadData();
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'one',
         date: '2016-12-01',
@@ -1151,7 +1373,7 @@ describe('Learning categories', () => {
       0,
     );
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'two',
         date: '2016-12-01',
@@ -1163,7 +1385,7 @@ describe('Learning categories', () => {
       0,
     );
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'three',
         date: '2016-12-01',
@@ -1184,7 +1406,7 @@ describe('Learning categories', () => {
 
     // Even though the system couldn't figure out the category to set,
     // it should leave the existing rule alone
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'four',
         date: '2016-12-01',
@@ -1207,7 +1429,7 @@ describe('Learning categories', () => {
       actions: [{ op: 'set', field: 'category', value: 'beer' }],
     });
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'one',
         date: '2016-12-01',
@@ -1218,7 +1440,7 @@ describe('Learning categories', () => {
       'beer',
       1,
     );
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'two',
         date: '2016-12-01',
@@ -1229,7 +1451,7 @@ describe('Learning categories', () => {
       'beer',
       1,
     );
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'three',
         date: '2016-12-01',
@@ -1253,7 +1475,7 @@ describe('Learning categories', () => {
     });
 
     // Use a new payee, so the category should be remembered
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'three',
         date: '2016-12-03',
@@ -1264,7 +1486,7 @@ describe('Learning categories', () => {
       'beer',
       1,
     );
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'four',
         date: '2016-12-03',
@@ -1275,7 +1497,7 @@ describe('Learning categories', () => {
       'beer',
       1,
     );
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'five',
         date: '2016-12-03',
@@ -1287,6 +1509,56 @@ describe('Learning categories', () => {
       2,
       'bar',
     );
+  });
+
+  test('does not create a rule if a "one of" rule already sets the category', async () => {
+    await loadData();
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'oneOf', field: 'payee', value: ['foo', 'bar'] }],
+      actions: [{ op: 'set', field: 'category', value: 'food' }],
+    });
+
+    const trans = {
+      date: '2016-12-01',
+      account: 'acct',
+      payee: 'foo',
+      category: 'food',
+    };
+    await db.insertTransaction({ ...trans, id: 'one' });
+    await db.insertTransaction({ ...trans, id: 'two' });
+    await db.insertTransaction({ ...trans, id: 'three' });
+    await updateCategoryRules([{ ...trans, id: 'three' }]);
+
+    expect(getRules().length).toBe(1);
+    expect(getRules()[0].conditions[0].op).toBe('oneOf');
+  });
+
+  test('creates a rule if a "one of" rule sets a different category', async () => {
+    await loadData();
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'oneOf', field: 'payee', value: ['foo', 'bar'] }],
+      actions: [{ op: 'set', field: 'category', value: 'beer' }],
+    });
+
+    const trans = {
+      date: '2016-12-01',
+      account: 'acct',
+      payee: 'foo',
+      category: 'food',
+    };
+    await db.insertTransaction({ ...trans, id: 'one' });
+    await db.insertTransaction({ ...trans, id: 'two' });
+    await db.insertTransaction({ ...trans, id: 'three' });
+    await updateCategoryRules([{ ...trans, id: 'three' }]);
+
+    expect(getRules().length).toBe(2);
+    expectCategoryRule(getRules()[1], 'food', 'foo');
   });
 
   test('updates rules correctly even if multiple rules exist', async () => {

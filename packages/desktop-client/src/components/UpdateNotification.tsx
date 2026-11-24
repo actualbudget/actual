@@ -34,7 +34,9 @@ export function UpdateNotification() {
           bottom: 0,
           right: 0,
           margin: '15px 17px',
+          // oxlint-disable-next-line actual/theme-token-roles
           backgroundColor: theme.pageTextPositive,
+          // oxlint-disable-next-line actual/theme-token-roles
           color: theme.tableBackground,
           padding: '7px 10px',
           borderRadius: 4,

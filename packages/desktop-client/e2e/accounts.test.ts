@@ -119,6 +119,31 @@ test.describe('Accounts', () => {
     await expect(transaction.balance).toHaveText('25.00');
   });
 
+  test('shows the running balance when sorted by date oldest first', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Running balance',
+      offBudget: false,
+      balance: 100,
+    });
+    await accountPage.waitFor();
+    await accountPage.createSingleTransaction({ debit: '30.00' });
+    await accountPage.createSingleTransaction({ credit: '5.00' });
+    await accountPage.setTransactionColumnVisibility('balance', true);
+
+    // The first click sorts newest first, the second oldest first.
+    const dateHeader = page.getByRole('button', { name: 'Date', exact: true });
+    await dateHeader.click();
+    await expect(accountPage.getNthTransaction(0).credit).toHaveText('5.00');
+    await dateHeader.click();
+
+    await expect(accountPage.getNthTransaction(0).payee).toHaveText(
+      'Starting Balance',
+    );
+    await expect(accountPage.getNthTransaction(0).balance).toHaveText('100.00');
+    await expect(accountPage.getNthTransaction(1).balance).toHaveText('70.00');
+    await expect(accountPage.getNthTransaction(2).balance).toHaveText('75.00');
+  });
+
   test('bulk editing the date shows a properly formatted date picker', async () => {
     async function measure(locator: Locator) {
       const box = await locator.boundingBox();
@@ -188,6 +213,9 @@ test.describe('Accounts', () => {
         notes: `range-${note}`,
         debit: '10.00',
       });
+      await expect(
+        accountPage.transactionTableRow.filter({ hasText: `range-${note}` }),
+      ).toBeVisible();
     }
 
     // Mark the middle transaction as cleared and lock it via
@@ -231,6 +259,224 @@ test.describe('Accounts', () => {
     // Only the two visible transactions should be selected — not the
     // hidden reconciled one in between.
     await expect(accountPage.selectButton).toHaveText('2 transactions');
+  });
+
+  test('keeps the search applied after toggling reconciled transactions', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Search Toggle',
+      offBudget: false,
+      balance: 0,
+    });
+    await accountPage.waitFor();
+
+    for (const note of ['search-match', 'search-other']) {
+      await accountPage.createSingleTransaction({
+        payee: '',
+        notes: note,
+        debit: '10.00',
+      });
+    }
+
+    await page.getByPlaceholder('Search').fill('search-match');
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'search-other' }),
+    ).not.toBeVisible();
+
+    await accountPage.accountMenuButton.click();
+    await page
+      .getByRole('button', { name: /(Hide|Show) reconciled transactions/ })
+      .click();
+
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'search-match' }),
+    ).toBeVisible();
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'search-other' }),
+    ).not.toBeVisible();
+  });
+
+  test('keeps the filter applied after toggling reconciled transactions', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Filter Toggle',
+      offBudget: false,
+      balance: 0,
+    });
+    await accountPage.waitFor();
+
+    for (const note of ['filter-match', 'filter-other']) {
+      await accountPage.createSingleTransaction({
+        payee: '',
+        notes: note,
+        debit: '10.00',
+      });
+    }
+
+    await accountPage.filterByNote('filter-match');
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'filter-other' }),
+    ).not.toBeVisible();
+
+    await accountPage.accountMenuButton.click();
+    await page
+      .getByRole('button', { name: /(Hide|Show) reconciled transactions/ })
+      .click();
+
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'filter-match' }),
+    ).toBeVisible();
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'filter-other' }),
+    ).not.toBeVisible();
+  });
+
+  test('keeps unreconciled transactions after sorting with hidden reconciled ones', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Sort Hidden Reconciled',
+      offBudget: false,
+      balance: 0,
+    });
+    await accountPage.waitFor();
+
+    async function importRows(rows: string[]) {
+      const fileChooserPromise = page.waitForEvent('filechooser');
+      await page.getByRole('button', { name: 'Import' }).click();
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles({
+        name: 'transactions.csv',
+        mimeType: 'text/csv',
+        buffer: Buffer.from(
+          ['Date,Payee,Notes,Category,Amount', ...rows].join('\n'),
+        ),
+      });
+      const importButton = page.getByRole('button', {
+        name: /Import \d+ transactions?/,
+      });
+      await importButton.click();
+      await expect(importButton).not.toBeVisible();
+    }
+
+    // More reconciled transactions than a single page of results (150),
+    // all older than the unreconciled one, so sorting by oldest first
+    // fills the first page with hidden transactions only.
+    await importRows(
+      Array.from(
+        { length: 160 },
+        (_, i) =>
+          `2024-01-${String((i % 28) + 1).padStart(2, '0')},Old ${i},,,-1.00`,
+      ),
+    );
+
+    await page.getByRole('button', { name: 'Reconcile' }).click();
+    const reconcilePopover = page.locator('[data-popover]');
+    await reconcilePopover.getByRole('textbox').waitFor();
+    await reconcilePopover.getByRole('button', { name: 'Reconcile' }).click();
+    await page.getByRole('button', { name: 'Lock transactions' }).click();
+
+    await importRows(['2024-06-01,Recent,not-reconciled,,-10.00']);
+
+    await accountPage.setTransactionColumnVisibility('balance', true);
+    await accountPage.accountMenuButton.click();
+    await page
+      .getByRole('button', { name: 'Hide reconciled transactions' })
+      .click();
+
+    const unreconciled = accountPage.transactionTableRow.filter({
+      hasText: 'not-reconciled',
+    });
+    await expect(unreconciled).toBeVisible();
+
+    // Each click toggles the order: newest first, oldest first, then
+    // newest first again.
+    const dateHeader = page.getByRole('button', { name: 'Date', exact: true });
+    await dateHeader.click();
+    await dateHeader.click();
+
+    await expect(unreconciled).toBeVisible();
+
+    await dateHeader.click();
+
+    // The running balance still counts the hidden reconciled transactions.
+    await expect(unreconciled.getByTestId('balance')).toHaveText('-170.00');
+  });
+
+  test('opens the other side of a transfer from its arrow', async () => {
+    accountPage = await navigation.goToAccountPage('Bank of America');
+    await accountPage.createSingleTransaction({
+      payee: 'Ally Savings',
+      notes: 'Transfer to point out',
+      debit: '12.34',
+    });
+
+    await accountPage.transactionTableRow
+      .filter({ hasText: 'Transfer to point out' })
+      .getByTestId('transfer-icon')
+      .click();
+
+    await expect(accountPage.accountName).toHaveText('Ally Savings');
+    const otherSide = accountPage.transactionTableRow.filter({
+      hasText: 'Transfer to point out',
+    });
+    await expect(otherSide).toHaveAttribute('data-pulse', 'true');
+    await expect(otherSide).toBeInViewport();
+    // The row is pointed out for a while only
+    await expect(otherSide).not.toHaveAttribute('data-pulse');
+  });
+
+  test('opens the other side of a transfer older than the first loaded page', async () => {
+    await page.evaluate(async () => {
+      const $send = (
+        window as unknown as {
+          $send: <T>(type: string, args?: unknown) => Promise<T>;
+        }
+      ).$send;
+      const accounts =
+        await $send<{ id: string; name: string }[]>('accounts-get');
+      const payees =
+        await $send<{ id: string; transfer_acct: string | null }[]>(
+          'payees-get',
+        );
+      const bankOfAmerica = accounts.find(a => a.name === 'Bank of America');
+      const allySavings = accounts.find(a => a.name === 'Ally Savings');
+      const allySavingsPayee = payees.find(
+        p => p.transfer_acct === allySavings?.id,
+      );
+      if (!bankOfAmerica || !allySavings || !allySavingsPayee) {
+        throw new Error('Missing test accounts');
+      }
+
+      // More newer transactions in Ally Savings than an account loads at
+      // first, so the other side of the transfer is only on a later page
+      await $send('transactions-batch-update', {
+        added: Array.from({ length: 200 }, () => ({
+          id: crypto.randomUUID(),
+          account: allySavings.id,
+          date: '2001-01-01',
+          amount: -100,
+        })),
+      });
+      await $send('transaction-add', {
+        id: crypto.randomUUID(),
+        account: bankOfAmerica.id,
+        date: '2000-01-01',
+        amount: -1234,
+        payee: allySavingsPayee.id,
+        notes: 'Old transfer to point out',
+      });
+    });
+
+    accountPage = await navigation.goToAccountPage('Bank of America');
+    await page.getByPlaceholder('Search').fill('Old transfer to point out');
+    await accountPage.transactionTableRow
+      .filter({ hasText: 'Old transfer to point out' })
+      .getByTestId('transfer-icon')
+      .click();
+
+    await expect(accountPage.accountName).toHaveText('Ally Savings');
+    const otherSide = accountPage.transactionTableRow.filter({
+      hasText: 'Old transfer to point out',
+    });
+    await expect(otherSide).toHaveAttribute('data-pulse', 'true');
+    await expect(otherSide).toBeInViewport();
   });
 
   test.describe('On Budget Accounts', () => {
@@ -372,6 +618,55 @@ test.describe('Accounts', () => {
       await accountPage.page.getByRole('button', { name: 'Close' }).click();
 
       await expect(importButton).not.toBeVisible();
+    });
+
+    test('imports a new transaction when an unchecked match has the same amount', async () => {
+      async function openCsv(content: string) {
+        const fileChooserPromise = page.waitForEvent('filechooser');
+        await accountPage.page.getByRole('button', { name: 'Import' }).click();
+        const fileChooser = await fileChooserPromise;
+        await fileChooser.setFiles({
+          name: 'same-amount.csv',
+          mimeType: 'text/csv',
+          buffer: Buffer.from(content),
+        });
+        return page.getByRole('dialog');
+      }
+
+      let dialog = await openCsv(
+        'Date,Payee,Notes,Amount\n2024-08-02,Netflix,,-8.99\n',
+      );
+      await dialog
+        .getByRole('button', { name: 'Import 1 transactions' })
+        .click();
+      await expect(dialog).not.toBeVisible();
+
+      // Netflix matches the existing transaction; Corner Coffee is new.
+      dialog = await openCsv(
+        'Date,Payee,Notes,Amount\n' +
+          '2024-08-02,Netflix,Subscription,-8.99\n' +
+          '2024-07-31,Corner Coffee,Latte,-8.99\n',
+      );
+      await expect(dialog.getByText('Corner Coffee')).toBeVisible();
+
+      // Uncheck the Netflix row: merge -> import as new -> skip
+      const netflixCheckbox = dialog
+        .getByTestId('row')
+        .filter({ hasText: 'Netflix' })
+        .getByRole('checkbox');
+      await netflixCheckbox.click();
+      await netflixCheckbox.click();
+      await dialog
+        .getByRole('button', { name: 'Import 1 transactions' })
+        .click();
+      await expect(dialog).not.toBeVisible();
+
+      await expect(
+        accountPage.transactionTableRow.filter({ hasText: 'Corner Coffee' }),
+      ).toBeVisible();
+      await expect(
+        accountPage.transactionTableRow.filter({ hasText: 'Subscription' }),
+      ).toHaveCount(0);
     });
 
     test('import notes checkbox is not shown for CSV files', async () => {

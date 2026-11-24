@@ -4,14 +4,14 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
 import type { SelectOption } from '@actual-app/components/select';
-import { Text } from '@actual-app/components/text';
 import type { TFunction } from 'i18next';
 
 import { Link } from '#components/common/Link';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { availableLanguages, setI18NextLanguage } from '#i18n';
 
-import { Setting } from './UI';
+import { SettingsGroup } from './SettingsGroup';
+import { SettingsRow } from './SettingsRow';
 
 const languageDisplayNameOverride: { [key: string]: string } = {
   'pt-BR': 'Português (Brasil)',
@@ -38,56 +38,59 @@ export function LanguageSettings() {
   const isEnabled = !!availableLanguages.length;
 
   return (
-    <Setting
-      primaryAction={
-        <Select
-          aria-label={t('Select language')}
-          options={languageOptions(t)}
-          value={isEnabled ? (language ?? '') : 'not-available'}
-          defaultLabel={
-            isEnabled ? t('Select language') : t('No languages available')
-          }
-          onChange={value => {
-            setLanguage(value);
-            setI18NextLanguage(value);
-          }}
-          disabled={!isEnabled}
-        />
-      }
-    >
-      <Text>
-        {isEnabled ? (
-          <Trans>
-            <strong>Language</strong> is the display language of all text.
-            Please note that no warranty is provided for the accuracy or
-            completeness of non-English translations. If you encounter a
-            translation error, feel free to make a suggestion on{' '}
-            <Link
-              variant="external"
-              to={
-                'https://hosted.weblate.org/projects/actualbudget/actual/' +
-                (language ?? '')
-              }
-              linkColor="purple"
-            >
-              Weblate
-            </Link>
-            .
-          </Trans>
-        ) : (
-          <Trans>
-            <strong>Language</strong> support is not available. Please follow
-            the instructions{' '}
-            <Link
-              variant="external"
-              to="https://actualbudget.org/docs/install/build-from-source#translations"
-            >
-              here
-            </Link>{' '}
-            to add missing translation files.
-          </Trans>
-        )}
-      </Text>
-    </Setting>
+    <SettingsGroup title={t('Language')}>
+      <SettingsRow
+        title={t('Display language')}
+        description={
+          isEnabled ? (
+            <Trans>
+              <span>Language</span> is the display language of all text. Please
+              note that no warranty is provided for the accuracy or completeness
+              of non-English translations. If you encounter a translation error,
+              feel free to make a suggestion on{' '}
+              <Link
+                variant="external"
+                to={
+                  'https://hosted.weblate.org/projects/actualbudget/actual/' +
+                  (language ?? '')
+                }
+                linkColor="purple"
+              >
+                Weblate
+              </Link>
+              .
+            </Trans>
+          ) : (
+            <Trans>
+              <span>Language</span> support is not available. Please follow the
+              instructions{' '}
+              <Link
+                variant="external"
+                to="https://actualbudget.org/docs/install/build-from-source#translations"
+                linkColor="purple"
+              >
+                here
+              </Link>{' '}
+              to add missing translation files.
+            </Trans>
+          )
+        }
+        control={
+          <Select
+            aria-label={t('Select language')}
+            options={languageOptions(t)}
+            value={isEnabled ? (language ?? '') : 'not-available'}
+            defaultLabel={
+              isEnabled ? t('Select language') : t('No languages available')
+            }
+            onChange={value => {
+              setLanguage(value);
+              setI18NextLanguage(value);
+            }}
+            disabled={!isEnabled}
+          />
+        }
+      />
+    </SettingsGroup>
   );
 }

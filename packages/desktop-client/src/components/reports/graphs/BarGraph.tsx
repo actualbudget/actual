@@ -88,6 +88,7 @@ const CustomTooltip = ({
           zIndex: 1000,
           pointerEvents: 'none',
           borderRadius: 2,
+          // oxlint-disable-next-line actual/no-color-literals
           boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
           backgroundColor: theme.menuBackground,
           color: theme.menuItemText,
@@ -193,6 +194,40 @@ function hasUncategorizedId(value: unknown): value is ReportDrilldownPayload {
   );
 }
 
+// Recharts types the bar's payload as `any`, so check it holds interval dates
+type IntervalDrilldownPayload = Pick<
+  IntervalEntity,
+  'intervalStartDate' | 'intervalEndDate'
+>;
+
+function hasIntervalDates(value: unknown): value is IntervalDrilldownPayload {
+  return (
+    value !== null && typeof value === 'object' && 'intervalStartDate' in value
+  );
+}
+
+// Keeps angled category labels from taking over the small card preview
+const COMPACT_LABEL_MAX_LENGTH = 12;
+// Rough horizontal space an angled tick label takes per character
+const ANGLED_LABEL_WIDTH_PER_CHAR = 5;
+
+const graphemeSegmenter = new Intl.Segmenter(undefined, {
+  granularity: 'grapheme',
+});
+
+// Splits by visible character so emoji like flags and families stay whole
+function splitGraphemes(value: string) {
+  return Array.from(graphemeSegmenter.segment(value), s => s.segment);
+}
+
+// Emoji and CJK characters render about twice as wide as Latin letters
+const WIDE_GRAPHEME =
+  /\p{Extended_Pictographic}|\p{Regional_Indicator}|\p{Script=Han}|\p{Script=Hiragana}|\p{Script=Katakana}|\p{Script=Hangul}/u;
+
+function getGraphemeWidth(grapheme: string) {
+  return WIDE_GRAPHEME.test(grapheme) ? 2 : 1;
+}
+
 type BarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
@@ -239,15 +274,47 @@ export function BarGraph({
     return obj[balanceTypeOp];
   };
 
+  const formatXTick = (value: string) => {
+    // Split by grapheme so emoji like flags and families stay whole
+    const chars = splitGraphemes(value);
+    return compact && chars.length > COMPACT_LABEL_MAX_LENGTH
+      ? `${chars.slice(0, COMPACT_LABEL_MAX_LENGTH - 1).join('')}…`
+      : value;
+  };
+
+  const getLabelLength = (value: string) =>
+    splitGraphemes(formatXTick(value)).length;
+
   const longestLabelLength = data[splitData]
-    .map(c => c[yAxis])
-    .reduce((acc, cur) => (cur.length > acc ? cur.length : acc), 0);
+    .map(c => getLabelLength(c[yAxis]))
+    .reduce((acc, cur) => (cur > acc ? cur : acc), 0);
 
   const largestValue = data[splitData]
     .map(c => c[balanceTypeOp])
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
-  const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
+  // Dates fit flat like the stacked bar card; only category names need angling
+  const isAngled = !compact || groupBy !== 'Interval';
+
+  const getLeftMargin = () => {
+    // Without a Y axis the card has no room for the first angled label to overhang
+    const firstLabel = data[splitData][0]?.[yAxis];
+    if (compact && isAngled && firstLabel) {
+      const labelWidth = splitGraphemes(formatXTick(firstLabel)).reduce(
+        (sum, grapheme) => sum + getGraphemeWidth(grapheme),
+        0,
+      );
+      return labelWidth * ANGLED_LABEL_WIDTH_PER_CHAR;
+    }
+
+    if (Math.abs(largestValue) > 1000000) {
+      return 20;
+    }
+
+    return 0;
+  };
+
+  const leftMargin = getLeftMargin();
 
   return (
     <Container
@@ -289,15 +356,17 @@ export function BarGraph({
                 />
               )}
               {!compact && <CartesianGrid strokeDasharray="3 3" />}
-              {!compact && (
-                <XAxis
-                  dataKey={yAxis}
-                  angle={-35}
-                  height={Math.sqrt(longestLabelLength) * 25}
-                  tick={{ fill: theme.pageText, textAnchor: 'end' }}
-                  tickLine={{ stroke: theme.pageText }}
-                />
-              )}
+              <XAxis
+                dataKey={yAxis}
+                angle={isAngled ? -35 : 0}
+                height={isAngled ? Math.sqrt(longestLabelLength) * 25 : 30}
+                tickFormatter={formatXTick}
+                tick={{
+                  fill: theme.pageText,
+                  textAnchor: isAngled ? 'end' : 'middle',
+                }}
+                tickLine={{ stroke: theme.pageText }}
+              />
               {!compact && (
                 <YAxis
                   tickFormatter={value =>
@@ -317,33 +386,50 @@ export function BarGraph({
                 stackId="a"
                 {...animationProps}
                 onMouseLeave={() => setPointer('')}
-                onMouseEnter={() =>
-                  groupBy !== 'Interval' && setPointer('pointer')
-                }
+                onMouseEnter={() => setPointer('pointer')}
                 onClick={item => {
+                  if (compact && !showTooltip) {
+                    return;
+                  }
+
+                  const intervalPayload = hasIntervalDates(item.payload)
+                    ? item.payload
+                    : undefined;
                   const itemPayload = hasUncategorizedId(item.payload)
                     ? item.payload
                     : undefined;
 
-                  return (
-                    ((compact && showTooltip) || !compact) &&
-                    groupBy !== 'Interval' &&
-                    showActivity({
-                      navigate,
-                      categories,
-                      accounts,
-                      balanceTypeOp,
-                      filters,
-                      showHiddenCategories,
-                      showOffBudget,
-                      type: 'totals',
-                      startDate: data.startDate,
-                      endDate: data.endDate,
-                      field: groupBy.toLowerCase(),
-                      id: item.id,
-                      uncategorizedId: itemPayload?.uncategorizedId,
-                    })
-                  );
+                  // Interval bars drill down by their own date range instead of a field
+                  const drilldown =
+                    groupBy === 'Interval'
+                      ? {
+                          startDate:
+                            intervalPayload?.intervalStartDate ??
+                            data.startDate,
+                          endDate:
+                            intervalPayload?.intervalEndDate ?? data.endDate,
+                        }
+                      : {
+                          startDate: data.startDate,
+                          endDate: data.endDate,
+                          field: groupBy.toLowerCase(),
+                          id: item.id,
+                          uncategorizedId: itemPayload?.uncategorizedId,
+                        };
+
+                  showActivity({
+                    navigate,
+                    categories,
+                    accounts,
+                    balanceTypeOp,
+                    filters,
+                    showHiddenCategories,
+                    showOffBudget,
+                    type: 'totals',
+                    ...drilldown,
+                    bucketTagNames: item.payload.bucketTagNames,
+                    scopeTagNames: data.scopeTagNames,
+                  });
                 }}
                 shape={(props: BarShapeProps) => (
                   <Rectangle

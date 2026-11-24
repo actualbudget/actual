@@ -69,7 +69,7 @@ export async function checkTemplateNotes(): Promise<TemplateNotification> {
   };
 }
 
-async function getCategoriesWithTemplates(
+export async function getCategoriesWithTemplates(
   categoryIds?: string[],
 ): Promise<CategoryWithTemplateNotes[]> {
   const templatesForCategory: CategoryWithTemplateNotes[] = [];
@@ -111,6 +111,7 @@ async function getCategoriesWithTemplates(
         // Validate schedule adjustments
         if (
           (parsedTemplate.type === 'average' ||
+            parsedTemplate.type === 'weeklyAverage' ||
             parsedTemplate.type === 'schedule') &&
           parsedTemplate.adjustment !== undefined
         ) {
@@ -199,11 +200,7 @@ function templateToLine(
       }
       result += ` ${template.name}`;
       if (template.adjustment !== undefined) {
-        const adj = template.adjustment;
-        const op = adj >= 0 ? 'increase' : 'decrease';
-        const val = Math.abs(adj);
-        const type = template.adjustmentType === 'percent' ? '%' : '';
-        result += ` [${op} ${val}${type}]`;
+        result += ` ${adjustmentToString(template)}`;
       }
       return result;
     }
@@ -252,11 +249,15 @@ function templateToLine(
       // #template average <numMonths> months [increase/decrease {number|number%}]
       let result = `${prefix} average ${template.numMonths} months`;
       if (template.adjustment !== undefined) {
-        const adj = template.adjustment;
-        const op = adj >= 0 ? 'increase' : 'decrease';
-        const val = Math.abs(adj);
-        const type = template.adjustmentType === 'percent' ? '%' : '';
-        result += ` [${op} ${val}${type}]`;
+        result += ` ${adjustmentToString(template)}`;
+      }
+      return result;
+    }
+    case 'weeklyAverage': {
+      // #template average <numWeeks> weeks on <weekday> [increase/decrease {number|number%}]
+      let result = `${prefix} average ${template.numWeeks} weeks on ${template.weekday}`;
+      if (template.adjustment !== undefined) {
+        result += ` ${adjustmentToString(template)}`;
       }
       return result;
     }
@@ -322,6 +323,18 @@ function limitToString(limit: {
       return limit.hold ? `${base} hold` : base;
     }
   }
+}
+
+function adjustmentToString({
+  adjustment = 0,
+  adjustmentType,
+}: {
+  adjustment?: number;
+  adjustmentType?: 'percent' | 'fixed';
+}): string {
+  const op = adjustment >= 0 ? 'increase' : 'decrease';
+  const type = adjustmentType === 'percent' ? '%' : '';
+  return `[${op} ${Math.abs(adjustment)}${type}]`;
 }
 
 function periodToString(p: {

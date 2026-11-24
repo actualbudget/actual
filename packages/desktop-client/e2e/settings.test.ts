@@ -40,6 +40,36 @@ test.describe('Settings', () => {
     expect(download.suggestedFilename()).toMatch(/^\d{4}-\d{2}-\d{2}-.*.zip$/);
   });
 
+  test('moves pages between the sidebar and settings', async () => {
+    await settingsPage.settings
+      .locator('label[for="toggle-sidebar-item-payees"]')
+      .click();
+    await settingsPage.settings
+      .locator('label[for="toggle-sidebar-item-schedules"]')
+      .click();
+
+    const sidebar = page.getByTestId('sidebar-primary-buttons');
+    await expect(sidebar.getByRole('link', { name: 'Payees' })).toBeVisible();
+    await expect(sidebar.getByRole('link', { name: 'Schedules' })).toHaveCount(
+      0,
+    );
+    await expect(
+      settingsPage.settingsNav.getByRole('link', { name: 'Schedules' }),
+    ).toBeVisible();
+    await expect(
+      settingsPage.settingsNav.getByRole('link', { name: 'Payees' }),
+    ).toHaveCount(0);
+
+    await settingsPage.settingsNav
+      .getByRole('link', { name: 'Schedules' })
+      .click();
+    await expect(page).toHaveURL(/\/settings\/schedules$/);
+    await expect(settingsPage.settingsNav).toBeVisible();
+
+    await sidebar.getByRole('link', { name: 'Payees' }).click();
+    await expect(page).toHaveURL(/\/payees$/);
+  });
+
   test('keeps the global CSS override readable after switching themes', async () => {
     await page.setViewportSize({ width: 1024, height: 900 });
     await page.route('**/customThemeCatalog.json', route =>

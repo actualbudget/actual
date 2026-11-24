@@ -59,11 +59,26 @@ export const loadBudget = createAppAsyncThunk(
     dispatch(setAppState({ loadingText: t('Loading...') }));
 
     // Loading a budget may fail
-    const { error } = await send('load-budget', { id, ...options });
+    const {
+      error,
+      budgetName,
+      canKeepPreviousStorage = null,
+    } = await send('load-budget', { id, ...options });
 
     if (error) {
-      const message = getSyncError(error, id);
-      if (error === 'out-of-sync-migrations') {
+      // By the name the user knows the budget by, where the backend got
+      // far enough to tell it
+      const message = getSyncError(error, budgetName ?? id);
+      if (error === 'storage-migration-failed') {
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'storage-migration-failed',
+              options: { budgetId: id, message, canKeepPreviousStorage },
+            },
+          }),
+        );
+      } else if (error === 'out-of-sync-migrations') {
         dispatch(pushModal({ modal: { name: 'out-of-sync-migrations' } }));
       } else if (error === 'out-of-sync-data') {
         // confirm is not available on iOS

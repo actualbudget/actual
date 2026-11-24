@@ -1,44 +1,109 @@
 import createDebug from 'debug';
 import express from 'express';
+import { fetch } from 'undici';
 
 import { handleError } from '#app-gocardless/util/handle-error';
+import { amountToInteger } from '#app-gocardless/utils';
+import { config } from '#load-config';
 import { SecretName, secretsService } from '#services/secrets-service';
+import * as UserService from '#services/user-service';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
-import { assertUrlAllowed } from '#util/ssrf';
+import { isValidFileId } from '#util/paths';
+import { assertUrlAllowed, createSsrfDispatcher } from '#util/ssrf';
+import { validateBankSyncSession } from '#util/validate-budget-session';
 
 const debugSensitive = createDebug('actual-sensitive:simplefin');
+const networkOptions = {
+  allowedNetworks: config.get('simplefinAllowedNetworks'),
+};
+const dispatcher = createSsrfDispatcher(networkOptions);
 
 const app = express();
 export { app as handlers };
 app.use(requestLoggerMiddleware);
 app.use(express.json());
+// SECURITY NOTE (intended behaviour - not a vulnerability):
+// Routes below that read bank data with stored credentials only require a
+// valid session; they deliberately do NOT check the user's role. Setting
+// server-wide (global) bank-sync credentials is admin-only, but every
+// signed-in user on that server may use them. This is a supported feature
+// and will remain; budgets with their own credentials use those instead.
+// API keys need explicit permission to use shared credentials.
+// All users on one server are trusted; roles are not a security boundary.
+// See SECURITY.md ("Threat model" and "Out of scope").
+const bankSync = express.Router();
+bankSync.use(validateBankSyncSession({ allowGlobalCredentials: true }));
+const budgetAccounts = express.Router();
+budgetAccounts.use(validateBankSyncSession());
+app.use(bankSync, budgetAccounts);
 app.use(validateSessionMiddleware);
 
-app.post(
+function selectCredentials(req, res, next) {
+  const fileId = req.get('X-Actual-File-Id');
+  if (fileId != null) {
+    if (!isValidFileId(fileId)) {
+      res.status(400).send({ status: 'error', reason: 'invalid-file-id' });
+      return;
+    }
+    if (!UserService.canAccessActiveFile(fileId, res.locals.user_id)) {
+      res.status(403).send({ status: 'error', reason: 'file-access-denied' });
+      return;
+    }
+  }
+
+  // Select the pair together, even if a budget's setup token is invalid.
+  // Falling back in that case could expose global accounts unexpectedly.
+  res.locals.credentialFileId =
+    fileId != null &&
+    (!res.locals.allowGlobalBankSync ||
+      secretsService.exists(SecretName.simplefin_token, fileId) ||
+      secretsService.exists(SecretName.simplefin_accessKey, fileId))
+      ? fileId
+      : null;
+  next();
+}
+
+bankSync.post(
   '/status',
+  selectCredentials,
   handleError(async (req, res) => {
-    const token = secretsService.get(SecretName.simplefin_token);
+    const token = secretsService.get(
+      SecretName.simplefin_token,
+      res.locals.credentialFileId,
+    );
     const configured = token != null && !isForbidden(token);
 
     res.send({
       status: 'ok',
       data: {
         configured,
+        source: res.locals.credentialFileId
+          ? 'per-budget-file'
+          : configured
+            ? 'global'
+            : null,
       },
     });
   }),
 );
 
-app.post(
+budgetAccounts.post(
   '/accounts',
+  selectCredentials,
   handleError(async (req, res) => {
-    let accessKey = secretsService.get(SecretName.simplefin_accessKey);
+    let accessKey = secretsService.get(
+      SecretName.simplefin_accessKey,
+      res.locals.credentialFileId,
+    );
 
     if (isInvalidAccessKey(accessKey)) {
-      const token = secretsService.get(SecretName.simplefin_token);
+      const token = secretsService.get(
+        SecretName.simplefin_token,
+        res.locals.credentialFileId,
+      );
       if (token == null || isForbidden(token)) {
         invalidToken(res);
         return;
@@ -71,7 +136,11 @@ app.post(
         return;
       }
 
-      secretsService.set(SecretName.simplefin_accessKey, accessKey);
+      secretsService.set(
+        SecretName.simplefin_accessKey,
+        accessKey,
+        res.locals.credentialFileId,
+      );
     }
 
     try {
@@ -90,12 +159,16 @@ app.post(
   }),
 );
 
-app.post(
+bankSync.post(
   '/transactions',
+  selectCredentials,
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
 
-    const accessKey = secretsService.get(SecretName.simplefin_accessKey);
+    const accessKey = secretsService.get(
+      SecretName.simplefin_accessKey,
+      res.locals.credentialFileId,
+    );
 
     if (isInvalidAccessKey(accessKey)) {
       invalidToken(res);
@@ -199,7 +272,7 @@ function getAccountResponse(results, accountId, startDate) {
     });
   }
 
-  const startingBalance = parseInt(account.balance.replace('.', ''));
+  const startingBalance = amountToInteger(account.balance);
   const date = getDate(new Date(account['balance-date'] * 1000));
 
   const balances = [
@@ -354,15 +427,13 @@ function decodeClaimUrl(base64Token) {
 }
 
 async function claimAccessKey(claimUrl) {
-  // Self-hosters may run their own SimpleFIN bridge on the local network, so
-  // private addresses are allowed here; cloud metadata and other always-blocked
-  // ranges are still rejected.
-  await assertUrlAllowed(claimUrl, { allowPrivateNetwork: true });
+  await assertUrlAllowed(claimUrl, networkOptions);
 
   // don't auto-follow redirects for SSRF safety
   const response = await fetch(claimUrl, {
     method: 'POST',
     redirect: 'manual',
+    dispatcher,
   });
 
   if (!response.ok && response.status !== 403) {
@@ -446,12 +517,13 @@ async function getAccounts(
   let currentUrl = url.toString();
   let response;
   for (let hop = 0; ; hop++) {
-    await assertUrlAllowed(currentUrl, { allowPrivateNetwork: true });
+    await assertUrlAllowed(currentUrl, networkOptions);
 
     response = await fetch(currentUrl, {
       method: 'GET',
       headers,
       redirect: 'manual',
+      dispatcher,
     });
 
     const location = response.headers.get('location');

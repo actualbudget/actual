@@ -184,7 +184,7 @@ const parseOptionKeys = [
   'importNotes',
 ] satisfies Array<keyof ParseFileOptions>;
 
-function shouldPreserveImportSettingsForParse(
+export function shouldPreserveImportSettingsForParse(
   lastParse: LastParse | null,
   filename: string,
   fileType: string,
@@ -478,7 +478,7 @@ export function ImportTransactionsModal({
   }
 
   useEffect(() => {
-    const fileType = getFileType(originalFileName);
+    const fileType = getFileType(filename);
     const parseOptions = getParseOptions(fileType, {
       delimiter,
       encoding: csvEncoding,
@@ -497,22 +497,22 @@ export function ImportTransactionsModal({
     const lastParse = lastParseRef.current;
     const shouldPreserveImportSettings = shouldPreserveImportSettingsForParse(
       lastParse,
-      originalFileName,
+      filename,
       fileType,
       parseOptions,
     );
 
     lastParseRef.current = {
-      filename: originalFileName,
+      filename,
       fileType,
       options: parseOptions,
     };
 
-    void parse(originalFileName, parseOptions, {
+    void parse(filename, parseOptions, {
       preserveImportSettings: shouldPreserveImportSettings,
     });
   }, [
-    originalFileName,
+    filename,
     delimiter,
     csvEncoding,
     hasHeaderRow,
@@ -562,24 +562,32 @@ export function ImportTransactionsModal({
       ],
     });
 
-    const fileType = getFileType(res[0]);
-    const parseOptions = getParseOptions(fileType, {
-      delimiter,
-      encoding: csvEncoding,
-      hasHeaderRow,
-      skipStartLines,
-      skipEndLines,
-      fallbackMissingPayeeToMemo,
-      importNotes,
-      swapPayeeAndMemo: getSwapOption(
-        fileType,
-        ofxSwapPayeeAndMemo,
-        qifSwapPayeeAndMemo,
-        camtSwapPayeeAndMemo,
-      ),
-    });
-
-    void parse(res[0], parseOptions);
+    if (res?.[0]) {
+      const nextFilename = res[0];
+      if (nextFilename === filename) {
+        const fileType = getFileType(nextFilename);
+        const options = getParseOptions(fileType, {
+          delimiter,
+          encoding: csvEncoding,
+          hasHeaderRow,
+          skipStartLines,
+          skipEndLines,
+          fallbackMissingPayeeToMemo,
+          importNotes,
+          swapPayeeAndMemo: getSwapOption(
+            fileType,
+            ofxSwapPayeeAndMemo,
+            qifSwapPayeeAndMemo,
+            camtSwapPayeeAndMemo,
+          ),
+        });
+        void parse(nextFilename, options, {
+          preserveImportSettings: false,
+        });
+      } else {
+        setFilename(nextFilename);
+      }
+    }
   }
 
   function onUpdateFields(field, name) {
@@ -643,11 +651,11 @@ export function ImportTransactionsModal({
     for (let trans of transactions) {
       if (
         trans.isMatchedTransaction ||
-        (reconcile && !trans.selected && !trans.ignored)
+        (reconcile && !trans.selected && !trans.ignored && !trans.existing)
       ) {
         // skip transactions that are
         // - matched transaction (existing transaction added to show update changes)
-        // - unselected transactions that are not ignored by the reconcilation algorithm (only when reconcilation is enabled)
+        // - unselected transactions that are not ignored or merged by the reconcilation algorithm (only when reconcilation is enabled)
         continue;
       }
 
@@ -703,6 +711,12 @@ export function ImportTransactionsModal({
         // - ignored transactions (aleardy existing) that are checked
         // - transactions with existing (merged transactions) that are not selected_merge
         finalTransaction.forceAddTransaction = true;
+      }
+
+      if (reconcile && trans.existing && !trans.selected) {
+        // unselected transactions with existing are still sent, so they keep
+        // their match and the other transactions match as in the preview
+        finalTransaction.skipTransaction = true;
       }
 
       finalTransactions.push({

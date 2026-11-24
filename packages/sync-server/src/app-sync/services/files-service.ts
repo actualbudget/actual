@@ -129,6 +129,12 @@ type RawFile = {
   owner: string | null;
 };
 
+type UserWithAccess = {
+  userId: string;
+  displayName: string | null;
+  userName: string | null;
+};
+
 class FilesService {
   accountDb: WrappedDatabase;
 
@@ -169,10 +175,11 @@ class FilesService {
 
     return (
       canSeeAll
-        ? this.accountDb.all('SELECT * FROM files WHERE deleted = 0 LIMIT ?', [
-            limit,
-          ])
-        : this.accountDb.all(
+        ? this.accountDb.all<RawFile>(
+            'SELECT * FROM files WHERE deleted = 0 LIMIT ?',
+            [limit],
+          )
+        : this.accountDb.all<RawFile>(
             `SELECT files.*
         FROM files
         WHERE files.owner = ? and deleted = 0
@@ -185,12 +192,12 @@ class FilesService {
        WHERE files.deleted = 0 LIMIT ?`,
             [userId, userId, limit],
           )
-    ).map((item: RawFile) => this.validate(item));
+    ).map(item => this.validate(item));
   }
 
   findUsersWithAccess(fileId: FileId) {
     const userAccess =
-      this.accountDb.all(
+      this.accountDb.all<UserWithAccess>(
         `SELECT UA.user_id as userId, users.display_name displayName, users.user_name userName
               FROM files
                 JOIN user_access UA ON UA.file_id = files.id

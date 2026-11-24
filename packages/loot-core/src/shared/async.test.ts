@@ -81,18 +81,19 @@ describe('async', () => {
     const data = [];
     const fn = sequential(makeFunction(data));
 
-    void fn(1).then(() => {
+    const first = fn(1).then(() => {
       // The next call should already have started (so it should have
       // already appended 2 to the end). It shouldn't depend on this
       // promise chain at all (important part being that if any errors
       // happened in here, it wouldn't effect anything else)
       expect(data).toEqual([1, 1, 1, 2]);
     });
-    fn(2, { throwError: true }).catch(() => {
+    const second = fn(2, { throwError: true }).catch(() => {
       // Same as above
       expect(data).toEqual([1, 1, 1, 2, 3]);
     });
     await fn(3);
+    await Promise.all([first, second]);
 
     expect(data).toEqual([1, 1, 1, 2, 3, 3, 3]);
   });
