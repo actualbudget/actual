@@ -54,7 +54,7 @@ The most important part to know is [how we vote on new expenses](./funding.md#su
 
 1. A maintainer posts the proposed expense in the `#funding-updates` Discord channel.
 2. All other active maintainers vote to approve (👍), reject (👎), or abstain (🤷). Not voting within one week counts as abstaining.
-3. The expense is approved only if every vote cast is an approval, and there is at least one approval.
+3. The expense is approved only if it receives at least one approval and no rejections. Abstentions do not count either way.
 
 As a maintainer you are expected to take part in these votes.
 
@@ -69,7 +69,7 @@ Maintainers are compensated for the administrative work that keeps the project h
 ### How Points Are Earned
 
 - **Reviewing pull requests.** Larger pull requests earn more points than small ones.
-- **Triaging issues.** Labeling and closing issues each earn a point.
+- **Triaging issues.** Removing the `needs triage` label from an issue earns a point. So does closing an issue as "not planned" or as a duplicate. Closing an issue as completed does not earn points.
 - **Getting your own pull requests merged.** Points depend on the type of change (for example, a bug fix or a feature).
 - **Merging the release pull request.**
 
@@ -77,7 +77,7 @@ The exact point values live in the [points script](https://github.com/actualbudg
 
 ## Other Perks
 
-Maintainers can have a Cursor and a Claude Code subscription reimbursed. See the [Extras section of the New Core Contributors Guide](./new-core-contributors-guide.md#extras).
+Maintainers can have a Cursor subscription and a Claude Code Pro subscription reimbursed. See the [Extras section of the New Core Contributors Guide](./new-core-contributors-guide.md#extras).
 
 ## Further Reading
 
