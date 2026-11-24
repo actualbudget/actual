@@ -5,7 +5,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
-import { STORAGE_PREFS_KEY } from '@actual-app/core/platform/client/browser-preload';
 import { isElectron } from '@actual-app/core/shared/environment';
 import type { FeatureFlag, ServerPrefs } from '@actual-app/core/types/prefs';
 
@@ -191,9 +190,8 @@ export function ExperimentalFeatures() {
 
   const showServerPrefs =
     localStorage.getItem('devEnableServerPrefs') === 'true';
-  // The browser storage engine is hidden until it is ready for testers
-  const showStoragePrefs =
-    !isElectron() && localStorage.getItem(STORAGE_PREFS_KEY) === 'true';
+  // Only the web app has a choice of storage engine
+  const showStoragePrefs = !isElectron();
 
   return (
     <SettingsGroup
@@ -279,14 +277,6 @@ export function ExperimentalFeatures() {
       >
         <Trans>Monte Carlo Analysis Report</Trans>
       </FeatureToggle>
-      {isUsingServer && (
-        <FeatureToggle
-          flag="enableBanking"
-          feedbackLink="https://github.com/actualbudget/actual/issues/7799"
-        >
-          <Trans>Enable Banking sync (EU banks)</Trans>
-        </FeatureToggle>
-      )}
       {isUsingServer && (
         <FeatureToggle flag="bankSyncReverseAmounts">
           <Trans>Reverse bank sync transaction amounts</Trans>

@@ -71,6 +71,7 @@ export function MobilePageHeader({
           color: theme.mobileHeaderText,
         },
         '& button[data-pressed]': {
+          // oxlint-disable-next-line actual/theme-token-roles
           backgroundColor: theme.mobileHeaderTextHover,
         },
         ...style,

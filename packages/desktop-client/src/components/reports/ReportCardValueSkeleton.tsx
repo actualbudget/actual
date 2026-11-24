@@ -16,6 +16,7 @@ const barBase = {
   maxWidth: 160,
   height: 32,
   borderRadius: 6,
+  // oxlint-disable-next-line actual/theme-token-roles
   backgroundColor: theme.pageText,
 };
 

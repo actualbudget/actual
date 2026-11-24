@@ -21,6 +21,7 @@ import {
 } from '#components/budget/goals/cleanupModel';
 import type { CleanupConfig } from '#components/budget/goals/cleanupModel';
 import {
+  isBlockingAutomationError,
   validateAutomation,
   validatePercentageAllocation,
   validateSchedulePriorities,
@@ -251,7 +252,7 @@ export function useBudgetAutomationsEditor({
   const contributions: (number | null)[] = entries.map((_, i) =>
     dryRun?.perTemplate?.[i] != null ? dryRun.perTemplate[i] : null,
   );
-  const hasErrors = automationErrors.some(error => error !== null);
+  const hasErrors = automationErrors.some(isBlockingAutomationError);
   const conflicts = [
     validatePercentageAllocation(templates),
     validateSchedulePriorities(templates),

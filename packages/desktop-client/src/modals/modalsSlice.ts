@@ -243,6 +243,17 @@ export type Modal =
       name: 'out-of-sync-migrations';
     }
   | {
+      name: 'storage-migration-failed';
+      options: {
+        budgetId: string;
+        // What went wrong, naming the budget
+        message: string;
+        // Whether the budget could be opened on the previous storage
+        // engine instead, or null where that could not be found out
+        canKeepPreviousStorage: boolean | null;
+      };
+    }
+  | {
       name: 'files-settings';
     }
   | {
@@ -446,6 +457,14 @@ export type Modal =
           groupId: CategoryGroupEntity['id'],
           direction: 'asc' | 'desc',
         ) => void;
+      };
+    }
+  | {
+      name: 'tag-color';
+      options: {
+        tagName: string;
+        color: string | null;
+        onSelect: (color: string | null) => void;
       };
     }
   | {

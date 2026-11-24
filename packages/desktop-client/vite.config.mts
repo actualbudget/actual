@@ -317,7 +317,12 @@ export default defineConfig(async ({ mode, command }) => {
       minify: 'oxc',
       target: 'es2022',
       sourcemap: true,
-      outDir: mode === 'desktop' ? 'build-electron' : 'build',
+      outDir:
+        mode === 'desktop'
+          ? 'build-electron'
+          : mode === 'mobile'
+            ? 'build-mobile'
+            : 'build',
       assetsDir: 'static',
       manifest: true,
       assetsInlineLimit: 0,
@@ -361,9 +366,14 @@ export default defineConfig(async ({ mode, command }) => {
       },
     },
     resolve: {
-      ...(mode !== 'browser' && {
-        conditions: ['electron-renderer', 'module', 'browser', 'default'],
+      // The native mobile (Capacitor) apps get their own preload.
+      ...(mode === 'mobile' && {
+        conditions: ['mobile', 'module', 'browser', 'default'],
       }),
+      ...(mode !== 'browser' &&
+        mode !== 'mobile' && {
+          conditions: ['electron-renderer', 'module', 'browser', 'default'],
+        }),
       tsconfigPaths: true,
     },
     plugins: [
@@ -411,6 +421,11 @@ export default defineConfig(async ({ mode, command }) => {
                 /^\/kcab\/.*$/,
                 /^\/plugin-data\/.*$/,
                 /^\/enablebanking\/.*$/,
+                // Auth-proxy callbacks (Cloudflare Access, oauth2-proxy,
+                // Authentik) must reach the network to set their cookies.
+                /^\/cdn-cgi\/.*$/,
+                /^\/oauth2\/.*$/,
+                /^\/outpost\.goauthentik\.io\/.*$/,
               ],
             },
           }),

@@ -13,6 +13,7 @@ blob-report
 # production
 build
 build-electron
+build-mobile
 build-stats
 stats.json
 

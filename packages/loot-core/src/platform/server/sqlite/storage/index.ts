@@ -69,9 +69,14 @@ export function setSqliteStore(next: SqliteFileStore | null) {
 // the store's file goes, and the row turns into the legacy marker in the
 // same step, so an interruption leaves the budget whole in one place or the
 // other; a copy left behind by a failure is ignored while the row still
-// names the store, and replaced by the next revert.
-export async function revertToLegacy(): Promise<void> {
+// names the store, and replaced by the next revert. Given one path, only
+// that budget is moved back, whatever else lives in the store by then.
+export async function revertToLegacy(onlyPath?: string): Promise<void> {
   const current = getSqliteStore();
+  if (onlyPath != null) {
+    await current.revertFile(onlyPath);
+    return;
+  }
   for (const row of await listSqliteFileRows()) {
     await current.revertFile(row.filepath);
   }

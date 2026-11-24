@@ -357,6 +357,14 @@ async function downloadAkahuTransactions(
   return retVal;
 }
 
+function getImportPending(id: string): Promise<boolean> {
+  return aqlQuery(
+    q('preferences')
+      .filter({ id: `sync-import-pending-${id}` })
+      .select('value'),
+  ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+}
+
 // Some banks report the credit/debit indicator the wrong way round (e.g. card
 // purchases as credit). The Enable Banking server swaps it before it derives
 // the amount sign and the payee, but only when both the experimental flag and
@@ -375,6 +383,7 @@ async function isSwapCreditDebitEnabled(id: string) {
 async function downloadEnableBankingTransactions(
   acctId: string,
   since: string,
+  importPending: boolean,
   aspspName?: string,
   swapCreditDebit = false,
 ) {
@@ -389,6 +398,7 @@ async function downloadEnableBankingTransactions(
       accountId: acctId,
       startDate: since,
       aspspName,
+      importPending,
       ...(swapCreditDebit ? { swapCreditDebit } : {}),
     },
     {
@@ -539,11 +549,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         .filter({ id: `custom-sync-mappings-${acctId}` })
         .select('value'),
     ).then(data => data?.data?.[0]?.value),
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `sync-import-pending-${acctId}` })
-        .select('value'),
-    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+    getImportPending(acctId),
     aqlQuery(
       q('preferences')
         .filter({ id: `sync-import-notes-${acctId}` })
@@ -1162,9 +1168,7 @@ async function processBankSyncDownload(
       balanceToUse = customStartingBalance;
     } else if (acctRow.account_sync_source === 'simpleFin') {
       const previousBalance = transactions.reduce((total, trans) => {
-        return (
-          total - parseInt(trans.transactionAmount.amount.replace('.', ''))
-        );
+        return total - amountToInteger(trans.transactionAmount.amount);
       }, currentBalance);
       balanceToUse = previousBalance;
     } else if (acctRow.account_sync_source === 'pluggyai') {
@@ -1178,11 +1182,7 @@ async function processBankSyncDownload(
       acctRow.account_sync_source === 'enableBanking' &&
       currentBalance !== null
     ) {
-      const importPending = await aqlQuery(
-        q('preferences')
-          .filter({ id: `sync-import-pending-${id}` })
-          .select('value'),
-      ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+      const importPending = await getImportPending(id);
       const importable = importPending
         ? transactions
         : transactions.filter(trans => Boolean(trans.booked));
@@ -1312,6 +1312,7 @@ export async function syncAccount(
     download = await downloadEnableBankingTransactions(
       acctId,
       syncStartDate,
+      await getImportPending(id),
       bankRow?.name,
       // The option is stored under the Actual account id, not the bank one.
       await isSwapCreditDebitEnabled(id),

@@ -13,14 +13,18 @@ import { send } from '@actual-app/core/platform/client/connection';
 import { Checkbox } from '#components/forms';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
+import {
+  describePreviousStorageError,
+  returnToPreviousStorage,
+} from '#util/previous-storage';
 
 import { SettingsRow } from './SettingsRow';
 
 /**
- * Opt-in to the sqlite-wasm storage for budget files (hidden behind a dev
- * flag while it is being tried out). Switching on only stores the choice:
- * budgets move over when they are next opened. Switching off moves every
- * budget back first, so nothing is lost either way. Both relaunch the app.
+ * Opt-in to the sqlite-wasm storage for budget files while it is being
+ * tried out. Switching on only stores the choice: budgets move over when
+ * they are next opened. Switching off moves every budget back first, so
+ * nothing is lost either way. Both relaunch the app.
  */
 export function StorageBackendToggle() {
   const { t } = useTranslation();
@@ -52,30 +56,21 @@ export function StorageBackendToggle() {
   async function toggle() {
     setIsSwitching(true);
     if (isEnabled) {
-      const result = await send('storage-revert').catch(() => ({
-        error: 'revert-failed' as const,
-      }));
-      if ('error' in result) {
+      const error = await returnToPreviousStorage();
+      if (error) {
         dispatch(
           addNotification({
             notification: {
               type: 'error',
-              message:
-                result.error === 'budget-in-use'
-                  ? t('Close Actual in your other tabs first, then try again.')
-                  : t(
-                      'Switching back failed. Your budgets stay on the new storage engine.',
-                    ),
+              message: describePreviousStorageError(error),
             },
           }),
         );
         setIsSwitching(false);
-        return;
       }
-      setStoredStorageBackend('legacy');
-    } else {
-      setStoredStorageBackend('opfs');
+      return;
     }
+    setStoredStorageBackend('opfs');
     window.Actual.relaunch();
   }
 

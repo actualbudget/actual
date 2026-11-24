@@ -1,3 +1,4 @@
+const CONCURRENCY = 2;
 const BUILD_OUTPUT_GLOBS = ['lib-dist/**', 'dist/**', 'build/**', '@types/**'];
 
 /** @type {import('lage').ConfigOptions} */
@@ -33,6 +34,20 @@ module.exports = {
       dependsOn: ['^build'],
       cache: false,
     },
+    'build:mobile': {
+      type: 'npmScript',
+      dependsOn: ['^build'],
+      cache: false,
+      weight: CONCURRENCY,
+    },
+    'mobile-client#build': {
+      type: 'npmScript',
+      dependsOn: ['^build', '@actual-app/web#build:mobile'],
+      cache: true,
+      options: {
+        outputGlob: BUILD_OUTPUT_GLOBS,
+      },
+    },
   },
   cacheOptions: {
     cacheStorageConfig: {
@@ -41,5 +56,5 @@ module.exports = {
     },
   },
   npmClient: 'yarn',
-  concurrency: 2,
+  concurrency: CONCURRENCY,
 };

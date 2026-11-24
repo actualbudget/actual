@@ -12,6 +12,7 @@ import {
   completeMigration,
   deleteLegacyDatabase,
   legacySnapshot,
+  matchesLegacyDatabase,
   readLegacyDatabaseBytes,
   verifyMigratedDatabase,
   writeLegacyDatabaseBytes,
@@ -204,19 +205,27 @@ export function createMemoryIdbStore({
       return { bytes: null, rev };
     }
     onMigrationProgress?.('verify');
+    const snapshot = legacySnapshot(bytes);
     const check = openMemoryDatabase(bytes);
     try {
       verifyMigratedDatabase(check);
+      // On this store this guards the read, not the write: the row is
+      // written by the cutover below and is not read back
+      if (!(await matchesLegacyDatabase(path, bytes, snapshot))) {
+        throw new Error('the moved file differs from the absurd-sql copy');
+      }
     } catch (error) {
       onMigrationProgress?.('failed');
-      throw new StorageMigrationError(path, error);
+      throw error instanceof BudgetInUseError
+        ? error
+        : new StorageMigrationError(path, error);
     } finally {
       check.close();
     }
     await completeMigration(
       { filepath: path, contents: bytes, storage: 'memory-idb', rev: rev + 1 },
       rev,
-      legacySnapshot(bytes),
+      snapshot,
       onMigrationProgress,
     );
     return { bytes, rev: rev + 1 };

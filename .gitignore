@@ -77,6 +77,10 @@ DESIGN.json
 .cursor/agents/impeccable-*.md
 .github/agents/impeccable-*.agent.md
 
+# Android signing keys
+*.jks
+*.keystore
+
 # Misc
 .#*
 
