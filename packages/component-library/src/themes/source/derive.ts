@@ -77,6 +77,27 @@ function withLightness(css: string, lightness: number) {
 }
 
 type ContrastGoal = { backgrounds: string[]; target: number };
+type LightnessStep = { color: string; luminance: number };
+
+const stepCache = new Map<string, Array<LightnessStep | undefined>>();
+
+function stepsOf(start: string, base: ReturnType<typeof toColor>) {
+  let steps = stepCache.get(start);
+  if (steps == null) {
+    steps = [];
+    stepCache.set(start, steps);
+  }
+  const cached = steps;
+  return (index: number) => {
+    let step = cached[index];
+    if (step == null) {
+      const color = atLightness(base, index / lightnessSteps);
+      step = { color, luminance: wcagLuminance(color) };
+      cached[index] = step;
+    }
+    return step;
+  };
+}
 
 export function nearestWithContrasts(css: string, goals: ContrastGoal[]) {
   const base = toColor(css);
@@ -88,8 +109,7 @@ export function nearestWithContrasts(css: string, goals: ContrastGoal[]) {
     strongest: { color: start, contrast: 0 },
   }));
 
-  const measure = (color: string) => {
-    const own = wcagLuminance(color);
+  const measure = ({ color, luminance: own }: LightnessStep) => {
     let open = 0;
     for (const search of searches) {
       if (search.found != null) {
@@ -115,13 +135,18 @@ export function nearestWithContrasts(css: string, goals: ContrastGoal[]) {
     return open;
   };
 
-  if (measure(start) > 0) {
+  if (measure({ color: start, luminance: wcagLuminance(start) }) > 0) {
+    const stepAt = stepsOf(start, base);
     const nearestFirst = Array.from(
       { length: lightnessSteps + 1 },
-      (_, step) => step / lightnessSteps,
-    ).sort((a, b) => Math.abs(a - base.l) - Math.abs(b - base.l));
-    for (const lightness of nearestFirst) {
-      if (measure(atLightness(base, lightness)) === 0) {
+      (_, index) => index,
+    ).sort(
+      (a, b) =>
+        Math.abs(a / lightnessSteps - base.l) -
+        Math.abs(b / lightnessSteps - base.l),
+    );
+    for (const index of nearestFirst) {
+      if (measure(stepAt(index)) === 0) {
         break;
       }
     }
