@@ -33,6 +33,7 @@ runs:
       shell: bash
     - name: Hash lock files
       id: hash-lock-files
+      if: ${{ inputs.cache == 'true' }}
       run: echo "cache-hash-key=${{ hashFiles(format('{0}/**/yarn.lock', inputs.working-directory)) }}" >> "$GITHUB_OUTPUT"
       shell: bash
     - name: Cache
