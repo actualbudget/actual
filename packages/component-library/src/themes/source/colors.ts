@@ -65,7 +65,13 @@ export const colors = {
     light: 'navy100',
     dark: 'navy600',
     midnight: 'gray600',
-    description: 'Lines between table rows.',
+    description: 'Lines between rows and around inputs, menus and tooltips.',
+  },
+  borderStrong: {
+    light: 'navy300',
+    dark: 'navy400',
+    midnight: 'gray400',
+    description: 'Stronger lines, such as button outlines and dividers.',
   },
   text: {
     light: { raw: '#272630' },
@@ -149,11 +155,7 @@ export const colors = {
   tableBorder: { all: { ref: 'border' } },
   tableBorderSelected: { all: { ref: 'accentBorder' } },
   tableBorderHover: { all: { ref: 'accentBorder' } },
-  tableBorderSeparator: {
-    light: 'navy400',
-    dark: 'navy400',
-    midnight: 'gray400',
-  },
+  tableBorderSeparator: { all: { ref: 'borderStrong' } },
   tableRowBackgroundHighlight: { all: { ref: 'backgroundSelected' } },
   tableRowBackgroundHighlightText: { all: { ref: 'tableText' } },
   tableRowHeaderBackground: {
@@ -249,7 +251,7 @@ export const colors = {
   menuItemTextHover: { all: { ref: 'text' } },
   menuItemTextSelected: { all: { ref: 'accentText' } },
   menuItemTextHeader: { all: { accentTextOn: 'menuBackground' } },
-  menuBorder: { light: 'navy100', dark: 'navy900', midnight: 'gray800' },
+  menuBorder: { all: { ref: 'border' } },
   menuKeybindingText: { all: { accentTextOn: 'menuBackground' } },
   menuAutoCompleteBackground: {
     light: 'navy900',
@@ -368,11 +370,7 @@ export const colors = {
   buttonNormalTextHover: { all: { ref: 'text' } },
   buttonNormalBackground: { all: { ref: 'backgroundRaised' } },
   buttonNormalBackgroundHover: { all: { ref: 'backgroundHover' } },
-  buttonNormalBorder: {
-    light: 'navy150',
-    dark: 'navy300',
-    midnight: 'gray300',
-  },
+  buttonNormalBorder: { all: { ref: 'borderStrong' } },
   buttonNormalShadow: {
     light: { raw: 'rgba(0, 0, 0, 0.2)' },
     dark: { raw: 'rgba(0, 0, 0, 0.4)' },
@@ -387,7 +385,7 @@ export const colors = {
   },
   buttonNormalDisabledBackground: { all: { ref: 'backgroundRaised' } },
   buttonNormalDisabledBorder: {
-    light: { ref: 'buttonNormalBorder' },
+    light: 'navy150',
     dark: 'navy500',
     midnight: 'gray500',
   },
@@ -486,7 +484,7 @@ export const colors = {
     midnight: 'gray700',
   },
   formInputBackgroundSelection: { all: { ref: 'accent' } },
-  formInputBorder: { light: 'navy150', dark: 'navy600', midnight: 'gray600' },
+  formInputBorder: { all: { ref: 'border' } },
   formInputTextReadOnlySelection: {
     light: 'navy50',
     dark: 'navy800',
@@ -533,11 +531,7 @@ export const colors = {
     all: { accentTextOn: 'pillBackgroundLight', contrast: 7 },
   },
   pillBorder: { light: 'navy150', dark: 'navy700', midnight: 'gray500' },
-  pillBorderDark: {
-    light: 'navy300',
-    dark: { ref: 'pillBorder' },
-    midnight: { ref: 'pillBorder' },
-  },
+  pillBorderDark: { all: { ref: 'borderStrong' } },
   pillBackgroundSelected: { all: { ref: 'accentSubtle' } },
   pillTextSelected: { all: { ref: 'accentSubtleText' } },
   pillBorderSelected: { all: { ref: 'accentBorder' } },
@@ -582,7 +576,7 @@ export const colors = {
 
   tooltipText: { all: { ref: 'text' } },
   tooltipBackground: { all: { ref: 'backgroundRaised' } },
-  tooltipBorder: { light: 'navy150', dark: 'navy700', midnight: 'gray600' },
+  tooltipBorder: { all: { ref: 'border' } },
 
   calendarCellBackground: {
     light: 'navy100',
