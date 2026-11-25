@@ -34,6 +34,6 @@ You can share a file that has been synced to your server with other users of tha
 3. Open the server menu and choose **User Access Management**.
 4. Tick the user to give them access to the file. Untick them to revoke it.
 
-Users you share a file with will see it in their file list the next time they open Actual, and can open it like their own files. The file list shows the owner's name on files someone else owns, and the owner can hover over a shared file to see who it is shared with.
+Users you share a file with will see it in their file list the next time they open Actual, and can open it like their own files. If the file uses [end-to-end encryption](./sync.md#end-to-end-encryption), they also need its encryption password to open it on a new device. The file list shows the owner's name on files someone else owns, and the owner can hover over a shared file to see who it is shared with.
 
 See [User Access Management](../config/multi-user.md#user-access-management) for the full set of controls, including transferring ownership.
