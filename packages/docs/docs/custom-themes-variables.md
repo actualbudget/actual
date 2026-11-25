@@ -55,7 +55,7 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-tableTextLight`                    | `#627d98`   | `#d9e2ec`   | `#e8ecf0`   | `--color-tableText` in Dark and Midnight                                                  |
 | `--color-tableTextSubdued`                  | `#627d98`   | `#9fb3c8`   | `#98a1ae`   |                                                                                           |
 | `--color-tableTextSelected`                 | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-tableText`                                                                       |
-| `--color-tableTextInactive`                 | `#627d98`   | `#9fb3c8`   | `#bdc5cf`   | `--color-textSecondary`                                                                   |
+| `--color-tableTextInactive`                 | `#627d98`   | `#829ab1`   | `#98a1ae`   |                                                                                           |
 | `--color-tableHeaderText`                   | `#486581`   | `#bcccdc`   | `#bdc5cf`   |                                                                                           |
 | `--color-tableHeaderBackground`             | `#ffffff`   | `#334e68`   | `#080811`   |                                                                                           |
 | `--color-tableBorder`                       | `#e8ecf0`   | `#486581`   | `#373b4a`   | `--color-border`                                                                          |
