@@ -492,11 +492,7 @@ export const colors = {
   },
   formInputBorderSelected: { all: { ref: 'accentBorder' } },
   formInputText: { all: { ref: 'text' } },
-  formInputTextPlaceholder: {
-    light: 'navy300',
-    dark: 'navy150',
-    midnight: 'gray150',
-  },
+  formInputTextPlaceholder: { all: { ref: 'textTertiary' } },
   formInputTextPlaceholderSelected: {
     light: 'navy200',
     dark: 'navy100',
