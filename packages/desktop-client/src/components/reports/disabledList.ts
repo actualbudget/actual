@@ -250,6 +250,16 @@ export const disabledList = {
   ),
 };
 
+export function getIncludeCurrentState(
+  dateRange: string,
+  isDateStatic: boolean,
+  includeCurrentInterval: boolean,
+) {
+  const disabled =
+    isDateStatic || Boolean(disabledList.currentInterval.get(dateRange));
+  return { disabled, checked: !disabled && includeCurrentInterval };
+}
+
 export const defaultsList = {
   mode: modeOptions,
   modeGraphsMap: new Map(

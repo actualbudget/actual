@@ -31,7 +31,11 @@ import { useDateFormat } from '#hooks/useDateFormat';
 import { useLocale } from '#hooks/useLocale';
 
 import { CategorySelector } from './CategorySelector';
-import { defaultsList, disabledList } from './disabledList';
+import {
+  defaultsList,
+  disabledList,
+  getIncludeCurrentState,
+} from './disabledList';
 import { getLiveRange } from './getLiveRange';
 import { getIntervalFormat, ReportOptions } from './ReportOptions';
 import type { dateRangeProps } from './ReportOptions';
@@ -300,6 +304,12 @@ export function ReportSidebar({
       ? monthUtils.weekFromDate(customReportItems.endDate, firstDayOfWeekIdx)
       : customReportItems.endDate;
 
+  const includeCurrentState = getIncludeCurrentState(
+    customReportItems.dateRange,
+    customReportItems.isDateStatic,
+    customReportItems.includeCurrentInterval,
+  );
+
   return (
     <View
       style={{
@@ -538,12 +548,8 @@ export function ReportSidebar({
                   name: 'include-current-interval',
                   text: includeCurrentIntervalText,
                   tooltip: includeCurrentIntervalTooltip,
-                  toggle: customReportItems.includeCurrentInterval,
-                  disabled:
-                    customReportItems.isDateStatic ||
-                    disabledList.currentInterval.get(
-                      customReportItems.dateRange,
-                    ),
+                  toggle: includeCurrentState.checked,
+                  disabled: includeCurrentState.disabled,
                 },
                 {
                   name: 'show-hidden-categories',
@@ -650,25 +656,24 @@ export function ReportSidebar({
               onChange={onSelectRange}
               options={rangeOptions}
             />
-            {!disabledList.currentInterval.get(customReportItems.dateRange) &&
-              customReportItems.includeCurrentInterval && (
-                <Tooltip
-                  placement="bottom start"
-                  content={
-                    <Text>
-                      <Trans>Current month</Trans>
-                    </Text>
-                  }
-                  style={{
-                    ...styles.tooltip,
-                    lineHeight: 1.5,
-                    padding: '6px 10px',
-                    marginTop: 5,
-                  }}
-                >
-                  <Text style={{ marginLeft: 10 }}>+1</Text>
-                </Tooltip>
-              )}
+            {includeCurrentState.checked && (
+              <Tooltip
+                placement="bottom start"
+                content={
+                  <Text>
+                    <Trans>Current month</Trans>
+                  </Text>
+                }
+                style={{
+                  ...styles.tooltip,
+                  lineHeight: 1.5,
+                  padding: '6px 10px',
+                  marginTop: 5,
+                }}
+              >
+                <Text style={{ marginLeft: 10 }}>+1</Text>
+              </Tooltip>
+            )}
           </View>
         ) : (
           <>

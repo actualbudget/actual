@@ -254,6 +254,7 @@ export function Menu<const NameType = string>({
                 <Toggle
                   id={String(item.name)}
                   isOn={item.toggle}
+                  isDisabled={item.disabled}
                   style={{ marginLeft: 5 }}
                   onToggle={() =>
                     !item.disabled &&

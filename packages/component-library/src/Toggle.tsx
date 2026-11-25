@@ -52,7 +52,7 @@ export const Toggle = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            cursor: 'pointer',
+            cursor: isDisabled ? 'default' : 'pointer',
             width: '32px',
             height: '16px',
             borderRadius: '100px',
