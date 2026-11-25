@@ -1,9 +1,11 @@
 import * as connection from '@actual-app/core/platform/client/connection';
 import type { ServerEvents } from '@actual-app/core/types/server-events';
-import type { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { budgetBoundsQueries } from './budget';
+import { mergeLocalPrefs } from './prefs/prefsSlice';
+import { configureAppStore } from './redux/store';
 import type { AppStore } from './redux/store';
 import { dashboardQueries, reportQueries } from './reports';
 import { listenForSyncEvent } from './sync-events';
@@ -31,12 +33,6 @@ function publishSyncEvent(event: ServerEvents['sync-event']) {
 type UserData = { offline: boolean } | null;
 
 function setup({ userData = null }: { userData?: UserData } = {}) {
-  vi.spyOn(connection, 'listen').mockImplementation(
-    // The real `listen` is overloaded per event name; the mock only needs
-    // to record the handler
-    mockListen as unknown as typeof connection.listen,
-  );
-
   const invalidateQueries = vi.fn();
   const queryClient = { invalidateQueries } as unknown as QueryClient;
 
@@ -71,6 +67,40 @@ describe('listenForSyncEvent', () => {
   beforeEach(() => {
     eventListeners.clear();
     vi.clearAllMocks();
+    vi.spyOn(connection, 'listen').mockImplementation(
+      // The real `listen` is overloaded per event name; the mock only needs
+      // to record the handler
+      mockListen as unknown as typeof connection.listen,
+    );
+  });
+
+  it('shows the upload error and leaves sync pending when registration fails', async () => {
+    const queryClient = new QueryClient();
+    const store = configureAppStore({ queryClient });
+    store.dispatch(mergeLocalPrefs({ id: 'budget-id' }));
+    listenForSyncEvent(store, queryClient);
+    const send = vi.spyOn(connection, 'send').mockResolvedValue({
+      error: { reason: 'network' },
+    });
+
+    try {
+      publishSyncEvent({ type: 'error', subtype: 'file-not-found' });
+      const register = store
+        .getState()
+        .notifications.notifications.find(
+          notification => notification.id === 'register-file',
+        );
+      await register?.button?.action();
+
+      expect(send).toHaveBeenCalledExactlyOnceWith('upload-budget', {
+        id: undefined,
+      });
+      expect(store.getState().notifications.notifications).toContainEqual(
+        expect.objectContaining({ type: 'error' }),
+      );
+    } finally {
+      send.mockRestore();
+    }
   });
 
   it.each([

@@ -25,4 +25,61 @@ test.describe('Onboarding', () => {
     await expect(bootstrapPage.getHeading()).toHaveText('Welcome to Actual!');
     await expect(electronPage).toHaveScreenshot();
   });
+
+  test('registers an existing local budget and syncs it with the server', async ({
+    electronPage: page,
+  }) => {
+    await configurationPage.clickOnNoServer();
+    await configurationPage.startFresh();
+    const [budget] = await page.evaluate(() => window.$send('get-budgets'));
+    expect(budget.cloudFileId).toBeUndefined();
+    expect(budget.groupId).toBeUndefined();
+
+    await page.getByRole('button', { name: 'No server' }).click();
+    await page.getByRole('button', { name: 'Start using a server' }).click();
+    await configurationPage.clickOnStartSyncServer();
+    const password = page.getByPlaceholder('Password', { exact: true });
+    await password.fill('test-password');
+    await page.getByPlaceholder('Confirm password').fill('test-password');
+    await page.getByRole('button', { name: 'OK', exact: true }).click();
+    await page.waitForURL('**/login');
+    await password.fill('test-password');
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+    await page.getByText(budget.name, { exact: true }).click();
+
+    const register = page.getByRole('button', {
+      name: 'Register',
+      exact: true,
+    });
+    await expect(register).toBeVisible();
+    expect(await page.evaluate(() => window.$send('get-remote-files'))).toEqual(
+      [],
+    );
+    expect(
+      await page.evaluate(() => window.$send('load-prefs')),
+    ).not.toHaveProperty('lastSyncedTimestamp');
+    await register.click();
+
+    // A completed sync writes this timestamp. Uploading the file alone does not.
+    await expect
+      .poll(() => page.evaluate(() => window.$send('load-prefs')))
+      .toMatchObject({
+        id: budget.id,
+        lastSyncedTimestamp: expect.any(String),
+      });
+    const [registered] = await page.evaluate(() => window.$send('get-budgets'));
+    expect(registered).toMatchObject({
+      id: budget.id,
+      cloudFileId: expect.any(String),
+      groupId: expect.any(String),
+    });
+    expect(await page.evaluate(() => window.$send('get-remote-files'))).toEqual(
+      [
+        expect.objectContaining({
+          fileId: registered.cloudFileId,
+          groupId: registered.groupId,
+        }),
+      ],
+    );
+  });
 });
