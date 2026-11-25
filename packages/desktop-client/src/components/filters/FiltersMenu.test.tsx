@@ -201,8 +201,7 @@ describe('FilterEditor "is between"', () => {
 });
 
 describe('FilterEditor month', () => {
-  it('picks a month with the month picker', async () => {
-    const user = userEvent.setup();
+  const renderEditor = () => {
     const onSave = vi.fn();
     render(
       <FilterEditor
@@ -215,8 +214,14 @@ describe('FilterEditor month', () => {
       />,
       { wrapper: TestProviders },
     );
+    return { onSave };
+  };
 
-    await user.click(screen.getByTestId('month-picker-trigger'));
+  it('picks a month with the month picker', async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderEditor();
+
+    await user.click(screen.getByRole('textbox'));
     await user.click(screen.getByRole('button', { name: 'October 2020' }));
     await user.click(screen.getByRole('button', { name: 'Apply' }));
 
@@ -225,6 +230,26 @@ describe('FilterEditor month', () => {
         field: 'date',
         op: 'is',
         value: '2020-10',
+        options: expect.objectContaining({ month: true }),
+      }),
+    );
+  });
+
+  it('accepts a typed month', async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderEditor();
+
+    const input = screen.getByRole('textbox');
+    expect(input).toHaveValue('08/2020');
+    await user.clear(input);
+    await user.type(input, '03/2021');
+    await user.click(screen.getByRole('button', { name: 'Apply' }));
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        field: 'date',
+        op: 'is',
+        value: '2021-03',
         options: expect.objectContaining({ month: true }),
       }),
     );

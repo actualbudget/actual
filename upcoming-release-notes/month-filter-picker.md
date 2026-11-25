@@ -3,4 +3,4 @@ category: Enhancements
 authors: [DanShinde]
 ---
 
-Use the month picker when filtering transactions by month
+Add a month picker to the month date filter while still allowing the month to be typed

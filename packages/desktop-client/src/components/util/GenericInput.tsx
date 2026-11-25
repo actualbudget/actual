@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
-import { MonthPicker } from '@actual-app/components/month-picker';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 import { getMonthYearFormat } from '@actual-app/core/shared/months';
@@ -11,11 +10,6 @@ import type {
   RecurConfig,
   RuleConditionOp,
 } from '@actual-app/core/types/models';
-import {
-  format as formatDate,
-  isValid as isDateValid,
-  parse as parseDate,
-} from 'date-fns';
 
 import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';
 import { Autocomplete } from '#components/autocomplete/Autocomplete';
@@ -27,10 +21,10 @@ import { ReportAutocomplete } from '#components/autocomplete/ReportAutocomplete'
 import { Checkbox } from '#components/forms';
 import { hideNativeDateIconClassName } from '#components/mobile/MobileForms';
 import { DateSelect } from '#components/select/DateSelect';
+import { MonthSelect } from '#components/select/MonthSelect';
 import { RecurringSchedulePicker } from '#components/select/RecurringSchedulePicker';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
-import { useLanguage } from '#hooks/useLocale';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
@@ -137,7 +131,6 @@ export const GenericInput = ({
   const { data: { grouped: categoryGroups } = { grouped: [] } } =
     useCategories();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const language = useLanguage();
 
   let content: JSX.Element | null = null;
   switch (props.type) {
@@ -381,34 +374,24 @@ export const GenericInput = ({
 
     case 'date':
       switch (props.field) {
-        case 'month': {
-          const monthYearFormat = getMonthYearFormat(dateFormat);
-          if (isNarrowWidth) {
-            content = (
-              <Input
-                ref={ref}
-                value={props.value || ''}
-                placeholder={monthYearFormat.toLowerCase()}
-                onChangeValue={props.onChange}
-              />
-            );
-            break;
-          }
-          const { onChange } = props;
-          content = (
-            <MonthPicker
-              value={toPickerMonth(props.value, monthYearFormat)}
-              locale={language}
-              placeholder={t('Select month')}
-              labels={{ previous: t('Previous'), next: t('Next') }}
-              style={{ width: '100%' }}
-              onChange={month =>
-                onChange(fromPickerMonth(month, monthYearFormat))
-              }
+        case 'month':
+          // Narrow screens keep the plain text input
+          content = isNarrowWidth ? (
+            <Input
+              ref={ref}
+              value={props.value || ''}
+              placeholder={getMonthYearFormat(dateFormat).toLowerCase()}
+              onChangeValue={props.onChange}
+            />
+          ) : (
+            <MonthSelect
+              ref={ref}
+              value={props.value || ''}
+              monthYearFormat={getMonthYearFormat(dateFormat)}
+              onChange={props.onChange}
             />
           );
           break;
-        }
 
         case 'year':
           content = (
@@ -537,21 +520,3 @@ export const GenericInput = ({
 
   return <View style={{ flex: 1, ...style }}>{content}</View>;
 };
-
-// The month field holds a value in the user's month/year display format (the
-// filter parses it when applied), while the month picker works in `yyyy-MM`.
-function toPickerMonth(value: string | undefined, monthYearFormat: string) {
-  if (!value) {
-    return '';
-  }
-  if (/^\d{4}-\d{2}$/.test(value)) {
-    return value;
-  }
-  const date = parseDate(value, monthYearFormat, new Date());
-  return isDateValid(date) ? formatDate(date, 'yyyy-MM') : '';
-}
-
-function fromPickerMonth(month: string, monthYearFormat: string) {
-  const date = parseDate(month, 'yyyy-MM', new Date());
-  return isDateValid(date) ? formatDate(date, monthYearFormat) : month;
-}
