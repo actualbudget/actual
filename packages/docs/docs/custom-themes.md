@@ -93,7 +93,7 @@ Accent text that sits on its own background, such as the selected sidebar item o
 
 Custom themes can override any of the CSS variables in Actual's built-in themes. The [Theme Variable Reference](./custom-themes-variables.md) lists every one, with its color in each built-in theme and the variable it follows.
 
-Start with the accent and base colors at the top of that page. Many other variables follow them, so setting a few of them restyles most of the app. Others keep their own colors, including most cards and buttons, modals and form inputs, so a theme needs to set those itself.
+Start with the accent and base colors at the top of that page. Many other variables follow them, so setting a few of them restyles most of the app. Others keep their own colors, including the sidebar, the date picker, status messages and some buttons, so a theme needs to set those itself.
 
 Do not point a base color at a variable that follows it, such as `--color-background: var(--color-tableBackground)`. The two would refer to each other and neither would work.
 
