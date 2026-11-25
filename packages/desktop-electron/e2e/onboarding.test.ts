@@ -1,8 +1,12 @@
+import type { send } from '@actual-app/core/platform/client/connection';
 // oxlint-disable-next-line eslint/no-restricted-imports -- fix me
 import { ConfigurationPage } from '@actual-app/web/e2e/page-models/configuration-page';
 import { expect } from '@playwright/test';
 
 import { test } from './fixtures';
+
+// The desktop renderer exposes this RPC client to the page.
+declare const $send: typeof send;
 
 test.describe('Onboarding', () => {
   let configurationPage: ConfigurationPage;
@@ -31,7 +35,7 @@ test.describe('Onboarding', () => {
   }) => {
     await configurationPage.clickOnNoServer();
     await configurationPage.startFresh();
-    const [budget] = await page.evaluate(() => window.$send('get-budgets'));
+    const [budget] = await page.evaluate(() => $send('get-budgets'));
     expect(budget.cloudFileId).toBeUndefined();
     expect(budget.groupId).toBeUndefined();
 
@@ -52,34 +56,30 @@ test.describe('Onboarding', () => {
       exact: true,
     });
     await expect(register).toBeVisible();
-    expect(await page.evaluate(() => window.$send('get-remote-files'))).toEqual(
-      [],
+    expect(await page.evaluate(() => $send('get-remote-files'))).toEqual([]);
+    expect(await page.evaluate(() => $send('load-prefs'))).not.toHaveProperty(
+      'lastSyncedTimestamp',
     );
-    expect(
-      await page.evaluate(() => window.$send('load-prefs')),
-    ).not.toHaveProperty('lastSyncedTimestamp');
     await register.click();
 
     // A completed sync writes this timestamp. Uploading the file alone does not.
     await expect
-      .poll(() => page.evaluate(() => window.$send('load-prefs')))
+      .poll(() => page.evaluate(() => $send('load-prefs')))
       .toMatchObject({
         id: budget.id,
         lastSyncedTimestamp: expect.any(String),
       });
-    const [registered] = await page.evaluate(() => window.$send('get-budgets'));
+    const [registered] = await page.evaluate(() => $send('get-budgets'));
     expect(registered).toMatchObject({
       id: budget.id,
       cloudFileId: expect.any(String),
       groupId: expect.any(String),
     });
-    expect(await page.evaluate(() => window.$send('get-remote-files'))).toEqual(
-      [
-        expect.objectContaining({
-          fileId: registered.cloudFileId,
-          groupId: registered.groupId,
-        }),
-      ],
-    );
+    expect(await page.evaluate(() => $send('get-remote-files'))).toEqual([
+      expect.objectContaining({
+        fileId: registered.cloudFileId,
+        groupId: registered.groupId,
+      }),
+    ]);
   });
 });
