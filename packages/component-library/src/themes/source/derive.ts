@@ -5,6 +5,7 @@ import {
   interpolate,
   parse,
   wcagContrast,
+  wcagLuminance,
 } from './color';
 
 export type AccentSet = {
@@ -61,20 +62,71 @@ function toColor(css: string) {
   return color;
 }
 
-function withLightness(css: string, lightness: number) {
+function atLightness(color: ReturnType<typeof toColor>, lightness: number) {
   return formatHex(
     clampChroma(
-      { ...toColor(css), l: Math.min(1, Math.max(0, lightness)) },
+      { ...color, l: Math.min(1, Math.max(0, lightness)) },
       'oklch',
       'rgb',
     ),
   );
 }
 
-function lowestContrast(css: string, backgrounds: string[]) {
-  return Math.min(
-    ...backgrounds.map(background => wcagContrast(css, background)),
-  );
+function withLightness(css: string, lightness: number) {
+  return atLightness(toColor(css), lightness);
+}
+
+type ContrastGoal = { backgrounds: string[]; target: number };
+
+export function nearestWithContrasts(css: string, goals: ContrastGoal[]) {
+  const base = toColor(css);
+  const start = formatHex(base);
+  const searches = goals.map(goal => ({
+    target: goal.target,
+    luminances: goal.backgrounds.map(background => wcagLuminance(background)),
+    found: null as string | null,
+    strongest: { color: start, contrast: 0 },
+  }));
+
+  const measure = (color: string) => {
+    const own = wcagLuminance(color);
+    let open = 0;
+    for (const search of searches) {
+      if (search.found != null) {
+        continue;
+      }
+      let lowest = Infinity;
+      for (const luminance of search.luminances) {
+        const contrast =
+          (Math.max(own, luminance) + 0.05) / (Math.min(own, luminance) + 0.05);
+        if (contrast < lowest) {
+          lowest = contrast;
+        }
+      }
+      if (lowest >= search.target) {
+        search.found = color;
+      } else {
+        open += 1;
+        if (lowest > search.strongest.contrast) {
+          search.strongest = { color, contrast: lowest };
+        }
+      }
+    }
+    return open;
+  };
+
+  if (measure(start) > 0) {
+    const nearestFirst = Array.from(
+      { length: lightnessSteps + 1 },
+      (_, step) => step / lightnessSteps,
+    ).sort((a, b) => Math.abs(a - base.l) - Math.abs(b - base.l));
+    for (const lightness of nearestFirst) {
+      if (measure(atLightness(base, lightness)) === 0) {
+        break;
+      }
+    }
+  }
+  return searches.map(search => search.found ?? search.strongest.color);
 }
 
 export function nearestWithContrast(
@@ -82,31 +134,7 @@ export function nearestWithContrast(
   backgrounds: string[],
   target: number,
 ) {
-  const start = formatHex(toColor(css));
-  let strongest = {
-    color: start,
-    contrast: lowestContrast(start, backgrounds),
-  };
-  if (strongest.contrast >= target) {
-    return start;
-  }
-
-  const startLightness = toColor(css).l;
-  const nearestFirst = Array.from(
-    { length: lightnessSteps + 1 },
-    (_, step) => step / lightnessSteps,
-  ).sort((a, b) => Math.abs(a - startLightness) - Math.abs(b - startLightness));
-  for (const lightness of nearestFirst) {
-    const color = withLightness(css, lightness);
-    const contrast = lowestContrast(color, backgrounds);
-    if (contrast >= target) {
-      return color;
-    }
-    if (contrast > strongest.contrast) {
-      strongest = { color, contrast };
-    }
-  }
-  return strongest.color;
+  return nearestWithContrasts(css, [{ backgrounds, target }])[0];
 }
 
 export function pickContrast(fill: string) {

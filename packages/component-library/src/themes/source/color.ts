@@ -12,6 +12,7 @@ import {
   parse,
   useMode as registerMode,
   wcagContrast,
+  wcagLuminance,
 } from 'culori/fn';
 
 registerMode(modeRgb);
@@ -28,4 +29,5 @@ export {
   interpolate,
   parse,
   wcagContrast,
+  wcagLuminance,
 };
