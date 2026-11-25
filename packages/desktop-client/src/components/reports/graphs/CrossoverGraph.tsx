@@ -47,6 +47,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
           zIndex: 1000,
           pointerEvents: 'none',
           borderRadius: 2,
+          // oxlint-disable-next-line actual/no-color-literals
           boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
           backgroundColor: theme.menuBackground,
           color: theme.menuItemText,
@@ -191,7 +192,6 @@ export function CrossoverGraph({
           {!compact && <CartesianGrid strokeDasharray="3 3" />}
           <XAxis
             dataKey="x"
-            hide={compact}
             tick={{ fill: theme.pageText }}
             tickLine={{ stroke: theme.pageText }}
           />

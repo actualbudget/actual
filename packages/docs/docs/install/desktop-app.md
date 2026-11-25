@@ -14,9 +14,17 @@ If you prefer not to worry about setting up or configuring a server, the desktop
 - **User-Friendly:** Ideal for non-technical users who want to focus on managing their budget rather than managing servers.
 - **Local Control:** Run the server on your own machine, giving you immediate access to features like Bank Sync and more.
 
-## Who shouldn't use the desktop app?
+## Using the Desktop App with Your Own Server
 
-If you're already running your own server, the Web client remains your best option. Running the desktop app alongside an existing server can lead to version mismatches — the server might expect a different release than that provided by the desktop app, potentially causing unexpected issues.
+If you already run your own server, you can connect the desktop app to it. In the server selection area at the bottom of the welcome screen, click **Set up sync**, choose **Use an external server**, enter the address of your server, and click **Connect**.
+
+If the desktop app is already connected to an external server, the link reads **Change** instead of **Set up sync**. Click it to go straight to the connection form, enter the address of your server, and click **Connect**.
+
+The desktop app does not need to be on the same version as your server. Devices running different versions of Actual can sync the same budget, so you can use the desktop app on your computer and the web client everywhere else.
+
+If another device makes a change with a newer version of Actual than the one installed on your computer, the desktop app keeps syncing.
+
+New features that rely on the server, such as a newly added bank sync provider, only work once your server has been updated to a version that includes them.
 
 ## Setting up the desktop app local server
 

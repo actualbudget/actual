@@ -14,7 +14,6 @@ import { authorizeBank } from '#gocardless';
 import { useAkahuStatus } from '#hooks/useAkahuStatus';
 import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import { useEnableBankingStatus } from '#hooks/useEnableBankingStatus';
-import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '#hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '#hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '#hooks/useSimpleFinStatus';
@@ -117,14 +116,12 @@ export function useBuiltInBankSyncProviders({
     useState(false);
   const [loadingAkahuAccounts, setLoadingAkahuAccounts] = useState(false);
 
-  const enableBankingEnabled = useFeatureFlag('enableBanking');
-  const akahuEnabled = useFeatureFlag('akahuBankSync');
   const { configuredGoCardless } = useGoCardlessStatus();
   const { simpleFinStatus, setSimpleFinStatus } = useSimpleFinStatus();
   const { pluggyAiStatus, setPluggyAiStatus } = usePluggyAiStatus();
-  const { configuredAkahu } = useAkahuStatus(akahuEnabled);
+  const { configuredAkahu } = useAkahuStatus();
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
-    useEnableBankingStatus(enableBankingEnabled);
+    useEnableBankingStatus();
 
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
     boolean | null
@@ -722,41 +719,37 @@ export function useBuiltInBankSyncProviders({
         };
       });
 
-    if (akahuEnabled) {
-      baseProviders.push({
-        id: 'akahu',
-        displayName: 'Akahu',
-        description: t(
-          'Link a New Zealand bank account to automatically download transactions.',
-        ),
-        isConfigured: configuredProviders.akahu,
-        credentialSource: 'global',
-        supportsPerBudgetFile: false,
-        canConfigure: canConfigureProviders,
-        isLoading: loadingAkahuAccounts,
-        onConfigure: onAkahuInit,
-        onLink: onConnectAkahu,
-        onReset: onAkahuReset,
-      });
-    }
+    baseProviders.push({
+      id: 'akahu',
+      displayName: 'Akahu',
+      description: t(
+        'Link a New Zealand bank account to automatically download transactions.',
+      ),
+      isConfigured: configuredProviders.akahu,
+      credentialSource: 'global',
+      supportsPerBudgetFile: false,
+      canConfigure: canConfigureProviders,
+      isLoading: loadingAkahuAccounts,
+      onConfigure: onAkahuInit,
+      onLink: onConnectAkahu,
+      onReset: onAkahuReset,
+    });
 
-    if (enableBankingEnabled) {
-      baseProviders.push({
-        id: 'enableBanking',
-        displayName: 'Enable Banking',
-        description: t(
-          'Link a European bank account via Enable Banking, a free alternative to GoCardless for PSD2-supported banks.',
-        ),
-        isConfigured: configuredProviders.enableBanking,
-        credentialSource: 'global',
-        supportsPerBudgetFile: false,
-        canConfigure: canConfigureProviders,
-        isLoading: isEnableBankingLoading,
-        onConfigure: onEnableBankingInit,
-        onLink: onConnectEnableBanking,
-        onReset: onEnableBankingReset,
-      });
-    }
+    baseProviders.push({
+      id: 'enableBanking',
+      displayName: 'Enable Banking',
+      description: t(
+        'Link a European bank account via Enable Banking, a free alternative to GoCardless for PSD2-supported banks.',
+      ),
+      isConfigured: configuredProviders.enableBanking,
+      credentialSource: 'global',
+      supportsPerBudgetFile: false,
+      canConfigure: canConfigureProviders,
+      isLoading: isEnableBankingLoading,
+      onConfigure: onEnableBankingInit,
+      onLink: onConnectEnableBanking,
+      onReset: onEnableBankingReset,
+    });
 
     return baseProviders;
   }, [
@@ -771,8 +764,6 @@ export function useBuiltInBankSyncProviders({
     pluggyAiStatus,
     simpleFinStatus,
     syncServerStatus,
-    enableBankingEnabled,
-    akahuEnabled,
     isEnableBankingLoading,
     loadingSimpleFinAccounts,
     loadingAkahuAccounts,

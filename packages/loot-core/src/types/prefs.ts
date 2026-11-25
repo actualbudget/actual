@@ -8,9 +8,7 @@ export type FeatureFlag =
   | 'balanceForecastReport'
   | 'customThemes'
   | 'budgetAnalysisReport'
-  | 'enableBanking'
   | 'sankeyReport'
-  | 'akahuBankSync'
   | 'mobileCalculator'
   | 'monteCarloReport';
 

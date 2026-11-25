@@ -3,9 +3,11 @@ import type { ServerEvents } from '@actual-app/core/types/server-events';
 import type { QueryClient } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { budgetBoundsQueries } from './budget';
 import type { AppStore } from './redux/store';
 import { dashboardQueries, reportQueries } from './reports';
 import { listenForSyncEvent } from './sync-events';
+import type * as UsersSlice from './users/usersSlice';
 
 const eventListeners = new Map<string, Array<(args: unknown) => void>>();
 
@@ -26,7 +28,9 @@ function publishSyncEvent(event: ServerEvents['sync-event']) {
   (eventListeners.get('sync-event') ?? []).forEach(listener => listener(event));
 }
 
-function setup() {
+type UserData = { offline: boolean } | null;
+
+function setup({ userData = null }: { userData?: UserData } = {}) {
   vi.spyOn(connection, 'listen').mockImplementation(
     // The real `listen` is overloaded per event name; the mock only needs
     // to record the handler
@@ -36,19 +40,28 @@ function setup() {
   const invalidateQueries = vi.fn();
   const queryClient = { invalidateQueries } as unknown as QueryClient;
 
+  const dispatch = vi.fn();
   // A budget must be loaded for the table -> invalidate mapping to run
   const store = {
     getState: () => ({
       prefs: { local: { id: 'budget-id' } },
       app: { loadingText: null },
+      user: { data: userData },
     }),
-    dispatch: vi.fn(),
+    dispatch,
   } as unknown as AppStore;
 
   listenForSyncEvent(store, queryClient);
 
-  return { invalidateQueries };
+  return { invalidateQueries, dispatch };
 }
+
+const getUserDataAction = { type: 'user/getUserData' };
+
+vi.mock('./users/usersSlice', async importOriginal => ({
+  ...(await importOriginal<typeof UsersSlice>()),
+  getUserData: () => getUserDataAction,
+}));
 
 function appliedEvent(tables: string[]): ServerEvents['sync-event'] {
   return { type: 'applied', tables } as ServerEvents['sync-event'];
@@ -58,6 +71,28 @@ describe('listenForSyncEvent', () => {
   beforeEach(() => {
     eventListeners.clear();
     vi.clearAllMocks();
+  });
+
+  it.each([
+    'zero_budgets',
+    'reflect_budgets',
+    'transactions',
+    'categories',
+    'preferences',
+  ])('refreshes budget bounds after %s changes', table => {
+    const { invalidateQueries } = setup();
+    publishSyncEvent(appliedEvent([table]));
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: budgetBoundsQueries.all(),
+    });
+  });
+
+  it('leaves budget bounds alone for unrelated changes', () => {
+    const { invalidateQueries } = setup();
+    publishSyncEvent(appliedEvent(['payees']));
+    expect(invalidateQueries).not.toHaveBeenCalledWith({
+      queryKey: budgetBoundsQueries.all(),
+    });
   });
 
   it('invalidates the dashboard queries when widgets sync', () => {
@@ -102,4 +137,33 @@ describe('listenForSyncEvent', () => {
       queryKey: reportQueries.lists(),
     });
   });
+
+  it.each([
+    { type: 'success', userData: { offline: true } },
+    { type: 'error', userData: { offline: false } },
+  ] as const)(
+    'refreshes the user data on $type when the status says $userData',
+    ({ type, userData }) => {
+      const { dispatch } = setup({ userData });
+
+      publishSyncEvent({ type, tables: [] } as ServerEvents['sync-event']);
+
+      expect(dispatch).toHaveBeenCalledWith(getUserDataAction);
+    },
+  );
+
+  it.each([
+    { type: 'success', userData: { offline: false } },
+    { type: 'error', userData: { offline: true } },
+    { type: 'success', userData: null },
+  ] as const)(
+    'leaves the user data alone on $type when the status says $userData',
+    ({ type, userData }) => {
+      const { dispatch } = setup({ userData });
+
+      publishSyncEvent({ type, tables: [] } as ServerEvents['sync-event']);
+
+      expect(dispatch).not.toHaveBeenCalledWith(getUserDataAction);
+    },
+  );
 });

@@ -76,6 +76,7 @@ export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
                 width: 8,
                 height: 8,
                 borderRadius: 4,
+                // oxlint-disable-next-line actual/theme-token-roles
                 backgroundColor: theme.pageTextPositive,
               }}
             />

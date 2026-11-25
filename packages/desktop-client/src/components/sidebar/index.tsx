@@ -49,7 +49,8 @@ export function FloatableSidebar() {
         boxShadow:
           !sidebarShouldFloat || sidebar.hidden
             ? 'none'
-            : '0 15px 30px 0 rgba(0,0,0,0.25), 0 3px 15px 0 rgba(0,0,0,.5)',
+            : // oxlint-disable-next-line actual/no-color-literals
+              '0 15px 30px 0 rgba(0,0,0,0.25), 0 3px 15px 0 rgba(0,0,0,.5)',
         transform: `translateY(${!sidebarShouldFloat ? -8 : 0}px)
                       translateX(${
                         sidebarShouldFloat && sidebar.hidden ? '-100' : '0'

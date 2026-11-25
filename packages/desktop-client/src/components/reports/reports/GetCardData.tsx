@@ -42,10 +42,12 @@ function ErrorFallback() {
 
 function convertFromDate(
   interval: string | undefined,
-): 'dayFromDate' | 'monthFromDate' | 'yearFromDate' {
+): 'dayFromDate' | 'monthFromDate' | 'quarterFromDate' | 'yearFromDate' {
   switch (interval) {
     case 'Monthly':
       return 'monthFromDate';
+    case 'Quarterly':
+      return 'quarterFromDate';
     case 'Yearly':
       return 'yearFromDate';
     default:
@@ -55,10 +57,16 @@ function convertFromDate(
 
 function convertRangeInclusive(
   interval: string | undefined,
-): 'dayRangeInclusive' | 'rangeInclusive' | 'yearRangeInclusive' {
+):
+  | 'dayRangeInclusive'
+  | 'rangeInclusive'
+  | 'quarterRangeInclusive'
+  | 'yearRangeInclusive' {
   switch (interval) {
     case 'Monthly':
       return 'rangeInclusive';
+    case 'Quarterly':
+      return 'quarterRangeInclusive';
     case 'Yearly':
       return 'yearRangeInclusive';
     default:
@@ -201,7 +209,7 @@ export function GetCardData({
         interval={report.interval}
         compact
         style={{ height: 'auto', flex: 1 }}
-        intervalsCount={intervals.length}
+        intervalsCount={data.filteredIntervalCount ?? intervals.length}
         showTrendLines={report.showTrendLines}
         showTooltip={!isNarrowWidth && showTooltip}
       />

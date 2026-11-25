@@ -297,6 +297,41 @@ describe('app-simplefin', () => {
       expect(res.body.data.error_code).toBe('INVALID_ACCESS_TOKEN');
       expect(undici.fetch).not.toHaveBeenCalled();
     });
+
+    it.each([
+      ['100.23', 10023],
+      ['100.2', 10020],
+      ['100', 10000],
+      ['-25.5', -2550],
+    ])(
+      'converts a balance of %s to a starting balance of %i',
+      async (balance, expected) => {
+        secretsService.set(SecretName.simplefin_accessKey, VALID_ACCESS_KEY);
+        mockFetch({
+          accounts: okResponse(
+            JSON.stringify({
+              accounts: [
+                {
+                  id: 'account-1',
+                  org: { name: 'Bank' },
+                  balance,
+                  'balance-date': 1704067200,
+                  transactions: [],
+                },
+              ],
+              errors: [],
+            }),
+          ),
+        });
+
+        const res = await post('/transactions').send({
+          accountId: 'account-1',
+          startDate: '2024-01-01',
+        });
+
+        expect(res.body.data.startingBalance).toBe(expected);
+      },
+    );
   });
 });
 

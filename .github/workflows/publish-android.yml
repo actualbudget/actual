@@ -1,0 +1,80 @@
+name: Publish Android
+
+# Android apps are published for every new release and nightly schedule
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+concurrency:
+  group: build-android-release
+  queue: max
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-android-release:
+    runs-on: depot-macos-latest
+    environment: release
+    timeout-minutes: 60
+    env:
+      ANDROID_HOME: /Users/runner/Library/Android/sdk
+      ANDROID_SDK_ROOT: /Users/runner/Library/Android/sdk
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          cache: 'false'
+
+      - name: Build mobile web app
+        run: yarn build:browser --mobile
+
+      # Secrets (all in the `release` environment):
+      #
+      # - ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD: a signing
+      #   keystore. Generate once with:
+      #   keytool -genkeypair -keystore actual-android.jks -storetype JKS \
+      #     -alias actual -keyalg RSA -keysize 2048 -validity 10000
+      #   Press Enter at the key-password prompt to reuse the keystore password.
+      #   The secret is `base64 -i actual-android.jks` and the keystore password.
+      #   Back up the key securely and supply it when enrolling in Play App Signing.
+      - name: Build and verify signed Android release
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: actual
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          umask 077
+          export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/actual-android-upload.jks"
+          trap 'rm -f "$ANDROID_KEYSTORE_PATH"' EXIT
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
+          export PATH="$ANDROID_HOME/build-tools/36.0.0:$PATH"
+          # Compute once for both artifacts, with the same minute precision as iOS.
+          export ANDROID_VERSION_CODE=$(( $(date -u +%s) / 60 ))
+          # The AAB command uses SHA-256 after cap build's SHA-1 signing.
+          # Related upstream issue: https://github.com/ionic-team/capacitor/issues/8428
+          yarn workspace mobile-client release:android
+          apksigner verify packages/mobile-client/build/app-release-signed.apk
+          jarsigner -verify -strict -keystore "$ANDROID_KEYSTORE_PATH" -storepass:env ANDROID_KEYSTORE_PASSWORD packages/mobile-client/build/app-release-signed.aab "$ANDROID_KEY_ALIAS"
+
+      - name: Upload signed Android artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: actual-android-release
+          path: |
+            packages/mobile-client/build/app-release-signed.apk
+            packages/mobile-client/build/app-release-signed.aab

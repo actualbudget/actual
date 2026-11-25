@@ -10,6 +10,7 @@ import {
 } from '#server/schedules/app';
 import * as sheet from '#server/sheet';
 import { loadRules, updateRule } from '#server/transactions/transaction-rules';
+import { summarizeForecastContributors } from '#shared/forecast-contributors';
 import type { RuleConditionEntity } from '#types/models';
 
 import { generateForecast } from './app';
@@ -134,6 +135,190 @@ afterEach(() => {
 });
 
 describe('forecast app', () => {
+  it('does not project a recorded occurrence that report filters exclude', async () => {
+    const account = await db.insertAccount({ id: 'acct', name: 'Checking' });
+    const scheduleId = await createSchedule({
+      conditions: [
+        { op: 'is', field: 'account', value: account },
+        { op: 'is', field: 'amount', value: -10_000 },
+        {
+          op: 'is',
+          field: 'date',
+          value: { start: '2024-03-10', frequency: 'monthly' },
+        },
+      ],
+    });
+    await db.insertTransaction({
+      id: 'recorded',
+      account,
+      amount: -10_000,
+      date: '2024-03-10',
+      schedule: scheduleId,
+      cleared: true,
+    });
+    const result = await generateForecast({
+      accountIds: [account],
+      startDate: '2024-03-01',
+      endDate: '2024-04-30',
+      conditions: [{ op: 'is', field: 'cleared', value: false }],
+    });
+    expect(
+      summarizeForecastContributors(
+        result.dataPoints,
+        '2024-03-01',
+        '2024-04-30',
+      ),
+    ).toMatchObject({
+      recordedNet: 0,
+      scheduledNet: -10_000,
+      endingBalance: -10_000,
+      outflows: [{ scheduleId, amount: -10_000, count: 1 }],
+    });
+  });
+
+  it('reconciles projected and recorded occurrences without double counting', async () => {
+    const account = await db.insertAccount({ id: 'acct', name: 'Checking' });
+    const scheduleId = await createSchedule({
+      conditions: [
+        { op: 'is', field: 'account', value: account },
+        { op: 'is', field: 'amount', value: 500_000 },
+        {
+          op: 'is',
+          field: 'date',
+          value: { start: '2024-03-10', frequency: 'monthly' },
+        },
+      ],
+    });
+    await db.insertTransaction({
+      id: 'opening',
+      account,
+      amount: 100_000,
+      date: '2024-02-01',
+    });
+    await db.insertTransaction({
+      id: 'recorded',
+      account,
+      amount: 500_000,
+      date: '2024-03-10',
+      schedule: scheduleId,
+    });
+    const result = await generateForecast({
+      accountIds: [account],
+      startDate: '2024-03-01',
+      endDate: '2024-04-30',
+    });
+    expect(
+      summarizeForecastContributors(
+        result.dataPoints,
+        '2024-03-01',
+        '2024-04-30',
+      ),
+    ).toMatchObject({
+      openingBalance: 100_000,
+      recordedNet: 500_000,
+      scheduledNet: 500_000,
+      endingBalance: 1_100_000,
+      inflows: [{ scheduleId, amount: 500_000, count: 1 }],
+    });
+  });
+
+  it('recognizes a schedule recorded on a split parent', async () => {
+    const account = await db.insertAccount({ id: 'acct', name: 'Checking' });
+    const scheduleId = await createSchedule({
+      conditions: [
+        { op: 'is', field: 'account', value: account },
+        { op: 'is', field: 'amount', value: -100 },
+        { op: 'is', field: 'date', value: '2024-03-10' },
+      ],
+    });
+    await db.insertTransaction({
+      id: 'parent',
+      account,
+      amount: -100,
+      date: '2024-03-10',
+      schedule: scheduleId,
+      is_parent: true,
+    });
+    await db.insertTransaction({
+      id: 'child-1',
+      account,
+      amount: -60,
+      date: '2024-03-10',
+      is_child: true,
+      parent_id: 'parent',
+    });
+    await db.insertTransaction({
+      id: 'child-2',
+      account,
+      amount: -40,
+      date: '2024-03-10',
+      is_child: true,
+      parent_id: 'parent',
+    });
+    const result = await generateForecast({
+      accountIds: [account],
+      startDate: '2024-03-01',
+      endDate: '2024-03-31',
+    });
+    expect(
+      summarizeForecastContributors(
+        result.dataPoints,
+        '2024-03-01',
+        '2024-03-31',
+      ),
+    ).toMatchObject({
+      recordedNet: -100,
+      scheduledNet: 0,
+      endingBalance: -100,
+      outflows: [],
+    });
+  });
+  it('carries the opening balance into an inclusive range starting today', async () => {
+    const accountId = await db.insertAccount({ id: 'acct', name: 'Checking' });
+    for (const [id, date, amount] of [
+      ['opening', '2024-03-01', 100_000],
+      ['earlier-spending', '2024-03-09', -20_000],
+      ['today', '2024-03-10', -5_000],
+      ['last-day', '2024-09-09', -7_000],
+      ['outside-range', '2024-09-10', -50_000],
+    ] as const) {
+      await db.insertTransaction({ id, account: accountId, date, amount });
+    }
+    await createSchedule({
+      conditions: [
+        { op: 'is', field: 'account', value: accountId },
+        { op: 'is', field: 'amount', value: -1_000 },
+        {
+          op: 'is',
+          field: 'date',
+          value: { start: '2024-03-10', frequency: 'monthly' },
+        },
+      ],
+    });
+
+    const result = await generateForecast({
+      accountIds: [accountId],
+      startDate: '2024-03-10',
+      endDate: '2024-09-09',
+    });
+    expect(result.dataPoints[0]).toMatchObject({
+      date: '2024-03-10',
+      balance: 74_000,
+    });
+    expect(result.dataPoints.at(-1)).toMatchObject({
+      date: '2024-09-09',
+      balance: 62_000,
+    });
+    expect(result.dataPoints.flatMap(point => point.transactions)).toHaveLength(
+      6,
+    );
+    expect(
+      result.dataPoints.every(
+        point => point.date >= '2024-03-10' && point.date <= '2024-09-09',
+      ),
+    ).toBe(true);
+  });
+
   it('shows the real running balance for historical months', async () => {
     const accountId = await db.insertAccount({ id: 'acct', name: 'Checking' });
 

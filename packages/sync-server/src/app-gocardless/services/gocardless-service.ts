@@ -302,7 +302,7 @@ export const goCardlessService = {
 
   createRequisition: async ({
     institutionId,
-    host,
+    redirectUrl,
   }: CreateRequisitionParams): Promise<{
     link: string;
     requisitionId: GoCardlessRequisitionId;
@@ -318,7 +318,7 @@ export const goCardlessService = {
       ) ?? false;
 
     const body = {
-      redirectUrl: host + '/gocardless/link',
+      redirectUrl,
       institutionId,
       referenceId: uuidv4(),
       accessValidForDays: institution.max_access_valid_for_days,

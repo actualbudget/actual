@@ -47,6 +47,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
           zIndex: 1000,
           pointerEvents: 'none',
           borderRadius: 2,
+          // oxlint-disable-next-line actual/no-color-literals
           boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
           backgroundColor: theme.menuBackground,
           color: theme.menuItemText,
@@ -126,12 +127,14 @@ export function BarLineGraph({
               <Bar
                 type="monotone"
                 dataKey="y"
+                // oxlint-disable-next-line actual/no-color-literals
                 fill="#8884d8"
                 {...animationProps}
               />
               <Line
                 type="monotone"
                 dataKey="y"
+                // oxlint-disable-next-line actual/no-color-literals
                 stroke="#8884d8"
                 {...animationProps}
               />

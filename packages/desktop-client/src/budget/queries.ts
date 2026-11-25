@@ -11,6 +11,16 @@ type CategoryViews = {
   list: CategoryEntity[];
 };
 
+export const budgetBoundsQueries = {
+  all: () => ['budget-bounds'],
+  bounds: () =>
+    queryOptions({
+      queryKey: budgetBoundsQueries.all(),
+      queryFn: () => send('get-budget-bounds'),
+      throwOnError: true,
+    }),
+};
+
 export const categoryQueries = {
   all: () => ['categories'],
   lists: () => [...categoryQueries.all(), 'lists'],

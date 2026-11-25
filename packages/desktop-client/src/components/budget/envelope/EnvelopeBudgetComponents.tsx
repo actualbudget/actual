@@ -650,6 +650,7 @@ export function IncomeCategoryMonth({
             }}
           >
             <BalanceWithCarryover
+              isIncome
               carryover={envelopeBudget.catCarryover(category.id)}
               balance={envelopeBudget.catSumAmount(category.id)}
               goal={envelopeBudget.catGoal(category.id)}

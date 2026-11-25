@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "26.11.0",
+  "version": "26.12.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -13,6 +13,7 @@
   "imports": {
     "#browser-preload": {
       "electron-renderer": "./src/browser-preload.electron.ts",
+      "mobile": "./src/browser-preload.mobile.ts",
       "default": "./src/browser-preload.js"
     },
     "#account-groups": "./src/account-groups/index.ts",
@@ -93,6 +94,7 @@
     "#components/transactions/table/columns": "./src/components/transactions/table/columns.ts",
     "#components/transactions/table/utils": "./src/components/transactions/table/utils.ts",
     "#components/util/accountValidation": "./src/components/util/accountValidation.ts",
+    "#components/util/betweenRange": "./src/components/util/betweenRange.ts",
     "#components/util/countries": "./src/components/util/countries.ts",
     "#components/util/localeToCountry": "./src/components/util/localeToCountry.ts",
     "#components/*": "./src/components/*.tsx",
@@ -139,6 +141,7 @@
     "watch": "cross-env BROWSER=none yarn start",
     "build": "vite build",
     "build:browser": "vite build --mode=browser",
+    "build:mobile": "vite build --mode=mobile",
     "generate:i18n": "i18next",
     "test": "vitest --run",
     "validate:theme-catalog": "node --experimental-strip-types bin/validate-theme-catalog.mts",
@@ -151,6 +154,11 @@
     "@actual-app/components": "workspace:*",
     "@actual-app/core": "workspace:*",
     "@babel/core": "^8.0.7",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.4.2",
+    "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/share": "^8.0.3",
     "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/language": "^6.13.1",
     "@codemirror/state": "^6.7.6",
@@ -177,6 +185,7 @@
     "@use-gesture/react": "^10.3.1",
     "@vitejs/plugin-basic-ssl": "^2.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "@zumer/snapdom": "^3.3.6",
     "auto-text-size": "^0.2.3",
     "babel-plugin-react-compiler": "^1.0.0",
     "cmdk": "^1.1.1",
@@ -186,7 +195,6 @@
     "downshift": "9.4.0",
     "es-toolkit": "^1.52.0",
     "fzf": "^0.5.2",
-    "html-to-image": "^1.11.13",
     "hyperformula": "^3.5.0",
     "i18next": "^26.4.4",
     "i18next-parser": "^9.4.0",

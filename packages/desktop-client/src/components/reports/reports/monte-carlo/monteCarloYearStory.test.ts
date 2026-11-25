@@ -47,6 +47,10 @@ function makeRow(
     potTaxes: [0],
     potTaxables: [0],
     taxPaid: 0,
+    lumpSumWithdrawal: 0,
+    lumpSumTax: 0,
+    lumpSumAmounts: [],
+    potLumpSums: [0],
     feesPaid: 0,
     potFees: [0],
     potReturns: [0],
@@ -59,6 +63,7 @@ function story(
   options: {
     hasSurplusPot?: boolean;
     withdrawalRule?: typeof WITHDRAWAL_RULE_DEFAULTS;
+    lumpSumNames?: string[];
   } = {},
 ) {
   return buildMonteCarloYearStory({
@@ -66,6 +71,7 @@ function story(
     withdrawalRule: options.withdrawalRule ?? WITHDRAWAL_RULE_DEFAULTS,
     surplusPotName: 'Surplus cash',
     hasSurplusPot: options.hasSurplusPot ?? false,
+    lumpSumNames: options.lumpSumNames ?? [],
     format,
     translate,
   });
@@ -361,5 +367,63 @@ describe('buildMonteCarloYearStory', () => {
       'Only 1500.00 of the 4000.00 planned could be funded - the plan ran out of accessible money here.',
       '80000.00 was still locked in pots that had not reached their access age.',
     ]);
+  });
+
+  it('mentions one-off withdrawals after the funding, by name', () => {
+    const funded = makeRow({
+      lumpSumWithdrawal: 62_500,
+      lumpSumTax: 12_500,
+      lumpSumAmounts: [50_000, 0],
+      potLumpSums: [62_500],
+    });
+    expect(story(funded, { lumpSumNames: ['House deposit', ''] })).toEqual([
+      'Spent 4000.00 as planned, funded from the pots.',
+      'A one-off withdrawal of 50000.00, "House deposit", was taken from the pots.',
+    ]);
+
+    const several = makeRow({
+      lumpSumWithdrawal: 55_000,
+      lumpSumTax: 0,
+      lumpSumAmounts: [50_000, 5_000],
+      potLumpSums: [55_000],
+    });
+    expect(story(several, { lumpSumNames: ['House deposit', ''] })[1]).toBe(
+      'One-off withdrawals of 55000.00 ("House deposit", "One-off 2") were taken from the pots.',
+    );
+
+    // A failure year: the pots gave up what they had, short of the ask
+    const shortfall = makeRow({
+      withdrawal: 0,
+      spent: 0,
+      plannedSpending: 0,
+      lumpSumWithdrawal: 15_000,
+      lumpSumTax: 0,
+      lumpSumAmounts: [20_000],
+      potLumpSums: [15_000],
+    });
+    expect(story(shortfall, { lumpSumNames: ['Car'] })).toEqual([
+      'Spent 0.00 as planned, funded from the pots.',
+      'The 20000.00 one-off withdrawal "Car" could not be fully funded.',
+    ]);
+    // Unnamed, the sentence stands on its own rather than quoting a
+    // placeholder
+    expect(story(shortfall, { lumpSumNames: [''] })[1]).toBe(
+      'The 20000.00 one-off withdrawal could not be fully funded.',
+    );
+    expect(story(funded, { lumpSumNames: ['', ''] })[1]).toBe(
+      'A one-off withdrawal of 50000.00 was taken from the pots.',
+    );
+
+    // After the plan ran out the one-off is still called for
+    const tail = makeRow({
+      afterDepletion: true,
+      withdrawal: 0,
+      spent: 0,
+      plannedSpending: 4_000,
+      lumpSumAmounts: [20_000],
+    });
+    expect(story(tail, { lumpSumNames: ['Car'] })[1]).toBe(
+      'The 20000.00 one-off withdrawal "Car" could not be fully funded.',
+    );
   });
 });

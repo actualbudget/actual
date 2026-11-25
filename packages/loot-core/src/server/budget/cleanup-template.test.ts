@@ -165,3 +165,63 @@ describe('cleanupTemplate - named pool sources', () => {
     );
   });
 });
+
+describe('cleanupTemplate - negative To Budget', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test('does not budget a negative amount to cover overspending', async () => {
+    setup({
+      categories: [{ id: 'bills', name: 'Bills', cleanup_def: [] }],
+      sheetValues: {
+        'leftover-bills': -300000,
+        'budget-bills': 100000,
+        // Last month's overspending was larger than this month's income.
+        'to-budget': -8873,
+      },
+    });
+
+    await cleanupTemplate({ month: MONTH });
+
+    expect(budgetedFor('bills')).toEqual([]);
+  });
+
+  test('does not take money from sinks', async () => {
+    setup({
+      categories: [
+        {
+          id: 'vacation',
+          name: 'Vacation',
+          cleanup_def: [{ role: 'sink', groupId: null, weight: 1 }],
+        },
+      ],
+      sheetValues: {
+        'leftover-vacation': 0,
+        'budget-vacation': 50000,
+        'to-budget': -8873,
+      },
+    });
+
+    await cleanupTemplate({ month: MONTH });
+
+    expect(budgetedFor('vacation')).toEqual([]);
+  });
+
+  test('still covers part of the overspending when To Budget is positive but short', async () => {
+    setup({
+      categories: [{ id: 'bills', name: 'Bills', cleanup_def: [] }],
+      sheetValues: {
+        'leftover-bills': -300000,
+        'budget-bills': 100000,
+        'to-budget': 50000,
+      },
+    });
+
+    await cleanupTemplate({ month: MONTH });
+
+    expect(budgetedFor('bills')).toEqual([
+      expect.objectContaining({ amount: 150000 }),
+    ]);
+  });
+});

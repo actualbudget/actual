@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/sync-server",
-  "version": "26.11.0",
+  "version": "26.12.0",
   "description": "actual syncing server",
   "license": "MIT",
   "repository": {
@@ -18,7 +18,7 @@
   ],
   "type": "module",
   "imports": {
-    "#db": "./src/db.js",
+    "#db": "./src/db.ts",
     "#account-db": "./src/account-db.js",
     "#load-config": "./src/load-config.js",
     "#migrations": "./src/migrations.ts",
@@ -90,7 +90,7 @@
   "dependencies": {
     "@actual-app/crdt": "workspace:*",
     "@actual-app/web": "workspace:*",
-    "akahu": "^2.5.1",
+    "akahu": "^2.6.0",
     "argon2": "^0.45.1",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^13.0.3",
@@ -106,7 +106,7 @@
     "migrate": "^2.1.0",
     "openid-client": "^5.7.1",
     "pluggy-sdk": "^0.92.0",
-    "undici": "^7.25.0",
+    "undici": "^8.12.3",
     "uuid": "^14.0.3",
     "winston": "^3.19.0"
   },
