@@ -1,39 +1,27 @@
----
-unlisted: true
----
+# Browser Storage
 
-# Browser Storage Engine (Experimental)
+The web app keeps each budget file in the browser’s private file system ([OPFS](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system)) using SQLite’s own WebAssembly build. Earlier versions stored budgets as blocks in IndexedDB through a compatibility layer (absurd-sql) that needed `SharedArrayBuffer` and therefore cross-origin isolation headers. Neither is needed any more: the page only has to be served over HTTPS or from `localhost`.
 
-Actual is trying out a new way of storing budget files in the browser. Today the web app keeps each budget in IndexedDB through a compatibility layer (absurd-sql) that needs `SharedArrayBuffer`, and every change costs several round trips. The new engine uses SQLite’s own WebAssembly build and keeps budget files in the browser’s private file system ([OPFS](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system)), which is faster, uses less memory and does not need the `SharedArrayBuffer` headers.
+## Existing Budgets
 
-This page is for people who want to try it before it becomes the default. Everything on it is temporary.
+A budget stored by an earlier version is moved to the new storage the first time it is opened after updating. The loading screen shows the progress. The old copy is deleted only after the contents of the moved budget have been checked against it. Budgets synced with a server are unaffected either way: the server keeps its own copy.
 
-## What It Needs
+If a budget cannot be moved, nothing is deleted and Actual tells you so. Opening the budget again tries once more. If it keeps failing, the copy in this browser may be damaged: download the budget again from your sync server, or [restore it from a backup](../backup-restore/restore.md).
 
-- Chrome or Edge 108 or later, Firefox 111 or later, Safari 16.4 or later, served over HTTPS (or from `localhost`).
-- Browsers without private file system access (older versions, private browsing in Safari) get a fallback that keeps the database in memory and saves it to IndexedDB about once a second. It works, but it is slower to open and only one tab can use a budget at a time.
+## Browser Requirements
 
-## Turning It On
+Chrome and Edge 108, Firefox 111 and Safari 16.4 or later.
 
-1. Go to **Settings** and click **Experimental** in the settings navigation.
-2. Tick **New browser storage engine**. The app reloads.
+Browsers without private file system access (older versions, private browsing in Safari) fall back to keeping the database in memory and saving it to IndexedDB about once a second. Actual shows a warning icon in the title bar when this is the case. It works, but budgets open more slowly and only one tab can use a budget at a time.
 
-The choice is remembered by the browser, not by the budget. It covers every budget opened in that browser, and your other browsers and devices keep their own setting.
+## One Budget per Tab
 
-Each budget is moved to the new storage the first time it is opened. The loading screen shows the progress. The old copy is deleted only after the contents of the moved budget have been checked against it.
+On desktop browsers all tabs share one copy of the budget engine, so you can keep a budget open in several tabs. On iOS and Android each tab runs its own copy and the budget file can only be open in one of them; a second tab shows "already open in another tab" until the first one closes it.
 
-If a budget cannot be moved, nothing is deleted and Actual tells you so. Opening the budget again tries once more. While no other budget in the browser uses the new storage yet, the message also offers **Go back to previous storage**. This turns the new storage engine off again and tries to open the budget the way it was opened before. If the budget does not open by itself, pick it from the list of files. If it cannot be opened on the previous storage either, the copy in this browser may be damaged: download the budget again from your sync server, or [restore it from a backup](../backup-restore/restore.md).
+## Where the Data Is
 
-Opening Actual once with `?storage=opfs` added to the address, for example `https://your-server.example/?storage=opfs`, turns it on as well. You do not need the parameter again.
+Everything stays on your device. The `actual` IndexedDB database lists your budget files and holds the small ones, such as `metadata.json`; the SQLite files live under `actual/pools/` in the private file system, or inside IndexedDB when the fallback is in use. If a budget exists only on one device, export it from time to time (**Settings → Export data**).
 
-## Turning It Off
+## Reporting Problems
 
-Untick **New browser storage engine** in the same place. It moves every budget back to the old layout before the app reloads, so nothing is lost. Opening Actual with `?storage=legacy` only changes the preference: a budget already on the new storage keeps using it.
-
-Close Actual in all other tabs before switching either way.
-
-## Things to Know
-
-- A budget can be open in one browser tab at a time. Other tabs on the same budget are served by that tab (this is how Actual already works); a tab that cannot reach it shows an "already open in another tab" message.
-- The data stays on your device, exactly as before. Syncing with a server is unchanged.
-- If something goes wrong, open an issue with the browser and version you used, what you were doing, and anything the browser console shows.
+Open an issue with the browser and version you used, what you were doing, and anything the browser console shows. If a budget failed to move, nothing was deleted: reloading the page tries again.

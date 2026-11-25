@@ -1,7 +1,6 @@
 import * as connection from '#platform/server/connection';
 
 import { detectOpfsSyncAccess, PROBE_DIRECTORY } from './config';
-import { listSqliteFileRows } from './files-store';
 import { createMemoryIdbStore } from './idb-memory';
 import { startOpfsKeepAlive } from './opfs-keep-alive';
 import type { OpfsKeepAlive } from './opfs-keep-alive';
@@ -59,25 +58,4 @@ export function getSqliteStore(): SqliteFileStore {
 // Test hook
 export function setSqliteStore(next: SqliteFileStore | null) {
   store = next;
-}
-
-// Move every budget back to absurd-sql's layout and clear the markers, so
-// the next start can pick the legacy engine (the opt-in phase's way back).
-// Each budget moves under one hold of its lock, so nothing can open it and
-// write between the copy and the cutover; a budget open in another tab
-// holds that lock and makes this throw. The legacy copy is written before
-// the store's file goes, and the row turns into the legacy marker in the
-// same step, so an interruption leaves the budget whole in one place or the
-// other; a copy left behind by a failure is ignored while the row still
-// names the store, and replaced by the next revert. Given one path, only
-// that budget is moved back, whatever else lives in the store by then.
-export async function revertToLegacy(onlyPath?: string): Promise<void> {
-  const current = getSqliteStore();
-  if (onlyPath != null) {
-    await current.revertFile(onlyPath);
-    return;
-  }
-  for (const row of await listSqliteFileRows()) {
-    await current.revertFile(row.filepath);
-  }
 }

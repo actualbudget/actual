@@ -4,8 +4,6 @@
 export const migrationsDir: string;
 /** Absolute path to loot-core's default budget database. */
 export const defaultDbPath: string;
-/** Absolute path to the sql.js wasm binary of the legacy engine. */
-export const sqlWasmPath: string;
 /** Absolute path to the official SQLite wasm binary the sqlite-wasm engine runs on. */
 export const sqliteWasmPath: string;
 

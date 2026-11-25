@@ -1,11 +1,7 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import {
-  hasMigratedSqliteFiles,
-  listSqliteFileRows,
-  putSqliteFileRow,
-} from './files-store';
+import { hasMigratedSqliteFiles, putSqliteFileRow } from './files-store';
 import { resetIndexedDb } from './test-helpers';
 
 beforeEach(() => resetIndexedDb());
@@ -16,7 +12,6 @@ describe('sqlite file rows', () => {
       filepath: '/documents/a/db.sqlite',
       contents: '',
     });
-    expect(await listSqliteFileRows()).toEqual([]);
     expect(await hasMigratedSqliteFiles()).toBe(false);
   });
 
@@ -28,29 +23,6 @@ describe('sqlite file rows', () => {
     });
     expect(await hasMigratedSqliteFiles()).toBe(true);
     expect(await hasMigratedSqliteFiles('opfs')).toBe(false);
-  });
-
-  it('leaves the one path it is told to out of the count', async () => {
-    await putSqliteFileRow({
-      filepath: '/documents/a/db.sqlite',
-      contents: new Uint8Array(0),
-      storage: 'memory-idb',
-    });
-    expect(
-      await hasMigratedSqliteFiles(undefined, '/documents/a/db.sqlite'),
-    ).toBe(false);
-    expect(
-      await hasMigratedSqliteFiles(undefined, '/documents/b/db.sqlite'),
-    ).toBe(true);
-
-    await putSqliteFileRow({
-      filepath: '/documents/b/db.sqlite',
-      contents: '',
-      storage: 'opfs',
-    });
-    expect(
-      await hasMigratedSqliteFiles(undefined, '/documents/a/db.sqlite'),
-    ).toBe(true);
   });
 
   it('reports migrated data when both kinds of rows exist', async () => {
@@ -66,8 +38,5 @@ describe('sqlite file rows', () => {
     });
     expect(await hasMigratedSqliteFiles()).toBe(true);
     expect(await hasMigratedSqliteFiles('opfs')).toBe(true);
-    expect(
-      (await listSqliteFileRows()).map(row => row.filepath).sort(),
-    ).toEqual(['/documents/a/db.sqlite', '/documents/b/db.sqlite']);
   });
 });
