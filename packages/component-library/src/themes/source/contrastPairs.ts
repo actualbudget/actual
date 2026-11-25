@@ -72,6 +72,9 @@ export const contrastPairs: ContrastPair[] = [
   text('tableRowHeaderText', 'tableRowHeaderBackground'),
   secondary('tableTextLight', 'tableBackground'),
   secondary('tableTextSubdued', 'tableBackground'),
+  secondary('tableTextInactive', 'tableBackground'),
+  secondary('tableTextInactive', 'tableRowBackgroundHover'),
+  secondary('tableTextInactive', 'tableRowBackgroundHighlight'),
 
   text('numberPositive', 'tableBackground'),
   text('numberNegative', 'tableBackground'),

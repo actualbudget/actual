@@ -143,7 +143,7 @@ export const colors = {
   },
   tableTextSubdued: { light: 'navy500', dark: 'navy300', midnight: 'gray300' },
   tableTextSelected: { all: { ref: 'tableText' } },
-  tableTextInactive: { light: 'navy500', dark: 'navy500', midnight: 'gray400' },
+  tableTextInactive: { all: { ref: 'textSecondary' } },
   tableHeaderText: { light: 'navy600', dark: 'navy200', midnight: 'gray200' },
   tableHeaderBackground: {
     light: 'white',
