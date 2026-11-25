@@ -16,6 +16,10 @@ test.describe('Onboarding', () => {
   });
 
   test('checks the page visuals', async ({ electronPage }) => {
+    // The reference image shows the Start button under the pointer.
+    await electronPage
+      .getByRole('button', { name: 'Start', exact: true })
+      .hover();
     await expect(electronPage).toHaveScreenshot();
     await configurationPage.clickOnNoServer();
     await expect(electronPage).toHaveScreenshot();
