@@ -302,8 +302,8 @@ function SelectedTransactionsFloatingActionBar({
   const getMenuItemStyle = useCallback(
     <T extends string>(item: MenuItemObject<T>) => ({
       ...styles.mobileMenuItem,
-      color: theme.mobileHeaderText,
-      ...(item.disabled === true && { color: theme.buttonBareDisabledText }),
+      color: theme.floatingActionBarText,
+      ...(item.disabled === true && { opacity: 0.5 }),
       ...(item.name === 'delete' && { color: theme.errorTextMenu }),
     }),
     [],

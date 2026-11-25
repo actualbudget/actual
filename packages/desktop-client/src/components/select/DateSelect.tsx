@@ -128,6 +128,7 @@ const pickerStyles: CSSProperties = {
     },
     '&[data-selected]': {
       backgroundColor: theme.calendarSelectedBackground,
+      color: theme.calendarSelectedText,
       borderRadius: 4,
     },
     '&[data-disabled]': {
