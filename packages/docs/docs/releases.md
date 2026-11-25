@@ -181,6 +181,7 @@ Release date: 2026-12-01
 - [#9324](https://github.com/actualbudget/actual/pull/9324) Document that iOS publishing from CI needs an Admin App Store Connect key — thanks @MatissJanis
 - [#9358](https://github.com/actualbudget/actual/pull/9358) Move the donut chart's colour helpers and hover labels into their own files — thanks @RandomSpaceship
 - [#9643](https://github.com/actualbudget/actual/pull/9643) Make the iOS app test in CI more reliable by starting the simulator before the test and retrying on failure — thanks @MatissJanis
+- [#9669](https://github.com/actualbudget/actual/pull/9669) Add a feedback link to the experimental browser storage engine setting — thanks @MikesGlitch
 - [#9330](https://github.com/actualbudget/actual/pull/9330) Submit the iOS and Mac App Store builds for review automatically on each release, and send nightly TestFlight builds to the external beta testers group instead of uploading on every merge — thanks @MatissJanis
 - [#9626](https://github.com/actualbudget/actual/pull/9626) Upgrade oxlint and switch type-aware linting from tsgolint to tsrs to halve lint memory usage — thanks @MatissJanis
 - [#9510](https://github.com/actualbudget/actual/pull/9510) Add a contrast test for theme color pairs — thanks @matt-fidd
