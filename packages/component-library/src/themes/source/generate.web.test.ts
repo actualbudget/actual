@@ -40,6 +40,18 @@ describe('built-in themes', () => {
       '  --color-overlayBackground: rgba(0, 0, 0, 0.3);',
     );
   });
+
+  it('writes derived accent tokens as plain colors', () => {
+    expect(lightThemeCss).toContain(
+      '  --color-accent: var(--palette-purple500);',
+    );
+    expect(lightThemeCss).toContain('  --color-accentHover: #7300c3;');
+    expect(darkThemeCss).toContain('  --color-accentContrast: #ffffff;');
+    expect(darkThemeCss).toContain('  --color-calendarSelectedText: #ffffff;');
+    expect(lightThemeCss).toContain(
+      '  --color-buttonPrimaryBackground: var(--color-accent);',
+    );
+  });
 });
 
 describe('theme', () => {

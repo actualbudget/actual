@@ -103,8 +103,9 @@ If you have started implementing a new feature or bugfix please open a PR so oth
 When you open a PR please remember to do the following:
 
 - If applicable, please link the issue or feature request ticket. The easiest way to do this is by adding the text `Fixes #<ticket_number>` in the PR description.
+- Prove that your change works. Verify it in a real browser and add a before and an after screenshot, or a video, to the Proof section of the PR description. PRs that change the app without proof are not reviewed.
 - Add a release note. These notes get used when generating the full release note at the next release.
-- Once your PR is ready for maintainers to review, remove the `[WIP]` label from the PR title.
+- Open your PR as a draft while you are still working on it, and mark it as ready for review once it is ready for maintainers. Drafts are labeled as work in progress automatically, and are closed after two weeks without activity.
 - Sometimes it can take some time for the maintainers to review your PR for approval. Please keep your PR up to date with the current master branch by merging or rebasing until your PR gets merged.
 
 ### Writing Good Release Notes

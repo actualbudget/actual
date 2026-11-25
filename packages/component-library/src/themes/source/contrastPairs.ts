@@ -33,6 +33,23 @@ function secondary(
 }
 
 export const contrastPairs: ContrastPair[] = [
+  text('accentText', 'mobilePageBackground'),
+  text('formLabelText', 'mobilePageBackground'),
+  text('pageTextPositive', 'datePickerRangeBackground'),
+  text('calendarSelectedText', 'calendarSelectedBackground'),
+  text(
+    'settingsNavItemTextSelected',
+    'settingsNavItemBackgroundSelected',
+    'pageBackground',
+  ),
+  text('accentContrast', 'accent'),
+  text('accentContrast', 'accentHover'),
+  text('accentText', 'pageBackground'),
+  text('accentText', 'tableBackground'),
+  text('accentSubtleText', 'accentSubtle'),
+  text('tableRowBackgroundHighlightText', 'tableRowBackgroundHighlight'),
+  text('checkboxText', 'checkboxBackgroundSelected'),
+
   text('pageText', 'pageBackground'),
   text('pageText', 'tableBackground'),
   text('pageText', 'cardBackground'),
@@ -66,6 +83,11 @@ export const contrastPairs: ContrastPair[] = [
   text('sidebarItemText', 'sidebarBackground'),
   text('sidebarItemText', 'sidebarItemBackgroundHover', 'sidebarBackground'),
   text('sidebarItemTextSelected', 'sidebarBackground'),
+  text(
+    'sidebarItemTextSelected',
+    'sidebarItemBackgroundSelected',
+    'sidebarBackground',
+  ),
   text('sidebarBudgetName', 'sidebarBackground'),
 
   text('settingsCardText', 'settingsCardBackground'),
@@ -112,7 +134,10 @@ export const contrastPairs: ContrastPair[] = [
 
   text('pillText', 'pillBackground'),
   text('pillTextSelected', 'pillBackgroundSelected'),
+  text('pillTextHighlighted', 'pillBackgroundLight'),
+  text('menuAutoCompleteTextHeader', 'menuAutoCompleteBackground'),
   text('noteTagText', 'noteTagBackground'),
+  text('noteTagText', 'noteTagBackgroundHover'),
   text('tooltipText', 'tooltipBackground'),
   text('calendarText', 'calendarBackground'),
   text('calendarItemText', 'calendarItemBackground'),
