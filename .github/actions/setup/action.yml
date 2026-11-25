@@ -31,19 +31,24 @@ runs:
       id: get-node
       run: echo "version=$(node -v)" >> "$GITHUB_OUTPUT"
       shell: bash
+    - name: Hash lock files
+      id: hash-lock-files
+      if: ${{ inputs.cache == 'true' }}
+      run: echo "cache-hash-key=${{ hashFiles(format('{0}/**/yarn.lock', inputs.working-directory)) }}" >> "$GITHUB_OUTPUT"
+      shell: bash
     - name: Cache
       uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       if: ${{ inputs.cache == 'true' }}
       id: cache
       with:
         path: ${{ format('{0}/**/node_modules', inputs.working-directory) }}
-        key: yarn-v1-${{ runner.os }}-${{ steps.get-node.outputs.version }}-${{ hashFiles(format('{0}/**/yarn.lock', inputs.working-directory)) }}
+        key: yarn-v1-${{ runner.os }}-${{ steps.get-node.outputs.version }}-${{ steps.hash-lock-files.outputs.cache-hash-key }}
     - name: Cache Yarn download cache
       uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       if: ${{ inputs.cache == 'true' && steps.cache.outputs.cache-hit != 'true' }}
       with:
         path: ${{ format('{0}/.yarn/cache', inputs.working-directory) }}
-        key: yarn-dl-${{ runner.os }}-${{ steps.get-node.outputs.version }}-${{ hashFiles(format('{0}/**/yarn.lock', inputs.working-directory)) }}
+        key: yarn-dl-${{ runner.os }}-${{ steps.get-node.outputs.version }}-${{ steps.hash-lock-files.outputs.cache-hash-key }}
         restore-keys: |
           yarn-dl-${{ runner.os }}-${{ steps.get-node.outputs.version }}-
           yarn-dl-${{ runner.os }}-
