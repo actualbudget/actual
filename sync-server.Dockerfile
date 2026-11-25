@@ -1,4 +1,4 @@
-FROM node:24-bookworm AS deps
+FROM node:24.22.1-bookworm AS deps
 
 # Install required packages
 RUN apt-get update && apt-get install -y openssl
@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Copy only the files needed for installing dependencies
 COPY .yarn ./.yarn
-COPY yarn.lock package.json .yarnrc.yml tsconfig.json lage.config.js ./
+COPY .gitignore yarn.lock package.json .yarnrc.yml tsconfig.json lage.config.js ./
 COPY packages/api/package.json packages/api/package.json
 COPY packages/component-library/package.json packages/component-library/package.json
 COPY packages/crdt/package.json packages/crdt/package.json
@@ -51,7 +51,7 @@ RUN rm -rf ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY ./packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
 RUN cp -r ./packages/desktop-client/build ./node_modules/@actual-app/web/build
 
-FROM node:24-bookworm-slim AS prod
+FROM node:24.22.1-bookworm-slim AS prod
 
 # Minimal runtime dependencies
 RUN apt-get update && apt-get install -y tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*

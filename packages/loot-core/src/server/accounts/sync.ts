@@ -189,6 +189,7 @@ async function downloadGoCardlessTransactions(
 async function downloadSimpleFinTransactions(
   acctId: AccountEntity['id'] | AccountEntity['id'][],
   since: string | string[],
+  fileId?: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -207,6 +208,7 @@ async function downloadSimpleFinTransactions(
       },
       {
         'X-ACTUAL-TOKEN': userToken,
+        ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),
       },
       // 5 minute timeout for batch sync, one minute for individual accounts
       Array.isArray(acctId) ? 300000 : 60000,
@@ -355,9 +357,18 @@ async function downloadAkahuTransactions(
   return retVal;
 }
 
+function getImportPending(id: string): Promise<boolean> {
+  return aqlQuery(
+    q('preferences')
+      .filter({ id: `sync-import-pending-${id}` })
+      .select('value'),
+  ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+}
+
 async function downloadEnableBankingTransactions(
   acctId: string,
   since: string,
+  importPending: boolean,
   aspspName?: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
@@ -371,6 +382,7 @@ async function downloadEnableBankingTransactions(
       accountId: acctId,
       startDate: since,
       aspspName,
+      importPending,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -391,7 +403,9 @@ async function downloadEnableBankingTransactions(
   return {
     transactions: all,
     accountBalance: balances,
-    startingBalance,
+    // `null` when the bank reported no balance. Normalize a missing field to
+    // the same, so the strict null checks downstream cover both.
+    startingBalance: startingBalance ?? null,
   };
 }
 
@@ -518,11 +532,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         .filter({ id: `custom-sync-mappings-${acctId}` })
         .select('value'),
     ).then(data => data?.data?.[0]?.value),
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `sync-import-pending-${acctId}` })
-        .select('value'),
-    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+    getImportPending(acctId),
     aqlQuery(
       q('preferences')
         .filter({ id: `sync-import-notes-${acctId}` })
@@ -1141,9 +1151,7 @@ async function processBankSyncDownload(
       balanceToUse = customStartingBalance;
     } else if (acctRow.account_sync_source === 'simpleFin') {
       const previousBalance = transactions.reduce((total, trans) => {
-        return (
-          total - parseInt(trans.transactionAmount.amount.replace('.', ''))
-        );
+        return total - amountToInteger(trans.transactionAmount.amount);
       }, currentBalance);
       balanceToUse = previousBalance;
     } else if (acctRow.account_sync_source === 'pluggyai') {
@@ -1153,12 +1161,11 @@ async function processBankSyncDownload(
         currentBalance,
       );
       balanceToUse = Math.round(previousBalance);
-    } else if (acctRow.account_sync_source === 'enableBanking') {
-      const importPending = await aqlQuery(
-        q('preferences')
-          .filter({ id: `sync-import-pending-${id}` })
-          .select('value'),
-      ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+    } else if (
+      acctRow.account_sync_source === 'enableBanking' &&
+      currentBalance !== null
+    ) {
+      const importPending = await getImportPending(id);
       const importable = importPending
         ? transactions
         : transactions.filter(trans => Boolean(trans.booked));
@@ -1191,15 +1198,20 @@ async function processBankSyncDownload(
     const payee = await getStartingBalancePayee();
 
     return runMutator(async () => {
-      const initialId = await db.insertTransaction({
-        account: id,
-        amount: balanceToUse,
-        category: acctRow.offbudget === 0 ? payee.category : null,
-        payee: payee.id,
-        date: startingBalanceDate,
-        cleared: true,
-        starting_balance_flag: true,
-      });
+      // Enable Banking reports no balance when the bank refuses the request;
+      // there is then nothing to derive an opening balance from.
+      const initialId =
+        balanceToUse === null
+          ? null
+          : await db.insertTransaction({
+              account: id,
+              amount: balanceToUse,
+              category: acctRow.offbudget === 0 ? payee.category : null,
+              payee: payee.id,
+              date: startingBalanceDate,
+              cleared: true,
+              starting_balance_flag: true,
+            });
 
       const result = await reconcileTransactions(id, transactions, {
         isBankSyncAccount: true,
@@ -1208,7 +1220,7 @@ async function processBankSyncDownload(
       });
       return {
         ...result,
-        added: [initialId, ...result.added],
+        added: initialId === null ? result.added : [initialId, ...result.added],
       };
     });
   }
@@ -1256,7 +1268,11 @@ export async function syncAccount(
 
   let download;
   if (acctRow.account_sync_source === 'simpleFin') {
-    download = await downloadSimpleFinTransactions(acctId, syncStartDate);
+    download = await downloadSimpleFinTransactions(
+      acctId,
+      syncStartDate,
+      fileId,
+    );
   } else if (acctRow.account_sync_source === 'pluggyai') {
     download = await downloadPluggyAiTransactions(
       acctId,
@@ -1279,6 +1295,7 @@ export async function syncAccount(
     download = await downloadEnableBankingTransactions(
       acctId,
       syncStartDate,
+      await getImportPending(id),
       bankRow?.name,
     );
   } else {
@@ -1299,6 +1316,7 @@ export async function syncAccount(
 
 export async function simpleFinBatchSync(
   accounts: Array<Pick<AccountEntity, 'id' | 'account_id'>>,
+  fileId?: string,
 ) {
   const startDates = await Promise.all(
     accounts.map(async a => getAccountSyncStartDate(a.id)),
@@ -1307,6 +1325,7 @@ export async function simpleFinBatchSync(
   const res = await downloadSimpleFinTransactions(
     accounts.map(a => a.account_id),
     startDates,
+    fileId,
   );
 
   if (!res) {

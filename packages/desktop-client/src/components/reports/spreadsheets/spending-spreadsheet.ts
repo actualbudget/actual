@@ -43,22 +43,29 @@ export function getSpendingBudgetFilters({
   conditions: RuleConditionEntity[];
   conditionsOp?: 'and' | 'or';
 }) {
+  const expenseCategories = categories.filter(category => !category.is_income);
+
   const budgetConditions = conditions.filter(
     cond =>
       !cond.customName &&
       (cond.field === 'category' || cond.field === 'category_group'),
   );
 
-  if (budgetConditions.length === 0) {
-    return [];
-  }
-
-  if (!budgetConditions.every(isSupportedCategoryCondition)) {
-    return [];
+  if (
+    budgetConditions.length === 0 ||
+    !budgetConditions.every(isSupportedCategoryCondition)
+  ) {
+    return [
+      {
+        category: {
+          $oneof: expenseCategories.map(category => category.id),
+        },
+      },
+    ];
   }
 
   const matchingCategoryIds = filterCategoriesByConditions(
-    categories,
+    expenseCategories,
     categoryGroups,
     budgetConditions,
     conditionsOp ?? 'and',
@@ -191,24 +198,20 @@ export function createSpendingSpreadsheet({
         totalsByDate.set(debt.date, totals);
       });
 
-    const budgetMonth = parseInt(compareMonth.replace('-', ''));
+    const budgetMonth = parseInt(compareMonth.replace('-', ''), 10);
+
     const budgetTable =
       budgetType === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
-    const hasBudgetConditions = conditions.some(
-      cond =>
-        !cond.customName &&
-        (cond.field === 'category' || cond.field === 'category_group'),
-    );
-    const budgetFilters = hasBudgetConditions
-      ? await send('get-categories').then(({ list, grouped }) =>
-          getSpendingBudgetFilters({
-            categories: list,
-            categoryGroups: grouped,
-            conditions,
-            conditionsOp,
-          }),
-        )
-      : [];
+
+    const { list: categories, grouped: categoryGroups } =
+      await send('get-categories');
+
+    const budgetFilters = getSpendingBudgetFilters({
+      categories,
+      categoryGroups,
+      conditions,
+      conditionsOp,
+    });
     const [budgets] = await Promise.all([
       aqlQuery(
         q(budgetTable)

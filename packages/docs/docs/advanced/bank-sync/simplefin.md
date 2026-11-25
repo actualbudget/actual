@@ -47,6 +47,10 @@ Server Version 24.10.0 or higher are required for this feature.
 
     <img width="510" alt="The Set-up SimpleFIN dialog with an empty Token field" src="/img/advanced/bank-sync/simplefin-setup-modal@2x.webp" />
 
+To use separate SimpleFIN credentials for this budget, enable **For this budget only** during setup. The budget must be uploaded to your sync server first. Administrators can choose global or budget-specific credentials; other budget owners can configure budget-specific credentials when global credentials are not active.
+
+Budget-specific credentials take precedence over global credentials. Resetting them affects only that budget, which will then use global credentials if available.
+
 ### Link Accounts with SimpleFIN
 
 1. Add the link to your accounts in actual (Existing or New).
@@ -80,6 +84,8 @@ Server Version 24.10.0 or higher are required for this feature.
 1. Currently, the sync pulls at most 90 days of data from each linked account. The amount of data SimpleFIN can get from each account may vary, so not all accounts may have 90 days of historical transactions that can be imported.
 
 2. SimpleFIN's data updates one time / day, roughly every 24 hours, for each linked account. The time of day that each bank updates in SimpleFIN may vary, even from day to day (based on the bank and upstream provider, MX).
+
+3. Actual uses SimpleFIN's payee name for the transaction's payee and `imported payee`, and puts SimpleFIN's description, which is usually your bank's own text, in the notes. For example, a credit card payment can arrive with the payee "Chase Credit Card" and the notes "Payment to Chase card ending in 1234". A [rule](../../budgeting/rules/index.md) that should match your bank's text needs a `notes` condition, not an `imported payee` condition. This needs **Import transaction notes**, which is on by default, in the account's bank sync settings (on the **Bank Sync** page, click **Edit** next to the account). With it off, the description is not imported, so a `notes` condition has nothing to match.
 
 ### Resetting the Setup Token
 

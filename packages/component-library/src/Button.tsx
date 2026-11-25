@@ -11,8 +11,8 @@ import {
   componentSizeControl,
   componentSizeText,
   sizeResponsiveStyles,
-  type ComponentSize,
 } from './tokens';
+import type { ComponentSize } from './tokens';
 import { View } from './View';
 
 const backgroundColor: {
@@ -45,9 +45,9 @@ const backgroundColorHover: Record<
 };
 
 const borderColor: {
-  [key in
-    | ButtonVariant
-    | `${ButtonVariant}Disabled`]?: CSSProperties['borderColor'];
+  [
+    key in ButtonVariant | `${ButtonVariant}Disabled`
+  ]?: CSSProperties['borderColor'];
 } = {
   normal: theme.buttonNormalBorder,
   normalDisabled: theme.buttonNormalDisabledBorder,

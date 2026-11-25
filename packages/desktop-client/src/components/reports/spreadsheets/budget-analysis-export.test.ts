@@ -20,7 +20,18 @@ describe('buildBudgetAnalysisCsv', () => {
     },
   ];
 
-  const lines = (csv: string) => csv.trimEnd().split('\n');
+  const lines = (csv: string) =>
+    csv
+      .replace(/^\uFEFF/, '')
+      .trimEnd()
+      .split('\n');
+
+  it.each([
+    ['with rows', rows],
+    ['with no rows', []],
+  ])('starts with one UTF-8 byte order mark %s', (_name, input) => {
+    expect(buildBudgetAnalysisCsv(input).lastIndexOf('\uFEFF')).toBe(0);
+  });
 
   it('produces a header row and one data row per interval', () => {
     expect(lines(buildBudgetAnalysisCsv(rows))).toHaveLength(3);

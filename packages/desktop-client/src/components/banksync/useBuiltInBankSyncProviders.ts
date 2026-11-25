@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { send } from '@actual-app/core/platform/client/connection';
@@ -14,7 +14,6 @@ import { authorizeBank } from '#gocardless';
 import { useAkahuStatus } from '#hooks/useAkahuStatus';
 import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import { useEnableBankingStatus } from '#hooks/useEnableBankingStatus';
-import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '#hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '#hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '#hooks/useSimpleFinStatus';
@@ -113,45 +112,45 @@ export function useBuiltInBankSyncProviders({
   const { cloudFileId, isAdmin, isFileOwner } = useCurrentAccess();
   const canConfigureProviders = isAdmin;
 
-  const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
-    boolean | null
-  >(null);
-  const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] = useState<
-    boolean | null
-  >(null);
-  const [isEnableBankingSetupComplete, setIsEnableBankingSetupComplete] =
-    useState<boolean | null>(null);
-  const [isAkahuSetupComplete, setIsAkahuSetupComplete] = useState<
-    boolean | null
-  >(null);
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
     useState(false);
   const [loadingAkahuAccounts, setLoadingAkahuAccounts] = useState(false);
 
-  const enableBankingEnabled = useFeatureFlag('enableBanking');
-  const akahuEnabled = useFeatureFlag('akahuBankSync');
   const { configuredGoCardless } = useGoCardlessStatus();
-  const { configuredSimpleFin } = useSimpleFinStatus();
+  const { simpleFinStatus, setSimpleFinStatus } = useSimpleFinStatus();
   const { pluggyAiStatus, setPluggyAiStatus } = usePluggyAiStatus();
-  const { configuredAkahu } = useAkahuStatus(akahuEnabled);
+  const { configuredAkahu } = useAkahuStatus();
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
-    useEnableBankingStatus(enableBankingEnabled);
+    useEnableBankingStatus();
 
-  useEffect(() => {
+  const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
+    boolean | null
+  >(configuredGoCardless);
+  const [prevConfiguredGoCardless, setPrevConfiguredGoCardless] =
+    useState(configuredGoCardless);
+  if (configuredGoCardless !== prevConfiguredGoCardless) {
+    setPrevConfiguredGoCardless(configuredGoCardless);
     setIsGoCardlessSetupComplete(configuredGoCardless);
-  }, [configuredGoCardless]);
+  }
 
-  useEffect(() => {
-    setIsSimpleFinSetupComplete(configuredSimpleFin);
-  }, [configuredSimpleFin]);
-
-  useEffect(() => {
+  const [isEnableBankingSetupComplete, setIsEnableBankingSetupComplete] =
+    useState<boolean | null>(configuredEnableBanking);
+  const [prevConfiguredEnableBanking, setPrevConfiguredEnableBanking] =
+    useState(configuredEnableBanking);
+  if (configuredEnableBanking !== prevConfiguredEnableBanking) {
+    setPrevConfiguredEnableBanking(configuredEnableBanking);
     setIsEnableBankingSetupComplete(configuredEnableBanking);
-  }, [configuredEnableBanking]);
+  }
 
-  useEffect(() => {
+  const [isAkahuSetupComplete, setIsAkahuSetupComplete] = useState<
+    boolean | null
+  >(configuredAkahu);
+  const [prevConfiguredAkahu, setPrevConfiguredAkahu] =
+    useState(configuredAkahu);
+  if (configuredAkahu !== prevConfiguredAkahu) {
+    setPrevConfiguredAkahu(configuredAkahu);
     setIsAkahuSetupComplete(configuredAkahu);
-  }, [configuredAkahu]);
+  }
 
   const onGoCardlessInit = useCallback(() => {
     dispatch(
@@ -172,12 +171,18 @@ export function useBuiltInBankSyncProviders({
         modal: {
           name: 'simplefin-init',
           options: {
-            onSuccess: () => setIsSimpleFinSetupComplete(true),
+            onSuccess: perBudgetFile => {
+              setSimpleFinStatus({
+                configured: true,
+                source: perBudgetFile ? 'per-budget-file' : 'global',
+              });
+            },
+            credentialSource: simpleFinStatus.source ?? 'global',
           },
         },
       }),
     );
-  }, [dispatch]);
+  }, [dispatch, simpleFinStatus.source, setSimpleFinStatus]);
 
   const onPluggyAiInit = useCallback(() => {
     dispatch(
@@ -266,10 +271,16 @@ export function useBuiltInBankSyncProviders({
 
   const onSimpleFinReset = useCallback(async () => {
     try {
+      const fileId =
+        simpleFinStatus.source === 'per-budget-file' ? cloudFileId : null;
+      if (simpleFinStatus.source === 'per-budget-file' && !fileId) {
+        throw new Error(t('Budget file ID is required.'));
+      }
       await ensureSuccessResponse(
         await send('secret-set', {
           name: 'simplefin_token',
           value: null,
+          fileId,
         }),
         'Failed to clear SimpleFIN token',
       );
@@ -277,14 +288,21 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'simplefin_accessKey',
           value: null,
+          fileId,
         }),
         'Failed to clear SimpleFIN access key',
       );
-      setIsSimpleFinSetupComplete(false);
+      setSimpleFinStatus(await send('simplefin-status'));
     } catch (error) {
       notifyResetFailure('SimpleFIN', error);
     }
-  }, [notifyResetFailure]);
+  }, [
+    cloudFileId,
+    notifyResetFailure,
+    simpleFinStatus.source,
+    setSimpleFinStatus,
+    t,
+  ]);
 
   const onPluggyAiReset = useCallback(async () => {
     try {
@@ -390,7 +408,7 @@ export function useBuiltInBankSyncProviders({
   ]);
 
   const onConnectSimpleFin = useCallback(async () => {
-    if (!isSimpleFinSetupComplete) {
+    if (!simpleFinStatus.configured) {
       onSimpleFinInit();
       return;
     }
@@ -453,7 +471,7 @@ export function useBuiltInBankSyncProviders({
     }
   }, [
     dispatch,
-    isSimpleFinSetupComplete,
+    simpleFinStatus.configured,
     loadingSimpleFinAccounts,
     onSimpleFinInit,
     t,
@@ -637,7 +655,7 @@ export function useBuiltInBankSyncProviders({
 
   const configuredProviders = {
     goCardless: Boolean(isGoCardlessSetupComplete),
-    simpleFin: Boolean(isSimpleFinSetupComplete),
+    simpleFin: Boolean(simpleFinStatus.configured),
     pluggyai: Boolean(pluggyAiStatus.configured),
     enableBanking: Boolean(isEnableBankingSetupComplete),
     akahu: Boolean(isAkahuSetupComplete),
@@ -671,9 +689,11 @@ export function useBuiltInBankSyncProviders({
               'Link a North American bank account to automatically download transactions.',
             ),
             isConfigured: configuredProviders.simpleFin,
-            credentialSource: 'global',
-            supportsPerBudgetFile: false,
-            canConfigure: canConfigureProviders,
+            credentialSource: simpleFinStatus.source ?? 'global',
+            supportsPerBudgetFile: true,
+            canConfigure:
+              syncServerStatus === 'online' &&
+              (isAdmin || (isFileOwner && simpleFinStatus.source !== 'global')),
             isLoading: loadingSimpleFinAccounts,
             onConfigure: onSimpleFinInit,
             onLink: onConnectSimpleFin,
@@ -699,41 +719,37 @@ export function useBuiltInBankSyncProviders({
         };
       });
 
-    if (akahuEnabled) {
-      baseProviders.push({
-        id: 'akahu',
-        displayName: 'Akahu',
-        description: t(
-          'Link a New Zealand bank account to automatically download transactions.',
-        ),
-        isConfigured: configuredProviders.akahu,
-        credentialSource: 'global',
-        supportsPerBudgetFile: false,
-        canConfigure: canConfigureProviders,
-        isLoading: loadingAkahuAccounts,
-        onConfigure: onAkahuInit,
-        onLink: onConnectAkahu,
-        onReset: onAkahuReset,
-      });
-    }
+    baseProviders.push({
+      id: 'akahu',
+      displayName: 'Akahu',
+      description: t(
+        'Link a New Zealand bank account to automatically download transactions.',
+      ),
+      isConfigured: configuredProviders.akahu,
+      credentialSource: 'global',
+      supportsPerBudgetFile: false,
+      canConfigure: canConfigureProviders,
+      isLoading: loadingAkahuAccounts,
+      onConfigure: onAkahuInit,
+      onLink: onConnectAkahu,
+      onReset: onAkahuReset,
+    });
 
-    if (enableBankingEnabled) {
-      baseProviders.push({
-        id: 'enableBanking',
-        displayName: 'Enable Banking',
-        description: t(
-          'Link a European bank account via Enable Banking, a free alternative to GoCardless for PSD2-supported banks.',
-        ),
-        isConfigured: configuredProviders.enableBanking,
-        credentialSource: 'global',
-        supportsPerBudgetFile: false,
-        canConfigure: canConfigureProviders,
-        isLoading: isEnableBankingLoading,
-        onConfigure: onEnableBankingInit,
-        onLink: onConnectEnableBanking,
-        onReset: onEnableBankingReset,
-      });
-    }
+    baseProviders.push({
+      id: 'enableBanking',
+      displayName: 'Enable Banking',
+      description: t(
+        'Link a European bank account via Enable Banking, a free alternative to GoCardless for PSD2-supported banks.',
+      ),
+      isConfigured: configuredProviders.enableBanking,
+      credentialSource: 'global',
+      supportsPerBudgetFile: false,
+      canConfigure: canConfigureProviders,
+      isLoading: isEnableBankingLoading,
+      onConfigure: onEnableBankingInit,
+      onLink: onConnectEnableBanking,
+      onReset: onEnableBankingReset,
+    });
 
     return baseProviders;
   }, [
@@ -746,9 +762,8 @@ export function useBuiltInBankSyncProviders({
     configuredProviders.simpleFin,
     configuredProviders.akahu,
     pluggyAiStatus,
+    simpleFinStatus,
     syncServerStatus,
-    enableBankingEnabled,
-    akahuEnabled,
     isEnableBankingLoading,
     loadingSimpleFinAccounts,
     loadingAkahuAccounts,

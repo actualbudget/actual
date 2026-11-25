@@ -59,6 +59,7 @@ It is possible to hold money multiple months ahead. If you do this, those dollar
 :::note
 If you enter a new month and have a negative "To Be Budgeted" amount and you're sure it should be positive, try resetting next month's buffer to bring money that may be held back to the current month.
 :::
+
 :::note
 If you hold funds regularly, you can [automatically hold funds from specific income categories](./index.md#automatic-holding-of-funds).
 :::

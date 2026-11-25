@@ -11,6 +11,7 @@ import {
 import { SvgHelp, SvgNotesPaperText } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { Command } from 'cmdk';
@@ -270,10 +271,11 @@ export function CommandBar() {
         transform: 'translate(-50%, -30%)',
         width: '90%',
         maxWidth: '600px',
-        backgroundColor: 'var(--color-modalBackground)',
-        border: '1px solid var(--color-modalBorder)',
-        color: 'var(--color-pageText)',
+        backgroundColor: theme.modalBackground,
+        border: `1px solid ${theme.modalBorder}`,
+        color: theme.pageText,
         borderRadius: '8px',
+        // oxlint-disable-next-line actual/no-color-literals
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden',
         zIndex: 3001,
@@ -289,12 +291,12 @@ export function CommandBar() {
           padding: '12px 16px',
           fontSize: '1rem',
           border: 'none',
-          borderBottom: '1px solid var(--color-tableBorderSeparator)',
+          borderBottom: `1px solid ${theme.tableBorderSeparator}`,
           backgroundColor: 'transparent',
-          color: 'var(--color-pageText)',
+          color: theme.pageText,
           outline: 'none',
           '&::placeholder': {
-            color: 'var(--color-pageTextSubdued)',
+            color: theme.pageTextSubdued,
           },
         })}
       />
@@ -324,7 +326,7 @@ export function CommandBar() {
                     padding: '8px 8px 4px',
                     fontSize: '0.8rem',
                     fontWeight: 500,
-                    color: 'var(--color-pageTextSubdued)',
+                    color: theme.pageTextSubdued,
                     textTransform: 'uppercase',
                   },
                 })}
@@ -346,14 +348,13 @@ export function CommandBar() {
                       // Avoid showing mouse hover styles when using keyboard navigation
                       '[data-cmdk-list]:not([data-cmdk-list-nav-active]) &:hover':
                         {
-                          backgroundColor:
-                            'var(--color-menuItemBackgroundHover)',
-                          color: 'var(--color-menuItemTextHover)',
+                          backgroundColor: theme.menuItemBackgroundHover,
+                          color: theme.menuItemTextHover,
                         },
 
                       "&[data-selected='true']": {
-                        backgroundColor: 'var(--color-menuItemBackgroundHover)',
-                        color: 'var(--color-menuItemTextHover)',
+                        backgroundColor: theme.menuItemBackgroundHover,
+                        color: theme.menuItemTextHover,
                       },
                     })}
                   >
@@ -371,7 +372,7 @@ export function CommandBar() {
               padding: '16px',
               textAlign: 'center',
               fontSize: '0.9rem',
-              color: 'var(--color-pageTextSubdued)',
+              color: theme.pageTextSubdued,
             })}
           >
             <Trans>No results found</Trans>

@@ -9,6 +9,7 @@ import { MobilePayeesPage } from './mobile-payees-page';
 import { MobileReportsPage } from './mobile-reports-page';
 import { MobileRulesPage } from './mobile-rules-page';
 import { MobileSchedulesPage } from './mobile-schedules-page';
+import { MobileTagsPage } from './mobile-tags-page';
 import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
 import { SettingsPage } from './settings-page';
 
@@ -175,6 +176,15 @@ export class MobileNavigation {
     const payeesPage = new MobilePayeesPage(this.page);
     await payeesPage.waitFor();
     return payeesPage;
+  }
+
+  async goToTagsPage() {
+    const settingsPage = await this.goToSettingsPage();
+    await settingsPage.goToSection('Tags');
+
+    const tagsPage = new MobileTagsPage(this.page);
+    await tagsPage.waitFor();
+    return tagsPage;
   }
 
   async goToSchedulesPage() {

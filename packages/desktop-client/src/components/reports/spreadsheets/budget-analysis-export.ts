@@ -33,6 +33,9 @@ export function buildBudgetAnalysisCsv(rows: IntervalRow[]): string {
       integerToAmount(row.balance),
     ]),
     {
+      // Without a BOM, Excel on Windows reads the UTF-8 as the system ANSI code
+      // page and corrupts accented text, such as translated column names.
+      bom: true,
       header: true,
       columns,
       cast: {

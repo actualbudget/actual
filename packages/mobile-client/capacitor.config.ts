@@ -1,19 +1,17 @@
-import path from 'node:path';
-
 import type { CapacitorConfig } from '@capacitor/cli';
-
-const actualAppWebBuildPath = path.join(
-  path.dirname(require.resolve('@actual-app/web/package.json')),
-  'build',
-);
 
 const baseConfig: CapacitorConfig = {
   appId: 'org.actualbudget',
   appName: 'Actual Budget',
-  webDir: actualAppWebBuildPath,
-  plugins: {
-    SplashScreen: {
-      launchAutoHide: false,
+  // Staged from the web build by `bin/stage-www.mjs` (run by the sync
+  // scripts), which leaves out files the native apps do not need.
+  webDir: 'www',
+  android: {
+    buildOptions: {
+      keystorePath: process.env.ANDROID_KEYSTORE_PATH,
+      keystorePassword: process.env.ANDROID_KEYSTORE_PASSWORD,
+      keystoreAlias: process.env.ANDROID_KEY_ALIAS,
+      keystoreAliasPassword: process.env.ANDROID_KEY_PASSWORD,
     },
   },
 };

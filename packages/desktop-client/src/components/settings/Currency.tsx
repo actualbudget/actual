@@ -52,6 +52,7 @@ export function CurrencySettings() {
         ['MKD', t('Macedonian Denar')],
         ['MXN', t('Mexican Peso')],
         ['MYR', t('Malaysian Ringgit')],
+        ['NOK', t('Norwegian Krone')],
         ['PEN', t('Peruvian Sol')],
         ['PHP', t('Philippine Peso')],
         ['PKR', t('Pakistani Rupee')],
@@ -114,7 +115,9 @@ export function CurrencySettings() {
       const cur = getCurrency(code);
       setNumberFormatPref(cur.numberFormat);
       setHideFractionPref(cur.decimalPlaces === 0 ? 'true' : 'false');
-      setSpaceEnabledPref(cur.symbolFirst ? 'false' : 'true');
+      // A currency code used as the symbol (e.g. "CHF 100") needs a space
+      const isSpaceEnabled = !cur.symbolFirst || cur.symbol === cur.code;
+      setSpaceEnabledPref(isSpaceEnabled ? 'true' : 'false');
       setSymbolPositionPref(cur.symbolFirst ? 'before' : 'after');
     }
   };

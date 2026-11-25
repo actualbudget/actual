@@ -5,7 +5,7 @@ description: Local-first personal finance, built around envelope budgeting
 # remap the same semantic roles via `theme.*` tokens (see The Semantic Token Rule).
 colors:
   actual-purple: '#8719e0'
-  actual-purple-hover: '#a368fc'
+  actual-purple-hover: '#7300c3'
   navy-ink: '#102a43'
   navy-slate: '#627d98'
   navy-mist: '#e8ecf0'
@@ -14,7 +14,6 @@ colors:
   surface-white: '#ffffff'
   positive-green: '#147d64'
   negative-red: '#e12d39'
-  link-blue: '#1980d4'
   warning-gold: '#b88115'
 typography:
   display:
@@ -41,12 +40,15 @@ typography:
     fontWeight: 400
 rounded:
   sm: '4px'
-  md: '6px'
+  sheet: '18px'
+  pill: '999px'
 spacing:
-  xs: '5px'
-  sm: '10px'
-  md: '16px'
-  lg: '20px'
+  xxs: '2px'
+  xs: '4px'
+  sm: '8px'
+  md: '12px'
+  lg: '16px'
+  xl: '24px'
 components:
   button-primary:
     backgroundColor: '{colors.actual-purple}'
@@ -94,7 +96,7 @@ All hex values in this file (frontmatter included) are the light-theme palette m
 
 ### Primary
 
-- **Actual Purple** (#8719e0): The single brand accent. Primary buttons, selected rows and borders, active navigation, mobile header. Hover lightens to **Lifted Purple** (#a368fc).
+- **Actual Purple** (#8719e0): The single brand accent. Primary buttons, selected rows and borders, active navigation, mobile header. Hover deepens to **Deep Purple** (#7300c3), so white text gains contrast on hover. Links use the accent too. The dark and midnight themes use a lighter purple fill (#9446ed) and lilac accent text.
 
 ### Neutral
 
@@ -109,7 +111,6 @@ All hex values in this file (frontmatter included) are the light-theme palette m
 
 - **Positive Green** (#147d64): Positive amounts and funded budgets.
 - **Negative Red** (#e12d39): Negative amounts, overspending, failures.
-- **Link Blue** (#1980d4): Links and informational highlights.
 - **Warning Gold** (#b88115): Underfunded templates, pending states.
 
 ### Named Rules
@@ -132,6 +133,7 @@ All hex values in this file (frontmatter included) are the light-theme palette m
 - **Display** (600, 30px): Page-level headings and large balances. Rare.
 - **Headline** (700, 20px, 0.5px letter-spacing): Section titles.
 - **Title** (500, 15px): Emphasized in-table and card text.
+- **Sheet title** (600, 18px): Centred title of a mobile bottom sheet. Mobile only.
 - **Body** (400, 16px): Default text.
 - **Label** (400, 13px): Table meta, menus, dense secondary text; 12px and 10px steps exist for the tightest spots.
 
@@ -181,10 +183,14 @@ Flat-first with ambient shadows. Structure comes from 1px borders (Navy Mist) an
 
 Utilitarian and quick: compact paddings, instant state feedback, built for daily repetition. All values below are the light theme; every color routes through the semantic token layer.
 
+### Spacing and Radius Scale
+
+Spacing comes from the `spacing` scale in `packages/component-library/src/tokens.ts`, a 4px grid: `xxs` 2, `xs` 4, `sm` 8, `md` 12, `lg` 16, `xl` 24. Radius comes from `radius` in the same file: `sm` 4, `sheet` 18, `pill` 999. New code uses these tokens. Many existing screens predate the scale and use 5, 10, 15 and 20px values, and table containers use a 6px radius that has no token.
+
 ### Buttons
 
 - **Shape:** Gently rounded (4px radius), compact padding (5px 10px)
-- **Primary:** Actual Purple background, white text; hover lifts to Lifted Purple with a soft shadow transition (`box-shadow .25s`)
+- **Primary:** Actual Purple background, white text; hover deepens to Deep Purple with a soft shadow transition (`box-shadow .25s`)
 - **Normal:** White background, Navy Ink text, 1px navy border
 - **Bare:** Transparent, 5px padding; background tint on hover/press. The workhorse for in-table actions
 
@@ -196,7 +202,7 @@ Utilitarian and quick: compact paddings, instant state feedback, built for daily
 
 ### Cards / Containers
 
-- **Corner Style:** 6px radius on table containers (top corners), 4px elsewhere
+- **Corner Style:** 6px radius on table containers (top corners), 4px elsewhere; mobile bottom sheets use 18px top corners and a flat bottom edge
 - **Background:** Surface White on Navy Mist page background
 - **Shadow Strategy:** Card shadow at most; structure via 1px Navy Mist border
 - **Internal Padding:** 16-20px
@@ -205,6 +211,7 @@ Utilitarian and quick: compact paddings, instant state feedback, built for daily
 
 - **Sidebar:** Navy Ink background, light navy text; hover darkens the row, selection marked with a purple accent and purple text. Status states (pending/positive/failed) tint the item background gold/green/red
 - **Mobile:** Purple header, white nav bar, purple selected item
+- **Mobile sheets:** Menus open as bottom sheets on the modal surface (`modalBackground`) with a grab handle in `pageTextSubdued` and hairline row dividers in `tooltipBorder`. Rows are full-width bare buttons, destructive rows in `errorText`, section labels in sentence case only when a sheet has two or more groups. Dismiss by swipe down, tap outside or Escape; no close button
 
 ### Pills / Chips
 

@@ -1,8 +1,6 @@
 import { q } from '@actual-app/core/shared/query';
 import type { ObjectExpression } from '@actual-app/core/shared/query';
 
-import { ReportOptions } from '#components/reports/ReportOptions';
-
 export function makeQuery(
   name: string,
   startDate: string,
@@ -12,16 +10,8 @@ export function makeQuery(
   filters: unknown[],
   groupBy?: string,
 ) {
-  const intervalGroup =
-    interval === 'Monthly'
-      ? { $month: '$date' }
-      : interval === 'Yearly'
-        ? { $year: '$date' }
-        : { $day: '$date' };
-  const intervalFilter =
-    interval === 'Weekly'
-      ? '$day'
-      : '$' + ReportOptions.intervalMap.get(interval)?.toLowerCase() || 'month';
+  const intervalFilter = getReportQueryDateTransform(interval);
+  const intervalGroup = { [intervalFilter]: '$date' };
 
   const query = q('transactions')
     //Apply filters and split by "Group By"
@@ -67,4 +57,18 @@ export function makeQuery(
   }
 
   return query.groupBy(groupByFields).select(selectedFields);
+}
+
+export function getReportQueryDateTransform(interval: string) {
+  // Weekly and quarterly reports are queried by day and month, respectively,
+  // before the spreadsheets roll them up into report intervals.
+  switch (interval) {
+    case 'Yearly':
+      return '$year';
+    case 'Monthly':
+    case 'Quarterly':
+      return '$month';
+    default:
+      return '$day';
+  }
 }
