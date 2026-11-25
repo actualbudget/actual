@@ -1,11 +1,13 @@
 ---
 name: proving-actual-changes
-description: Use when opening a PR that changes Actual app code, or when a PR's Proof section is missing or fails the PR description check ("add proof", "before and after", "record a video"). Covers capturing before and after screenshots or a video in a real browser and attaching them, including from a fork.
+description: Use when opening a PR that changes Actual app code, or when a PR's Proof section is missing or fails the PR description check ("add proof", "before and after", "record a video"). Covers capturing before and after screenshots or a video in a real browser (Playwright via `playwright-cli`, headless is fine) and attaching them, including from a fork.
 ---
 
 # Proving a change works in actualbudget/actual
 
 Proof is the change working in a real browser: **a before AND an after screenshot, or a video**, in the PR's "Proof" section. Passing tests are not proof. When nothing is user-visible (a refactor, types, tests), tick the Proof checkbox instead. Never tick it to skip verifying.
+
+"Real browser" means the app actually running and rendered, not a mock-up or a description of what it would look like. A headless browser counts: the steps below drive Chromium through Playwright with `playwright-cli`.
 
 ## 1. Capture "before"
 

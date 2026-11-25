@@ -1,9 +1,11 @@
 ---
 name: committing-actual-changes
-description: Use whenever creating, drafting, finalizing, or amending a git commit or a pull request in the Actual Budget repo (actualbudget/actual) — including phrases like "commit this", "make a commit", "stage and commit", "open a PR", "create a pull request", "send this for review", "push these changes", "ship it", "submit a PR", "raise a PR", or any time finishing implementation work in this repo where committing or opening a PR is the natural next step. Also trigger when the user mentions the PR template, git hooks, or `--no-verify` in this repo. The repo enforces strict, non-obvious rules for AI-generated contributions (a fixed PR description format with a human-only summary, never skipping hooks, specific git-safety constraints, a pre-commit quality checklist) and not following them produces commits and PRs that have to be redone or manually fixed by a maintainer.
+description: Use when creating or amending a git commit or a pull request in the Actual Budget repo (actualbudget/actual) ("commit this", "open a PR", "push these changes", "ship it"), when finishing work where committing or opening a PR is the natural next step, or when the user mentions the PR template, git hooks, or `--no-verify`.
 ---
 
 # Committing Changes in actualbudget/actual
+
+The repo enforces strict, non-obvious rules for AI-generated contributions: a fixed PR description format with a human-only summary, never skipping hooks, specific git-safety constraints and a pre-commit quality checklist. Commits and PRs that ignore them have to be redone or fixed by hand by a maintainer.
 
 Before creating any git commit or pull request in this repo, read:
 
