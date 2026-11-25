@@ -133,6 +133,19 @@ describe('deriveAccentCss', () => {
     );
   });
 
+  it('reads a fill that points at a derived color as it is written out', () => {
+    const derived = declarations(
+      deriveAccentCss(
+        'light',
+        ':root { --color-accent: #ffd84d; --color-tableBackground: rgba(0, 0, 0, 0); --color-calendarSelectedBackground: var(--color-accentSubtle); }',
+      ),
+    );
+
+    expect(
+      wcagContrast(derived.calendarSelectedText, derived.accentSubtle),
+    ).toBeGreaterThanOrEqual(4.5);
+  });
+
   it('writes only the colors that differ from the built-in theme', () => {
     expect(deriveAccentCss('light', ':root { --color-accent: #8719e0; }')).toBe(
       null,

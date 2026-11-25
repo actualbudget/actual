@@ -73,17 +73,24 @@ function parseColor(css: string): ResolvedColor | null {
     : { r: color.r, g: color.g, b: color.b, alpha: color.alpha ?? 1 };
 }
 
-function createResolver(theme: ThemeName, declarations: Declarations) {
+function createResolver(
+  theme: ThemeName,
+  declarations: Declarations,
+  generated: Record<string, string> = {},
+) {
   const resolving = new Set<string>();
 
   function resolveBuiltIn(property: string) {
     const [kind, name] = property.split(/-(.*)/);
     if (kind === 'color' && Object.hasOwn(colors, name)) {
-      return resolveToken(name, theme, colors, palette, other =>
-        declarations.has(`color-${other}`)
-          ? resolveProperty(`color-${other}`)
-          : undefined,
-      );
+      return resolveToken(name, theme, colors, palette, other => {
+        if (declarations.has(`color-${other}`)) {
+          return resolveProperty(`color-${other}`);
+        }
+        return Object.hasOwn(generated, other)
+          ? parseColor(generated[other])
+          : undefined;
+      });
     }
     if (kind === 'palette' && Object.hasOwn(paletteColors, name)) {
       return parseColor(paletteColors[name]);
@@ -122,10 +129,12 @@ function derive(theme: ThemeName, css: string) {
   const contrastTokens = contrastOnTokens(theme);
   const builtIn = (token: string) =>
     resolveToken(token, theme, colors, palette);
-  const readSurface = (token: string) => {
-    const color = resolve(`color-${token}`) ?? builtIn(token);
-    return color.alpha < 1 ? composite(color, builtIn(token)) : color;
-  };
+  const surfaceReader =
+    (lookup: ReturnType<typeof createResolver>) => (token: string) => {
+      const color = lookup(`color-${token}`) ?? builtIn(token);
+      return color.alpha < 1 ? composite(color, builtIn(token)) : color;
+    };
+  const readSurface = surfaceReader(resolve);
   const surface = readSurface(accentSurfaceTokens.surface);
   const page = readSurface(accentSurfaceTokens.page);
   const mobilePage = readSurface(accentSurfaceTokens.mobilePage);
@@ -143,9 +152,20 @@ function derive(theme: ThemeName, css: string) {
       mobilePage: toHex(mobilePage),
     },
   );
+  const resolveWithSet = createResolver(
+    theme,
+    declarations,
+    Object.fromEntries(
+      derivedAccentTokens.map(name => [name, accentSet[name]]),
+    ),
+  );
+  const readSetSurface = surfaceReader(resolveWithSet);
   const readFill = (token: string, over?: string) => {
-    const fill = resolve(`color-${token}`) ?? builtIn(token);
-    return composite(fill, over == null ? builtIn(token) : readSurface(over));
+    const fill = resolveWithSet(`color-${token}`) ?? builtIn(token);
+    return composite(
+      fill,
+      over == null ? builtIn(token) : readSetSurface(over),
+    );
   };
   const derived = [
     ...derivedAccentTokens.map(name => ({ name, value: accentSet[name] })),
@@ -153,7 +173,7 @@ function derive(theme: ThemeName, css: string) {
       name: token.name,
       value: nearestWithContrast(
         accentSet.accent,
-        [toHex(readSurface(token.surface))],
+        [toHex(readSetSurface(token.surface))],
         token.contrast,
       ),
     })),
