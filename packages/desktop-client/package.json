@@ -144,7 +144,7 @@
     "build:mobile": "vite build --mode=mobile",
     "generate:i18n": "i18next",
     "test": "vitest --run",
-    "validate:theme-catalog": "node --experimental-strip-types bin/validate-theme-catalog.mts",
+    "validate:theme-catalog": "node --import=extensionless/register --experimental-strip-types bin/validate-theme-catalog.mts",
     "e2e": "npx playwright test --browser=chromium",
     "vrt": "cross-env VRT=true npx playwright test --browser=chromium",
     "playwright": "playwright",
@@ -194,6 +194,7 @@
     "date-fns": "^4.4.0",
     "downshift": "9.4.0",
     "es-toolkit": "^1.52.0",
+    "extensionless": "^2.0.6",
     "fzf": "^0.5.2",
     "hyperformula": "^3.5.0",
     "i18next": "^26.4.4",
@@ -234,5 +235,10 @@
     "vite": "^8.3.4",
     "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.0.4"
+  },
+  "extensionless": {
+    "lookFor": [
+      "ts"
+    ]
   }
 }
