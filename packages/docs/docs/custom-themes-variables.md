@@ -25,6 +25,9 @@ Start with these. Many of the variables further down follow them, so a theme can
 | `--color-text`               | Primary text.                                                                            | `#272630` | `#d9e2ec` | `#e8ecf0` |
 | `--color-textSecondary`      | Supporting text such as descriptions and labels.                                         | `#627d98` | `#9fb3c8` | `#bdc5cf` |
 | `--color-textTertiary`       | The least prominent text, such as hints.                                                 | `#9fb3c8` | `#829ab1` | `#98a1ae` |
+| `--color-success`            | Success and notice messages. Their fills and text are worked out from it.                | `#27ab83` | `#3ebd93` | `#3ebd93` |
+| `--color-warning`            | Warning messages. Their fills and text are worked out from it.                           | `#e6bb20` | `#f5e35d` | `#f5e35d` |
+| `--color-error`              | Error messages. Their fills and text are worked out from it.                             | `#e12d39` | `#e12d39` | `#e12d39` |
 
 ## All Other Variables
 
@@ -184,23 +187,23 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-buttonBareDisabledBackground`      | `#00000000` | `#00000000` | `#00000000` | `--color-buttonBareBackground`                                                            |
 | `--color-buttonBareBackgroundHover`         | `#64646426` | `#c8c8c84d` | `#c8c8c84d` |                                                                                           |
 | `--color-buttonBareBackgroundActive`        | `#64646440` | `#c8c8c880` | `#c8c8c880` |                                                                                           |
-| `--color-noticeBackground`                  | `#c6f7e2`   | `#0c6b58`   | `#0c6b58`   |                                                                                           |
-| `--color-noticeBackgroundLight`             | `#effcf6`   | `#014d40`   | `#014d40`   |                                                                                           |
-| `--color-noticeText`                        | `#0c6b58`   | `#8eedc7`   | `#8eedc7`   |                                                                                           |
-| `--color-noticeTextLight`                   | `#147d64`   | `#3ebd93`   | `#3ebd93`   |                                                                                           |
-| `--color-noticeTextDark`                    | `#014d40`   | `#c6f7e2`   | `#c6f7e2`   |                                                                                           |
+| `--color-noticeBackground`                  | `#b0ffdf`   | `#00684d`   | `#00684d`   | `--color-success`, as a fill                                                              |
+| `--color-noticeBackgroundLight`             | `#dbffef`   | `#004c37`   | `#004c37`   | `--color-success`, as a fill                                                              |
+| `--color-noticeText`                        | `#00795a`   | `#6fe8bc`   | `#6fe8bc`   | `--color-success`, readable as text                                                       |
+| `--color-noticeTextLight`                   | `#00795a`   | `#56d1a6`   | `#45c298`   | `--color-success`, readable as text                                                       |
+| `--color-noticeTextDark`                    | `#006349`   | `#bfffe4`   | `#bfffe4`   | `--color-success`, readable as text                                                       |
 | `--color-noticeTextMenu`                    | `#8eedc7`   | `#27ab83`   | `#3ebd93`   |                                                                                           |
-| `--color-noticeBorder`                      | `#27ab83`   | `#0c6b58`   | `#0c6b58`   |                                                                                           |
-| `--color-warningBackground`                 | `#fcf088`   | `#87540d`   | `#87540d`   |                                                                                           |
-| `--color-warningText`                       | `#87540d`   | `#f5e35d`   | `#fcf088`   |                                                                                           |
-| `--color-warningTextDark`                   | `#733309`   | `#fffbea`   | `#fffbea`   |                                                                                           |
-| `--color-warningBorder`                     | `#e6bb20`   | `#e6bb20`   | `#e6bb20`   |                                                                                           |
-| `--color-errorBackground`                   | `#ffe3e3`   | `#8a041a`   | `#8a041a`   |                                                                                           |
-| `--color-errorText`                         | `#cf1124`   | `#ff9b9b`   | `#ff9b9b`   |                                                                                           |
-| `--color-errorTextDark`                     | `#ab091e`   | `#ffbdbd`   | `#ffbdbd`   |                                                                                           |
-| `--color-errorTextDarker`                   | `#610316`   | `#ffbdbd`   | `#ffbdbd`   | `--color-errorTextDark` in Dark and Midnight                                              |
+| `--color-noticeBorder`                      | `#27ab83`   | `#3ebd93`   | `#3ebd93`   | `--color-success`                                                                         |
+| `--color-warningBackground`                 | `#ffeaae`   | `#635900`   | `#635900`   | `--color-warning`, as a fill                                                              |
+| `--color-warningText`                       | `#816700`   | `#f5e35d`   | `#f5e35d`   | `--color-warning`, readable as text                                                       |
+| `--color-warningTextDark`                   | `#6b5500`   | `#fff082`   | `#fff082`   | `--color-warning`, readable as text                                                       |
+| `--color-warningBorder`                     | `#e6bb20`   | `#f5e35d`   | `#f5e35d`   | `--color-warning`                                                                         |
+| `--color-errorBackground`                   | `#ffe4e1`   | `#a7001d`   | `#a7001d`   | `--color-error`, as a fill                                                                |
+| `--color-errorText`                         | `#d1162c`   | `#ffb2ac`   | `#ffb2ac`   | `--color-error`, readable as text                                                         |
+| `--color-errorTextDark`                     | `#b1001f`   | `#ffd8d5`   | `#ffd8d5`   | `--color-error`, readable as text                                                         |
+| `--color-errorTextDarker`                   | `#610316`   | `#ffd8d5`   | `#ffd8d5`   | `--color-errorTextDark` in Dark and Midnight                                              |
 | `--color-errorTextMenu`                     | `#ff9b9b`   | `#ff9b9b`   | `#ff9b9b`   |                                                                                           |
-| `--color-errorBorder`                       | `#e12d39`   | `#e12d39`   | `#e12d39`   |                                                                                           |
+| `--color-errorBorder`                       | `#e12d39`   | `#e12d39`   | `#e12d39`   | `--color-error`                                                                           |
 | `--color-upcomingBackground`                | `#efe7fe`   | `#44427c`   | `#342553`   | `--color-accentSubtle`                                                                    |
 | `--color-upcomingText`                      | `#8719e0`   | `#cbaeff`   | `#bb91ff`   | `--color-accentSubtleText`                                                                |
 | `--color-formLabelText`                     | `#8719e0`   | `#cbaeff`   | `#bb91ff`   | `--color-accentText`                                                                      |
