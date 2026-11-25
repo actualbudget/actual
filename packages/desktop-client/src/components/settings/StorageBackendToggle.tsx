@@ -18,6 +18,7 @@ import {
   returnToPreviousStorage,
 } from '#util/previous-storage';
 
+import { FeatureControl } from './FeatureControl';
 import { SettingsRow } from './SettingsRow';
 
 /**
@@ -101,13 +102,15 @@ export function StorageBackendToggle() {
         </Text>
       }
       control={
-        <Checkbox
-          id="settings-storage-backend"
-          checked={isEnabled}
-          disabled={isSwitching}
-          onChange={() => void toggle()}
-          style={{ marginRight: 0 }}
-        />
+        <FeatureControl feedbackLink="https://github.com/actualbudget/actual/issues/9668">
+          <Checkbox
+            id="settings-storage-backend"
+            checked={isEnabled}
+            disabled={isSwitching}
+            onChange={() => void toggle()}
+            style={{ marginRight: 0 }}
+          />
+        </FeatureControl>
       }
     />
   );
