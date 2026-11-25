@@ -583,8 +583,11 @@ function DateSelectMobile(props: DateSelectProps) {
         type="date"
         value={props.value ?? ''}
         onChange={event => {
-          props.onSelect(event.target.value);
-          props.onCalendarSelect?.();
+          const date = event.target.value;
+          props.onSelect(date);
+          if (date) {
+            props.onCalendarSelect?.();
+          }
         }}
         style={{ height: 28, ...inputStyle }}
         {...restInputProps}
