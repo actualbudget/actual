@@ -3,7 +3,7 @@
 exports[`theme contrast > records the ratio of every known failure 1`] = `
 {
   "dark: tableTextInactive on tableRowBackgroundHover": "2.97",
-  "light: formInputTextPlaceholder on formInputBackground": "2.05",
+  "light: formInputTextPlaceholder on formInputBackground": "2.15",
   "light: pageTextSubdued on pageBackground": "1.81",
   "light: pageTextSubdued on tableBackground": "2.15",
   "midnight: tableTextInactive on tableRowBackgroundHover": "2.79",

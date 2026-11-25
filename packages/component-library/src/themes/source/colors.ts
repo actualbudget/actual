@@ -43,13 +43,13 @@ export const colors = {
     light: 'white',
     dark: 'navy800',
     midnight: 'gray800',
-    description: 'Tables and other content surfaces.',
+    description: 'Tables, cards, inputs and other content surfaces.',
   },
   backgroundRaised: {
     light: 'white',
     dark: 'navy800',
     midnight: 'gray700',
-    description: 'Menus and tooltips.',
+    description: 'Menus, tooltips, modals and buttons.',
   },
   backgroundHover: {
     light: 'navy50',
@@ -120,7 +120,7 @@ export const colors = {
   pageTextLink: { all: { ref: 'accentText' } },
   pageTextLinkLight: { all: { ref: 'accentText' } },
 
-  cardBackground: { light: 'white', dark: 'gray800', midnight: 'gray800' },
+  cardBackground: { all: { ref: 'background' } },
   cardBorder: { all: { ref: 'accentBorder' } },
   cardShadow: { light: 'navy700', dark: 'navy700', midnight: 'gray900' },
 
@@ -285,7 +285,7 @@ export const colors = {
     midnight: { ref: 'menuItemText' },
   },
 
-  modalBackground: { light: 'white', dark: 'gray800', midnight: 'gray700' },
+  modalBackground: { all: { ref: 'backgroundRaised' } },
   modalBorder: { light: 'white', dark: 'navy600', midnight: 'gray200' },
   mobileHeaderBackground: { all: { ref: 'accent' } },
   mobileHeaderText: { all: { ref: 'accentContrast' } },
@@ -300,7 +300,7 @@ export const colors = {
     dark: 'navy700',
     midnight: 'gray900',
   },
-  mobileNavBackground: { light: 'white', dark: 'navy800', midnight: 'gray600' },
+  mobileNavBackground: { all: { ref: 'backgroundRaised' } },
   mobileNavItem: { all: { ref: 'text' } },
   mobileNavItemSelected: { all: { ref: 'accentText' } },
   mobileAccountText: { all: 'blue800' },
@@ -366,16 +366,8 @@ export const colors = {
 
   buttonNormalText: { all: { ref: 'text' } },
   buttonNormalTextHover: { all: { ref: 'text' } },
-  buttonNormalBackground: {
-    light: 'white',
-    dark: 'navy800',
-    midnight: 'gray600',
-  },
-  buttonNormalBackgroundHover: {
-    light: { ref: 'buttonNormalBackground' },
-    dark: 'navy600',
-    midnight: 'gray500',
-  },
+  buttonNormalBackground: { all: { ref: 'backgroundRaised' } },
+  buttonNormalBackgroundHover: { all: { ref: 'backgroundHover' } },
   buttonNormalBorder: {
     light: 'navy150',
     dark: 'navy300',
@@ -393,11 +385,7 @@ export const colors = {
     dark: 'navy500',
     midnight: 'gray400',
   },
-  buttonNormalDisabledBackground: {
-    light: { ref: 'buttonNormalBackground' },
-    dark: 'navy800',
-    midnight: 'gray700',
-  },
+  buttonNormalDisabledBackground: { all: { ref: 'backgroundRaised' } },
   buttonNormalDisabledBorder: {
     light: { ref: 'buttonNormalBorder' },
     dark: 'navy500',
@@ -491,11 +479,7 @@ export const colors = {
 
   formLabelText: { all: { ref: 'accentText' } },
   formLabelBackground: { all: { ref: 'tableBackground' } },
-  formInputBackground: {
-    light: 'navy50',
-    dark: 'navy800',
-    midnight: 'gray800',
-  },
+  formInputBackground: { all: { ref: 'background' } },
   formInputBackgroundSelected: {
     light: 'white',
     dark: 'navy700',
