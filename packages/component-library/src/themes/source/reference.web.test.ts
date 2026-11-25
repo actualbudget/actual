@@ -46,4 +46,16 @@ describe('theme variable reference', () => {
       'Black or white on `--color-calendarSelectedBackground` over `--color-calendarBackground`',
     );
   });
+
+  it('names the variables a color is mixed from', () => {
+    const reference = buildThemeReference();
+
+    expect(followsCell(reference, 'noteTagBackgroundHover')).toBe(
+      'Mixed from `--color-accentSubtle` and `--color-tableBackground`',
+    );
+    expect(followsCell(reference, 'sidebarItemBackgroundSelected')).toBe(
+      'Mixed from `--color-sidebarItemAccentSelected`',
+    );
+    expect(followsCell(reference, 'buttonBareBackground')).toBe('');
+  });
 });
