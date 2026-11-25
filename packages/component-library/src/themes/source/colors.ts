@@ -465,11 +465,7 @@ export const colors = {
   errorBackground: { all: { statusOf: 'error', part: 'fill' } },
   errorText: { all: { statusOf: 'error', part: 'text' } },
   errorTextDark: { all: { statusOf: 'error', part: 'textStrong' } },
-  errorTextDarker: {
-    light: 'red900',
-    dark: { ref: 'errorTextDark' },
-    midnight: { ref: 'errorTextDark' },
-  },
+  errorTextDarker: { all: { ref: 'errorTextDark' } },
   errorTextMenu: { all: 'red200' },
   errorBorder: { all: { ref: 'error' } },
   upcomingBackground: { all: { ref: 'accentSubtle' } },

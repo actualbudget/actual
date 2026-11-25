@@ -352,7 +352,7 @@ exports[`resolved theme colors > light resolves every token 1`] = `
   "errorBorder": "#e12d39",
   "errorText": "#d1162c",
   "errorTextDark": "#b1001f",
-  "errorTextDarker": "#610316",
+  "errorTextDarker": "#b1001f",
   "errorTextMenu": "#ff9b9b",
   "floatingActionBarBackground": "#8719e0",
   "floatingActionBarBorder": "#8719e0",

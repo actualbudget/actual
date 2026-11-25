@@ -201,7 +201,7 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-errorBackground`                   | `#ffe4e1`   | `#a7001d`   | `#a7001d`   | `--color-error`, as a fill                                                                |
 | `--color-errorText`                         | `#d1162c`   | `#ffb2ac`   | `#ffb2ac`   | `--color-error`, readable as text                                                         |
 | `--color-errorTextDark`                     | `#b1001f`   | `#ffd8d5`   | `#ffd8d5`   | `--color-error`, readable as text                                                         |
-| `--color-errorTextDarker`                   | `#610316`   | `#ffd8d5`   | `#ffd8d5`   | `--color-errorTextDark` in Dark and Midnight                                              |
+| `--color-errorTextDarker`                   | `#b1001f`   | `#ffd8d5`   | `#ffd8d5`   | `--color-errorTextDark`                                                                   |
 | `--color-errorTextMenu`                     | `#ff9b9b`   | `#ff9b9b`   | `#ff9b9b`   |                                                                                           |
 | `--color-errorBorder`                       | `#e12d39`   | `#e12d39`   | `#e12d39`   | `--color-error`                                                                           |
 | `--color-upcomingBackground`                | `#efe7fe`   | `#44427c`   | `#342553`   | `--color-accentSubtle`                                                                    |
