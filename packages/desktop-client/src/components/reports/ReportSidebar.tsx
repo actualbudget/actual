@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -31,11 +31,7 @@ import { useDateFormat } from '#hooks/useDateFormat';
 import { useLocale } from '#hooks/useLocale';
 
 import { CategorySelector } from './CategorySelector';
-import {
-  defaultsList,
-  disabledList,
-  getIncludeCurrentState,
-} from './disabledList';
+import { defaultsList, disabledList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
 import { getIntervalFormat, ReportOptions } from './ReportOptions';
 import type { dateRangeProps } from './ReportOptions';
@@ -304,11 +300,20 @@ export function ReportSidebar({
       ? monthUtils.weekFromDate(customReportItems.endDate, firstDayOfWeekIdx)
       : customReportItems.endDate;
 
-  const includeCurrentState = getIncludeCurrentState(
-    customReportItems.dateRange,
-    customReportItems.isDateStatic,
+  const isIncludeCurrentDisabled =
+    customReportItems.isDateStatic ||
+    Boolean(disabledList.currentInterval.get(customReportItems.dateRange));
+
+  useEffect(() => {
+    if (isIncludeCurrentDisabled && customReportItems.includeCurrentInterval) {
+      setSessionReport('includeCurrentInterval', false);
+      setIncludeCurrentInterval(false);
+    }
+  }, [
+    isIncludeCurrentDisabled,
     customReportItems.includeCurrentInterval,
-  );
+    setIncludeCurrentInterval,
+  ]);
 
   return (
     <View
@@ -548,8 +553,8 @@ export function ReportSidebar({
                   name: 'include-current-interval',
                   text: includeCurrentIntervalText,
                   tooltip: includeCurrentIntervalTooltip,
-                  toggle: includeCurrentState.checked,
-                  disabled: includeCurrentState.disabled,
+                  toggle: customReportItems.includeCurrentInterval,
+                  disabled: isIncludeCurrentDisabled,
                 },
                 {
                   name: 'show-hidden-categories',
@@ -656,24 +661,25 @@ export function ReportSidebar({
               onChange={onSelectRange}
               options={rangeOptions}
             />
-            {includeCurrentState.checked && (
-              <Tooltip
-                placement="bottom start"
-                content={
-                  <Text>
-                    <Trans>Current month</Trans>
-                  </Text>
-                }
-                style={{
-                  ...styles.tooltip,
-                  lineHeight: 1.5,
-                  padding: '6px 10px',
-                  marginTop: 5,
-                }}
-              >
-                <Text style={{ marginLeft: 10 }}>+1</Text>
-              </Tooltip>
-            )}
+            {!isIncludeCurrentDisabled &&
+              customReportItems.includeCurrentInterval && (
+                <Tooltip
+                  placement="bottom start"
+                  content={
+                    <Text>
+                      <Trans>Current month</Trans>
+                    </Text>
+                  }
+                  style={{
+                    ...styles.tooltip,
+                    lineHeight: 1.5,
+                    padding: '6px 10px',
+                    marginTop: 5,
+                  }}
+                >
+                  <Text style={{ marginLeft: 10 }}>+1</Text>
+                </Tooltip>
+              )}
           </View>
         ) : (
           <>

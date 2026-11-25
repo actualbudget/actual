@@ -32,42 +32,52 @@ const intervalOptions = [
 const currentIntervalOptions = [
   {
     description: t('This week'),
+    key: 'This week',
     disableInclude: true,
   },
   {
     description: t('This month'),
+    key: 'This month',
     disableInclude: true,
   },
   {
     description: t('Last month'),
+    key: 'Last month',
     disableInclude: true,
   },
   {
     description: t('Current quarter'),
+    key: 'Current quarter',
     disableInclude: true,
   },
   {
     description: t('Previous quarter'),
+    key: 'Previous quarter',
     disableInclude: true,
   },
   {
     description: t('Last 30 days'),
+    key: 'Last 30 days',
     disableInclude: true,
   },
   {
     description: t('Year to date'),
+    key: 'Year to date',
     disableInclude: true,
   },
   {
     description: t('Last year'),
+    key: 'Last year',
     disableInclude: true,
   },
   {
     description: t('Prior year to date'),
+    key: 'Prior year to date',
     disableInclude: true,
   },
   {
     description: t('All time'),
+    key: 'All time',
     disableInclude: true,
   },
 ];
@@ -246,19 +256,9 @@ export const disabledList = {
     modeOptions.map(item => [item.description, item.disabledGraph]),
   ),
   currentInterval: new Map(
-    currentIntervalOptions.map(item => [item.description, item.disableInclude]),
+    currentIntervalOptions.map(item => [item.key, item.disableInclude]),
   ),
 };
-
-export function getIncludeCurrentState(
-  dateRange: string,
-  isDateStatic: boolean,
-  includeCurrentInterval: boolean,
-) {
-  const disabled =
-    isDateStatic || Boolean(disabledList.currentInterval.get(dateRange));
-  return { disabled, checked: !disabled && includeCurrentInterval };
-}
 
 export const defaultsList = {
   mode: modeOptions,

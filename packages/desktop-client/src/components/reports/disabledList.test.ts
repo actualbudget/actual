@@ -1,21 +1,15 @@
-import { getIncludeCurrentState } from './disabledList';
+import { describe, expect, it, vi } from 'vitest';
 
-describe('getIncludeCurrentState', () => {
-  it('disables and unchecks Last month even when includeCurrentInterval is true', () => {
-    expect(getIncludeCurrentState('Last month', false, true)).toEqual({
-      disabled: true,
-      checked: false,
-    });
-  });
+import { disabledList } from './disabledList';
 
-  it('keeps active numeric ranges enabled when live', () => {
-    expect(getIncludeCurrentState('Last 6 months', false, true)).toEqual({
-      disabled: false,
-      checked: true,
-    });
-    expect(getIncludeCurrentState('Last 6 months', true, true)).toEqual({
-      disabled: true,
-      checked: false,
-    });
+vi.mock('i18next', () => ({
+  t: (key: string) => `translated:${key}`,
+}));
+
+describe('disabledList.currentInterval', () => {
+  it('keys fixed ranges by untranslated range id regardless of locale', () => {
+    expect(disabledList.currentInterval.get('Last month')).toBe(true);
+    expect(disabledList.currentInterval.get('Previous quarter')).toBe(true);
+    expect(disabledList.currentInterval.get('Last 6 months')).toBeUndefined();
   });
 });
