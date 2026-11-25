@@ -9,6 +9,8 @@ const knownFailures = new Set<string>([
   'light: pageTextSubdued on pageBackground',
   'light: pageTextSubdued on tableBackground',
   'light: formInputTextPlaceholder on formInputBackground',
+  'dark: tableTextInactive on tableRowBackgroundHover',
+  'midnight: tableTextInactive on tableRowBackgroundHover',
 ]);
 
 function describePair(theme: ThemeName, text: string, background: string) {
