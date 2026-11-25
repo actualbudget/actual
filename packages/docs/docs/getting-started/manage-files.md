@@ -24,7 +24,7 @@ Open the file, and click on the name in the top left of the app. You will be abl
 ## Sharing a File with Other Users
 
 :::note
-Sharing files requires [multi-user support](../config/multi-user.md), which needs an OpenID provider. Without it, anyone who can log in to your server has access to the same files.
+Sharing files requires [multi-user support](../config/multi-user.md), which needs an OpenID provider.
 :::
 
 You can share a file that has been synced to your server with other users of that server. Only the file's owner, or a user with the Admin role, can change who has access.
