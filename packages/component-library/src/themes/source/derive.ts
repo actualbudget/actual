@@ -20,6 +20,16 @@ export type AccentSet = {
 
 export type DerivedAccentToken = Exclude<keyof AccentSet, 'accent'>;
 
+export type StatusSet = {
+  fill: string;
+  fillSubtle: string;
+  text: string;
+  textOnSubtle: string;
+  textStrong: string;
+};
+
+export type StatusPart = keyof StatusSet;
+
 export type AccentSurfaces = {
   surface: string;
   page: string;
@@ -42,6 +52,7 @@ export const derivedAccentTokens: DerivedAccentToken[] = [
 ];
 
 export const textContrast = 4.5;
+export const strongTextContrast = 6;
 export const shapeContrast = 3;
 
 const white = '#ffffff';
@@ -51,8 +62,12 @@ const lightnessSteps = 200;
 const subtleWeightOnLight = 0.12;
 const subtleWeightOnDark = 0.28;
 
+const statusFillLightness = { light: 0.94, dark: 0.46 };
+const statusFillSubtleLightness = { light: 0.97, dark: 0.37 };
+
 const toOklch = converter('oklch');
 const cache = new Map<string, AccentSet>();
+const statusCache = new Map<string, StatusSet>();
 
 function toColor(css: string) {
   const color = toOklch(parse(css));
@@ -213,4 +228,30 @@ export function deriveAccent(
   };
   cache.set(key, accentSet);
   return accentSet;
+}
+
+export function deriveStatus(
+  status: string,
+  { surface, page, mobilePage }: AccentSurfaces,
+): StatusSet {
+  const key = `${status}|${surface}|${page}|${mobilePage}`;
+  const cached = statusCache.get(key);
+  if (cached != null) {
+    return cached;
+  }
+
+  const input = toColor(status);
+  const tone = toColor(surface).l > 0.5 ? 'light' : 'dark';
+  const fill = atLightness(input, statusFillLightness[tone]);
+  const fillSubtle = atLightness(input, statusFillSubtleLightness[tone]);
+  const surfaces = [surface, page, mobilePage];
+  const [text, textOnSubtle, textStrong] = nearestWithContrasts(status, [
+    { backgrounds: [...surfaces, fill], target: textContrast },
+    { backgrounds: [...surfaces, fillSubtle], target: textContrast },
+    { backgrounds: [...surfaces, fill], target: strongTextContrast },
+  ]);
+
+  const statusSet = { fill, fillSubtle, text, textOnSubtle, textStrong };
+  statusCache.set(key, statusSet);
+  return statusSet;
 }

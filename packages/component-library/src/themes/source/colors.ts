@@ -91,6 +91,26 @@ export const colors = {
     midnight: 'gray300',
     description: 'The least prominent text, such as hints.',
   },
+  success: {
+    light: 'green500',
+    dark: 'green400',
+    midnight: 'green400',
+    description:
+      'Success and notice messages. Their fills and text are worked out from it.',
+  },
+  warning: {
+    light: 'orange500',
+    dark: 'orange300',
+    midnight: 'orange300',
+    description:
+      'Warning messages. Their fills and text are worked out from it.',
+  },
+  error: {
+    light: 'red500',
+    dark: 'red500',
+    midnight: 'red500',
+    description: 'Error messages. Their fills and text are worked out from it.',
+  },
 
   pageBackground: { all: { ref: 'backgroundPage' } },
   pageBackgroundTopLeft: {
@@ -431,47 +451,27 @@ export const colors = {
     midnight: { raw: 'rgba(200, 200, 200, 0.5)' },
   },
 
-  noticeBackground: {
-    light: 'green150',
-    dark: 'green800',
-    midnight: 'green800',
-  },
-  noticeBackgroundLight: {
-    light: 'green100',
-    dark: 'green900',
-    midnight: 'green900',
-  },
-  noticeText: { light: 'green800', dark: 'green200', midnight: 'green200' },
-  noticeTextLight: {
-    light: 'green700',
-    dark: 'green400',
-    midnight: 'green400',
-  },
-  noticeTextDark: { light: 'green900', dark: 'green150', midnight: 'green150' },
+  noticeBackground: { all: { statusOf: 'success', part: 'fill' } },
+  noticeBackgroundLight: { all: { statusOf: 'success', part: 'fillSubtle' } },
+  noticeText: { all: { statusOf: 'success', part: 'text' } },
+  noticeTextLight: { all: { statusOf: 'success', part: 'textOnSubtle' } },
+  noticeTextDark: { all: { statusOf: 'success', part: 'textStrong' } },
   noticeTextMenu: { light: 'green200', dark: 'green500', midnight: 'green400' },
-  noticeBorder: { light: 'green500', dark: 'green800', midnight: 'green800' },
-  warningBackground: {
-    light: 'orange200',
-    dark: 'orange800',
-    midnight: 'orange800',
-  },
-  warningText: { light: 'orange800', dark: 'orange300', midnight: 'orange200' },
-  warningTextDark: {
-    light: 'orange900',
-    dark: 'orange100',
-    midnight: 'orange100',
-  },
-  warningBorder: { all: 'orange500' },
-  errorBackground: { light: 'red100', dark: 'red800', midnight: 'red800' },
-  errorText: { light: 'red600', dark: 'red200', midnight: 'red200' },
-  errorTextDark: { light: 'red700', dark: 'red150', midnight: 'red150' },
+  noticeBorder: { all: { ref: 'success' } },
+  warningBackground: { all: { statusOf: 'warning', part: 'fill' } },
+  warningText: { all: { statusOf: 'warning', part: 'text' } },
+  warningTextDark: { all: { statusOf: 'warning', part: 'textStrong' } },
+  warningBorder: { all: { ref: 'warning' } },
+  errorBackground: { all: { statusOf: 'error', part: 'fill' } },
+  errorText: { all: { statusOf: 'error', part: 'text' } },
+  errorTextDark: { all: { statusOf: 'error', part: 'textStrong' } },
   errorTextDarker: {
     light: 'red900',
     dark: { ref: 'errorTextDark' },
     midnight: { ref: 'errorTextDark' },
   },
   errorTextMenu: { all: 'red200' },
-  errorBorder: { all: 'red500' },
+  errorBorder: { all: { ref: 'error' } },
   upcomingBackground: { all: { ref: 'accentSubtle' } },
   upcomingText: { all: { ref: 'accentSubtleText' } },
 

@@ -2,11 +2,12 @@ import { converter, formatHex, parse, wcagContrast } from './color';
 import {
   accentSurfaceTokens,
   deriveAccent,
+  deriveStatus,
   nearestWithContrast,
   pickContrast,
   textContrast,
 } from './derive';
-import type { DerivedAccentToken } from './derive';
+import type { DerivedAccentToken, StatusPart } from './derive';
 import type { ThemeName, TokenDefinition, TokenValue } from './types';
 
 type Palette = Record<string, string>;
@@ -132,6 +133,20 @@ function resolveDerived(
   return resolveCss(accentSet[token], context);
 }
 
+function resolveStatus(
+  statusName: string,
+  part: StatusPart,
+  context: Context,
+): ResolvedColor {
+  const input = (name: string) => toHex(resolveName(name, context));
+  const statusSet = deriveStatus(input(statusName), {
+    surface: input(accentSurfaceTokens.surface),
+    page: input(accentSurfaceTokens.page),
+    mobilePage: input(accentSurfaceTokens.mobilePage),
+  });
+  return resolveCss(statusSet[part], context);
+}
+
 function resolveAccentTextOn(
   surfaceName: string,
   contrast: number,
@@ -161,7 +176,10 @@ function resolveContrastOn(
 export function isComputedValue(value: TokenValue) {
   return (
     typeof value === 'object' &&
-    ('derive' in value || 'accentTextOn' in value || 'contrastOn' in value)
+    ('derive' in value ||
+      'accentTextOn' in value ||
+      'contrastOn' in value ||
+      'statusOf' in value)
   );
 }
 
@@ -181,6 +199,9 @@ function resolveValue(value: TokenValue, context: Context): ResolvedColor {
   }
   if ('contrastOn' in value) {
     return resolveContrastOn(value.contrastOn, value.over, context);
+  }
+  if ('statusOf' in value) {
+    return resolveStatus(value.statusOf, value.part, context);
   }
   if ('ref' in value) {
     return resolveName(value.ref, context);

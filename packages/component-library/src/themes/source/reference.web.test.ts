@@ -47,6 +47,17 @@ describe('theme variable reference', () => {
     );
   });
 
+  it('names the status color a message color is worked out from', () => {
+    const reference = buildThemeReference();
+
+    expect(followsCell(reference, 'noticeBackground')).toBe(
+      '`--color-success`, as a fill',
+    );
+    expect(followsCell(reference, 'errorText')).toBe(
+      '`--color-error`, readable as text',
+    );
+  });
+
   it('names the variables a color is mixed from', () => {
     const reference = buildThemeReference();
 
