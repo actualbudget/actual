@@ -31,8 +31,8 @@ describe('theme variable reference', () => {
     expect(followsCell(reference, 'tableTextLight')).toBe(
       '`--color-tableText` in Dark and Midnight',
     );
-    expect(followsCell(reference, 'tableText')).toBe(
-      '`--color-pageText` in Light, `--color-text` in Dark and Midnight',
+    expect(followsCell(reference, 'buttonBareDisabledText')).toBe(
+      '`--color-pageTextSubdued` in Light',
     );
   });
 
