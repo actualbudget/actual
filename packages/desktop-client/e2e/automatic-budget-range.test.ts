@@ -51,9 +51,17 @@ for (const viewport of [
         budgetPage instanceof BudgetPage
           ? budgetPage.selectedMonthButton
           : budgetPage.selectedBudgetMonthButton;
+      // The desktop month picker strikes out the months outside the range
+      const monthAfterSelected = selected.locator(
+        'xpath=following-sibling::*[1]',
+      );
 
       async function expectLastMonth(month: string) {
         if (budgetPage instanceof BudgetPage) {
+          await expect(monthAfterSelected).toHaveCSS(
+            'text-decoration-line',
+            'line-through',
+          );
           await budgetPage.nextMonthButton.click();
         } else {
           await expect(budgetPage.nextMonthButton).toBeDisabled();
@@ -68,6 +76,16 @@ for (const viewport of [
       await expectLastMonth('2018-01');
 
       await setBudgetAmount(page, '2018-01', 200);
+      if (budgetPage instanceof BudgetPage) {
+        // The range only grows once the app has refetched the budget bounds.
+        // Until then desktop ignores "Next month" on the old last month, so
+        // wait for the picker to show the following month as available.
+        // Mobile disables the button instead, which Playwright waits for.
+        await expect(monthAfterSelected).not.toHaveCSS(
+          'text-decoration-line',
+          'line-through',
+        );
+      }
       for (let index = 0; index < 3; index++) {
         await budgetPage.goToNextMonth();
       }
