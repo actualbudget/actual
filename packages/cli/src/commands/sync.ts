@@ -4,8 +4,8 @@ import { join } from 'node:path';
 import type { Command } from 'commander';
 
 import { CACHE_FILE_NAME, getMetaDir, readCacheState } from '#cache';
-import type { CliConfig } from '#config';
 import { resolveConfig } from '#config';
+import type { CliConfig } from '#config';
 import { withConnection } from '#connection';
 import { acquireExclusive } from '#lock';
 import { printOutput } from '#output';

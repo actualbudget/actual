@@ -13,12 +13,12 @@ import { View } from '@actual-app/components/view';
 import { MIN_CUSTOM_INTERVAL_MINUTES } from '#hooks/useAutomaticBankSync';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
-import type { BankSyncIntervalUnit } from './bankSyncInterval';
 import {
   isPresetInterval,
   minutesToParts,
   partsToMinutes,
 } from './bankSyncInterval';
+import type { BankSyncIntervalUnit } from './bankSyncInterval';
 
 const CUSTOM = 'custom';
 
