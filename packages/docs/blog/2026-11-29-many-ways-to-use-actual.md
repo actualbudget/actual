@@ -77,7 +77,7 @@ One thing to keep in mind: this is not an HTTP API. It is a package you install 
 
 The API package also runs in the browser. That means you can build a completely new app on top of your Actual data, with no backend of your own.
 
-We built a small [demo app](https://api-demo.actualbudget.org) to show how this works. It loads your budget and turns it into an analysis dashboard, all without your data ever leaving your browser. The [source code](https://github.com/actualbudget/browser-app-demo) is open, so feel free to use it as a starting point for your own idea.
+We built a small [demo app](https://api-demo.actualbudget.org) to show how this works. It loads your budget and turns it into an analysis dashboard, with all of the analysis running locally in your browser. The [source code](https://github.com/actualbudget/browser-app-demo) is open, so feel free to use it as a starting point for your own idea.
 
 ## Make It Look Like Yours
 
