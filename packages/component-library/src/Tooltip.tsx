@@ -10,6 +10,7 @@ type TooltipProps = Partial<ComponentProps<typeof AriaTooltip>> & {
   content: ReactNode;
   triggerProps?: Partial<ComponentProps<typeof TooltipTrigger>>;
   disablePointerEvents?: boolean;
+  shouldOpen?: () => boolean;
 };
 
 export const Tooltip = ({
@@ -17,6 +18,7 @@ export const Tooltip = ({
   content,
   triggerProps = {},
   disablePointerEvents = false,
+  shouldOpen,
   ...props
 }: TooltipProps) => {
   const triggerRef = useRef(null);
@@ -31,11 +33,11 @@ export const Tooltip = ({
     }
 
     const timeout = setTimeout(() => {
-      setIsHover(true);
+      setIsHover(shouldOpen?.() ?? true);
     }, triggerProps.delay ?? 300);
 
     hoverTimeoutRef.current = timeout;
-  }, [triggerProps.delay]);
+  }, [shouldOpen, triggerProps.delay]);
 
   const handlePointerLeave = useCallback(() => {
     if (hoverTimeoutRef.current) {
