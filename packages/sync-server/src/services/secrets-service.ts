@@ -1,6 +1,8 @@
 import createDebug from 'debug';
+import type { Debugger } from 'debug';
 
 import { getAccountDb } from '#account-db';
+import type { WrappedDatabase } from '#db';
 
 /**
  * An enum of valid secret names.
@@ -21,21 +23,24 @@ export const SecretName = {
   enablebanking_secretKey: 'enablebanking_secretKey',
 };
 
-function getSecretKey(name, fileId) {
+function getSecretKey(name: string, fileId: string | null) {
   return fileId == null ? name : `${name}:${fileId}`;
 }
 
 class SecretsDb {
+  private debug: Debugger;
+  private db: WrappedDatabase | null;
+
   constructor() {
     this.debug = createDebug('actual:secrets-db');
     this.db = null;
   }
 
-  open() {
+  open(): WrappedDatabase {
     return getAccountDb();
   }
 
-  set(name, value, fileId = null) {
+  set(name: string, value: string, fileId: string | null = null) {
     if (!this.db) {
       this.db = this.open();
     }
@@ -48,19 +53,20 @@ class SecretsDb {
     );
   }
 
-  get(name, fileId = null) {
+  get(name: string, fileId: string | null = null) {
     if (!this.db) {
       this.db = this.open();
     }
 
     const secretKey = getSecretKey(name, fileId);
     this.debug(`getting secret '${name}'`);
-    return this.db.first(`SELECT value FROM secrets WHERE name = ?`, [
-      secretKey,
-    ]);
+    return this.db.first<{ value: string }>(
+      `SELECT value FROM secrets WHERE name = ?`,
+      [secretKey],
+    );
   }
 
-  reset(name, fileId = null) {
+  reset(name: string, fileId: string | null = null) {
     if (!this.db) {
       this.db = this.open();
     }
@@ -84,40 +90,35 @@ const secretsDb = new SecretsDb();
 export const secretsService = {
   /**
    * Retrieves the active value of a secret by name.
-   * @param {SecretName} name - The name of the secret to retrieve.
-   * @param {string=} fileId - Budget file ID for this secret.
-   * @returns {string|null} The value of the secret, or null if the secret does not exist.
+   * @param name - The name of the secret to retrieve.
+   * @param fileId - Budget file ID for this secret.
+   * @returns The value of the secret, or null if the secret does not exist.
    */
-  get: (name, fileId = null) => {
+  get: (name: string, fileId: string | null = null): string | null => {
     return secretsDb.get(name, fileId)?.value ?? null;
   },
 
   /**
    * Sets the value of a secret by name.
-   * @param {SecretName} name - The name of the secret to set.
-   * @param {string} value - The value to set for the secret.
-   * @param {string=} fileId - Budget file ID for this secret.
-   * @returns {Object}
+   * @param name - The name of the secret to set.
+   * @param value - The value to set for the secret.
+   * @param fileId - Budget file ID for this secret.
    */
-  set: (name, value, fileId = null) => {
+  set: (name: string, value: string, fileId: string | null = null) => {
     return secretsDb.set(name, value, fileId);
   },
 
-  /**
-   * @param {SecretName} name
-   * @param {string|null} [fileId]
-   */
-  reset: (name, fileId = null) => {
+  reset: (name: string, fileId: string | null = null) => {
     return secretsDb.reset(name, fileId);
   },
 
   /**
    * Determines whether a secret with the given name exists.
-   * @param {SecretName} name - The name of the secret to check for existence.
-   * @param {string=} fileId - Budget file ID for this secret.
-   * @returns {boolean} True if a secret with the given name exists, false otherwise.
+   * @param name - The name of the secret to check for existence.
+   * @param fileId - Budget file ID for this secret.
+   * @returns True if a secret with the given name exists, false otherwise.
    */
-  exists: (name, fileId = null) => {
+  exists: (name: string, fileId: string | null = null): boolean => {
     return secretsService.get(name, fileId) !== null;
   },
 };

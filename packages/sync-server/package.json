@@ -40,7 +40,7 @@
     "#app-sync/services/*": "./src/app-sync/services/*.js",
     "#app-sync/*": "./src/app-sync/*.js",
     "#scripts/*": "./src/scripts/*.ts",
-    "#services/*": "./src/services/*.js",
+    "#services/*": "./src/services/*.ts",
     "#util/title": "./src/util/title/index.js",
     "#util/*": "./src/util/*.ts"
   },
