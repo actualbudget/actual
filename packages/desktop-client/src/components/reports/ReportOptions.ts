@@ -126,7 +126,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: t('Last month'),
     key: 'Last month',
-    name: 1,
+    name: 'lastMonth',
     type: 'Month',
     Daily: true,
     Weekly: true,

@@ -39,7 +39,7 @@
     "#app-simplefin/*": "./src/app-simplefin/*.js",
     "#app-sync/services/*": "./src/app-sync/services/*.js",
     "#app-sync/*": "./src/app-sync/*.js",
-    "#scripts/*": "./src/scripts/*.js",
+    "#scripts/*": "./src/scripts/*.ts",
     "#services/*": "./src/services/*.js",
     "#util/title": "./src/util/title/index.js",
     "#util/*": "./src/util/*.ts"

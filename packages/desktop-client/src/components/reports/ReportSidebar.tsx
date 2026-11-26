@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -300,6 +300,21 @@ export function ReportSidebar({
       ? monthUtils.weekFromDate(customReportItems.endDate, firstDayOfWeekIdx)
       : customReportItems.endDate;
 
+  const isIncludeCurrentDisabled =
+    customReportItems.isDateStatic ||
+    Boolean(disabledList.currentInterval.get(customReportItems.dateRange));
+
+  useEffect(() => {
+    if (isIncludeCurrentDisabled && customReportItems.includeCurrentInterval) {
+      setSessionReport('includeCurrentInterval', false);
+      setIncludeCurrentInterval(false);
+    }
+  }, [
+    isIncludeCurrentDisabled,
+    customReportItems.includeCurrentInterval,
+    setIncludeCurrentInterval,
+  ]);
+
   return (
     <View
       style={{
@@ -539,11 +554,7 @@ export function ReportSidebar({
                   text: includeCurrentIntervalText,
                   tooltip: includeCurrentIntervalTooltip,
                   toggle: customReportItems.includeCurrentInterval,
-                  disabled:
-                    customReportItems.isDateStatic ||
-                    disabledList.currentInterval.get(
-                      customReportItems.dateRange,
-                    ),
+                  disabled: isIncludeCurrentDisabled,
                 },
                 {
                   name: 'show-hidden-categories',
@@ -650,7 +661,7 @@ export function ReportSidebar({
               onChange={onSelectRange}
               options={rangeOptions}
             />
-            {!disabledList.currentInterval.get(customReportItems.dateRange) &&
+            {!isIncludeCurrentDisabled &&
               customReportItems.includeCurrentInterval && (
                 <Tooltip
                   placement="bottom start"

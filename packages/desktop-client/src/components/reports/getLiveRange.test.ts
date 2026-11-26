@@ -115,4 +115,23 @@ describe('getLiveRange', () => {
       expect(end).toBe('2016-12-31');
     });
   });
+
+  describe('Last month', () => {
+    it('returns the previous month even when includeCurrentInterval is true', () => {
+      const [start, end] = getLiveRange('Last month', EARLIEST, LATEST, true);
+      expect(start).toBe('2016-12-01');
+      expect(end).toBe('2016-12-31');
+    });
+
+    it('does not invert range when earliestTransaction is after last month', () => {
+      const [start, end] = getLiveRange(
+        'Last month',
+        '2017-01-01',
+        LATEST,
+        false,
+      );
+      expect(start).toBe('2016-12-01');
+      expect(end).toBe('2016-12-31');
+    });
+  });
 });
