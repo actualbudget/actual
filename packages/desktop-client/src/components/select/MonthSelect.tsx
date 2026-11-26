@@ -42,6 +42,19 @@ export function MonthSelect({
   // Set while a pointer press inside the picker is moving focus into it.
   const isPickerPointerDown = useRef(false);
 
+  function onPickerPointerDown() {
+    isPickerPointerDown.current = true;
+    // Clear it when the press ends, even if it didn't move focus out of the
+    // input, so it can't affect a later keyboard Tab.
+    const clear = () => {
+      isPickerPointerDown.current = false;
+      document.removeEventListener('pointerup', clear, true);
+      document.removeEventListener('pointercancel', clear, true);
+    };
+    document.addEventListener('pointerup', clear, true);
+    document.addEventListener('pointercancel', clear, true);
+  }
+
   return (
     <View>
       <Input
@@ -89,7 +102,7 @@ export function MonthSelect({
         onOpenChange={() => setIsOpen(false)}
         style={styles.popover}
       >
-        <View onPointerDown={() => (isPickerPointerDown.current = true)}>
+        <View onPointerDown={onPickerPointerDown}>
           <MonthPickerPanel
             value={toPickerMonth(value, monthYearFormat)}
             locale={language}
