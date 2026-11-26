@@ -887,6 +887,105 @@ describe('Account sync', () => {
     ).toBe('child-provider-id');
   });
 
+  async function seedSplitTransaction(
+    accountId: string,
+    { parentImportedId }: { parentImportedId?: string } = {},
+  ) {
+    await db.insertTransaction({
+      id: 'split-parent',
+      account: accountId,
+      amount: -1800,
+      date: '2024-04-05',
+      ...(parentImportedId ? { imported_id: parentImportedId } : {}),
+      is_parent: true,
+    });
+    await db.insertTransaction({
+      id: 'split-child-1',
+      account: accountId,
+      amount: -900,
+      date: '2024-04-05',
+      is_child: true,
+      parent_id: 'split-parent',
+    });
+    await db.insertTransaction({
+      id: 'split-child-2',
+      account: accountId,
+      amount: -900,
+      date: '2024-04-05',
+      is_child: true,
+      parent_id: 'split-parent',
+    });
+  }
+
+  test('strict import does not fuzzy-match children of an already-imported split', async () => {
+    const { id } = await prepareDatabase();
+    await seedSplitTransaction(id, { parentImportedId: 'A' });
+
+    const result = await reconcileTransactions(id, [
+      {
+        date: '2024-04-07',
+        amount: -900,
+        payee_name: 'Cafe',
+        imported_id: 'B',
+      },
+    ]);
+
+    expect(result.added).toHaveLength(1);
+    const transactions = await getAllTransactions();
+    expect(
+      transactions.find(t => t.id === 'split-child-1').imported_id,
+    ).toBeNull();
+    expect(transactions.find(t => t.imported_id === 'B')).toMatchObject({
+      amount: -900,
+      parent_id: null,
+    });
+  });
+
+  test('strict import can fuzzy-match children of an unimported manual split', async () => {
+    const { id } = await prepareDatabase();
+    await seedSplitTransaction(id);
+
+    const result = await reconcileTransactions(id, [
+      {
+        date: '2024-04-07',
+        amount: -900,
+        payee_name: 'Cafe',
+        imported_id: 'B',
+      },
+    ]);
+
+    expect(result.added).toHaveLength(0);
+    const transactions = await getAllTransactions();
+    expect(transactions.find(t => t.id === 'split-child-1').imported_id).toBe(
+      'B',
+    );
+  });
+
+  test('bank sync does not fuzzy-match children of a split imported in an earlier batch', async () => {
+    const { id } = await prepareDatabase();
+    await seedSplitTransaction(id, { parentImportedId: 'parent-provider-id' });
+
+    const result = await reconcileTransactions(
+      id,
+      [
+        {
+          transactionId: 'new-provider-id',
+          transactionAmount: { amount: '-9.00' },
+          date: '2024-04-07',
+          payeeName: 'New merchant',
+          booked: true,
+        },
+      ],
+      { isBankSyncAccount: true, strictIdChecking: false },
+    );
+
+    expect(result.added).toHaveLength(1);
+    const transactions = await getAllTransactions();
+    expect(
+      transactions.find(t => t.id === 'split-child-1').imported_id,
+    ).toBeNull();
+  });
+
   test(
     'given an imported tx with no imported_id, ' +
       'when using fuzzy search V2, existing transaction has an imported_id, matches amount, and is within 7 days of imported tx, ' +
