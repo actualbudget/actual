@@ -36,7 +36,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         app: path.resolve(__dirname, 'app.ts'),
-        'bin/actual-server': path.resolve(__dirname, 'bin/actual-server.js'),
+        'bin/actual-server': path.resolve(__dirname, 'bin/actual-server.ts'),
         'scripts/run-migrations': path.resolve(
           __dirname,
           'src/scripts/run-migrations.ts',
