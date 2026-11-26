@@ -9,6 +9,7 @@ import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
 import { isElectron } from '@actual-app/core/shared/environment';
 import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
@@ -20,7 +21,7 @@ import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useNavigate } from '#hooks/useNavigate';
 import { saveGlobalPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
-import { loggedIn, signOut } from '#users/usersSlice';
+import { getUserData, loggedIn, signOut } from '#users/usersSlice';
 
 import { Title } from './subscribe/common';
 
@@ -314,6 +315,8 @@ export function ConfigServer() {
         return t(
           'Connection failed. If you use a self-signed certificate or were recently offline, try refreshing the page. Otherwise ensure you have HTTPS set up properly.',
         );
+      case 'sign-out-failure':
+        return t('Could not sign out of the current server. Please try again.');
       default:
         return t(
           'Server does not look like an Actual server. Is it set up correctly?',
@@ -334,17 +337,46 @@ export function ConfigServer() {
       httpUrl = 'https://' + url;
     }
 
-    const { error } = await setServerUrl(httpUrl);
+    const urlChanged = httpUrl.replace(/\/+$/, '') !== currentUrl;
     setUrl(httpUrl);
 
-    if (error) {
+    try {
+      if (urlChanged) {
+        const result = await send('subscribe-needs-bootstrap', {
+          url: httpUrl,
+        });
+        if ('error' in result) {
+          setError(result.error);
+          return;
+        }
+        // Sign out before switching so the current server revokes the session.
+        const signOutResult = await dispatch(signOut());
+        if (signOut.rejected.match(signOutResult)) {
+          setError('sign-out-failure');
+          return;
+        }
+      }
+
+      const { error } = await setServerUrl(httpUrl, {
+        validate: !urlChanged,
+      });
+      if (error) {
+        setError(error);
+        return;
+      }
+    } catch {
+      setError('validation-failure');
+      return;
+    } finally {
       setLoading(false);
-      setError(error);
-    } else {
-      setLoading(false);
-      await dispatch(signOut());
-      void navigate('/');
     }
+
+    if (urlChanged) {
+      await dispatch(getUserData());
+    } else {
+      await dispatch(loggedIn());
+    }
+    void navigate('/');
   }
 
   function onSameDomain() {
@@ -421,8 +453,8 @@ export function ConfigServer() {
           >
             {currentUrl ? (
               <Trans>
-                Existing sessions will be logged out and you will log in to this
-                server. We will validate that Actual is running at this URL.
+                Changing the server will log you out. We will validate that
+                Actual is running at this URL.
               </Trans>
             ) : (
               <Trans>

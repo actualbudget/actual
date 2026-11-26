@@ -44,8 +44,11 @@ export const loggedIn = createAppAsyncThunk(
 
 export const signOut = createAppAsyncThunk(
   `${sliceName}/signOut`,
-  async (_, { dispatch }) => {
-    await send('subscribe-sign-out');
+  async (
+    options: Parameters<Handlers['subscribe-sign-out']>[0] | void,
+    { dispatch },
+  ) => {
+    await send('subscribe-sign-out', options || undefined);
 
     void dispatch(getUserData());
     void dispatch(loadGlobalPrefs());

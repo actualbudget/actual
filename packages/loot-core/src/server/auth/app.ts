@@ -297,7 +297,11 @@ async function signIn(
   return {};
 }
 
-async function signOut() {
+type SignOutOptions = {
+  clearEncryptionKeys?: boolean;
+};
+
+async function signOut(options?: SignOutOptions) {
   const token = await asyncStorage.getItem('user-token');
   const server = getServer();
   if (token && server) {
@@ -309,13 +313,11 @@ async function signOut() {
     }
   }
 
-  encryption.unloadAllKeys();
-  await asyncStorage.multiRemove([
-    'user-token',
-    'encrypt-keys',
-    'lastBudget',
-    'readOnly',
-  ]);
+  await asyncStorage.multiRemove(['user-token', 'lastBudget', 'readOnly']);
+  if (options?.clearEncryptionKeys) {
+    encryption.unloadAllKeys();
+    await asyncStorage.removeItem('encrypt-keys');
+  }
   return 'ok';
 }
 
