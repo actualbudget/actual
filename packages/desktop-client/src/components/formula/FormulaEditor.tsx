@@ -463,6 +463,7 @@ export function FormulaEditor({
             embedded
             autoFocus
             isOpen
+            clearOnBlur={false}
             onSelect={applyTimeframePickerValue}
           />
         </div>
