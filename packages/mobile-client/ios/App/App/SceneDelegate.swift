@@ -46,8 +46,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, UIGestureRecognizerDele
     }
 
     @objc private func goBackAfterEdgeSwipe(_ swipe: UIScreenEdgePanGestureRecognizer) {
-        // A swipe that ends moving back towards the edge is a change of mind.
-        guard swipe.state == .ended, swipe.velocity(in: swipe.view).x >= 0 else {
+        // A swipe that ends back near the edge, or moving back towards it, is
+        // a change of mind.
+        guard swipe.state == .ended,
+              swipe.translation(in: swipe.view).x >= 50,
+              swipe.velocity(in: swipe.view).x >= 0 else {
             return
         }
         (window?.rootViewController as? CAPBridgeViewController)?.webView?.goBack()
