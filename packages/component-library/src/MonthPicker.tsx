@@ -47,18 +47,8 @@ export function MonthPicker({
   onChange,
 }: MonthPickerProps) {
   const month = value ? getMonth(value) : '';
-  const min = minDate ? getMonth(minDate) : NO_MIN;
-  const max = maxDate ? getMonth(maxDate) : NO_MAX;
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [viewYear, setViewYear] = useState(() =>
-    getYear(month || currentMonth()),
-  );
-
-  function openPopover() {
-    setViewYear(getYear(month || currentMonth()));
-    setIsOpen(true);
-  }
 
   const label = month
     ? formatDate(month, locale, { month: 'short', year: 'numeric' })
@@ -70,7 +60,7 @@ export function MonthPicker({
         id={id}
         ref={triggerRef}
         data-testid="month-picker-trigger"
-        onPress={() => (isOpen ? setIsOpen(false) : openPopover())}
+        onPress={() => setIsOpen(!isOpen)}
         style={{ justifyContent: 'flex-start', ...style }}
       >
         {label}
@@ -82,32 +72,82 @@ export function MonthPicker({
         isOpen={isOpen}
         onOpenChange={setIsOpen}
       >
-        <View style={{ padding: 15, minWidth: 180 }}>
-          <NavRow
-            label={viewYear}
-            previousLabel={labels.previous}
-            nextLabel={labels.next}
-            canPrev={viewYear > getYear(min)}
-            canNext={viewYear < getYear(max)}
-            onPrev={() => setViewYear(String(Number(viewYear) - 1))}
-            onNext={() => setViewYear(String(Number(viewYear) + 1))}
-          />
-          <MonthGrid
-            year={viewYear}
-            rangeStart={month}
-            rangeEnd={month}
-            minMonth={min}
-            maxMonth={max}
-            locale={locale}
-            onSelect={next => {
-              setIsOpen(false);
-              if (next !== month) {
-                onChange(next);
-              }
-            }}
-          />
-        </View>
+        <MonthPickerPanel
+          value={month}
+          minDate={minDate}
+          maxDate={maxDate}
+          locale={locale}
+          labels={labels}
+          onSelect={next => {
+            setIsOpen(false);
+            if (next !== month) {
+              onChange(next);
+            }
+          }}
+        />
       </Popover>
+    </View>
+  );
+}
+
+type MonthPickerPanelProps = {
+  value: string;
+  minDate?: string;
+  maxDate?: string;
+  locale: string;
+  labels: MonthPickerLabels;
+  onSelect: (month: string) => void;
+};
+
+/**
+ * The year navigation and month grid of the month picker, without a trigger,
+ * so it can be shown in a popover anchored to another control (for example a
+ * text input that also accepts a typed month).
+ */
+export function MonthPickerPanel({
+  value,
+  minDate,
+  maxDate,
+  locale,
+  labels,
+  onSelect,
+}: MonthPickerPanelProps) {
+  const month = value ? getMonth(value) : '';
+  const min = minDate ? getMonth(minDate) : NO_MIN;
+  const max = maxDate ? getMonth(maxDate) : NO_MAX;
+  const [viewYear, setViewYear] = useState(() =>
+    getYear(month || currentMonth()),
+  );
+
+  // Follow the selected month when it changes from outside (e.g. typing).
+  const [prevMonth, setPrevMonth] = useState(month);
+  if (month !== prevMonth) {
+    setPrevMonth(month);
+    if (month) {
+      setViewYear(getYear(month));
+    }
+  }
+
+  return (
+    <View data-month-picker style={{ padding: 15, minWidth: 180 }}>
+      <NavRow
+        label={viewYear}
+        previousLabel={labels.previous}
+        nextLabel={labels.next}
+        canPrev={viewYear > getYear(min)}
+        canNext={viewYear < getYear(max)}
+        onPrev={() => setViewYear(String(Number(viewYear) - 1))}
+        onNext={() => setViewYear(String(Number(viewYear) + 1))}
+      />
+      <MonthGrid
+        year={viewYear}
+        rangeStart={month}
+        rangeEnd={month}
+        minMonth={min}
+        maxMonth={max}
+        locale={locale}
+        onSelect={onSelect}
+      />
     </View>
   );
 }
