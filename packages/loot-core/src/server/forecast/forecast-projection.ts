@@ -11,8 +11,8 @@ import type {
 import type { AccountWithComputedBalance } from './forecast-accounts';
 import { matchesForecastFilters } from './forecast-filters';
 import type { ForecastFilterInfo } from './forecast-filters';
-import type { ForecastScheduleOccurrence } from './forecast-schedules';
 import { FORECAST_UNASSIGNED_ACCOUNT_ID } from './forecast-schedules';
+import type { ForecastScheduleOccurrence } from './forecast-schedules';
 
 type ScheduleOccurrenceSummary = ForecastTransaction;
 

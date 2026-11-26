@@ -39,8 +39,8 @@ import type {
 } from '#app-gocardless/gocardless.types';
 import { SecretName, secretsService } from '#services/secrets-service';
 
-import type { AccountDetailsResponse, TokenResponse } from './gocardless-api';
 import { GoCardlessApi, GoCardlessApiError } from './gocardless-api';
+import type { AccountDetailsResponse, TokenResponse } from './gocardless-api';
 
 const debugSensitive = createDebug('actual-sensitive:gocardless');
 

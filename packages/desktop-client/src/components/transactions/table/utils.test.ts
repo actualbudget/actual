@@ -1,7 +1,7 @@
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import type { SerializedTransaction } from './utils';
 import { deserializeTransaction, shouldApplyRuleChange } from './utils';
+import type { SerializedTransaction } from './utils';
 
 describe('shouldApplyRuleChange', () => {
   test('applies rule changes to empty fields', () => {

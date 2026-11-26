@@ -1,6 +1,6 @@
 import createDebug from 'debug';
-import type { Request, Response } from 'express';
 import express from 'express';
+import type { Request, Response } from 'express';
 import ipaddr from 'ipaddr.js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,16 +15,16 @@ import { MOBILE_APP_RETURN_PAGE_HTML } from '#util/mobile-app-return';
 import { isBlockedIp } from '#util/ssrf';
 import { validateGlobalBankSyncSession } from '#util/validate-budget-session';
 
-import type {
-  EnableBankingSession,
-  PsuHeaders,
-} from './services/enablebanking-service';
 import {
   enableBankingService,
   isImportableTransaction,
   normalizeAccount,
   normalizeBalance,
   normalizeTransactions,
+} from './services/enablebanking-service';
+import type {
+  EnableBankingSession,
+  PsuHeaders,
 } from './services/enablebanking-service';
 import { EnableBankingError } from './utils/errors';
 

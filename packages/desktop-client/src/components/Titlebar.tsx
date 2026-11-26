@@ -13,8 +13,8 @@ import {
   SvgViewShow,
 } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import type { CSSProperties } from '@actual-app/components/styles';
 import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
