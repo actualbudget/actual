@@ -1,32 +1,33 @@
-import { Geolocation } from '@capacitor/geolocation';
 import type { PermissionStatus } from '@capacitor/geolocation';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  refreshNativeLocationPermission,
-  requestNativeLocationPermission,
-  subscribeToNativeLocationPermission,
-} from './native-location-permission';
+import type * as NativeLocationPermission from './native-location-permission';
 
 // The plugin is a proxy to native code, which does not exist in tests.
-vi.mock('@capacitor/geolocation', () => ({
-  Geolocation: {
-    checkPermissions: vi.fn(),
-    requestPermissions: vi.fn(),
-  },
+const Geolocation = vi.hoisted(() => ({
+  checkPermissions: vi.fn<() => Promise<PermissionStatus>>(),
+  requestPermissions: vi.fn<() => Promise<PermissionStatus>>(),
 }));
+
+vi.mock('@capacitor/geolocation', () => ({ Geolocation }));
+
+// The test setup has already loaded the module with the real plugin, so it
+// is loaded again for each test to pick up the mocked one.
+let permission: typeof NativeLocationPermission;
 
 function collectStates() {
   const states: PermissionState[] = [];
-  const unsubscribe = subscribeToNativeLocationPermission(state =>
+  const unsubscribe = permission.subscribeToNativeLocationPermission(state =>
     states.push(state),
   );
   return { states, unsubscribe };
 }
 
 describe('native location permission', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.resetAllMocks();
+    vi.resetModules();
+    permission = await import('./native-location-permission');
   });
 
   it.each<[PermissionStatus, PermissionState]>([
@@ -42,29 +43,29 @@ describe('native location permission', () => {
       'prompt',
     ],
   ])('reports %o as %s', async (status, expected) => {
-    vi.mocked(Geolocation.checkPermissions).mockResolvedValue(status);
+    Geolocation.checkPermissions.mockResolvedValue(status);
     const { states, unsubscribe } = collectStates();
 
-    await refreshNativeLocationPermission();
+    await permission.refreshNativeLocationPermission();
 
     expect(states).toEqual([expected]);
     unsubscribe();
   });
 
   it('reports denied when location services are switched off', async () => {
-    vi.mocked(Geolocation.checkPermissions).mockRejectedValue(
+    Geolocation.checkPermissions.mockRejectedValue(
       new Error('Location services are not enabled'),
     );
     const { states, unsubscribe } = collectStates();
 
-    await refreshNativeLocationPermission();
+    await permission.refreshNativeLocationPermission();
 
     expect(states).toEqual(['denied']);
     unsubscribe();
   });
 
   it('tells every subscriber the answer to the permission prompt', async () => {
-    vi.mocked(Geolocation.requestPermissions).mockResolvedValue({
+    Geolocation.requestPermissions.mockResolvedValue({
       location: 'granted',
       coarseLocation: 'granted',
     });
@@ -72,10 +73,20 @@ describe('native location permission', () => {
     const second = collectStates();
     second.unsubscribe();
 
-    await requestNativeLocationPermission();
+    await permission.requestNativeLocationPermission();
 
     expect(first.states).toEqual(['granted']);
     expect(second.states).toEqual([]);
     first.unsubscribe();
+  });
+
+  it.each<[PermissionStatus, boolean]>([
+    [{ location: 'granted', coarseLocation: 'granted' }, false],
+    [{ location: 'denied', coarseLocation: 'granted' }, true],
+    [{ location: 'prompt', coarseLocation: 'prompt' }, false],
+  ])('detects an approximate-only grant for %o', async (status, expected) => {
+    Geolocation.checkPermissions.mockResolvedValue(status);
+
+    expect(await permission.hasOnlyApproximateNativeLocation()).toBe(expected);
   });
 });

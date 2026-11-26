@@ -6,6 +6,8 @@ import type {
 } from '@actual-app/core/types/models';
 import { Geolocation } from '@capacitor/geolocation';
 
+import { hasOnlyApproximateNativeLocation } from './native-location-permission';
+
 /**
  * Abstraction for geolocation functionality
  */
@@ -70,9 +72,11 @@ export class CapacitorGeolocationAdapter implements GeolocationAdapter {
   async getCurrentPosition(
     options: PositionOptions = {},
   ): Promise<LocationCoordinates> {
+    const isApproximateOnly = await hasOnlyApproximateNativeLocation();
     const position = await Geolocation.getCurrentPosition({
       ...DEFAULT_POSITION_OPTIONS,
       ...options,
+      ...(isApproximateOnly && { enableHighAccuracy: false }),
     });
     return {
       latitude: position.coords.latitude,

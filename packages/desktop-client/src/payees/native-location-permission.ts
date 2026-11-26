@@ -57,3 +57,17 @@ export async function requestNativeLocationPermission() {
   }
   notify(state);
 }
+
+/**
+ * True when the user granted an approximate location only, which Android
+ * allows. Asking for a precise position then would bring up a second prompt
+ * to upgrade the grant.
+ */
+export async function hasOnlyApproximateNativeLocation() {
+  try {
+    const status = await Geolocation.checkPermissions();
+    return status.coarseLocation === 'granted' && status.location !== 'granted';
+  } catch {
+    return false;
+  }
+}

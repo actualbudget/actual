@@ -10,6 +10,8 @@ import {
   subscribeToNativeLocationPermission,
 } from '#payees/native-location-permission';
 
+import { useOnVisible } from './useOnVisible';
+
 const isNativeApp = Capacitor.isNativePlatform();
 
 export type LocationPermission = {
@@ -29,6 +31,12 @@ export type LocationPermission = {
 export function useLocationPermission(): LocationPermission {
   const { isNarrowWidth } = useResponsive();
   const [state, setState] = useState<PermissionState | null>(null);
+
+  // The operating system does not announce permission changes, so pick up
+  // one made in the device settings when the app comes back.
+  useOnVisible(() => refreshNativeLocationPermission(), {
+    isEnabled: isNativeApp && isNarrowWidth,
+  });
 
   useEffect(() => {
     if (!isNarrowWidth) {
