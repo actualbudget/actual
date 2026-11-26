@@ -1,5 +1,11 @@
 const CONCURRENCY = 2;
-const BUILD_OUTPUT_GLOBS = ['lib-dist/**', 'dist/**', 'build/**', '@types/**'];
+const BUILD_OUTPUT_GLOBS = [
+  'lib-dist/**',
+  'dist/**',
+  'build/**',
+  '@types/**',
+  'app/stats.json',
+];
 
 /** @type {import('lage').ConfigOptions} */
 module.exports = {
