@@ -1,3 +1,4 @@
+import { isComputedValue, resolveToken, toHex } from './resolve';
 import type { ThemeName, TokenDefinition, TokenValue } from './types';
 
 type Palette = Record<string, string>;
@@ -6,6 +7,7 @@ type Colors = Record<string, TokenDefinition>;
 function resolveValue(
   name: string,
   value: TokenValue,
+  theme: ThemeName,
   palette: Palette,
   colors: Colors,
 ) {
@@ -15,13 +17,19 @@ function resolveValue(
     }
     return `var(--palette-${value})`;
   }
+  if (isComputedValue(value)) {
+    return toHex(resolveToken(name, theme, colors, palette));
+  }
   if ('ref' in value) {
     if (!(value.ref in colors)) {
       throw new Error(`${name}: unknown token "${value.ref}"`);
     }
     return `var(--color-${value.ref})`;
   }
-  return value.raw;
+  if ('raw' in value) {
+    return value.raw;
+  }
+  throw new Error(`${name}: unknown value`);
 }
 
 function validate(colors: Colors) {
@@ -56,7 +64,7 @@ export function generateThemeCss(
   return toRule(
     Object.entries(colors).map(([name, definition]) => {
       const value = 'all' in definition ? definition.all : definition[theme];
-      return `  --color-${name}: ${resolveValue(name, value, palette, colors)};`;
+      return `  --color-${name}: ${resolveValue(name, value, theme, palette, colors)};`;
     }),
   );
 }

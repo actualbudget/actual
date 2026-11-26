@@ -3,7 +3,7 @@
 !data/.gitkeep
 /data2
 Actual-*
-!actual-server.js
+!actual-server.ts
 **/xcuserdata/*
 export-2020-01-10.csv
 

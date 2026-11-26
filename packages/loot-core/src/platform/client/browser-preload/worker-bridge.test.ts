@@ -158,7 +158,56 @@ describe('WorkerBridge takeover', () => {
     expect(worker.posted[3]).toEqual({ id: 'q2', name: 'query' });
   });
 
-  it('forwards requests at once when there is nothing to restore', () => {
+  it('keeps holding when the backend repeats its connect message during a restore', () => {
+    const { fromCoordinator } = createBridge();
+    fromCoordinator({
+      type: '__become-leader',
+      initMsg: { type: 'init' },
+      budgetToRestore: 'budget-1',
+      pendingMsg: null,
+    });
+    const worker = FakeBackendWorker.created[0];
+    fromCoordinator({ type: '__to-worker', msg: { id: 'q1', name: 'query' } });
+
+    // The backend repeats it until a client answers, which none does
+    // before the restore is over
+    worker.onmessage?.({ data: { type: 'connect' } } as MessageEvent);
+    worker.onmessage?.({ data: { type: 'connect' } } as MessageEvent);
+
+    expect(worker.posted).toEqual([
+      { type: 'init' },
+      expect.objectContaining({ id: '__restore-budget' }),
+    ]);
+  });
+
+  it('holds forwarded requests until the backend has connected', () => {
+    const { fromCoordinator } = createBridge();
+    fromCoordinator({
+      type: '__become-leader',
+      initMsg: { type: 'init' },
+      budgetToRestore: null,
+      pendingMsg: { id: 'own', name: 'load-budget' },
+    });
+    const worker = FakeBackendWorker.created[0];
+
+    // Another tab's request arrives while the backend is still starting,
+    // when it would not hear it
+    fromCoordinator({ type: '__to-worker', msg: { id: 'q1', name: 'query' } });
+    expect(worker.posted).toEqual([{ type: 'init' }]);
+
+    worker.onmessage?.({ data: { type: 'connect' } } as MessageEvent);
+    expect(worker.posted).toEqual([
+      { type: 'init' },
+      { id: 'own', name: 'load-budget' },
+      { id: 'q1', name: 'query' },
+    ]);
+
+    // Later requests go straight through
+    fromCoordinator({ type: '__to-worker', msg: { id: 'q2', name: 'query' } });
+    expect(worker.posted[3]).toEqual({ id: 'q2', name: 'query' });
+  });
+
+  it('lets the init failure acknowledgement through to a backend that never connects', () => {
     const { fromCoordinator } = createBridge();
     fromCoordinator({
       type: '__become-leader',
@@ -167,10 +216,13 @@ describe('WorkerBridge takeover', () => {
       pendingMsg: null,
     });
     const worker = FakeBackendWorker.created[0];
-    fromCoordinator({ type: '__to-worker', msg: { id: 'q1', name: 'query' } });
+    fromCoordinator({
+      type: '__to-worker',
+      msg: { name: '__app-init-failure-acknowledged' },
+    });
     expect(worker.posted).toEqual([
       { type: 'init' },
-      { id: 'q1', name: 'query' },
+      { name: '__app-init-failure-acknowledged' },
     ]);
   });
 });

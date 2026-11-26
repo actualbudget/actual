@@ -21,6 +21,7 @@ import { ReportAutocomplete } from '#components/autocomplete/ReportAutocomplete'
 import { Checkbox } from '#components/forms';
 import { hideNativeDateIconClassName } from '#components/mobile/MobileForms';
 import { DateSelect } from '#components/select/DateSelect';
+import { MonthSelect } from '#components/select/MonthSelect';
 import { RecurringSchedulePicker } from '#components/select/RecurringSchedulePicker';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
@@ -374,12 +375,20 @@ export const GenericInput = ({
     case 'date':
       switch (props.field) {
         case 'month':
-          content = (
+          // Narrow screens keep the plain text input
+          content = isNarrowWidth ? (
             <Input
               ref={ref}
               value={props.value || ''}
               placeholder={getMonthYearFormat(dateFormat).toLowerCase()}
               onChangeValue={props.onChange}
+            />
+          ) : (
+            <MonthSelect
+              ref={ref}
+              value={props.value || ''}
+              monthYearFormat={getMonthYearFormat(dateFormat)}
+              onChange={props.onChange}
             />
           );
           break;

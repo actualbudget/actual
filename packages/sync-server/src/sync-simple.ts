@@ -6,15 +6,44 @@ import {
   MessageEnvelopeSchema,
   Timestamp,
 } from '@actual-app/crdt';
+import type { MessageEnvelope } from '@actual-app/crdt';
 
 import { openDatabase } from './db';
+import type { WrappedDatabase } from './db';
 import messagesSql from './sql/messages.sql?raw';
 import { getPathForGroupFile } from './util/paths';
+import type { GroupId } from './util/paths';
 
 // Matches the client's Timestamp maxDrift; later messages break sync on other devices
 const MAX_FUTURE_DRIFT_MS = 5 * 60 * 1000;
 
-function getGroupDb(groupId) {
+type RejectedReason = 'invalid-timestamp' | 'clock-drift';
+
+// Thrown inside the transaction so a rejected message rolls everything back
+class RejectedMessageError extends Error {
+  reason: RejectedReason;
+
+  constructor(reason: RejectedReason) {
+    super(reason);
+    this.reason = reason;
+  }
+}
+
+type StoredMessage = {
+  timestamp: string;
+  is_encrypted: number;
+  content: Buffer;
+};
+
+type SyncResult =
+  | {
+      trie: merkle.TrieNode;
+      newMessages: MessageEnvelope[];
+      error?: undefined;
+    }
+  | { error: RejectedReason; trie?: undefined; newMessages?: undefined };
+
+function getGroupDb(groupId: GroupId) {
   const path = getPathForGroupFile(groupId);
   const needsInit = !existsSync(path);
 
@@ -27,9 +56,8 @@ function getGroupDb(groupId) {
   return db;
 }
 
-function addMessages(db, messages) {
-  let returnValue;
-  db.transaction(() => {
+function addMessages(db: WrappedDatabase, messages: MessageEnvelope[]) {
+  return db.transaction(() => {
     let trie = getMerkle(db);
 
     if (messages.length > 0) {
@@ -42,10 +70,11 @@ function addMessages(db, messages) {
 
         if (info.changes > 0) {
           const timestamp = Timestamp.parse(msg.timestamp);
-          const error = getTimestampError(timestamp);
-          if (error) {
-            // Throwing rolls back the transaction
-            throw Object.assign(new Error(error), { rejectedReason: error });
+          if (!timestamp) {
+            throw new RejectedMessageError('invalid-timestamp');
+          }
+          if (timestamp.millis() - Date.now() > MAX_FUTURE_DRIFT_MS) {
+            throw new RejectedMessageError('clock-drift');
           }
           trie = merkle.insert(trie, timestamp);
         }
@@ -59,24 +88,12 @@ function addMessages(db, messages) {
       [JSON.stringify(trie), JSON.stringify(trie)],
     );
 
-    returnValue = trie;
+    return trie;
   });
-
-  return returnValue;
 }
 
-function getTimestampError(timestamp) {
-  if (!timestamp) {
-    return 'invalid-timestamp';
-  }
-  if (timestamp.millis() - Date.now() > MAX_FUTURE_DRIFT_MS) {
-    return 'clock-drift';
-  }
-  return null;
-}
-
-function getMerkle(db) {
-  const rows = db.all('SELECT * FROM messages_merkles');
+function getMerkle(db: WrappedDatabase): merkle.TrieNode {
+  const rows = db.all<{ merkle: string }>('SELECT * FROM messages_merkles');
 
   if (rows.length > 0) {
     return JSON.parse(rows[0].merkle);
@@ -87,10 +104,14 @@ function getMerkle(db) {
   }
 }
 
-export function sync(messages, since, groupId) {
+export function sync(
+  messages: MessageEnvelope[],
+  since: string,
+  groupId: GroupId,
+): SyncResult {
   const db = getGroupDb(groupId);
   try {
-    const newMessages = db.all(
+    const newMessages = db.all<StoredMessage>(
       `SELECT * FROM messages_binary
            WHERE timestamp > ?
            ORDER BY timestamp`,
@@ -110,8 +131,8 @@ export function sync(messages, since, groupId) {
       ),
     };
   } catch (e) {
-    if (e.rejectedReason) {
-      return { error: e.rejectedReason };
+    if (e instanceof RejectedMessageError) {
+      return { error: e.reason };
     }
     throw e;
   } finally {

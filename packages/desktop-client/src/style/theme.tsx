@@ -12,6 +12,7 @@ import type { DarkTheme, Theme } from '@actual-app/core/types/prefs';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
 import {
+  buildCustomThemeCss,
   isBaseTheme,
   migrateLegacyOverride,
   parseInstalledTheme,
@@ -177,49 +178,26 @@ export function CustomThemeStyle() {
     'installedCustomDarkTheme',
   );
   const [customCssOverride] = useGlobalPref('customCssOverride');
+  const [darkThemePreference] = usePreferredDarkTheme();
 
-  const validatedCss = useMemo(() => {
-    const safeValidate = (css: string | undefined, errorLabel: string) =>
-      validateThemeCssSafely(css, error =>
-        console.error(errorLabel, { error }),
-      );
-
-    let baseCss = '';
-    if (activeTheme === 'auto') {
-      const lightCss = safeValidate(
-        parseInstalledTheme(installedCustomLightThemeJson)?.cssContent,
-        'Invalid custom light theme CSS',
-      );
-      if (lightCss) {
-        baseCss += `@media (prefers-color-scheme: light) { ${lightCss} }\n`;
-      }
-      const darkCss = safeValidate(
-        parseInstalledTheme(installedCustomDarkThemeJson)?.cssContent,
-        'Invalid custom dark theme CSS',
-      );
-      if (darkCss) {
-        baseCss += `@media (prefers-color-scheme: dark) { ${darkCss} }\n`;
-      }
-    } else {
-      baseCss = safeValidate(
-        parseInstalledTheme(installedCustomLightThemeJson)?.cssContent,
-        'Invalid custom theme CSS',
-      );
-    }
-
-    const overrideLayer = safeValidate(
+  const validatedCss = useMemo(
+    () =>
+      buildCustomThemeCss({
+        activeTheme,
+        darkThemePreference,
+        lightTheme: parseInstalledTheme(installedCustomLightThemeJson),
+        darkTheme: parseInstalledTheme(installedCustomDarkThemeJson),
+        cssOverride: customCssOverride,
+        onError: (label, error) => console.error(label, { error }),
+      }),
+    [
+      activeTheme,
+      darkThemePreference,
+      installedCustomLightThemeJson,
+      installedCustomDarkThemeJson,
       customCssOverride,
-      'Invalid custom CSS override',
-    );
-
-    const combined = [baseCss, overrideLayer].filter(Boolean).join('\n');
-    return combined || null;
-  }, [
-    activeTheme,
-    installedCustomLightThemeJson,
-    installedCustomDarkThemeJson,
-    customCssOverride,
-  ]);
+    ],
+  );
 
   if (!validatedCss) {
     return null;
