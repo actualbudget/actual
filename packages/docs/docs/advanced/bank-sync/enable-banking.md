@@ -30,6 +30,10 @@ To set up Enable Banking, start by creating and signing in to your account: http
 
 Go to **More → Bank Sync**, choose **Set up Enable Banking**, paste the App ID, and upload the credential file. If Enable Banking does not accept the details, Actual shows the reason and you can correct them and try again.
 
+To use separate Enable Banking credentials for this budget, enable **For this budget only** during setup. The budget must be uploaded to your sync server first. Administrators can choose global or budget-specific credentials; other budget owners can configure budget-specific credentials when global credentials are not active.
+
+Budget-specific credentials take precedence over global credentials. Resetting them affects only that budget, which will then use global credentials if available.
+
 Now go to an Actual Budget account and select **Link account → Enable Banking**. Select your country and bank, then follow the prompts to link your account.
 
 ## Reauthorize Your Bank

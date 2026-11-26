@@ -12,11 +12,7 @@ import { EnableBankingError } from '#app-enablebanking/utils/errors';
 // Mock all external dependencies before importing the app (mirrors
 // poll-auth.spec.ts).
 vi.mock('#util/validate-budget-session', () => ({
-  validateGlobalBankSyncSession: (
-    _req: unknown,
-    _res: unknown,
-    next: () => void,
-  ) => next(),
+  validateBudgetSession: () => ({ user_id: 'test-user' }),
 }));
 
 vi.mock('../../services/secrets-service', () => ({
@@ -177,6 +173,7 @@ describe('POST /transactions', () => {
       expect.any(String),
       expect.objectContaining({ 'Psu-Ip-Address': '136.243.37.31' }),
       expect.anything(),
+      null,
     );
   });
 
@@ -201,6 +198,7 @@ describe('POST /transactions', () => {
         expect.any(String),
         expect.anything(),
         { bookedOnly },
+        null,
       );
     },
   );

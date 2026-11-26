@@ -542,6 +542,7 @@ async function linkEnableBankingAccount({
     bank.bank_id,
     startingDate,
     startingBalance,
+    getPrefs()?.cloudFileId,
   );
 
   await handleSyncResponse(syncRes, id);
@@ -1044,7 +1045,7 @@ async function akahuAccounts() {
   }
 }
 
-async function enableBankingStatus() {
+async function enableBankingStatus(): Promise<BankSyncProviderStatus> {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -1056,11 +1057,13 @@ async function enableBankingStatus() {
     throw new Error('Failed to get server config.');
   }
 
+  const fileId = getPrefs()?.cloudFileId;
   return post(
     serverConfig.ENABLEBANKING_SERVER + '/status',
     {},
     {
       'X-ACTUAL-TOKEN': userToken,
+      ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),
     },
   );
 }
@@ -1077,11 +1080,13 @@ async function enableBankingAspsps(country: string) {
     throw new Error('Failed to get server config.');
   }
 
+  const fileId = getPrefs()?.cloudFileId;
   return post(
     serverConfig.ENABLEBANKING_SERVER + '/aspsps',
     { country },
     {
       'X-ACTUAL-TOKEN': userToken,
+      ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),
     },
   );
 }
@@ -1122,6 +1127,7 @@ async function enableBankingStartAuth({
     throw new Error('Failed to get server config.');
   }
 
+  const fileId = getPrefs()?.cloudFileId;
   return post(
     serverConfig.ENABLEBANKING_SERVER + '/start-auth',
     {
@@ -1137,6 +1143,7 @@ async function enableBankingStartAuth({
     },
     {
       'X-ACTUAL-TOKEN': userToken,
+      ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),
     },
   );
 }
@@ -1163,11 +1170,13 @@ async function enableBankingCompleteAuth({
     throw new Error('Failed to get server config.');
   }
 
+  const fileId = getPrefs()?.cloudFileId;
   return post(
     serverConfig.ENABLEBANKING_SERVER + '/complete-auth',
     { code, state },
     {
       'X-ACTUAL-TOKEN': userToken,
+      ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),
     },
   );
 }
@@ -1215,9 +1224,14 @@ async function stopEnableBankingPollAuth({ state }: { state: string }) {
   return 'ok';
 }
 
-async function enableBankingConfigure(config: {
+async function enableBankingConfigure({
+  fileId = null,
+  ...config
+}: {
   applicationId: string;
   secretKey: string;
+  // Set to store the credentials for that budget only.
+  fileId?: string | null;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -1232,6 +1246,7 @@ async function enableBankingConfigure(config: {
 
   return post(serverConfig.ENABLEBANKING_SERVER + '/configure', config, {
     'X-ACTUAL-TOKEN': userToken,
+    ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),
   });
 }
 

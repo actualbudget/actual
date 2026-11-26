@@ -18,6 +18,7 @@ vi.mock('#hooks/useGlobalPref', () => ({
 vi.mock('#hooks/useEnableBankingStatus', () => ({
   useEnableBankingStatus: () => ({
     configuredEnableBanking: true,
+    enableBankingStatus: { configured: true, source: 'global' },
     isLoading: false,
   }),
 }));

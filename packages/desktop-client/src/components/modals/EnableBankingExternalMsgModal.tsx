@@ -164,6 +164,7 @@ export function EnableBankingExternalMsgModal({
   } = useAvailableBanks(country, isEnableBankingSetupComplete);
   const {
     configuredEnableBanking: isConfigured,
+    enableBankingStatus,
     isLoading: isConfigurationLoading,
   } = useEnableBankingStatus();
 
@@ -258,6 +259,7 @@ export function EnableBankingExternalMsgModal({
           name: 'enablebanking-init',
           options: {
             onSuccess: () => setIsEnableBankingSetupComplete(true),
+            credentialSource: enableBankingStatus.source ?? 'global',
           },
         },
       }),

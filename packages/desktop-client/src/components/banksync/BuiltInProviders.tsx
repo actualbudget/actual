@@ -286,8 +286,9 @@ export function BuiltInProviders({
           {permissionWarning === 'file-owner' ? (
             <Trans>
               You don&apos;t have the required permissions to configure all bank
-              sync providers. You can set up Pluggy.ai because you are the owner
-              of this budget file.
+              sync providers. You can set up SimpleFIN, Pluggy.ai and Enable
+              Banking for this budget because you are the owner of this budget
+              file.
             </Trans>
           ) : (
             <Trans>

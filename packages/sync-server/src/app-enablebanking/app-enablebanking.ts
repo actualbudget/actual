@@ -1,19 +1,21 @@
 import createDebug from 'debug';
 import express from 'express';
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import ipaddr from 'ipaddr.js';
 import { v4 as uuidv4 } from 'uuid';
 
 import { isAdmin } from '#account-db';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
+import * as UserService from '#services/user-service';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
 import { MOBILE_APP_RETURN_PAGE_HTML } from '#util/mobile-app-return';
+import { isValidFileId } from '#util/paths';
 import { isBlockedIp } from '#util/ssrf';
-import { validateGlobalBankSyncSession } from '#util/validate-budget-session';
+import { validateBudgetSession } from '#util/validate-budget-session';
 
 import {
   enableBankingService,
@@ -85,7 +87,8 @@ function dataAccessPsuHeaders(
 
 async function buildSessionResult(
   session: EnableBankingSession,
-  psuHeaders?: PsuHeaders,
+  psuHeaders: PsuHeaders | undefined,
+  credentialFileId: string | null,
 ) {
   const accessHeaders = dataAccessPsuHeaders(session.aspsp?.name, psuHeaders);
   const accountsWithBalances = await Promise.all(
@@ -97,6 +100,7 @@ async function buildSessionResult(
         const balanceResult = await enableBankingService.getBalances(
           account.uid,
           accessHeaders,
+          credentialFileId,
         );
         balances = balanceResult.balances.map(normalizeBalance);
       } catch (err) {
@@ -131,6 +135,23 @@ async function buildSessionResult(
 // that can carry this through the bank redirect.
 const APP_STATE_SUFFIX = '-app';
 
+// Which credentials each in-flight authorization was started with, so the
+// code is redeemed with the same application. `null` is the server-wide one.
+// Process-local, like the poll/complete-auth handoff below.
+const authCredentialFileIds = new Map<string, string | null>();
+const AUTH_CREDENTIALS_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+function rememberAuthCredentials(
+  state: string,
+  credentialFileId: string | null,
+) {
+  authCredentialFileIds.set(state, credentialFileId);
+  setTimeout(
+    () => authCredentialFileIds.delete(state),
+    AUTH_CREDENTIALS_TTL_MS,
+  ).unref();
+}
+
 // The bank redirect callback does not require an Actual session,
 // since the bank redirects here directly (no auth token available)
 app.get('/auth_callback', async (req: Request, res: Response) => {
@@ -156,12 +177,22 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
     return;
   }
 
+  const credentialFileId = authCredentialFileIds.get(state) ?? null;
+  authCredentialFileIds.delete(state);
+
   try {
-    const session = await enableBankingService.createSession(code);
+    const session = await enableBankingService.createSession(
+      code,
+      credentialFileId,
+    );
     debug('Callback session created with %d accounts', session.accounts.length);
     debugSensitive('Callback session created: %s', session.session_id);
 
-    const result = await buildSessionResult(session, extractPsuHeaders(req));
+    const result = await buildSessionResult(
+      session,
+      extractPsuHeaders(req),
+      credentialFileId,
+    );
 
     // Always cache the result so retries within TTL can read it
     completedAuths.set(state, result);
@@ -212,13 +243,84 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
 // server-wide (global) bank-sync credentials is admin-only, but every
 // signed-in user on that server may use them. This is a supported feature
 // and will remain; budgets with their own credentials use those instead.
-// API keys need explicit permission to sync shared connections.
+// API keys need explicit permission to use shared credentials.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
 const bankSync = express.Router();
-bankSync.use(validateGlobalBankSyncSession);
+bankSync.use(validateEnableBankingSyncSession);
 app.use(bankSync);
 app.use(validateSessionMiddleware);
+
+// A key may sync the budgets it was granted with their own credentials. It
+// needs the shared-credentials permission to omit the budget or to fall back
+// to the server-wide ones.
+function validateEnableBankingSyncSession(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const session = validateBudgetSession(req, res);
+  if (!session) return;
+
+  if ('apiKeyFileIds' in session) {
+    const fileId = req.get('X-Actual-File-Id');
+    if (fileId && !session.apiKeyFileIds.includes(fileId)) {
+      res.status(403).send({ status: 'error', reason: 'file-access-denied' });
+      return;
+    }
+    if (!fileId && !session.allowGlobalBankSync) {
+      res.status(403).send({ status: 'error', reason: 'permission-denied' });
+      return;
+    }
+  }
+
+  res.locals = {
+    ...session,
+    allowGlobalBankSync:
+      !('apiKeyFileIds' in session) || session.allowGlobalBankSync,
+  };
+  next();
+}
+
+// Picks the budget's own credentials when it has them, otherwise the
+// server-wide ones. Sets `res.locals.credentialSource` (null when nothing
+// usable is configured) and `res.locals.credentialFileId`.
+function selectCredentials(req: Request, res: Response, next: NextFunction) {
+  const fileId = req.get('X-Actual-File-Id') || null;
+  if (fileId) {
+    if (!isValidFileId(fileId)) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'invalid-file-id',
+        details: 'invalid fileId',
+      });
+      return;
+    }
+
+    if (!UserService.canAccessActiveFile(fileId, res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'file-access-denied',
+        details: "You don't have permissions over this file",
+      });
+      return;
+    }
+  }
+
+  const source = enableBankingService.getCredentialSource(
+    fileId,
+    res.locals.allowGlobalBankSync !== false,
+  );
+  res.locals.credentialSource = source;
+  res.locals.credentialFileId = source === 'per-budget-file' ? fileId : null;
+  next();
+}
+
+function canManagePerBudgetFileCredentials(fileId: string, userId: string) {
+  return (
+    isAdmin(userId) || UserService.checkFilePermission(fileId, userId).granted
+  );
+}
 
 // --- Poll/complete-auth coordination ---
 
@@ -251,13 +353,15 @@ function cleanupPendingAuth(state: string, waiterId?: string) {
 
 bankSync.post(
   '/status',
+  selectCredentials,
   handleError(async (req: Request, res: Response) => {
-    const configured = enableBankingService.isConfigured();
+    const source = res.locals.credentialSource;
 
     res.send({
       status: 'ok',
       data: {
-        configured,
+        configured: !!source,
+        ...(source ? { source } : {}),
       },
     });
   }),
@@ -266,7 +370,22 @@ bankSync.post(
 app.post(
   '/configure',
   handleError(async (req: Request, res: Response) => {
-    if (!isAdmin(res.locals.user_id)) {
+    // With a budget named, the credentials apply to that budget only and its
+    // owner may set them. Server-wide credentials stay admin-only.
+    const fileId = req.get('X-Actual-File-Id') || null;
+    if (fileId && !isValidFileId(fileId)) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'invalid-file-id',
+        details: 'invalid fileId',
+      });
+      return;
+    }
+
+    const isAllowed = fileId
+      ? canManagePerBudgetFileCredentials(fileId, res.locals.user_id)
+      : isAdmin(res.locals.user_id);
+    if (!isAllowed) {
       res.status(403).send({
         status: 'error',
         reason: 'forbidden',
@@ -320,13 +439,18 @@ app.post(
     }
 
     // Only persist after successful validation
-    secretsService.set(SecretName.enablebanking_applicationId, applicationId);
-    secretsService.set(SecretName.enablebanking_secretKey, secretKey);
+    secretsService.set(
+      SecretName.enablebanking_applicationId,
+      applicationId,
+      fileId,
+    );
+    secretsService.set(SecretName.enablebanking_secretKey, secretKey, fileId);
 
     res.send({
       status: 'ok',
       data: {
         configured: true,
+        source: fileId ? 'per-budget-file' : 'global',
       },
     });
   }),
@@ -334,11 +458,15 @@ app.post(
 
 app.post(
   '/aspsps',
+  selectCredentials,
   handleError(async (req: Request, res: Response) => {
     const { country } = req.body || {};
 
     try {
-      const aspsps = await enableBankingService.getAspsps(country);
+      const aspsps = await enableBankingService.getAspsps(
+        country,
+        res.locals.credentialFileId,
+      );
 
       res.send({
         status: 'ok',
@@ -357,6 +485,7 @@ app.post(
 
 app.post(
   '/start-auth',
+  selectCredentials,
   handleError(async (req: Request, res: Response) => {
     const { aspsp, redirectUrl, maxConsentValidity, psuType, returnToApp } =
       req.body || {};
@@ -382,7 +511,9 @@ app.post(
         typeof maxConsentValidity === 'number' ? maxConsentValidity : undefined,
         psuType === 'business' ? 'business' : 'personal',
         extractPsuHeaders(req),
+        res.locals.credentialFileId,
       );
+      rememberAuthCredentials(state, res.locals.credentialFileId);
 
       res.send({
         status: 'ok',
@@ -404,6 +535,7 @@ app.post(
 
 app.post(
   '/complete-auth',
+  selectCredentials,
   handleError(async (req: Request, res: Response) => {
     const { code, state } = req.body || {};
 
@@ -418,12 +550,38 @@ app.post(
       return;
     }
 
+    // Redeem the code with the credentials the authorization was started
+    // with; the window finishing it may have a different budget open.
+    let credentialFileId: string | null = res.locals.credentialFileId;
+    if (typeof state === 'string' && authCredentialFileIds.has(state)) {
+      credentialFileId = authCredentialFileIds.get(state) ?? null;
+      if (
+        credentialFileId &&
+        !UserService.canAccessActiveFile(credentialFileId, res.locals.user_id)
+      ) {
+        res.status(403).send({
+          status: 'error',
+          reason: 'file-access-denied',
+          details: "You don't have permissions over this file",
+        });
+        return;
+      }
+      authCredentialFileIds.delete(state);
+    }
+
     try {
-      const session = await enableBankingService.createSession(code);
+      const session = await enableBankingService.createSession(
+        code,
+        credentialFileId,
+      );
       debug('Session created with %d accounts', session.accounts.length);
       debugSensitive('Session created: %s', session.session_id);
 
-      const result = await buildSessionResult(session, extractPsuHeaders(req));
+      const result = await buildSessionResult(
+        session,
+        extractPsuHeaders(req),
+        credentialFileId,
+      );
 
       // Always cache so retries within TTL can read the result
       if (state) {
@@ -560,8 +718,17 @@ app.post(
 
 bankSync.post(
   '/transactions',
+  selectCredentials,
   handleError(async (req: Request, res: Response) => {
     const { accountId, startDate, aspspName, importPending } = req.body || {};
+    const credentialFileId: string | null = res.locals.credentialFileId;
+
+    // A key without the shared-credentials permission has nothing to sync
+    // with unless its budget has credentials of its own.
+    if (!res.locals.allowGlobalBankSync && !res.locals.credentialSource) {
+      res.status(403).send({ status: 'error', reason: 'permission-denied' });
+      return;
+    }
 
     if (!accountId || !startDate) {
       res.send({
@@ -594,6 +761,7 @@ bankSync.post(
         const balanceResult = await enableBankingService.getBalances(
           accountId,
           psuHeaders,
+          credentialFileId,
         );
         balances = balanceResult.balances.map(normalizeBalance);
       } catch (err) {
@@ -622,6 +790,7 @@ bankSync.post(
         psuHeaders,
         // Clients that predate the setting send nothing and get everything.
         { bookedOnly: importPending === false },
+        credentialFileId,
       );
 
       const all: ReturnType<typeof normalizeTransactions> = [];

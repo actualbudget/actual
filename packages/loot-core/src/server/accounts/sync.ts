@@ -370,6 +370,7 @@ async function downloadEnableBankingTransactions(
   since: string,
   importPending: boolean,
   aspspName?: string,
+  fileId?: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -386,6 +387,7 @@ async function downloadEnableBankingTransactions(
     },
     {
       'X-ACTUAL-TOKEN': userToken,
+      ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),
     },
     60000,
   );
@@ -1297,6 +1299,7 @@ export async function syncAccount(
       syncStartDate,
       await getImportPending(id),
       bankRow?.name,
+      fileId,
     );
   } else {
     throw new Error(

@@ -4,11 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock all external dependencies before importing the app
 vi.mock('#util/validate-budget-session', () => ({
-  validateGlobalBankSyncSession: (
-    _req: unknown,
-    _res: unknown,
-    next: () => void,
-  ) => next(),
+  validateBudgetSession: () => ({ user_id: 'test-user' }),
 }));
 
 vi.mock('../../services/secrets-service', () => ({

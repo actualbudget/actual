@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
+import type { BankSyncProviderStatus } from '@actual-app/core/types/models';
 
 import { useSyncServerStatus } from './useSyncServerStatus';
 
 export function useEnableBankingStatus() {
-  const [configuredEnableBanking, setConfiguredEnableBanking] = useState<
-    boolean | null
-  >(null);
+  const [enableBankingStatus, setEnableBankingStatus] =
+    useState<BankSyncProviderStatus>({});
   const [isLoading, setIsLoading] = useState(true);
   const status = useSyncServerStatus();
 
@@ -15,10 +15,9 @@ export function useEnableBankingStatus() {
     async function fetch() {
       setIsLoading(true);
       try {
-        const results = await send('enablebanking-status');
-        setConfiguredEnableBanking(results.configured || false);
+        setEnableBankingStatus((await send('enablebanking-status')) ?? {});
       } catch {
-        setConfiguredEnableBanking(false);
+        setEnableBankingStatus({});
       } finally {
         setIsLoading(false);
       }
@@ -30,7 +29,11 @@ export function useEnableBankingStatus() {
   }, [status]);
 
   return {
-    configuredEnableBanking,
+    configuredEnableBanking: isLoading
+      ? null
+      : Boolean(enableBankingStatus.configured),
+    enableBankingStatus,
+    setEnableBankingStatus,
     isLoading,
   };
 }

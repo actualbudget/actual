@@ -101,11 +101,46 @@ export type PsuHeaders = {
 
 // --- Helper functions ---
 
-function getCredentials(): { applicationId: string; secretKey: string } {
-  const applicationId = secretsService.get(
-    SecretName.enablebanking_applicationId,
-  );
-  const secretKey = secretsService.get(SecretName.enablebanking_secretKey);
+type CredentialSource = 'per-budget-file' | 'global';
+
+function readCredentials(fileId: string | null = null) {
+  return {
+    applicationId: secretsService.get(
+      SecretName.enablebanking_applicationId,
+      fileId,
+    ),
+    secretKey: secretsService.get(SecretName.enablebanking_secretKey, fileId),
+  };
+}
+
+function hasCredentials(fileId: string | null = null): boolean {
+  const { applicationId, secretKey } = readCredentials(fileId);
+  return !!(applicationId && secretKey);
+}
+
+// A budget's own credentials win over the server-wide ones.
+function getCredentialSource(
+  fileId?: string | null,
+  allowGlobal = true,
+): CredentialSource | null {
+  if (fileId && hasCredentials(fileId)) {
+    return 'per-budget-file';
+  }
+
+  if (allowGlobal && hasCredentials()) {
+    return 'global';
+  }
+
+  return null;
+}
+
+// `credentialFileId` is the budget whose credentials to use, or `null` for
+// the server-wide ones.
+function getCredentials(credentialFileId: string | null = null): {
+  applicationId: string;
+  secretKey: string;
+} {
+  const { applicationId, secretKey } = readCredentials(credentialFileId);
 
   if (!applicationId || !secretKey) {
     throw new EnableBankingError(
@@ -118,8 +153,8 @@ function getCredentials(): { applicationId: string; secretKey: string } {
   return { applicationId, secretKey };
 }
 
-function getAuthorizationHeader(): string {
-  const { applicationId, secretKey } = getCredentials();
+function getAuthorizationHeader(credentialFileId: string | null): string {
+  const { applicationId, secretKey } = getCredentials(credentialFileId);
   const token = getJWT(applicationId, secretKey);
   return `Bearer ${token}`;
 }
@@ -132,13 +167,15 @@ async function request<T>(
   body?: unknown,
   authHeaderOverride?: string,
   psuHeaders?: PsuHeaders,
+  credentialFileId: string | null = null,
 ): Promise<T> {
   const url = `${BASE_URL}${path}`;
   debug('%s request', method);
   debugSensitive('%s %s', method, url);
 
   const headers: Record<string, string> = {
-    Authorization: authHeaderOverride ?? getAuthorizationHeader(),
+    Authorization:
+      authHeaderOverride ?? getAuthorizationHeader(credentialFileId),
     'Content-Type': 'application/json',
   };
 
@@ -382,13 +419,11 @@ export function normalizeAccount(
 // --- Service ---
 
 export const enableBankingService = {
-  isConfigured(): boolean {
-    const applicationId = secretsService.get(
-      SecretName.enablebanking_applicationId,
-    );
-    const secretKey = secretsService.get(SecretName.enablebanking_secretKey);
-    return !!(applicationId && secretKey);
+  isConfigured(fileId?: string | null): boolean {
+    return getCredentialSource(fileId) != null;
   },
+
+  getCredentialSource,
 
   async validateCredentials(
     applicationId: string,
@@ -407,9 +442,19 @@ export const enableBankingService = {
     return request<unknown>('GET', '/application');
   },
 
-  async getAspsps(country?: string): Promise<EnableBankingAspsp[]> {
+  async getAspsps(
+    country?: string,
+    credentialFileId: string | null = null,
+  ): Promise<EnableBankingAspsp[]> {
     const query = country ? `?country=${encodeURIComponent(country)}` : '';
-    return request<EnableBankingAspsp[]>('GET', `/aspsps${query}`);
+    return request<EnableBankingAspsp[]>(
+      'GET',
+      `/aspsps${query}`,
+      undefined,
+      undefined,
+      undefined,
+      credentialFileId,
+    );
   },
 
   async startAuth(
@@ -419,6 +464,7 @@ export const enableBankingService = {
     maxConsentValidity?: number,
     psuType: PsuType = 'personal',
     psuHeaders?: PsuHeaders,
+    credentialFileId: string | null = null,
   ): Promise<EnableBankingAuthResponse> {
     const DEFAULT_CONSENT_DAYS = 90;
     const defaultMs = DEFAULT_CONSENT_DAYS * 24 * 60 * 60 * 1000;
@@ -448,11 +494,22 @@ export const enableBankingService = {
       },
       undefined,
       psuHeaders,
+      credentialFileId,
     );
   },
 
-  async createSession(code: string): Promise<EnableBankingSession> {
-    return request<EnableBankingSession>('POST', '/sessions', { code });
+  async createSession(
+    code: string,
+    credentialFileId: string | null = null,
+  ): Promise<EnableBankingSession> {
+    return request<EnableBankingSession>(
+      'POST',
+      '/sessions',
+      { code },
+      undefined,
+      undefined,
+      credentialFileId,
+    );
   },
 
   async getSession(sessionId: string): Promise<EnableBankingSession> {
@@ -465,6 +522,7 @@ export const enableBankingService = {
   async getBalances(
     accountUid: string,
     psuHeaders?: PsuHeaders,
+    credentialFileId: string | null = null,
   ): Promise<{ balances: EnableBankingBalance[] }> {
     return request<{ balances: EnableBankingBalance[] }>(
       'GET',
@@ -472,6 +530,7 @@ export const enableBankingService = {
       undefined,
       undefined,
       psuHeaders,
+      credentialFileId,
     );
   },
 
@@ -482,6 +541,7 @@ export const enableBankingService = {
     continuationKey?: string,
     psuHeaders?: PsuHeaders,
     { bookedOnly = false }: { bookedOnly?: boolean } = {},
+    credentialFileId: string | null = null,
   ): Promise<{
     transactions: EnableBankingTransaction[];
     continuation_key?: string;
@@ -498,7 +558,7 @@ export const enableBankingService = {
     return request<{
       transactions: EnableBankingTransaction[];
       continuation_key?: string;
-    }>('GET', path, undefined, undefined, psuHeaders);
+    }>('GET', path, undefined, undefined, psuHeaders, credentialFileId);
   },
 
   async getAllTransactions(
@@ -507,6 +567,7 @@ export const enableBankingService = {
     dateTo: string,
     psuHeaders?: PsuHeaders,
     options: { bookedOnly?: boolean } = {},
+    credentialFileId: string | null = null,
   ): Promise<EnableBankingTransaction[]> {
     const allTransactions: EnableBankingTransaction[] = [];
     let continuationKey: string | undefined;
@@ -521,6 +582,7 @@ export const enableBankingService = {
         continuationKey,
         psuHeaders,
         options,
+        credentialFileId,
       );
 
       if (

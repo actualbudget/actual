@@ -8,6 +8,7 @@ import { getAccountDb } from './account-db';
 import { handlers as akahuApp } from './app-akahu/app-akahu';
 import { handlers as keysApp } from './app-api-keys';
 import { handlers as enableApp } from './app-enablebanking/app-enablebanking';
+import { enableBankingService } from './app-enablebanking/services/enablebanking-service';
 import { handlers as gcApp } from './app-gocardless/app-gocardless';
 import { handlers as pluggyApp } from './app-pluggyai/app-pluggyai';
 import { handlers as simplefinApp } from './app-simplefin/app-simplefin';
@@ -232,6 +233,24 @@ it.each(['gocardless', 'akahu', 'enablebanking'])(
     expect(ordinary.body.data.transactions.all).toEqual([]);
   },
 );
+it("syncs enablebanking with a budget's own credentials without the global permission", async () => {
+  secretsService.set(SecretName.enablebanking_applicationId, 'id', budget);
+  secretsService.set(SecretName.enablebanking_secretKey, 'key', budget);
+  try {
+    const response = await sync('enablebanking').expect(200);
+    expect(response.body.data.transactions.all).toEqual([]);
+    expect(
+      vi.mocked(enableBankingService.getAllTransactions).mock.lastCall?.at(-1),
+    ).toBe(budget);
+    vi.clearAllMocks();
+    await sync('enablebanking', key, otherBudget).expect(403);
+    await sync('enablebanking', key, null).expect(403);
+    expect(enableBankingService.getAllTransactions).not.toHaveBeenCalled();
+  } finally {
+    secretsService.reset(SecretName.enablebanking_applicationId, budget);
+    secretsService.reset(SecretName.enablebanking_secretKey, budget);
+  }
+});
 it.each([
   '/gocardless/create-web-token',
   '/gocardless/remove-account',

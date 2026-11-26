@@ -8,12 +8,11 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as Platform from '@actual-app/core/shared/platform';
 
-import { useAuth } from '#auth/AuthProvider';
-import { Permissions } from '#auth/types';
 import { Error as ErrorAlert } from '#components/alerts';
 import { Link } from '#components/common/Link';
 import {
@@ -24,6 +23,7 @@ import {
 } from '#components/common/Modal';
 import { FormField, FormLabel } from '#components/forms';
 import { useServerURL } from '#components/ServerContext';
+import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { getSecretsError } from '#util/error';
 
@@ -34,10 +34,20 @@ type EnableBankingInitialiseProps = Extract<
 
 export function EnableBankingInitialiseModal({
   onSuccess,
+  credentialSource,
 }: EnableBankingInitialiseProps) {
   const { t } = useTranslation();
-  const { hasPermission } = useAuth();
-  const isAdmin = hasPermission(Permissions.ADMINISTRATOR);
+  const {
+    cloudFileId,
+    isAdmin: canSetGlobalCredentials,
+    isFileOwner,
+  } = useCurrentAccess();
+  // Budget owners may set credentials for their own budget; only an
+  // administrator may set the ones shared by the whole server.
+  const canConfigure = canSetGlobalCredentials || isFileOwner;
+  const [perBudgetFile, setPerBudgetFile] = useState(
+    credentialSource === 'per-budget-file' || !canSetGlobalCredentials,
+  );
   const serverUrl = useServerURL();
   // The mobile apps have no web origin, so the bank redirects to the server.
   const redirectBase =
@@ -71,7 +81,7 @@ export function EnableBankingInitialiseModal({
   }
 
   async function onSubmit(close: () => void) {
-    if (!isAdmin) return;
+    if (!canConfigure) return;
     if (!applicationId || !secretKey) {
       setIsValid(false);
       setError(
@@ -82,12 +92,20 @@ export function EnableBankingInitialiseModal({
       return;
     }
 
+    const fileId = perBudgetFile ? cloudFileId : null;
+    if (perBudgetFile && !fileId) {
+      setIsValid(false);
+      setError(t('Budget file ID is required.'));
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const result = await send('enablebanking-configure', {
         applicationId,
         secretKey,
+        fileId,
       });
 
       if (result?.error) {
@@ -110,7 +128,7 @@ export function EnableBankingInitialiseModal({
       }
 
       setIsValid(true);
-      onSuccess();
+      onSuccess(perBudgetFile);
       close();
     } catch {
       setIsValid(false);
@@ -136,10 +154,11 @@ export function EnableBankingInitialiseModal({
             rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>
-            {!isAdmin && (
+            {!canConfigure && (
               <ErrorAlert>
                 <Trans>
-                  Only an administrator can configure Enable Banking.
+                  Only an administrator or the owner of this budget file can
+                  configure Enable Banking.
                 </Trans>
               </ErrorAlert>
             )}
@@ -176,6 +195,25 @@ export function EnableBankingInitialiseModal({
               </ErrorAlert>
             )}
 
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}
+            >
+              <Text>
+                <Trans>For this budget only</Trans>
+              </Text>
+              <Toggle
+                id="enablebanking-per-budget-file"
+                isOn={perBudgetFile}
+                isDisabled={!canSetGlobalCredentials}
+                onToggle={setPerBudgetFile}
+              />
+            </View>
+
             <FormField>
               <FormLabel
                 title={t('Application ID:')}
@@ -183,7 +221,7 @@ export function EnableBankingInitialiseModal({
               />
               <InitialFocus>
                 <Input
-                  disabled={!isAdmin}
+                  disabled={!canConfigure}
                   id="application-id-field"
                   type="text"
                   value={applicationId}
@@ -201,7 +239,7 @@ export function EnableBankingInitialiseModal({
                 htmlFor="secret-key-field"
               />
               <input
-                disabled={!isAdmin}
+                disabled={!canConfigure}
                 id="secret-key-field"
                 type="file"
                 accept=".pem,.key"
@@ -233,7 +271,7 @@ export function EnableBankingInitialiseModal({
             <ButtonWithLoading
               variant="primary"
               isLoading={isLoading}
-              isDisabled={!isAdmin}
+              isDisabled={!canConfigure}
               onPress={() => {
                 void onSubmit(() => state.close());
               }}
