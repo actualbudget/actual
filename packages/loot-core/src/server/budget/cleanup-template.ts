@@ -273,6 +273,7 @@ async function processCleanup(month: string): Promise<TemplateNotification> {
       balance < 0 &&
       !category.is_income &&
       carryover.carryover === 0 &&
+      budgetAvailable > 0 &&
       Math.abs(balance) > budgetAvailable
     ) {
       await setBudget({
@@ -289,12 +290,13 @@ async function processCleanup(month: string): Promise<TemplateNotification> {
   }
 
   //fill sinking categories
-  for (let c = 0; c < sinkCategory.length; c++) {
-    const { cat, weight } = sinkCategory[c];
+  const sinksToFill = budgetAvailable > 0 ? sinkCategory : [];
+  for (let c = 0; c < sinksToFill.length; c++) {
+    const { cat, weight } = sinksToFill[c];
     const budgeted = await getSheetValue(sheetName, `budget-${cat.id}`);
     let to_budget =
       budgeted + Math.round((weight / total_weight) * budgetAvailable);
-    if (c === sinkCategory.length - 1) {
+    if (c === sinksToFill.length - 1) {
       const currentBudgetAvailable = await getSheetValue(
         sheetName,
         `to-budget`,

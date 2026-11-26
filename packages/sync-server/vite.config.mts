@@ -39,19 +39,19 @@ export default defineConfig({
         'bin/actual-server': path.resolve(__dirname, 'bin/actual-server.js'),
         'scripts/run-migrations': path.resolve(
           __dirname,
-          'src/scripts/run-migrations.js',
+          'src/scripts/run-migrations.ts',
         ),
         'scripts/reset-password': path.resolve(
           __dirname,
-          'src/scripts/reset-password.js',
+          'src/scripts/reset-password.ts',
         ),
         'scripts/disable-openid': path.resolve(
           __dirname,
-          'src/scripts/disable-openid.js',
+          'src/scripts/disable-openid.ts',
         ),
         'scripts/enable-openid': path.resolve(
           __dirname,
-          'src/scripts/enable-openid.js',
+          'src/scripts/enable-openid.ts',
         ),
         'scripts/health-check': path.resolve(
           __dirname,

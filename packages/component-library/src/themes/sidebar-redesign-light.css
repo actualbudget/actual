@@ -6,9 +6,9 @@
   --color-sidebarRedesignBackground: var(--palette-white);
   --color-sidebarRedesignItemText: var(--palette-navy800);
   --color-sidebarRedesignItemBackgroundHover: var(--palette-navy100);
-  --color-sidebarRedesignItemAccentSelected: var(--palette-purple500);
-  --color-sidebarRedesignItemTextSelected: var(--palette-purple600);
-  --color-sidebarRedesignItemBackgroundSelected: var(--palette-purple100);
+  --color-sidebarRedesignItemAccentSelected: var(--color-accentBorder);
+  --color-sidebarRedesignItemTextSelected: var(--color-accentSubtleText);
+  --color-sidebarRedesignItemBackgroundSelected: var(--color-accentSubtle);
   --color-sidebarRedesignItemBackgroundFailed: var(--palette-red500);
   --color-sidebarRedesignHeaderText: var(--palette-gray700);
   --color-sidebarRedesignTextSubdued: var(--palette-navy600);

@@ -13,6 +13,7 @@
   "imports": {
     "#browser-preload": {
       "electron-renderer": "./src/browser-preload.electron.ts",
+      "mobile": "./src/browser-preload.mobile.ts",
       "default": "./src/browser-preload.js"
     },
     "#account-groups": "./src/account-groups/index.ts",
@@ -93,6 +94,7 @@
     "#components/transactions/table/columns": "./src/components/transactions/table/columns.ts",
     "#components/transactions/table/utils": "./src/components/transactions/table/utils.ts",
     "#components/util/accountValidation": "./src/components/util/accountValidation.ts",
+    "#components/util/betweenRange": "./src/components/util/betweenRange.ts",
     "#components/util/countries": "./src/components/util/countries.ts",
     "#components/util/localeToCountry": "./src/components/util/localeToCountry.ts",
     "#components/*": "./src/components/*.tsx",
@@ -139,9 +141,10 @@
     "watch": "cross-env BROWSER=none yarn start",
     "build": "vite build",
     "build:browser": "vite build --mode=browser",
+    "build:mobile": "vite build --mode=mobile",
     "generate:i18n": "i18next",
     "test": "vitest --run",
-    "validate:theme-catalog": "node --experimental-strip-types bin/validate-theme-catalog.mts",
+    "validate:theme-catalog": "node --import=extensionless/register --experimental-strip-types bin/validate-theme-catalog.mts",
     "e2e": "npx playwright test --browser=chromium",
     "vrt": "cross-env VRT=true npx playwright test --browser=chromium",
     "playwright": "playwright",
@@ -153,7 +156,9 @@
     "@babel/core": "^8.0.7",
     "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.4.2",
+    "@capacitor/filesystem": "^8.1.5",
     "@capacitor/haptics": "^8.0.2",
+    "@capacitor/share": "^8.0.3",
     "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/language": "^6.13.1",
     "@codemirror/state": "^6.7.6",
@@ -189,6 +194,7 @@
     "date-fns": "^4.4.0",
     "downshift": "9.4.0",
     "es-toolkit": "^1.52.0",
+    "extensionless": "^2.0.6",
     "fzf": "^0.5.2",
     "hyperformula": "^3.5.0",
     "i18next": "^26.4.4",
@@ -229,5 +235,10 @@
     "vite": "^8.3.4",
     "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.0.4"
+  },
+  "extensionless": {
+    "lookFor": [
+      "ts"
+    ]
   }
 }

@@ -1,6 +1,7 @@
 /**
  * Custom theme utilities: fetch, validation, and storage helpers.
  */
+import { deriveAccentCss } from '@actual-app/components/themes';
 
 export const BASE_THEME_OPTIONS = ['light', 'dark', 'midnight'] as const;
 export type BaseTheme = (typeof BASE_THEME_OPTIONS)[number];
@@ -663,6 +664,78 @@ export function validateThemeCssSafely(
     onError?.(error);
     return '';
   }
+}
+
+type CustomThemeCssOptions = {
+  activeTheme: string;
+  darkThemePreference: string;
+  lightTheme: InstalledTheme | null;
+  darkTheme: InstalledTheme | null;
+  cssOverride: string | undefined;
+  onError?: (label: string, error: unknown) => void;
+};
+
+function toBaseTheme(value: string | undefined) {
+  return value !== undefined && isBaseTheme(value) ? value : undefined;
+}
+
+function inColorScheme(scheme: 'light' | 'dark', css: string | null) {
+  return css ? `@media (prefers-color-scheme: ${scheme}) { ${css} }\n` : '';
+}
+
+export function buildCustomThemeCss({
+  activeTheme,
+  darkThemePreference,
+  lightTheme,
+  darkTheme,
+  cssOverride,
+  onError,
+}: CustomThemeCssOptions): string | null {
+  const validate = (css: string | undefined, label: string) =>
+    validateThemeCssSafely(css, error => onError?.(label, error));
+  const overrideCss = validate(cssOverride, 'Invalid custom CSS override');
+
+  let themeCss = '';
+  let derivedCss = '';
+  if (activeTheme === 'auto') {
+    const lightCss = validate(
+      lightTheme?.cssContent,
+      'Invalid custom light theme CSS',
+    );
+    const darkCss = validate(
+      darkTheme?.cssContent,
+      'Invalid custom dark theme CSS',
+    );
+    themeCss =
+      inColorScheme('light', lightCss) + inColorScheme('dark', darkCss);
+    derivedCss =
+      inColorScheme(
+        'light',
+        deriveAccentCss(
+          toBaseTheme(lightTheme?.baseTheme) ?? 'light',
+          `${lightCss}\n${overrideCss}`,
+        ),
+      ) +
+      inColorScheme(
+        'dark',
+        deriveAccentCss(
+          toBaseTheme(darkTheme?.baseTheme) ??
+            toBaseTheme(darkThemePreference) ??
+            'dark',
+          `${darkCss}\n${overrideCss}`,
+        ),
+      );
+  } else {
+    themeCss = validate(lightTheme?.cssContent, 'Invalid custom theme CSS');
+    const baseTheme =
+      toBaseTheme(lightTheme?.baseTheme) ?? toBaseTheme(activeTheme);
+    if (baseTheme != null) {
+      derivedCss =
+        deriveAccentCss(baseTheme, `${themeCss}\n${overrideCss}`) ?? '';
+    }
+  }
+
+  return [derivedCss, themeCss, overrideCss].filter(Boolean).join('\n') || null;
 }
 
 export function usesRedesignSidebarPalette(css: string): boolean {

@@ -836,7 +836,7 @@ const autocompletePopoverTheme = EditorView.baseTheme({
       lineHeight: '1em',
       textTransform: 'uppercase',
       letterSpacing: '0.03em',
-      color: theme.menuItemTextHeader,
+      color: theme.menuAutoCompleteTextHeader,
       opacity: '1 !important',
       marginTop: '8px',
       position: 'sticky',
@@ -903,11 +903,11 @@ const autocompletePopoverTheme = EditorView.baseTheme({
   },
   '.cm-tooltip.cm-tooltip-autocomplete .cm-completionDetail': {
     fontSize: '12px',
-    color: theme.menuKeybindingText,
+    color: theme.menuAutoCompleteTextHeader,
     marginLeft: 'auto',
     whiteSpace: 'nowrap',
   },
-  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected] .cm-completionDetail':
+  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected] .cm-completionDetail, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem:hover .cm-completionDetail, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem-hover .cm-completionDetail, .cm-tooltip.cm-tooltip-autocomplete li[role="option"]:hover .cm-completionDetail':
     {
       color: theme.menuAutoCompleteItemTextHover,
     },
@@ -1124,6 +1124,7 @@ const autocompletePopoverPointerHandler = ViewPlugin.define(view => {
   };
 });
 
+/* oxlint-disable actual/no-color-literals */
 // Custom theme for categorized function highlighting (light)
 const functionCategoryTheme = EditorView.baseTheme({
   '&light .cm-keyword': { color: '#0066CC' }, // Math functions in blue
@@ -1167,6 +1168,8 @@ export const excelFormulaDarkHighlighting = syntaxHighlighting(
     { tag: tags.special(tags.variableName), color: '#4FC1FF' }, // Special variables in bright cyan
   ]),
 );
+
+/* oxlint-enable actual/no-color-literals */
 
 // Combined extension for Excel formula support
 export function excelFormulaExtension(

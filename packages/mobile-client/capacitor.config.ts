@@ -6,6 +6,14 @@ const baseConfig: CapacitorConfig = {
   // Staged from the web build by `bin/stage-www.mjs` (run by the sync
   // scripts), which leaves out files the native apps do not need.
   webDir: 'www',
+  android: {
+    buildOptions: {
+      keystorePath: process.env.ANDROID_KEYSTORE_PATH,
+      keystorePassword: process.env.ANDROID_KEYSTORE_PASSWORD,
+      keystoreAlias: process.env.ANDROID_KEY_ALIAS,
+      keystoreAliasPassword: process.env.ANDROID_KEY_PASSWORD,
+    },
+  },
 };
 
 const devConfig: CapacitorConfig = {

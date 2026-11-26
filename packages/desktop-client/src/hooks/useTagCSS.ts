@@ -122,6 +122,7 @@ function getTagCSSColors(
 
   if (brightnessDiff >= 125) {
     return {
+      // oxlint-disable-next-line actual/no-color-literals
       color: 'black',
       backgroundColor: color,
       backgroundColorHovered: `color-mix(in srgb, ${color} 80%, black)`,
@@ -130,6 +131,7 @@ function getTagCSSColors(
   }
 
   return {
+    // oxlint-disable-next-line actual/no-color-literals
     color: 'white',
     backgroundColor: color,
     backgroundColorHovered: `color-mix(in srgb, ${color} 70%, white)`,

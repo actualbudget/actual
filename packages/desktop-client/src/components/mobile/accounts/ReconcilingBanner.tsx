@@ -18,6 +18,7 @@ type ReconcilingBannerProps = {
   account: AccountEntity;
   targetBalance: number;
   onDone: () => Promise<void>;
+  onExit: () => void;
   onCreateTransaction: (targetDiff: number) => Promise<void>;
 };
 
@@ -25,6 +26,7 @@ export function ReconcilingBanner({
   account,
   targetBalance,
   onDone,
+  onExit,
   onCreateTransaction,
 }: ReconcilingBannerProps) {
   const format = useFormat();
@@ -147,7 +149,7 @@ export function ReconcilingBanner({
             variant="primary"
             isDisabled={isUpdating}
             style={{ flex: 1, minHeight: styles.mobileMinHeight }}
-            onPress={() => runAction(onDone)}
+            onPress={onExit}
           >
             <Trans>Exit reconciliation</Trans>
           </Button>

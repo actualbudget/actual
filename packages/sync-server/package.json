@@ -18,7 +18,7 @@
   ],
   "type": "module",
   "imports": {
-    "#db": "./src/db.js",
+    "#db": "./src/db.ts",
     "#account-db": "./src/account-db.js",
     "#load-config": "./src/load-config.js",
     "#migrations": "./src/migrations.ts",
@@ -39,7 +39,7 @@
     "#app-simplefin/*": "./src/app-simplefin/*.js",
     "#app-sync/services/*": "./src/app-sync/services/*.js",
     "#app-sync/*": "./src/app-sync/*.js",
-    "#scripts/*": "./src/scripts/*.js",
+    "#scripts/*": "./src/scripts/*.ts",
     "#services/*": "./src/services/*.js",
     "#util/title": "./src/util/title/index.js",
     "#util/*": "./src/util/*.ts"

@@ -54,6 +54,7 @@ import { useDispatch } from '#redux';
 
 import { ROW_HEIGHT, TransactionListItem } from './TransactionListItem';
 
+// The floating action bar's height and bottom offset, plus a small gap.
 const NOTIFICATION_BOTTOM_INSET = 75;
 
 type LoadingProps = {
@@ -180,7 +181,13 @@ export function TransactionList({
             selectionMode={
               selectedTransactions.size > 0 ? 'multiple' : 'single'
             }
-            style={{ flex: 1, overflow: 'auto' }}
+            style={{
+              flex: 1,
+              overflow: 'auto',
+              // Lets the last rows scroll up from under the floating action bar.
+              paddingBottom:
+                selectedTransactions.size > 0 ? NOTIFICATION_BOTTOM_INSET : 0,
+            }}
             selectedKeys={selectedTransactions}
             dependencies={[
               selectedTransactions,
@@ -295,8 +302,8 @@ function SelectedTransactionsFloatingActionBar({
   const getMenuItemStyle = useCallback(
     <T extends string>(item: MenuItemObject<T>) => ({
       ...styles.mobileMenuItem,
-      color: theme.mobileHeaderText,
-      ...(item.disabled === true && { color: theme.buttonBareDisabledText }),
+      color: theme.floatingActionBarText,
+      ...(item.disabled === true && { opacity: 0.5 }),
       ...(item.name === 'delete' && { color: theme.errorTextMenu }),
     }),
     [],

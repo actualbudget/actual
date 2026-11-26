@@ -593,7 +593,7 @@ function onApplySync(oldValues, newValues) {
 // This is the service that move schedules forward automatically and
 // posts transactions
 
-async function postTransactionForSchedule({
+export async function postTransactionForSchedule({
   id,
   today,
 }: {
@@ -606,17 +606,32 @@ async function postTransactionForSchedule({
     return;
   }
 
+  // Read the day once: it can change while the transaction is saved.
+  const postDay = currentDay();
   const transaction = {
     payee: schedule._payee,
     account: schedule._account,
     amount: getScheduledAmount(schedule._amount),
-    date: today ? currentDay() : schedule.next_date,
+    date: today ? postDay : schedule.next_date,
     schedule: schedule.id,
     cleared: false,
   };
 
   if (transaction.account) {
     await addTransactions(transaction.account, [transaction]);
+  }
+
+  // Posting before the due date pays the upcoming occurrence. Move on to the
+  // next one (or complete the schedule if there is none), or the occurrence
+  // shows as unpaid again whenever the transaction is dated before
+  // `next_date`.
+  const { date: dateCond } = extractScheduleConds(schedule._conditions);
+  if (dateCond && schedule.next_date > postDay) {
+    if (getNextDateAfter(dateCond, schedule.next_date) != null) {
+      await skipNextDate({ id });
+    } else {
+      await updateSchedule({ schedule: { id, completed: true } });
+    }
   }
 }
 
