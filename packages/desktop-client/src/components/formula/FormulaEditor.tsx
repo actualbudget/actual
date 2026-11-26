@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { MonthPickerPanel } from '@actual-app/components/month-picker';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { EditorView } from '@codemirror/view';
@@ -9,8 +10,7 @@ import CodeMirror, { EditorState } from '@uiw/react-codemirror';
 import type { ReactCodeMirrorProps } from '@uiw/react-codemirror';
 
 import { autocompleteTabAcceptHighest } from '#components/codemirror/autocompleteTabAccept';
-import { DateSelect } from '#components/select/DateSelect';
-import { useDateFormat } from '#hooks/useDateFormat';
+import { useLanguage } from '#hooks/useLocale';
 import { useTheme } from '#style/theme';
 
 import {
@@ -73,7 +73,8 @@ export function FormulaEditor({
   showLineNumbers = true,
 }: FormulaEditorProps) {
   const [activeTheme] = useTheme();
-  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const { t } = useTranslation();
+  const language = useLanguage();
   const [queryPicker, setQueryPicker] = useState<BadgePickerState | null>(null);
   const [dimensionPicker, setDimensionPicker] =
     useState<BadgePickerState | null>(null);
@@ -167,14 +168,14 @@ export function FormulaEditor({
   );
 
   const applyTimeframePickerValue = useCallback(
-    (selectedDate: string) => {
+    (selectedMonth: string) => {
       if (!timeframePicker) {
         return;
       }
 
       replaceBadgeValue(
         timeframePicker,
-        formatMonthYear(selectedDate.slice(0, 7), timeframePicker.format),
+        formatMonthYear(selectedMonth, timeframePicker.format),
       );
     },
     [replaceBadgeValue, timeframePicker],
@@ -449,7 +450,6 @@ export function FormulaEditor({
               timeframePicker.anchorRect.left,
               window.innerWidth - TIMEFRAME_PICKER_WIDTH,
             ),
-            // Definite width required by the embedded calendar (see DateSelect)
             width: TIMEFRAME_PICKER_WIDTH,
           }}
           onMouseDown={event => {
@@ -457,11 +457,10 @@ export function FormulaEditor({
           }}
           onClick={event => event.stopPropagation()}
         >
-          <DateSelect
-            value={`${timeframePicker.month}-01`}
-            dateFormat={dateFormat}
-            embedded
-            isOpen
+          <MonthPickerPanel
+            value={timeframePicker.month}
+            locale={language}
+            labels={{ previous: t('Previous'), next: t('Next') }}
             onSelect={applyTimeframePickerValue}
           />
         </div>
