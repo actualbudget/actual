@@ -327,27 +327,8 @@ jobs:
         id: merge-reports
         run: yarn workspace @actual-app/web run playwright merge-reports --reporter html ./all-blob-reports
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        id: playwright-report-vrt
         with:
           name: html-report--attempt-${{ github.run_attempt }}
           path: packages/desktop-client/playwright-report
           retention-days: 30
           overwrite: true
-      - name: Save VRT metadata for comment workflow
-        if: github.event_name == 'pull_request'
-        run: |
-          mkdir -p vrt-metadata
-          echo "${PR_NUMBER}" > vrt-metadata/pr-number.txt
-          echo "${VRT_RESULT}" > vrt-metadata/vrt-result.txt
-          echo "${STEPS_PLAYWRIGHT_REPORT_VRT_OUTPUTS_ARTIFACT_URL}" > vrt-metadata/artifact-url.txt
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          STEPS_PLAYWRIGHT_REPORT_VRT_OUTPUTS_ARTIFACT_URL: ${{ steps.playwright-report-vrt.outputs.artifact-url }}
-          VRT_RESULT: ${{ needs.vrt.result }}
-      - name: Upload VRT metadata
-        if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: vrt-comment-metadata
-          path: vrt-metadata/
-          retention-days: 1
