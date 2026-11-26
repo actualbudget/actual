@@ -63,7 +63,6 @@ export function MonthSelect({
         value={value}
         placeholder={monthYearFormat.toLowerCase()}
         onChangeValue={onChange}
-        onFocus={() => setIsOpen(true)}
         onPointerUp={() => setIsOpen(true)}
         onBlur={e => {
           const isFocusInPicker =
@@ -83,10 +82,9 @@ export function MonthSelect({
           setIsOpen(false);
         }}
         onKeyDown={e => {
-          if (e.key === 'Escape' && isOpen) {
-            e.stopPropagation();
-            setIsOpen(false);
-          } else if (e.key === 'Enter') {
+          // Like the date field, the picker opens on click or typing, not on
+          // focus, so Escape on a freshly focused field closes the whole menu.
+          if (e.key === 'Escape' || e.key === 'Enter') {
             setIsOpen(false);
           } else if (!isOpen) {
             setIsOpen(true);
