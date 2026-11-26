@@ -5,7 +5,7 @@ import { inspect, promisify } from 'node:util';
 
 import { formatNotes, parseReleaseNotes } from '../src/release-notes/util.mjs';
 
-const exec = promisify(childProcess.exec);
+const execFile = promisify(childProcess.execFile);
 
 if (!process.env.GITHUB_REPOSITORY) {
   throw new Error('GITHUB_REPOSITORY env var is not set');
@@ -266,7 +266,7 @@ await group('Remove used release notes', async () => {
 });
 
 await group('Format generated files', async () => {
-  await exec(`yarn exec oxfmt ${blogPath} ${releasesPath}`, {
+  await execFile('yarn', ['exec', 'oxfmt', blogPath, releasesPath], {
     stdio: 'inherit',
   });
 });
