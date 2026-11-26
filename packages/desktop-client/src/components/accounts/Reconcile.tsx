@@ -28,6 +28,7 @@ type ReconcilingMessageProps = {
   accountId: AccountEntity['id'];
   targetBalance: number;
   onDone: () => void;
+  onExit: () => void;
   onCreateTransaction: (targetDiff: number) => void;
 };
 
@@ -35,6 +36,7 @@ export function ReconcilingMessage({
   accountId,
   targetBalance,
   onDone,
+  onExit,
   onCreateTransaction,
 }: ReconcilingMessageProps) {
   const cleared =
@@ -100,7 +102,10 @@ export function ReconcilingMessage({
           </View>
         )}
         <View style={{ marginLeft: 15 }}>
-          <Button variant="primary" onPress={onDone}>
+          <Button
+            variant="primary"
+            onPress={targetDiff === 0 ? onDone : onExit}
+          >
             {targetDiff === 0
               ? t('Lock transactions')
               : t('Exit reconciliation')}

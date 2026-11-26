@@ -62,6 +62,7 @@
   "dependencies": {
     "@emotion/css": "^11.13.5",
     "@internationalized/date": "^3.12.4",
+    "culori": "^4.0.2",
     "react-aria-components": "^1.22.1",
     "usehooks-ts": "^3.1.1"
   },
@@ -80,7 +81,6 @@
     "@typescript/native-preview": "beta",
     "@vitejs/plugin-react": "^6.1.2",
     "babel-plugin-react-compiler": "^1.0.0",
-    "culori": "^4.0.2",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "storybook": "^10.6.2",

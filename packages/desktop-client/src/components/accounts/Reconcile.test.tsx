@@ -39,6 +39,7 @@ describe('ReconcilingMessage math & UI', () => {
           accountId="account-1"
           targetBalance={5000}
           onDone={vi.fn()}
+          onExit={vi.fn()}
           onCreateTransaction={vi.fn()}
         />
       </TestProviders>,
@@ -53,6 +54,7 @@ describe('ReconcilingMessage math & UI', () => {
     vi.mocked(useSheetValue).mockReturnValue(5000);
 
     const onDone = vi.fn();
+    const onExit = vi.fn();
     const onCreateTransaction = vi.fn();
 
     render(
@@ -61,6 +63,7 @@ describe('ReconcilingMessage math & UI', () => {
           accountId="account-1"
           targetBalance={5000}
           onDone={onDone}
+          onExit={onExit}
           onCreateTransaction={onCreateTransaction}
         />
       </TestProviders>,
@@ -75,6 +78,29 @@ describe('ReconcilingMessage math & UI', () => {
     // Done button triggers callback
     await userEvent.click(screen.getByText('Lock transactions'));
     expect(onDone).toHaveBeenCalledTimes(1);
+    expect(onExit).not.toHaveBeenCalled();
+  });
+
+  test('calls onExit without calling onDone when exiting an unbalanced reconciliation', async () => {
+    vi.mocked(useSheetValue).mockReturnValue(3000);
+    const onDone = vi.fn();
+    const onExit = vi.fn();
+
+    render(
+      <TestProviders>
+        <ReconcilingMessage
+          accountId="account-1"
+          targetBalance={10000}
+          onDone={onDone}
+          onExit={onExit}
+          onCreateTransaction={vi.fn()}
+        />
+      </TestProviders>,
+    );
+
+    await userEvent.click(screen.getByText('Exit reconciliation'));
+    expect(onExit).toHaveBeenCalledTimes(1);
+    expect(onDone).not.toHaveBeenCalled();
   });
 
   test('computes positive difference and passes correct amount', async () => {
@@ -88,6 +114,7 @@ describe('ReconcilingMessage math & UI', () => {
           accountId="account-1"
           targetBalance={10000}
           onDone={vi.fn()}
+          onExit={vi.fn()}
           onCreateTransaction={onCreateTransaction}
         />
       </TestProviders>,
@@ -116,6 +143,7 @@ describe('ReconcilingMessage math & UI', () => {
           accountId="account-1"
           targetBalance={10000}
           onDone={vi.fn()}
+          onExit={vi.fn()}
           onCreateTransaction={onCreateTransaction}
         />
       </TestProviders>,

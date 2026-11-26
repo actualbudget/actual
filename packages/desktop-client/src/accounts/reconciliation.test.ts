@@ -22,21 +22,23 @@ describe('finishReconciliation', () => {
     );
   });
 
-  test('locks when the entered balance matches the cleared balance', async () => {
+  test('locks and returns true when the entered balance matches the cleared balance', async () => {
     vi.mocked(aqlQuery).mockResolvedValue({ data: 5000, dependencies: [] });
     const lock = vi.fn();
 
-    await finishReconciliation('account-1', 5000, lock);
+    const didReconcile = await finishReconciliation('account-1', 5000, lock);
 
     expect(lock).toHaveBeenCalledTimes(1);
+    expect(didReconcile).toBe(true);
   });
 
-  test('does not lock when the entered balance differs', async () => {
+  test('does not lock and returns false when the entered balance differs', async () => {
     vi.mocked(aqlQuery).mockResolvedValue({ data: 5000, dependencies: [] });
     const lock = vi.fn();
 
-    await finishReconciliation('account-1', 4000, lock);
+    const didReconcile = await finishReconciliation('account-1', 4000, lock);
 
     expect(lock).not.toHaveBeenCalled();
+    expect(didReconcile).toBe(false);
   });
 });

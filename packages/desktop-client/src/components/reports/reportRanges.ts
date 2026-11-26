@@ -121,7 +121,7 @@ export function validateRange(
   start: string,
   end: string,
 ): [string, string] {
-  if (start < earliest) {
+  if (start < earliest && earliest <= end) {
     start = earliest;
   }
 

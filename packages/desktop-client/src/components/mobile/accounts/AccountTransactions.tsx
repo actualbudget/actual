@@ -233,16 +233,7 @@ function TransactionListWithPreviews({
   const { mutate: updateAccount } = useUpdateAccountMutation();
   const { onBatchEdit } = useTransactionBatchActions();
 
-  const onDoneReconciling = useCallback(async () => {
-    await reconciliation.finishReconciliation(account.id, reconcileAmount);
-
-    updateAccount({
-      account: {
-        ...account,
-        last_reconciled: new Date().getTime().toString(),
-      },
-    });
-
+  const onExitReconciling = useCallback(() => {
     setSearchParams(
       prev => {
         prev.delete('reconcile');
@@ -250,7 +241,25 @@ function TransactionListWithPreviews({
       },
       { replace: true },
     );
-  }, [account, reconcileAmount, setSearchParams, updateAccount]);
+  }, [setSearchParams]);
+
+  const onDoneReconciling = useCallback(async () => {
+    const didReconcile = await reconciliation.finishReconciliation(
+      account.id,
+      reconcileAmount,
+    );
+
+    if (didReconcile) {
+      updateAccount({
+        account: {
+          ...account,
+          last_reconciled: new Date().getTime().toString(),
+        },
+      });
+    }
+
+    onExitReconciling();
+  }, [account, onExitReconciling, reconcileAmount, updateAccount]);
 
   const onCreateReconciliationTransaction = useCallback(
     async (targetDiff: number) => {
@@ -312,6 +321,7 @@ function TransactionListWithPreviews({
           account={account}
           targetBalance={reconcileAmount}
           onDone={onDoneReconciling}
+          onExit={onExitReconciling}
           onCreateTransaction={onCreateReconciliationTransaction}
         />
       )}

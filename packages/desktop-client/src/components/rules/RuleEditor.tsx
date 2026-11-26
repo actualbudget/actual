@@ -1188,8 +1188,9 @@ export function RuleEditor({
 
   function addActionToSplitAfterIndex(splitIndex, actionIndex) {
     let newAction;
-    if (splitIndex && !actionSplits[splitIndex]?.actions?.length) {
-      actionSplits[splitIndex] = { id: uuidv4(), actions: [] };
+    let split = actionSplits[splitIndex];
+    if (splitIndex && !split?.actions?.length) {
+      split = { id: uuidv4(), actions: [] };
       newAction = {
         op: 'set-split-amount',
         options: { method: 'remainder', splitIndex },
@@ -1200,7 +1201,7 @@ export function RuleEditor({
       const fieldsArray =
         splitIndex === 0 ? getActionFields() : getSplitActionFields();
       let fields = fieldsArray.map(f => f[0]);
-      for (const action of actionSplits[splitIndex].actions) {
+      for (const action of split.actions) {
         fields = fields.filter(f => f !== action.field);
       }
       const field = fields[0] || 'category';
@@ -1214,10 +1215,10 @@ export function RuleEditor({
       };
     }
 
-    const actionsCopy = [...actionSplits[splitIndex].actions];
+    const actionsCopy = [...split.actions];
     actionsCopy.splice(actionIndex + 1, 0, newAction);
     const copy = [...actionSplits];
-    copy[splitIndex] = { ...actionSplits[splitIndex], actions: actionsCopy };
+    copy[splitIndex] = { ...split, actions: actionsCopy };
     setActionSplits(copy);
   }
 

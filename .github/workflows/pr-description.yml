@@ -1,0 +1,57 @@
+name: PR description
+
+##########################################################################################
+# This workflow uses the 'pull_request_target' event so that it runs the BASE branch's   #
+# copy of the checker: a PR cannot weaken the check that judges it. It does NOT check    #
+# out or execute any code from the PR - it only reads the PR description and the list    #
+# of changed files. Keep it that way: do not check out the PR head or run PR scripts.    #
+##########################################################################################
+
+on:
+  # See banner above: base-branch checkout only, no PR-supplied code is run.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
+    types: [opened, reopened, edited, synchronize]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check-pr-description:
+    name: Check PR description
+    # Bot-authored PRs (dependency bumps, the automated release PRs) don't use
+    # the PR template, and PRs into `release` cherry-pick changes that were
+    # already described and proven on master. Don't filter further by event,
+    # e.g. edits that leave the body unchanged: a skipped run would replace an
+    # earlier failure with a pass.
+    if: >-
+      github.event.pull_request.user.type != 'Bot'
+      && github.base_ref != 'release'
+    runs-on: depot-ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            .nvmrc
+            packages/ci-actions
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Check PR description
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          CHANGED_FILES=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files?per_page=100" --jq '.[].filename')
+          export CHANGED_FILES
+          node packages/ci-actions/bin/pr-description-check.mjs
