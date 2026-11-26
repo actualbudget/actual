@@ -11,6 +11,14 @@ import { EnableBankingError } from '#app-enablebanking/utils/errors';
 
 // Mock all external dependencies before importing the app (mirrors
 // poll-auth.spec.ts).
+vi.mock('#util/validate-budget-session', () => ({
+  validateGlobalBankSyncSession: (
+    _req: unknown,
+    _res: unknown,
+    next: () => void,
+  ) => next(),
+}));
+
 vi.mock('../../services/secrets-service', () => ({
   SecretName: {
     enablebanking_applicationId: 'enablebanking_applicationId',
@@ -168,6 +176,32 @@ describe('POST /transactions', () => {
       '2026-03-01',
       expect.any(String),
       expect.objectContaining({ 'Psu-Ip-Address': '136.243.37.31' }),
+      expect.anything(),
     );
   });
+
+  it.each([
+    [false, true],
+    [true, false],
+    [undefined, false],
+  ])(
+    'with importPending %s, asks the bank for booked only: %s',
+    async (importPending, bookedOnly) => {
+      const getAllTransactions = vi
+        .spyOn(enableBankingService, 'getAllTransactions')
+        .mockResolvedValue([]);
+
+      await request(app)
+        .post('/transactions')
+        .send({ accountId: 'acc-1', startDate: '2026-03-01', importPending });
+
+      expect(getAllTransactions).toHaveBeenCalledWith(
+        'acc-1',
+        '2026-03-01',
+        expect.any(String),
+        expect.anything(),
+        { bookedOnly },
+      );
+    },
+  );
 });

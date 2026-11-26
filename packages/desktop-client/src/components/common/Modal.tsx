@@ -101,6 +101,7 @@ const mobileSheetHandleStyle: CSSProperties = {
   width: 36,
   height: 4,
   borderRadius: radius.pill,
+  // oxlint-disable-next-line actual/theme-token-roles
   backgroundColor: theme.pageTextSubdued,
   alignSelf: 'center',
   marginTop: spacing.sm,
@@ -342,6 +343,7 @@ function getOverlayBackgroundStyle({
 }: OverlayBackgroundStyleOptions): CSSProperties {
   // On mobile, we disable the blurred background for performance reasons.
   if (isNarrowWidth) {
+    // oxlint-disable-next-line actual/no-color-literals
     return { backgroundColor: 'rgba(0, 0, 0, 0.4)' };
   }
   // On desktop, only the top modal blurs: each stacked backdrop filter
@@ -351,6 +353,7 @@ function getOverlayBackgroundStyle({
   }
   // The modal directly below the top one gets a plain dim, equal to brightness(0.9).
   if (isDirectlyBelowTopModal) {
+    // oxlint-disable-next-line actual/no-color-literals
     return { backgroundColor: 'rgba(0, 0, 0, 0.1)' };
   }
   return {};

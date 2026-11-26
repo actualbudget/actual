@@ -61,6 +61,7 @@ export function DonutActiveShapeMobile({
           x={cx + chartOuterRadius * Math.cos(-RADIAN * 330) + 10}
           y={ey}
           textAnchor="start"
+          // oxlint-disable-next-line actual/no-color-literals
           fill="#999"
         >
           {`${(percent * 100).toFixed(2)}%`}

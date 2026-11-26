@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import './load-config';
 
 describe('tokenExpiration format', () => {
-  let originalEnv;
+  let originalEnv: NodeJS.ProcessEnv;
 
   beforeEach(() => {
     originalEnv = { ...process.env };
@@ -74,7 +74,7 @@ describe('tokenExpiration format', () => {
   });
 
   it('should accept numeric values directly', () => {
-    const testSchema = convict({
+    const testSchema = convict<{ token_expiration: string | number }>({
       token_expiration: {
         format: 'tokenExpiration',
         default: 'never',

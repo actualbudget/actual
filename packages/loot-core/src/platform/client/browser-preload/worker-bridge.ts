@@ -10,6 +10,8 @@ type BridgeMessage = { type?: string; [key: string]: unknown };
 const STORAGE_RELEASE_TIMEOUT_MS = 3000;
 const STORAGE_RELEASE_REQUEST_ID = '__storage-release';
 const RESTORE_REQUEST_ID = '__restore-budget';
+// The one request a backend that failed to start still has to hear
+const INIT_FAILURE_ACKNOWLEDGED = '__app-init-failure-acknowledged';
 
 /** The part of a Worker the release step needs; fakes stand in for tests. */
 export type TerminatableWorker = {
@@ -96,8 +98,10 @@ export class WorkerBridge {
   _currentBudgetId: string | null;
   _wasHidden: boolean;
   _onVisibilityChange: () => void;
-  // Requests forwarded while a new leader is still restoring its budget;
-  // they would otherwise run against a backend with no database open
+  // Requests forwarded while a new leader's backend is still starting, or
+  // still restoring its budget. A backend only listens once it has started,
+  // so a request sent sooner is lost and the tab that made it waits forever;
+  // one sent before the restore runs against a backend with no database open
   _heldRequests: unknown[] | null;
   localBackendWorker: Worker | null;
   backendWorkerUrl: URL;
@@ -190,7 +194,8 @@ export class WorkerBridge {
 
     // Forward requests from SharedWorker to our local Worker
     if (msg && msg.type === '__to-worker') {
-      if (this._heldRequests) {
+      const request = msg.msg as BridgeMessage | null;
+      if (this._heldRequests && request?.name !== INIT_FAILURE_ACKNOWLEDGED) {
         this._heldRequests.push(msg.msg);
       } else if (this.localBackendWorker) {
         this.localBackendWorker.postMessage(msg.msg);
@@ -297,9 +302,26 @@ export class WorkerBridge {
     const localWorker = new Worker(this.backendWorkerUrl);
     this.localBackendWorker = localWorker;
     initSQLBackend(localWorker);
-    // Followers keep sending requests during a takeover; hold them until
-    // the restored budget is open (the restore reply releases them)
-    this._heldRequests = budgetToRestore ? [] : null;
+    // Other tabs send requests while this backend starts; hold them until
+    // it has connected, or, during a takeover, until the restored budget is
+    // open (the restore reply releases them)
+    this._heldRequests = [];
+    const restoresBudget = budgetToRestore !== null;
+    const releaseHeldRequests = () => {
+      if (this.localBackendWorker !== localWorker || !this._heldRequests) {
+        return;
+      }
+      const held = this._heldRequests;
+      this._heldRequests = null;
+      if (held.length > 0) {
+        logger.log(
+          `[WorkerBridge] Backend ready, sending ${held.length} held request(s)`,
+        );
+      }
+      for (const request of held) {
+        localWorker.postMessage(request);
+      }
+    };
 
     const sharedPort = this._sharedPort;
     localWorker.onmessage = workerEvent => {
@@ -335,22 +357,21 @@ export class WorkerBridge {
             requestId: RESTORE_REQUEST_ID,
             budgetId: id,
           });
-        } else if (pendingMsg) {
-          const toSend = pendingMsg;
-          pendingMsg = null;
-          localWorker.postMessage(toSend);
+        } else {
+          if (pendingMsg) {
+            const toSend = pendingMsg;
+            pendingMsg = null;
+            localWorker.postMessage(toSend);
+          }
+          // The backend repeats its connect message while a restore runs,
+          // which must not let requests in ahead of the restored budget
+          if (!restoresBudget) {
+            releaseHeldRequests();
+          }
         }
       }
-      if (
-        workerMsg.id === RESTORE_REQUEST_ID &&
-        this._heldRequests &&
-        this.localBackendWorker === localWorker
-      ) {
-        const held = this._heldRequests;
-        this._heldRequests = null;
-        for (const request of held) {
-          localWorker.postMessage(request);
-        }
+      if (workerMsg.id === RESTORE_REQUEST_ID) {
+        releaseHeldRequests();
       }
       sharedPort.postMessage({ type: '__from-worker', msg: workerMsg });
     };

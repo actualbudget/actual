@@ -83,13 +83,16 @@ export async function finishReconciliation(
   accountId: AccountEntity['id'],
   reconcileAmount: number | null,
   lock: () => Promise<void> = () => lockTransactions(accountId),
-) {
+): Promise<boolean> {
   const cleared = await getClearedBalance(accountId);
   const targetDiff = (reconcileAmount ?? 0) - cleared;
 
   if (targetDiff === 0) {
     await lock();
+    return true;
   }
+
+  return false;
 }
 
 export async function createReconciliationTransaction(

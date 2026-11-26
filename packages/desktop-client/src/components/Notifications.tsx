@@ -333,6 +333,7 @@ function Notification({
                     whiteSpace: 'pre-wrap',
                     fontFamily: 'monospace',
                     fontSize: 12,
+                    // oxlint-disable-next-line actual/no-color-literals
                     backgroundColor: 'rgba(0, 0, 0, .05)',
                     padding: 10,
                     borderRadius: 4,

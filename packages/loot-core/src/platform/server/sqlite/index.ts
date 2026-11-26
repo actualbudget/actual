@@ -30,6 +30,9 @@ export {
   StorageMigrationError,
   StorageUnavailableError,
 } from './storage/errors';
+// Whether anything lives in the new storage, which the legacy engine
+// cannot read
+export { hasMigratedSqliteFiles } from './storage/files-store';
 // Used by the legacy filesystem layer and its tests
 export { _getModule } from './engine.sqljs.legacy';
 export type { SqlJsModule } from './engine.sqljs.legacy';
@@ -167,10 +170,13 @@ export function resumeSqliteStorage(): void {
 }
 
 // Move every budget back to absurd-sql's layout (the opt-in phase's way
-// back); the next start then picks the legacy engine
-export async function revertSqliteStorageToLegacy(): Promise<void> {
+// back), or only the one at the given path; the next start then picks
+// the legacy engine, unless something is left in the new storage
+export async function revertSqliteStorageToLegacy(
+  onlyPath?: string,
+): Promise<void> {
   if (activeBackend !== 'legacy') {
-    await revertToLegacy();
+    await revertToLegacy(onlyPath);
   }
 }
 

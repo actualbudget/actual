@@ -2,6 +2,10 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
+import type { ParseArgsOptionsConfig } from 'node:util';
+
+// Replaced with the package version at build time, see vite.config.mts.
+declare const __APP_VERSION__: string;
 
 const args = process.argv;
 
@@ -20,7 +24,7 @@ const options = {
   config: {
     type: 'string',
   },
-};
+} satisfies ParseArgsOptionsConfig;
 
 const { values } = parseArgs({
   args,
@@ -57,7 +61,7 @@ if (values.version) {
   process.exit();
 }
 
-const setupDataDir = dataDir => {
+const setupDataDir = (dataDir?: string) => {
   if (process.env.ACTUAL_DATA_DIR) {
     return; // Env variables must not be overwritten
   }

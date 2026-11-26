@@ -607,6 +607,7 @@ app.post('/delete-user-file', (req, res) => {
 
   accountDb.transaction(() => {
     filesService.update(file.id, new FileUpdate({ deleted: true }));
+    UserService.revokeApiKeysWithoutBudgetAccess();
     for (const name of Object.values(SecretName)) {
       secretsService.reset(name, file.id);
     }

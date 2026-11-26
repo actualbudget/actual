@@ -129,7 +129,7 @@ function ToBudget({ toBudget, onPress, show3Columns }: ToBudgetProps) {
         <SvgCheveronRight
           style={{
             flexShrink: 0,
-            color: theme.mobileHeaderTextSubdued,
+            color: theme.pageTextLight,
             marginLeft: 5,
           }}
           width={14}
@@ -228,7 +228,7 @@ function Saved({ projected, onPress, show3Columns }: SavedProps) {
         <SvgCheveronRight
           style={{
             flexShrink: 0,
-            color: theme.mobileHeaderTextSubdued,
+            color: theme.pageTextLight,
             marginLeft: 5,
           }}
           width={14}

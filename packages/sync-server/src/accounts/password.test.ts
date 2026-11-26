@@ -29,7 +29,7 @@ function getAuthMethods() {
   return getAccountDb().all('SELECT method, active FROM auth ORDER BY method');
 }
 
-function insertOpenIdAuth(extraData) {
+function insertOpenIdAuth(extraData: unknown) {
   getAccountDb().mutate(
     'INSERT INTO auth (method, display_name, extra_data, active) VALUES (?, ?, ?, ?)',
     ['openid', 'OpenID', JSON.stringify(extraData), 1],
@@ -293,7 +293,7 @@ describe('password session revocation', () => {
 
   it('does not issue a session if the password changes during verification', async () => {
     await bootstrapPassword('old password');
-    let finishVerification;
+    let finishVerification!: (verified: boolean) => void;
     const verify = vi.spyOn(argon2, 'verify').mockImplementationOnce(
       () =>
         new Promise(resolve => {

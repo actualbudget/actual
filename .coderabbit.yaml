@@ -17,7 +17,6 @@ reviews:
   pre_merge_checks:
     docstrings:
       mode: off
-      enabled: false
   labeling_instructions:
     - label: 'API'
       instructions: 'This issue or PR updates the API in `packages/api`.'

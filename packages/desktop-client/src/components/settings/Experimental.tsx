@@ -3,15 +3,12 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
-import { View } from '@actual-app/components/view';
 import { isElectron } from '@actual-app/core/shared/environment';
 import { isNativeMobileApp } from '@actual-app/core/shared/platform';
 import type { FeatureFlag, ServerPrefs } from '@actual-app/core/types/prefs';
 
 import { useAuth } from '#auth/AuthProvider';
 import { Permissions } from '#auth/types';
-import { Link } from '#components/common/Link';
 import { Checkbox } from '#components/forms';
 import { useLoginMethod, useMultiuserEnabled } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
@@ -19,6 +16,7 @@ import { useServerPref } from '#hooks/useServerPref';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
+import { FeatureControl } from './FeatureControl';
 import { SettingsGroup } from './SettingsGroup';
 import { SettingsRow } from './SettingsRow';
 import { StorageBackendToggle } from './StorageBackendToggle';
@@ -100,26 +98,6 @@ function FeatureDetails({ note, error }: FeatureDetailsProps) {
   );
 }
 
-type FeatureControlProps = {
-  feedbackLink?: string;
-  children: ReactNode;
-};
-
-function FeatureControl({ feedbackLink, children }: FeatureControlProps) {
-  return (
-    <View
-      style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
-    >
-      {feedbackLink && (
-        <Link variant="external" to={feedbackLink} linkColor="purple">
-          <Trans>Give feedback</Trans>
-        </Link>
-      )}
-      {children}
-    </View>
-  );
-}
-
 type ServerFeatureToggleProps = {
   prefName: keyof ServerPrefs;
   disableToggle?: boolean;
@@ -187,7 +165,6 @@ export function ExperimentalFeatures() {
   const [, setGoalTemplatesUIPref] = useSyncedPref(
     'flags.goalTemplatesUIEnabled',
   );
-  const isUsingServer = useSyncServerStatus() !== 'no-server';
 
   const showServerPrefs =
     localStorage.getItem('devEnableServerPrefs') === 'true';
@@ -278,14 +255,6 @@ export function ExperimentalFeatures() {
       >
         <Trans>Monte Carlo Analysis Report</Trans>
       </FeatureToggle>
-      {isUsingServer && (
-        <FeatureToggle
-          flag="enableBanking"
-          feedbackLink="https://github.com/actualbudget/actual/issues/7799"
-        >
-          <Trans>Enable Banking sync (EU banks)</Trans>
-        </FeatureToggle>
-      )}
       {isNativeMobileApp && (
         <FeatureToggle flag="nativeAppFeatures">
           <Trans>Native app features (app lock)</Trans>

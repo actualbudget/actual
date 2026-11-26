@@ -79,7 +79,7 @@ Heads up! You probably don't want to hard-code the passwords like that, especial
 For even more security, you can generate budget-scoped API keys rather than providing your password.
 
 1. In your budget, go to **Settings → General → Security → API keys** and select **Add key**.
-2. Enter a name for your API key and select **Create key**.
+2. Enter a name for your API key and configure any additional permissions, then select **Create key**.
 3. Copy the generated key (it will not be displayed again).
 4. The key will appear in the **API keys** section in case you need to revoke it later.
 
