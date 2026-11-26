@@ -274,6 +274,7 @@ __metadata:
     date-fns: "npm:^4.4.0"
     downshift: "npm:9.4.0"
     es-toolkit: "npm:^1.52.0"
+    extensionless: "npm:^2.0.6"
     fzf: "npm:^0.5.2"
     hyperformula: "npm:^3.5.0"
     i18next: "npm:^26.4.4"

@@ -5,7 +5,9 @@ import { inspect, promisify } from 'node:util';
 
 import { formatNotes, parseReleaseNotes } from '../src/release-notes/util.mjs';
 
-const exec = promisify(childProcess.exec);
+const execFile = promisify(childProcess.execFile);
+// Arguments are passed as an array so no shell ever parses them.
+const git = (...args) => execFile('git', args);
 
 if (!process.env.GITHUB_REPOSITORY) {
   throw new Error('GITHUB_REPOSITORY env var is not set');
@@ -89,20 +91,25 @@ const commitMessage = `Generate release notes for v${version}`;
 const botName = 'github-actions[bot]';
 const botEmail = '41898282+github-actions[bot]@users.noreply.github.com';
 
-await exec(`git config user.name '${botName}'`);
-await exec(`git config user.email '${botEmail}'`);
+await git('config', 'user.name', botName);
+await git('config', 'user.email', botEmail);
 
 const AUTOGEN_MARKER = '<!-- release-notes:auto-generated -->';
 
 await group('Prepare branch', async () => {
   // recover deleted release note files from previous generation commits
-  await exec(`git fetch origin ${baseBranch}`, { stdio: 'inherit' });
-  const { stdout: mergeBase } = await exec(
-    `git merge-base HEAD origin/${baseBranch}`,
+  await git('fetch', 'origin', baseBranch);
+  const { stdout: mergeBase } = await git(
+    'merge-base',
+    'HEAD',
+    `origin/${baseBranch}`,
   );
   const base = mergeBase.trim();
-  const { stdout: genLog } = await exec(
-    `git log --grep='${commitMessage}' --format=%H ${base}..HEAD`,
+  const { stdout: genLog } = await git(
+    'log',
+    `--grep=${commitMessage}`,
+    '--format=%H',
+    `${base}..HEAD`,
   );
   const genCommits = genLog.split('\n').filter(Boolean);
   console.log(
@@ -112,22 +119,30 @@ await group('Prepare branch', async () => {
   for (const sha of genCommits) {
     const patchPath = join(tmpDir, `revert-${sha}.patch`);
     try {
-      await exec(
-        `git diff --diff-filter=D ${sha}~1..${sha} -- upcoming-release-notes > ${patchPath}`,
+      await git(
+        'diff',
+        '--diff-filter=D',
+        `--output=${patchPath}`,
+        `${sha}~1..${sha}`,
+        '--',
+        'upcoming-release-notes',
       );
       const { size } = await fs.stat(patchPath);
       if (size > 0) {
-        await exec(`git apply -R --3way ${patchPath}`, { stdio: 'inherit' });
+        await git('apply', '-R', '--3way', patchPath);
       }
     } finally {
       await fs.unlink(patchPath).catch(() => undefined);
     }
   }
 
-  await exec(`git fetch origin ${releaseBranch}`, { stdio: 'inherit' });
-  await exec(`git checkout origin/${releaseBranch} -- upcoming-release-notes`, {
-    stdio: 'inherit',
-  });
+  await git('fetch', 'origin', releaseBranch);
+  await git(
+    'checkout',
+    `origin/${releaseBranch}`,
+    '--',
+    'upcoming-release-notes',
+  );
 });
 
 // Only notes present on the release branch belong in this release. The notes
@@ -135,8 +150,13 @@ await group('Prepare branch', async () => {
 // master's pending notes for changes that are not part of the release; those
 // must be neither compiled nor deleted (deleting them here would propagate to
 // master when this PR merges, silently dropping them from the next release).
-const { stdout: releaseNotesList } = await exec(
-  `git ls-tree -r --name-only origin/${releaseBranch} -- upcoming-release-notes`,
+const { stdout: releaseNotesList } = await git(
+  'ls-tree',
+  '-r',
+  '--name-only',
+  `origin/${releaseBranch}`,
+  '--',
+  'upcoming-release-notes',
 );
 const releaseNoteFiles = releaseNotesList
   .split('\n')
@@ -266,9 +286,7 @@ await group('Remove used release notes', async () => {
 });
 
 await group('Format generated files', async () => {
-  await exec(`yarn exec oxfmt ${blogPath} ${releasesPath}`, {
-    stdio: 'inherit',
-  });
+  await execFile('yarn', ['exec', 'oxfmt', blogPath, releasesPath]);
 });
 
 // The in-app notifications feed is generated from the blog and committed. This
@@ -276,28 +294,32 @@ await group('Format generated files', async () => {
 // normally regenerate it (autofix.ci), so it has to be part of this commit.
 const newsFeedPath = 'packages/desktop-client/src/data/news.json';
 await group('Generate news feed', async () => {
-  await exec(
-    'node --import=extensionless/register --experimental-strip-types packages/ci-actions/bin/generate-news-feed.ts',
-    { stdio: 'inherit' },
-  );
+  await execFile('node', [
+    '--import=extensionless/register',
+    '--experimental-strip-types',
+    'packages/ci-actions/bin/generate-news-feed.ts',
+  ]);
 });
 
 await group('Commit and push', async () => {
-  await exec(
-    `git add upcoming-release-notes packages/docs/blog packages/docs/docs/releases.md ${newsFeedPath}`,
-    { stdio: 'inherit' },
+  await git(
+    'add',
+    'upcoming-release-notes',
+    'packages/docs/blog',
+    'packages/docs/docs/releases.md',
+    newsFeedPath,
   );
 
   try {
-    await exec('git diff --cached --quiet');
+    await git('diff', '--cached', '--quiet');
     console.log('No changes to commit');
     return;
   } catch {
     // there are staged changes
   }
 
-  await exec(`git commit -m '${commitMessage}'`);
-  await exec('git push origin', { stdio: 'inherit' });
+  await git('commit', '-m', commitMessage);
+  await git('push', 'origin');
 });
 
 function escapeRegExp(str) {

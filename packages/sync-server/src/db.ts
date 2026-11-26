@@ -22,7 +22,10 @@ export class WrappedDatabase {
     return this.db.exec(sql);
   }
 
-  mutate(sql: string, params: (string | number | null | undefined)[] = []) {
+  mutate(
+    sql: string,
+    params: (string | number | Buffer | null | undefined)[] = [],
+  ) {
     const stmt = this.db.prepare(sql);
     const info = stmt.run(...params);
     return { changes: info.changes, insertId: info.lastInsertRowid };
