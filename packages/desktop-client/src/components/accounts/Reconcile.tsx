@@ -29,6 +29,7 @@ type ReconcilingMessageProps = {
   balanceQuery: { name: `balance-query-${string}`; query: Query };
   targetBalance: number;
   onDone: () => void;
+  onExit: () => void;
   onCreateTransaction: (targetDiff: number) => void;
 };
 
@@ -36,6 +37,7 @@ export function ReconcilingMessage({
   balanceQuery,
   targetBalance,
   onDone,
+  onExit,
   onCreateTransaction,
 }: ReconcilingMessageProps) {
   const cleared =
@@ -104,7 +106,10 @@ export function ReconcilingMessage({
           </View>
         )}
         <View style={{ marginLeft: 15 }}>
-          <Button variant="primary" onPress={onDone}>
+          <Button
+            variant="primary"
+            onPress={targetDiff === 0 ? onDone : onExit}
+          >
             {targetDiff === 0
               ? t('Lock transactions')
               : t('Exit reconciliation')}

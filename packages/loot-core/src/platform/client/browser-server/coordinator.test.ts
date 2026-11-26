@@ -1422,4 +1422,270 @@ describe('SharedWorker coordinator', () => {
       expect(coordinator.getState().budgetGroups.has('budget-1')).toBe(false);
     });
   });
+
+  // ── Requests no backend can take ─────────────────────────────────────
+
+  describe('requests without a backend', () => {
+    function forwardedIds(port: MockPort): string[] {
+      return port.postMessage.mock.calls
+        .map(call => call[0])
+        .filter(message => message.type === '__to-worker')
+        .map(message => message.msg.id);
+    }
+
+    function replyFrom(leader: MockPort, id: string) {
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id, result: {} },
+      });
+    }
+
+    /**
+     * Three tabs starting at the same moment, as after an app update: the
+     * first leads the lobby and the others start against its backend.
+     */
+    function startThreeTabs() {
+      const lobbyLeader = connectTab(coordinator);
+      sendInit(lobbyLeader);
+      const opener = connectTab(coordinator);
+      sendInit(opener);
+      const bystander = connectTab(coordinator);
+      sendInit(bystander);
+      simulateWorkerConnect(lobbyLeader);
+      return { lobbyLeader, opener, bystander };
+    }
+
+    it('answers every tab when another tab opens the budget before the lobby leader', () => {
+      const { lobbyLeader, opener, bystander } = startThreeTabs();
+
+      // Both are with the lobby backend, unanswered, when it goes away
+      sendMsg(bystander, { id: 'last-1', name: 'get-last-opened-backup' });
+      sendMsg(lobbyLeader, { id: 'prefs-3', name: 'load-global-prefs' });
+      expect(forwardedIds(lobbyLeader)).toEqual(['last-1', 'prefs-3']);
+
+      // A tab that does not lead the lobby opens the budget first and
+      // starts a backend of its own
+      sendMsg(opener, {
+        id: 'load-2',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      // The lobby leader opens the same budget: it follows, which ends
+      // the lobby and its backend
+      sendMsg(lobbyLeader, {
+        id: 'load-3',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      expect(coordinator.getState().budgetGroups.has('__lobby')).toBe(false);
+
+      // Asked while the only backend left is still starting
+      sendMsg(bystander, { id: 'budgets-1', name: 'get-budgets' });
+
+      // The new leader's bridge holds the load until its backend listens;
+      // the requests any backend can answer wait in the coordinator
+      expect(forwardedIds(opener)).toEqual(['load-3']);
+
+      simulateWorkerConnect(opener);
+      expect(forwardedIds(opener)).toEqual([
+        'load-3',
+        'last-1',
+        'prefs-3',
+        'budgets-1',
+      ]);
+
+      bystander.postMessage.mockClear();
+      lobbyLeader.postMessage.mockClear();
+      replyFrom(opener, 'last-1');
+      replyFrom(opener, 'prefs-3');
+      replyFrom(opener, 'load-3');
+      expect(bystander.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'last-1' }),
+      );
+      expect(lobbyLeader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'prefs-3' }),
+      );
+      expect(lobbyLeader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'load-3' }),
+      );
+    });
+
+    it('sends a request again when the backend it was sent on to goes away too', () => {
+      const { lobbyLeader, opener, bystander } = startThreeTabs();
+      sendMsg(bystander, { id: 'last-1', name: 'get-last-opened-backup' });
+      sendMsg(lobbyLeader, { id: 'prefs-3', name: 'load-global-prefs' });
+      sendMsg(opener, {
+        id: 'load-2',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      sendMsg(lobbyLeader, {
+        id: 'load-3',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+
+      // Both go on to the opener's backend, the lobby leader's own request
+      // now coming from a follower of the budget
+      simulateWorkerConnect(opener);
+      expect(forwardedIds(opener)).toEqual(['load-3', 'last-1', 'prefs-3']);
+
+      // That backend goes away as well before it answers, and the former
+      // lobby leader takes the budget over
+      lobbyLeader.postMessage.mockClear();
+      sendMsg(opener, { type: 'tab-closing' });
+      sendMsg(lobbyLeader, {
+        type: '__track-restore',
+        requestId: '__restore-budget',
+        budgetId: 'budget-1',
+      });
+      simulateWorkerConnect(lobbyLeader);
+      expect(forwardedIds(lobbyLeader)).toEqual([]);
+      replyFrom(lobbyLeader, '__restore-budget');
+
+      // Its own request to open the budget is among them
+      expect(forwardedIds(lobbyLeader)).toEqual([
+        'load-3',
+        'last-1',
+        'prefs-3',
+      ]);
+      replyFrom(lobbyLeader, 'prefs-3');
+      replyFrom(lobbyLeader, 'load-3');
+      expect(lobbyLeader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'prefs-3' }),
+      );
+      expect(lobbyLeader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'load-3' }),
+      );
+    });
+
+    it('answers a tab that was joining a budget when its leader went away', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      sendMsg(follower, {
+        id: 'load-f',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      replyFrom(leader, 'load-f');
+
+      const joining = connectTab(coordinator);
+      sendInit(joining);
+      sendMsg(joining, {
+        id: 'load-j',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+
+      // The leader goes before it has answered; the follower takes over
+      follower.postMessage.mockClear();
+      joining.postMessage.mockClear();
+      sendMsg(leader, { type: 'tab-closing' });
+      sendMsg(follower, {
+        type: '__track-restore',
+        requestId: '__restore-budget',
+        budgetId: 'budget-1',
+      });
+      simulateWorkerConnect(follower);
+      expect(forwardedIds(follower)).toEqual([]);
+      replyFrom(follower, '__restore-budget');
+
+      // Only the unanswered request is sent again
+      expect(forwardedIds(follower)).toEqual(['load-j']);
+      replyFrom(follower, 'load-j');
+      expect(joining.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'load-j' }),
+      );
+      expect(coordinator.getState().portToBudget.get(joining)).toBe('budget-1');
+    });
+
+    it('does not send an answered request again', () => {
+      const { lobbyLeader, opener, bystander } = startThreeTabs();
+
+      sendMsg(bystander, { id: 'last-1', name: 'get-last-opened-backup' });
+      replyFrom(lobbyLeader, 'last-1');
+
+      sendMsg(opener, {
+        id: 'load-2',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      sendMsg(lobbyLeader, {
+        id: 'load-3',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      simulateWorkerConnect(opener);
+
+      expect(forwardedIds(opener)).toEqual(['load-3']);
+    });
+
+    it('does not hold a message nobody waits on', () => {
+      const { lobbyLeader, opener, bystander } = startThreeTabs();
+      sendMsg(opener, {
+        id: 'load-2',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      sendMsg(lobbyLeader, {
+        id: 'load-3',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+
+      sendMsg(bystander, { name: 'client-connected-to-backend' });
+      simulateWorkerConnect(opener);
+
+      expect(forwardedIds(opener)).toEqual(['load-3']);
+    });
+
+    it('starts a backend in a waiting tab when the last backend goes away', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+      const waiting = connectTab(coordinator);
+      sendInit(waiting);
+      sendMsg(waiting, { id: 'budgets-1', name: 'get-budgets' });
+      waiting.postMessage.mockClear();
+
+      // The only backend goes with its tab, the request unanswered
+      sendMsg(leader, { type: 'tab-closing' });
+
+      expect(
+        coordinator.getState().budgetGroups.get('__lobby').leaderPort,
+      ).toBe(waiting);
+      expect(waiting.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__become-leader',
+          pendingMsg: expect.objectContaining({ id: 'budgets-1' }),
+        }),
+      );
+
+      simulateWorkerConnect(waiting);
+      replyFrom(waiting, 'budgets-1');
+      expect(waiting.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'budgets-1' }),
+      );
+    });
+
+    it('starts a backend for a request made after the last backend went away', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+      const idle = connectTab(coordinator);
+      sendInit(idle);
+      sendMsg(leader, { type: 'tab-closing' });
+      expect(coordinator.getState().budgetGroups.size).toBe(0);
+      idle.postMessage.mockClear();
+
+      sendMsg(idle, { id: 'budgets-1', name: 'get-budgets' });
+
+      expect(
+        coordinator.getState().budgetGroups.get('__lobby').leaderPort,
+      ).toBe(idle);
+      expect(idle.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__become-leader',
+          pendingMsg: expect.objectContaining({ id: 'budgets-1' }),
+        }),
+      );
+    });
+  });
 });

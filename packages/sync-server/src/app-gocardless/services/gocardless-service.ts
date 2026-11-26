@@ -317,6 +317,10 @@ export const goCardlessService = {
         'separate_continuous_history_consent',
       ) ?? false;
 
+    // ING Italy requisitions bound to an explicit agreement get stuck in `UA`
+    // https://github.com/actualbudget/actual/issues/8902
+    const skipEndUserAgreement = institutionId === 'ING_INGBITMM';
+
     const body = {
       redirectUrl,
       institutionId,
@@ -329,6 +333,7 @@ export const goCardlessService = {
       ssn: null,
       redirectImmediate: false,
       accountSelection,
+      skipEndUserAgreement,
     };
 
     console.log('GoCardless requisition request:', {
@@ -338,10 +343,15 @@ export const goCardlessService = {
       transactionTotalDays: institution.transaction_total_days,
       separateContinuousHistoryConsent,
       accountSelection,
+      skipEndUserAgreement,
       supportedFeatures: institution.supported_features,
     });
 
-    const response = await client.initSession(body).catch(async () => {
+    const response = await client.initSession(body).catch(async error => {
+      if (skipEndUserAgreement) {
+        return handleGoCardlessError(error);
+      }
+
       debugSensitive('Failed to link using: %O', body);
       console.log(
         'Falling back to accessValidForDays = 90 ' +
@@ -526,6 +536,7 @@ export const client = {
     ssn,
     redirectImmediate,
     accountSelection,
+    skipEndUserAgreement,
   }: {
     redirectUrl: string;
     institutionId: GoCardlessInstitutionId;
@@ -536,6 +547,7 @@ export const client = {
     ssn: string | null;
     redirectImmediate: boolean;
     accountSelection: boolean;
+    skipEndUserAgreement: boolean;
   }): Promise<Requisition> =>
     await getGocardlessClient().initSession({
       redirectUrl,
@@ -547,6 +559,7 @@ export const client = {
       ssn,
       redirectImmediate,
       accountSelection,
+      skipEndUserAgreement,
     }),
   generateToken: async (): Promise<TokenResponse> =>
     await getGocardlessClient().generateToken(),
