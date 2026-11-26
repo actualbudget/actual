@@ -21,7 +21,11 @@ import { useNavigate } from '#hooks/useNavigate';
 import { saveGlobalPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 import { loggedIn, signOut } from '#users/usersSlice';
-import { canReloadFromServer, reloadFromServer } from '#util/reloadFromServer';
+import {
+  canReloadFromServer,
+  isAppOrigin,
+  reloadFromServer,
+} from '#util/reloadFromServer';
 
 import { Title } from './subscribe/common';
 
@@ -469,7 +473,7 @@ export function ConfigServer() {
                 {getErrorMessage(error)}
               </Text>
               {error === 'network-failure' &&
-                url?.startsWith(window.location.origin) &&
+                isAppOrigin(url) &&
                 canReloadFromServer() && (
                   <Button
                     onPress={reloadFromServer}

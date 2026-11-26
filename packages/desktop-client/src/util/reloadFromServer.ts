@@ -11,6 +11,15 @@ export function canReloadFromServer() {
   return navigator.onLine && !!navigator.serviceWorker?.controller;
 }
 
+// Reloading only reaches the server the app itself was loaded from.
+export function isAppOrigin(url: string | null | undefined) {
+  try {
+    return new URL(url ?? '').origin === window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
 export function reloadFromServer() {
   window.location.assign('/' + RELOAD_FROM_SERVER_SEARCH);
 }

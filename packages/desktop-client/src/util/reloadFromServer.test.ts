@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { RELOAD_FROM_SERVER_SEARCH } from './reloadFromServer';
+import { isAppOrigin, RELOAD_FROM_SERVER_SEARCH } from './reloadFromServer';
 
 // The service worker answers every page load from its cache, except URLs
 // matching `navigateFallbackDenylist` (tested against pathname + search). The
@@ -24,6 +24,25 @@ function isServedFromCache(pathAndSearch: string) {
     pattern.test(pathAndSearch),
   );
 }
+
+describe('isAppOrigin', () => {
+  const { protocol, hostname, origin } = window.location;
+
+  it.each([
+    [origin, true],
+    [origin + '/', true],
+    [origin + '/budget', true],
+    [`${protocol}//${hostname.toUpperCase()}:${window.location.port}`, true],
+    [origin.replace(/(:\d+)?$/, ':8443'), false],
+    [origin + '.example.com', false],
+    ['https://example.com', false],
+    ['not a url', false],
+    ['', false],
+    [null, false],
+  ])('%s -> %s', (url, expected) => {
+    expect(isAppOrigin(url)).toBe(expected);
+  });
+});
 
 // Regression test for https://github.com/actualbudget/actual/issues/7026
 describe('reloadFromServer', () => {
