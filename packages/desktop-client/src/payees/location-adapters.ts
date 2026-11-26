@@ -4,6 +4,7 @@ import type {
   NearbyPayeeEntity,
   PayeeLocationEntity,
 } from '@actual-app/core/types/models';
+import { Geolocation } from '@capacitor/geolocation';
 
 /**
  * Abstraction for geolocation functionality
@@ -28,6 +29,12 @@ export type LocationApiClient = {
   ): Promise<NearbyPayeeEntity[]>;
 };
 
+const DEFAULT_POSITION_OPTIONS: PositionOptions = {
+  enableHighAccuracy: true,
+  timeout: 15000, // 15 second timeout
+  maximumAge: 60000, // Accept 1-minute-old cached position
+};
+
 /**
  * Browser implementation of geolocation using the Web Geolocation API
  */
@@ -39,20 +46,34 @@ export class BrowserGeolocationAdapter implements GeolocationAdapter {
       throw new Error('Geolocation is not supported by this browser');
     }
 
-    const defaultOptions: PositionOptions = {
-      enableHighAccuracy: true,
-      timeout: 15000, // 15 second timeout
-      maximumAge: 60000, // Accept 1-minute-old cached position
-    };
-
     const position = await new Promise<GeolocationPosition>(
       (resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
-          ...defaultOptions,
+          ...DEFAULT_POSITION_OPTIONS,
           ...options,
         });
       },
     );
+    return {
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude,
+    };
+  }
+}
+
+/**
+ * Native (Capacitor) implementation of geolocation. It reads the location
+ * from the operating system, which asks for permission once. The Web
+ * Geolocation API would make the web view ask a second time.
+ */
+export class CapacitorGeolocationAdapter implements GeolocationAdapter {
+  async getCurrentPosition(
+    options: PositionOptions = {},
+  ): Promise<LocationCoordinates> {
+    const position = await Geolocation.getCurrentPosition({
+      ...DEFAULT_POSITION_OPTIONS,
+      ...options,
+    });
     return {
       latitude: position.coords.latitude,
       longitude: position.coords.longitude,

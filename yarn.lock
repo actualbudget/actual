@@ -237,6 +237,7 @@ __metadata:
     "@capacitor/app": "npm:^8.1.2"
     "@capacitor/core": "npm:^8.4.2"
     "@capacitor/filesystem": "npm:^8.1.5"
+    "@capacitor/geolocation": "npm:^8.2.5"
     "@capacitor/haptics": "npm:^8.0.2"
     "@capacitor/share": "npm:^8.0.3"
     "@codemirror/autocomplete": "npm:^6.20.3"
@@ -2147,6 +2148,17 @@ __metadata:
   peerDependencies:
     "@capacitor/core": ">=8.0.0"
   checksum: 10/de7bb152177de26161a983c11d01e3dc4f028ee5dd00699f7742c5de5d882f7c9680b3dcf436a9e6b9c39264989c61f63a486fb8ed8a84ecfdfe9996f4d78534
+  languageName: node
+  linkType: hard
+
+"@capacitor/geolocation@npm:^8.2.5":
+  version: 8.2.5
+  resolution: "@capacitor/geolocation@npm:8.2.5"
+  dependencies:
+    "@capacitor/synapse": "npm:^1.0.4"
+  peerDependencies:
+    "@capacitor/core": ">=8.0.0"
+  checksum: 10/3c8ef70538a438c9d94f01592d67e6f0985ee8b4d4f3a17e35ebd1ef3b93e3169fea4d09eafb3c724e726ce37970ea2d7596c43cd0c649292f7ae48523a332f8
   languageName: node
   linkType: hard
 
@@ -20256,6 +20268,7 @@ __metadata:
     "@capacitor/cli": "npm:^8.4.2"
     "@capacitor/core": "npm:^8.4.2"
     "@capacitor/filesystem": "npm:^8.1.5"
+    "@capacitor/geolocation": "npm:^8.2.5"
     "@capacitor/haptics": "npm:^8.0.2"
     "@capacitor/ios": "npm:^8.5.3"
     "@capacitor/share": "npm:^8.0.3"

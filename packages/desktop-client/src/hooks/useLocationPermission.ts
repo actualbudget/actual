@@ -1,8 +1,16 @@
 import { useEffect, useState } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { Capacitor } from '@capacitor/core';
 
 import { locationService } from '#payees/location';
+import {
+  refreshNativeLocationPermission,
+  requestNativeLocationPermission,
+  subscribeToNativeLocationPermission,
+} from '#payees/native-location-permission';
+
+const isNativeApp = Capacitor.isNativePlatform();
 
 export type LocationPermission = {
   isGranted: boolean;
@@ -26,6 +34,12 @@ export function useLocationPermission(): LocationPermission {
     if (!isNarrowWidth) {
       setState(null);
       return;
+    }
+
+    if (isNativeApp) {
+      const unsubscribe = subscribeToNativeLocationPermission(setState);
+      void refreshNativeLocationPermission();
+      return unsubscribe;
     }
 
     let permissionStatus: PermissionStatus | null = null;
@@ -85,6 +99,11 @@ export function useLocationPermission(): LocationPermission {
   }, [isNarrowWidth]);
 
   const requestPermission = async () => {
+    if (isNativeApp) {
+      await requestNativeLocationPermission();
+      return;
+    }
+
     try {
       await locationService.getCurrentPosition();
       setState('granted');
