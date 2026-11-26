@@ -39,6 +39,8 @@ export function MonthSelect({
   const innerRef = useRef<HTMLInputElement | null>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(innerRef, ref);
   const [isOpen, setIsOpen] = useState(false);
+  // Set while a pointer press inside the picker is moving focus into it.
+  const isPickerPointerDown = useRef(false);
 
   return (
     <View>
@@ -51,13 +53,18 @@ export function MonthSelect({
         onFocus={() => setIsOpen(true)}
         onPointerUp={() => setIsOpen(true)}
         onBlur={e => {
-          // Clicking the picker moves focus into it; keep it open and return
-          // focus to the input so typing still works.
-          if (
+          const isFocusInPicker =
             e.relatedTarget instanceof Element &&
-            e.relatedTarget.closest('[data-month-picker]')
-          ) {
-            innerRef.current?.focus();
+            e.relatedTarget.closest('[data-month-picker]') !== null;
+          const isPointer = isPickerPointerDown.current;
+          isPickerPointerDown.current = false;
+          if (isFocusInPicker) {
+            // Clicking the picker moves focus into it: return focus to the
+            // input so typing still works. Tabbing into it keeps focus there
+            // so the picker can be used from the keyboard.
+            if (isPointer) {
+              innerRef.current?.focus();
+            }
             return;
           }
           setIsOpen(false);
@@ -82,15 +89,17 @@ export function MonthSelect({
         onOpenChange={() => setIsOpen(false)}
         style={styles.popover}
       >
-        <MonthPickerPanel
-          value={toPickerMonth(value, monthYearFormat)}
-          locale={language}
-          labels={{ previous: t('Previous'), next: t('Next') }}
-          onSelect={month => {
-            setIsOpen(false);
-            onChange(fromPickerMonth(month, monthYearFormat));
-          }}
-        />
+        <View onPointerDown={() => (isPickerPointerDown.current = true)}>
+          <MonthPickerPanel
+            value={toPickerMonth(value, monthYearFormat)}
+            locale={language}
+            labels={{ previous: t('Previous'), next: t('Next') }}
+            onSelect={month => {
+              setIsOpen(false);
+              onChange(fromPickerMonth(month, monthYearFormat));
+            }}
+          />
+        </View>
       </Popover>
     </View>
   );
