@@ -1,6 +1,7 @@
 import { wcagContrast } from 'culori';
 
 import { deriveAccentCss } from './accent';
+import { deriveAccent, derivedAccentTokens } from './source/derive';
 import { palette } from './source/palette';
 
 import { darkThemeCss, lightThemeCss } from './index';
@@ -14,7 +15,7 @@ function declarations(css: string | null) {
 }
 
 describe('deriveAccentCss', () => {
-  it('does nothing for a theme that sets no accent input', () => {
+  it('writes nothing when a theme changes nothing the accent set uses', () => {
     expect(deriveAccentCss('light', ':root { --color-pageText: #111; }')).toBe(
       null,
     );
@@ -27,7 +28,6 @@ describe('deriveAccentCss', () => {
     );
 
     expect(Object.keys(derived)).toEqual([
-      'accentContrast',
       'accentHover',
       'accentText',
       'accentBorder',
@@ -38,9 +38,7 @@ describe('deriveAccentCss', () => {
       'menuKeybindingText',
       'menuAutoCompleteTextHeader',
       'pillTextHighlighted',
-      'calendarSelectedText',
     ]);
-    expect(derived.accentContrast).toBe('#ffffff');
     expect(wcagContrast(derived.accentText, '#ffffff')).toBeGreaterThanOrEqual(
       4.5,
     );
@@ -69,6 +67,7 @@ describe('deriveAccentCss', () => {
   });
 
   it('puts black or white on the selected day to suit the accent', () => {
+    const builtIn = declarations(darkThemeCss);
     const pale = declarations(
       deriveAccentCss('dark', ':root { --color-accent: #ffd84d; }'),
     );
@@ -76,11 +75,15 @@ describe('deriveAccentCss', () => {
       deriveAccentCss('dark', ':root { --color-accent: #0a7d5a; }'),
     );
 
+    expect(Object.keys(deep)).not.toHaveLength(0);
     expect(pale.calendarSelectedText).toBe('#000000');
-    expect(deep.calendarSelectedText).toBe('#ffffff');
+    expect(deep.calendarSelectedText ?? builtIn.calendarSelectedText).toBe(
+      '#ffffff',
+    );
   });
 
   it('works out the selected day text against a fill the theme sets', () => {
+    const builtIn = declarations(lightThemeCss);
     const pale = declarations(
       deriveAccentCss(
         'light',
@@ -100,38 +103,108 @@ describe('deriveAccentCss', () => {
       ),
     );
 
+    expect(Object.keys(deep)).not.toHaveLength(0);
     expect(pale.calendarSelectedText).toBe('#000000');
-    expect(deep.calendarSelectedText).toBe('#ffffff');
+    expect(deep.calendarSelectedText ?? builtIn.calendarSelectedText).toBe(
+      '#ffffff',
+    );
     expect(own.calendarSelectedText).toBeUndefined();
   });
 
   it('lays a see-through selected day fill over the calendar background', () => {
-    const pale = declarations(
+    const builtIn = declarations(lightThemeCss);
+    const fill = 'rgba(100, 74, 201, 0.2)';
+    const overCream = declarations(
       deriveAccentCss(
         'light',
-        ':root { --color-calendarBackground: #fffbeb; --color-calendarSelectedBackground: rgba(100, 74, 201, 0.2); }',
+        `:root { --color-calendarBackground: #fffbeb; --color-calendarSelectedBackground: ${fill}; }`,
       ),
     );
-    const deep = declarations(
+    const overBlack = declarations(
       deriveAccentCss(
         'light',
-        ':root { --color-calendarBackground: #000000; --color-calendarSelectedBackground: rgba(255, 255, 255, 0.2); }',
+        `:root { --color-calendarBackground: #000000; --color-calendarSelectedBackground: ${fill}; }`,
       ),
     );
 
-    expect(pale.calendarSelectedText).toBe('#000000');
-    expect(deep.calendarSelectedText).toBe('#ffffff');
+    expect(overCream.calendarSelectedText).toBe('#000000');
+    expect(overBlack.calendarSelectedText ?? builtIn.calendarSelectedText).toBe(
+      '#ffffff',
+    );
   });
 
-  it('matches the built-in values when given the built-in accent', () => {
-    const builtIn = declarations(lightThemeCss);
+  it('reads a fill that points at a derived color as it is written out', () => {
     const derived = declarations(
-      deriveAccentCss('light', ':root { --color-accent: #8719e0; }'),
+      deriveAccentCss(
+        'light',
+        ':root { --color-accent: #ffd84d; --color-tableBackground: rgba(0, 0, 0, 0); --color-calendarSelectedBackground: var(--color-accentSubtle); }',
+      ),
     );
 
-    expect(Object.keys(derived)).toHaveLength(12);
-    for (const [name, value] of Object.entries(derived)) {
-      expect(value).toBe(builtIn[name]);
+    expect(
+      wcagContrast(derived.calendarSelectedText, derived.accentSubtle),
+    ).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('writes only the colors that differ from the built-in theme', () => {
+    expect(deriveAccentCss('light', ':root { --color-accent: #8719e0; }')).toBe(
+      null,
+    );
+    expect(
+      Object.keys(
+        declarations(
+          deriveAccentCss('light', ':root { --color-accent: #ffd84d; }'),
+        ),
+      ),
+    ).toContain('accentContrast');
+  });
+
+  it('reads surfaces set through the neutral token names', () => {
+    const viaNeutral = deriveAccentCss(
+      'light',
+      ':root { --color-background: #101418; --color-backgroundPage: #000000; }',
+    );
+
+    expect(viaNeutral).not.toBe(null);
+    expect(viaNeutral).toBe(
+      deriveAccentCss(
+        'light',
+        ':root { --color-tableBackground: #101418; --color-pageBackground: #000000; }',
+      ),
+    );
+  });
+
+  it('prefers the specific surface token over the neutral one', () => {
+    expect(
+      deriveAccentCss(
+        'light',
+        ':root { --color-accent: #0a7d5a; --color-background: #101418; --color-tableBackground: #ffffff; }',
+      ),
+    ).toBe(deriveAccentCss('light', ':root { --color-accent: #0a7d5a; }'));
+  });
+
+  it('falls back to the built-in surface when one refers back to itself', () => {
+    expect(
+      deriveAccentCss(
+        'light',
+        ':root { --color-accent: #0a7d5a; --color-background: var(--color-tableBackground); }',
+      ),
+    ).toBe(deriveAccentCss('light', ':root { --color-accent: #0a7d5a; }'));
+  });
+
+  it('leaves the cascade equal to a full derivation', () => {
+    const css =
+      ':root { --color-accent: #0a7d5a; --color-background: #101418; --color-backgroundPage: #000000; }';
+    const emitted = declarations(deriveAccentCss('dark', css));
+    const builtIn = declarations(darkThemeCss);
+    const full = deriveAccent('#0a7d5a', {
+      surface: '#101418',
+      page: '#000000',
+      mobilePage: palette.navy700,
+    });
+
+    for (const name of derivedAccentTokens) {
+      expect(emitted[name] ?? builtIn[name], name).toBe(full[name]);
     }
   });
 

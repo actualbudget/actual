@@ -76,7 +76,7 @@ The accent is the color of primary buttons, links, checkboxes, the outline of a 
 }
 ```
 
-Actual works out the related colors from the accent and from your theme's `--color-tableBackground`, `--color-pageBackground` and `--color-mobilePageBackground`, so text and buttons stay readable on your backgrounds:
+Actual works out the related colors from the accent and from your theme's table and page backgrounds, so text and buttons stay readable on them:
 
 - `--color-accentContrast` - Text and icons on an accent fill
 - `--color-accentHover` - Hovered accent fill
@@ -98,6 +98,22 @@ Common variables include:
 **Accent Colors:**
 
 - `--color-accent` - Primary buttons, links, focus rings and selection. See [Changing the Accent Color](#changing-the-accent-color)
+
+**Base Colors:**
+
+A few of the variables below follow these base colors when a theme does not set them: the page and table backgrounds, the menu and tooltip backgrounds, table borders, and page and table text. Many other variables keep their own colors, including most cards and buttons, modals, form inputs and menu text, so a theme still needs to set those.
+
+Do not point a base color at a variable that follows it, such as `--color-background: var(--color-tableBackground)`. The two would refer to each other and neither would work.
+
+- `--color-backgroundPage` - The page behind cards and tables
+- `--color-background` - Tables and other content surfaces
+- `--color-backgroundRaised` - Menus and tooltips
+- `--color-backgroundHover` - A hovered table row
+- `--color-backgroundSelected` - A selected table row
+- `--color-border` - Lines between table rows
+- `--color-text` - Primary text
+- `--color-textSecondary` - Supporting text such as descriptions
+- `--color-textTertiary` - The least prominent text, such as hints
 
 **Page Colors:**
 

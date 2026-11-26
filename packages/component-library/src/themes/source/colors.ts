@@ -33,7 +33,60 @@ export const colors = {
     description: 'Accent text on the tinted surface.',
   },
 
-  pageBackground: { light: 'navy100', dark: 'gray900', midnight: 'gray600' },
+  backgroundPage: {
+    light: 'navy100',
+    dark: 'gray900',
+    midnight: 'gray600',
+    description: 'The page behind cards and tables.',
+  },
+  background: {
+    light: 'white',
+    dark: 'navy800',
+    midnight: 'gray800',
+    description: 'Tables and other content surfaces.',
+  },
+  backgroundRaised: {
+    light: 'white',
+    dark: 'navy800',
+    midnight: 'gray700',
+    description: 'Menus and tooltips.',
+  },
+  backgroundHover: {
+    light: 'navy50',
+    dark: 'navy700',
+    midnight: 'gray500',
+    description: 'A hovered row on a content surface.',
+  },
+  backgroundSelected: {
+    all: { ref: 'accentSubtle' },
+    description: 'A selected row on a content surface.',
+  },
+  border: {
+    light: 'navy100',
+    dark: 'navy600',
+    midnight: 'gray600',
+    description: 'Lines between table rows.',
+  },
+  text: {
+    light: { raw: '#272630' },
+    dark: 'navy150',
+    midnight: 'gray100',
+    description: 'Primary text.',
+  },
+  textSecondary: {
+    light: 'navy500',
+    dark: 'navy300',
+    midnight: 'gray200',
+    description: 'Supporting text such as descriptions and labels.',
+  },
+  textTertiary: {
+    light: 'navy300',
+    dark: 'navy500',
+    midnight: 'gray400',
+    description: 'The least prominent text, such as hints.',
+  },
+
+  pageBackground: { all: { ref: 'backgroundPage' } },
   pageBackgroundTopLeft: {
     light: 'navy100',
     dark: 'navy800',
@@ -59,9 +112,9 @@ export const colors = {
     dark: 'navy150',
     midnight: 'gray150',
   },
-  pageText: { light: { raw: '#272630' }, dark: 'navy150', midnight: 'gray100' },
-  pageTextLight: { light: 'navy500', dark: 'navy300', midnight: 'gray200' },
-  pageTextSubdued: { light: 'navy300', dark: 'navy500', midnight: 'gray400' },
+  pageText: { all: { ref: 'text' } },
+  pageTextLight: { all: { ref: 'textSecondary' } },
+  pageTextSubdued: { all: { ref: 'textTertiary' } },
   pageTextDark: { light: 'navy800', dark: 'navy100', midnight: 'gray100' },
   pageTextPositive: { all: { ref: 'accentText' } },
   pageTextLink: { all: { ref: 'accentText' } },
@@ -71,20 +124,16 @@ export const colors = {
   cardBorder: { all: { ref: 'accentBorder' } },
   cardShadow: { light: 'navy700', dark: 'navy700', midnight: 'gray900' },
 
-  tableBackground: { light: 'white', dark: 'navy800', midnight: 'gray800' },
+  tableBackground: { all: { ref: 'background' } },
   tableRowBackgroundAlternate: {
     all: { ref: 'tableBackground' },
     fallback: 'tableBackground',
   },
-  tableRowBackgroundHover: {
-    light: 'navy50',
-    dark: 'navy700',
-    midnight: 'gray500',
-  },
+  tableRowBackgroundHover: { all: { ref: 'backgroundHover' } },
   tableText: {
     light: { ref: 'pageText' },
-    dark: 'navy150',
-    midnight: 'gray150',
+    dark: { ref: 'text' },
+    midnight: { ref: 'text' },
   },
   tableTextItemAdded: { all: { ref: 'tableText' } },
   tableTextLight: {
@@ -101,7 +150,7 @@ export const colors = {
     dark: 'navy700',
     midnight: 'gray900',
   },
-  tableBorder: { light: 'navy100', dark: 'navy600', midnight: 'gray600' },
+  tableBorder: { all: { ref: 'border' } },
   tableBorderSelected: { all: { ref: 'accentBorder' } },
   tableBorderHover: { all: { ref: 'accentBorder' } },
   tableBorderSeparator: {
@@ -109,7 +158,7 @@ export const colors = {
     dark: 'navy400',
     midnight: 'gray400',
   },
-  tableRowBackgroundHighlight: { all: { ref: 'accentSubtle' } },
+  tableRowBackgroundHighlight: { all: { ref: 'backgroundSelected' } },
   tableRowBackgroundHighlightText: { all: { ref: 'tableText' } },
   tableRowHeaderBackground: {
     light: 'navy50',
@@ -118,8 +167,8 @@ export const colors = {
   },
   tableRowHeaderText: {
     light: 'navy800',
-    dark: 'navy150',
-    midnight: 'gray150',
+    dark: { ref: 'text' },
+    midnight: { ref: 'text' },
   },
 
   numberPositive: { light: 'green700', dark: 'green300', midnight: 'green300' },
@@ -202,7 +251,7 @@ export const colors = {
   },
   settingsNavItemBackgroundSelected: { all: { ref: 'accentSubtle' } },
 
-  menuBackground: { light: 'white', dark: 'navy800', midnight: 'gray700' },
+  menuBackground: { all: { ref: 'backgroundRaised' } },
   menuItemBackgroundHover: {
     light: 'navy100',
     dark: 'navy500',
@@ -568,7 +617,7 @@ export const colors = {
   floatingActionBarText: { all: { ref: 'accentContrast' } },
 
   tooltipText: { light: 'navy900', dark: 'navy100', midnight: 'gray100' },
-  tooltipBackground: { light: 'white', dark: 'navy800', midnight: 'gray800' },
+  tooltipBackground: { all: { ref: 'backgroundRaised' } },
   tooltipBorder: { light: 'navy150', dark: 'navy700', midnight: 'gray600' },
 
   calendarCellBackground: {

@@ -19,7 +19,10 @@ type Context = {
   colors: Colors;
   palette: Palette;
   path: string[];
+  override?: TokenOverride;
 };
+
+export type TokenOverride = (name: string) => ResolvedColor | null | undefined;
 
 const toRgb = converter('rgb');
 
@@ -186,13 +189,17 @@ function resolveValue(value: TokenValue, context: Context): ResolvedColor {
 }
 
 function resolveName(name: string, context: Context): ResolvedColor {
-  if (!(name in context.colors)) {
+  if (!Object.hasOwn(context.colors, name)) {
     throw new Error(`unknown token "${name}"`);
   }
   if (context.path.includes(name)) {
     throw new Error(
       `circular reference: ${[...context.path, name].join(' -> ')}`,
     );
+  }
+  const overridden = context.override?.(name);
+  if (overridden != null) {
+    return overridden;
   }
   const definition = context.colors[name];
   const value =
@@ -209,8 +216,9 @@ export function resolveToken(
   theme: ThemeName,
   colors: Colors,
   palette: Palette,
+  override?: TokenOverride,
 ) {
-  return resolveName(name, { theme, colors, palette, path: [] });
+  return resolveName(name, { theme, colors, palette, path: [], override });
 }
 
 export function composite(
