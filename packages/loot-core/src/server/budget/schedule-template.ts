@@ -602,7 +602,9 @@ export async function buildMonthlyOutflow(
       .map(skipFromFor)
       .reduce((earliest, date) => (date < earliest ? date : earliest));
     ({ data: linkedAnywhere } = await aqlQuery(
+      // A split payment carries the schedule link on its parent.
       q('transactions')
+        .options({ splits: 'all' })
         .filter({
           schedule: {
             $oneof: skippingEntries.map(entry => entry.scheduleId),

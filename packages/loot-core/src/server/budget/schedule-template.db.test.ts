@@ -851,6 +851,62 @@ describe('runScheduleForecast against a real database', () => {
     expect(result.to_budget).toBe(770);
   });
 
+  it('counts a payment linked through a split parent like an unsplit one', async () => {
+    // Nov 12, budgeting November. The yearly $100 bill due Nov 11 was paid
+    // on Nov 11 from another category, and the schedule moved on to
+    // Nov 11, 2027. A split payment carries the schedule link on its parent,
+    // so the forecast must find it as it finds an unsplit payment.
+    async function forecastAfterPayment(split: boolean) {
+      await global.emptyDatabase()();
+      await loadMappings();
+      await loadRules();
+      vi.mocked(monthUtils.currentDay).mockReturnValue('2026-11-11');
+      const { account, category, template, scheduleId } =
+        await setUpYearlyBill();
+      const otherCategory = await db.insertCategory({
+        name: 'Household',
+        cat_group: (await db.getCategories())[0].cat_group,
+      });
+      if (split) {
+        await db.insertTransaction({
+          id: 'parent',
+          account,
+          amount: -10000,
+          date: '2026-11-11',
+          schedule: scheduleId,
+          is_parent: true,
+        });
+        for (const id of ['child1', 'child2']) {
+          await db.insertTransaction({
+            id,
+            account,
+            amount: -5000,
+            date: '2026-11-11',
+            category: otherCategory,
+            is_child: true,
+            parent_id: 'parent',
+          });
+        }
+      } else {
+        await db.insertTransaction({
+          account,
+          amount: -10000,
+          date: '2026-11-11',
+          category: otherCategory,
+          schedule: scheduleId,
+        });
+      }
+      await setNextDate({ id: scheduleId, advance: true });
+      vi.mocked(monthUtils.currentDay).mockReturnValue('2026-11-12');
+      return runScheduleForecast([template], '2026-11', 0, 0, category);
+    }
+
+    const unsplit = await forecastAfterPayment(false);
+    const split = await forecastAfterPayment(true);
+
+    expect(split.to_budget).toBe(unsplit.to_budget);
+  });
+
   it('reserves a bill that has not posted yet this month when budgeting ahead', async () => {
     // Oct 20, budgeting November. October's rent (Oct 22) hasn't posted,
     // so the $100 carried into November still has to pay it.
