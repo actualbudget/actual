@@ -6,6 +6,7 @@ import {
   generateTransaction,
 } from '@actual-app/core/mocks';
 import { initServer } from '@actual-app/core/platform/client/connection';
+import * as Platform from '@actual-app/core/shared/platform';
 import {
   addSplitTransaction,
   realizeTempTransactions,
@@ -1778,6 +1779,58 @@ describe('Transactions', () => {
     expect(container.querySelectorAll('[data-testid=select] svg').length).toBe(
       2,
     );
+  });
+
+  describe('cmd/ctrl-click on a row', () => {
+    const modifier = Platform.OS === 'mac' ? 'Meta' : 'Control';
+
+    function selectedCount(container: HTMLElement) {
+      return container.querySelectorAll(
+        '[data-testid=transaction-table] [data-testid=select] svg',
+      ).length;
+    }
+
+    async function modifierClick(element: Element, withShift = false) {
+      const user = userEvent.setup();
+      await user.keyboard(`{${modifier}>}${withShift ? '{Shift>}' : ''}`);
+      await user.click(element);
+      await user.keyboard(`${withShift ? '{/Shift}' : ''}{/${modifier}}`);
+    }
+
+    function cellContent(container: HTMLElement, name: string, row: number) {
+      const field = queryField(container, name, '', row);
+      return field.querySelector('div') ?? field;
+    }
+
+    test('selects the row instead of editing the cell', async () => {
+      const { container } = renderTransactions();
+
+      await modifierClick(cellContent(container, 'notes', 2));
+
+      expect(selectedCount(container)).toBe(1);
+      expect(
+        queryField(container, 'notes', '', 2).querySelector('input'),
+      ).toBeNull();
+    });
+
+    test('toggles selection on and off and selects multiple rows', async () => {
+      const { container } = renderTransactions();
+
+      await modifierClick(cellContent(container, 'payee', 2));
+      await modifierClick(cellContent(container, 'notes', 4));
+      expect(selectedCount(container)).toBe(2);
+
+      await modifierClick(cellContent(container, 'payee', 2));
+      expect(selectedCount(container)).toBe(1);
+    });
+
+    test('with shift selects the range from the last clicked row', async () => {
+      const { container } = renderTransactions();
+
+      await modifierClick(cellContent(container, 'notes', 1));
+      await modifierClick(cellContent(container, 'notes', 4), true);
+      expect(selectedCount(container)).toBe(4);
+    });
   });
 
   test('pressing the mouse on the running balance pauses row drag so the text can be selected', () => {
