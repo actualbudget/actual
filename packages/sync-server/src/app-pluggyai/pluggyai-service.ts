@@ -5,9 +5,9 @@ import { SecretName, secretsService } from '#services/secrets-service';
 
 const debugSensitive = createDebug('actual-sensitive:pluggy');
 
-const pluggyClients = new Map();
+const pluggyClients = new Map<string, PluggyClient>();
 
-function hasCredentials(fileId = null) {
+function hasCredentials(fileId: string | null = null) {
   return !!(
     secretsService.get(SecretName.pluggyai_clientId, fileId) &&
     secretsService.get(SecretName.pluggyai_clientSecret, fileId) &&
@@ -15,7 +15,7 @@ function hasCredentials(fileId = null) {
   );
 }
 
-function getCredentialSource(fileId, allowGlobal = true) {
+function getCredentialSource(fileId?: string | null, allowGlobal = true) {
   if (!!fileId && hasCredentials(fileId)) {
     return 'per-budget-file';
   }
@@ -27,7 +27,7 @@ function getCredentialSource(fileId, allowGlobal = true) {
   return null;
 }
 
-function getCredentialsCacheEntry(credentialFileId) {
+function getCredentialsCacheEntry(credentialFileId?: string | null) {
   const clientId = secretsService.get(
     SecretName.pluggyai_clientId,
     credentialFileId,
@@ -48,7 +48,7 @@ function getCredentialsCacheEntry(credentialFileId) {
   };
 }
 
-function getPluggyClient(fileId, allowGlobal) {
+function getPluggyClient(fileId?: string | null, allowGlobal?: boolean) {
   const credentialSource = getCredentialSource(fileId, allowGlobal);
   if (!credentialSource) {
     throw new Error('Pluggy credentials are not configured');
@@ -58,6 +58,10 @@ function getPluggyClient(fileId, allowGlobal) {
     credentialSource === 'per-budget-file' ? fileId : null;
   const { cacheKey, clientId, clientSecret } =
     getCredentialsCacheEntry(credentialFileId);
+  if (!clientId || !clientSecret) {
+    throw new Error('Pluggy credentials are not configured');
+  }
+
   let pluggyClient = pluggyClients.get(cacheKey);
   if (!pluggyClient) {
     pluggyClient = new PluggyClient({
@@ -71,11 +75,15 @@ function getPluggyClient(fileId, allowGlobal) {
 }
 
 export const pluggyaiService = {
-  isConfigured: fileId => getCredentialSource(fileId) != null,
+  isConfigured: (fileId?: string | null) => getCredentialSource(fileId) != null,
 
   getCredentialSource,
 
-  getAccountsByItemId: async (itemId, fileId, allowGlobal = true) => {
+  getAccountsByItemId: async (
+    itemId: string,
+    fileId?: string | null,
+    allowGlobal = true,
+  ) => {
     try {
       const client = getPluggyClient(fileId, allowGlobal);
       const { results, total, ...rest } = await client.fetchAccounts(itemId);
@@ -92,7 +100,11 @@ export const pluggyaiService = {
       throw error;
     }
   },
-  getAccountById: async (accountId, fileId, allowGlobal = true) => {
+  getAccountById: async (
+    accountId: string,
+    fileId?: string | null,
+    allowGlobal = true,
+  ) => {
     try {
       const client = getPluggyClient(fileId, allowGlobal);
       const account = await client.fetchAccount(accountId);
@@ -109,9 +121,9 @@ export const pluggyaiService = {
   },
 
   getTransactionsByAccountId: async (
-    accountId,
-    startDate,
-    fileId,
+    accountId: string,
+    startDate: string,
+    fileId?: string | null,
     allowGlobal = true,
   ) => {
     try {
