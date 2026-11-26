@@ -303,6 +303,21 @@ export function KeyboardShortcutModal() {
             shift: true,
           },
           {
+            id: 'toggle-selection-clicked-transaction',
+            shortcut: t('Click'),
+            description: t('Toggle selection of the clicked transaction'),
+            meta: ctrl,
+          },
+          {
+            id: 'select-range-to-clicked-transaction',
+            shortcut: t('Click'),
+            description: t(
+              'Select transactions between the most recently selected and the clicked transaction',
+            ),
+            meta: ctrl,
+            shift: true,
+          },
+          {
             id: 'move-next-transaction',
             shortcut: 'J',
             description: t('Move down to the next transaction'),

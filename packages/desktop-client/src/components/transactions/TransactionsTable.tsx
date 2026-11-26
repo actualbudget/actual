@@ -14,6 +14,7 @@ import type {
   CSSProperties,
   ForwardedRef,
   KeyboardEvent,
+  MouseEvent,
   ReactNode,
   Ref,
   RefObject,
@@ -50,6 +51,7 @@ import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import { memoizeOne } from '@actual-app/core/shared/memoize';
 import * as monthUtils from '@actual-app/core/shared/months';
+import * as Platform from '@actual-app/core/shared/platform';
 import { q } from '@actual-app/core/shared/query';
 import { DEFAULT_UPCOMING_SCHEDULE_DAYS } from '@actual-app/core/shared/schedules';
 import {
@@ -2125,6 +2127,40 @@ const Transaction = memo(function Transaction({
     }
   };
 
+  // Cmd-click (Mac) or Ctrl-click (elsewhere) anywhere on the row toggles
+  // its selection, like the checkbox. Ctrl-click is left alone on Mac
+  // because it opens the context menu there.
+  const canSelectByClick =
+    showSelection && !isTemporaryId(transaction.id) && !(isPreview && isChild);
+
+  function isSelectClick(e: MouseEvent) {
+    return (
+      canSelectByClick &&
+      e.button === 0 &&
+      (Platform.OS === 'mac' ? e.metaKey : e.ctrlKey)
+    );
+  }
+
+  function onRowMouseDownCapture(e: MouseEvent<HTMLDivElement>) {
+    if (isSelectClick(e)) {
+      // Stop the browser from starting a text selection
+      e.preventDefault();
+    }
+  }
+
+  function onRowClickCapture(e: MouseEvent<HTMLDivElement>) {
+    if (isSelectClick(e)) {
+      // Stop the clicked cell from opening for editing
+      e.preventDefault();
+      e.stopPropagation();
+      dispatchSelected({
+        type: 'select',
+        id: transaction.id,
+        isRangeSelect: e.shiftKey,
+      });
+    }
+  }
+
   return (
     <View
       innerRef={dropRef}
@@ -2137,6 +2173,8 @@ const Transaction = memo(function Transaction({
       <Row
         ref={rowRef}
         {...dragProps}
+        onMouseDownCapture={onRowMouseDownCapture}
+        onClickCapture={onRowClickCapture}
         {...(pulse && { 'data-pulse': true })}
         style={{
           backgroundColor: selected
