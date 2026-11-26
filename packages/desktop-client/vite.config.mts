@@ -413,6 +413,9 @@ export default defineConfig(async ({ mode, command }) => {
               navigateFallback: '/index.html',
               maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
               navigateFallbackDenylist: [
+                // Lets the app load itself from the server instead of the
+                // cache. See src/util/reloadFromServer.ts.
+                /^\/\?reload-from-server$/,
                 /^\/account\/.*$/,
                 /^\/admin\/.*$/,
                 /^\/secret\/.*$/,

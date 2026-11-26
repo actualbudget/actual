@@ -21,6 +21,7 @@ import { useNavigate } from '#hooks/useNavigate';
 import { saveGlobalPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 import { loggedIn, signOut } from '#users/usersSlice';
+import { canReloadFromServer, reloadFromServer } from '#util/reloadFromServer';
 
 import { Title } from './subscribe/common';
 
@@ -312,7 +313,7 @@ export function ConfigServer() {
     switch (error) {
       case 'network-failure':
         return t(
-          'Connection failed. If you use a self-signed certificate or were recently offline, try refreshing the page. Otherwise ensure you have HTTPS set up properly.',
+          'Connection failed. If you use a self-signed certificate or were recently offline, try reloading from the server. Otherwise ensure you have HTTPS set up properly.',
         );
       default:
         return t(
@@ -467,6 +468,16 @@ export function ConfigServer() {
               >
                 {getErrorMessage(error)}
               </Text>
+              {error === 'network-failure' &&
+                url?.startsWith(window.location.origin) &&
+                canReloadFromServer() && (
+                  <Button
+                    onPress={reloadFromServer}
+                    style={{ marginTop: 20, alignSelf: 'flex-start' }}
+                  >
+                    <Trans>Reload from server</Trans>
+                  </Button>
+                )}
               {isElectron() && (
                 <View
                   style={{

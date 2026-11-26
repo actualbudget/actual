@@ -9,6 +9,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { useNavigate } from '#hooks/useNavigate';
+import { canReloadFromServer, reloadFromServer } from '#util/reloadFromServer';
 
 function getErrorMessage(reason) {
   switch (reason) {
@@ -25,6 +26,10 @@ export function Error() {
   const { error } = (location.state || {}) as { error? };
 
   function onTryAgain() {
+    if (error === 'network-failure' && canReloadFromServer()) {
+      reloadFromServer();
+      return;
+    }
     void navigate('/');
   }
 
