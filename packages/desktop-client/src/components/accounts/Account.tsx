@@ -1197,15 +1197,16 @@ class AccountInternal extends PureComponent<
     this.onExitReconciling();
   };
 
-  onCreateReconciliationTransaction = async (diff: number) => {
+  onCreateReconciliationTransaction = async () => {
     const { accountId } = this.props;
-    if (!accountId) {
+    const { reconcileAmount } = this.state;
+    if (!accountId || reconcileAmount == null) {
       return;
     }
 
     await reconciliation.createReconciliationTransaction(
       accountId,
-      diff,
+      reconcileAmount,
       // Optimistic UI: update the transaction list before sending the data to the database
       reconciliationTransactions =>
         this.setState(state => ({

@@ -95,9 +95,17 @@ export async function finishReconciliation(
 
 export async function createReconciliationTransaction(
   accountId: AccountEntity['id'],
-  diff: number,
+  targetBalance: number,
   onRealized?: (transactions: TransactionEntity[]) => void,
 ) {
+  // Work out the difference from the saved balance, not from what the
+  // reconcile bar shows: the bar updates a moment after a save, so a quick
+  // second press would otherwise add the same adjustment again.
+  const diff = targetBalance - (await getClearedBalance(accountId));
+  if (diff === 0) {
+    return;
+  }
+
   const reconciliationTransactions = realizeTempTransactions([
     {
       id: 'temp',

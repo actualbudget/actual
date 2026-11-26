@@ -29,7 +29,7 @@ type ReconcilingMessageProps = {
   targetBalance: number;
   onDone: () => void;
   onExit: () => void;
-  onCreateTransaction: (targetDiff: number) => void;
+  onCreateTransaction: () => Promise<void>;
 };
 
 export function ReconcilingMessage({
@@ -44,7 +44,17 @@ export function ReconcilingMessage({
       bindings.accountBalanceCleared(accountId),
     ) ?? 0;
   const format = useFormat();
+  const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
   const targetDiff = targetBalance - cleared;
+
+  async function onCreateTransactionPress() {
+    setIsCreatingTransaction(true);
+    try {
+      await onCreateTransaction();
+    } finally {
+      setIsCreatingTransaction(false);
+    }
+  }
 
   const clearedBalance = format(cleared, 'financial');
   const bankBalance = format(targetBalance, 'financial');
@@ -113,7 +123,10 @@ export function ReconcilingMessage({
         </View>
         {targetDiff !== 0 && (
           <View style={{ marginLeft: 15 }}>
-            <Button onPress={() => onCreateTransaction(targetDiff)}>
+            <Button
+              isDisabled={isCreatingTransaction}
+              onPress={onCreateTransactionPress}
+            >
               <Trans>Create reconciliation transaction</Trans>
             </Button>
           </View>

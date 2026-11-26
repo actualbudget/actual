@@ -19,7 +19,7 @@ type ReconcilingBannerProps = {
   targetBalance: number;
   onDone: () => Promise<void>;
   onExit: () => void;
-  onCreateTransaction: (targetDiff: number) => Promise<void>;
+  onCreateTransaction: () => Promise<void>;
 };
 
 export function ReconcilingBanner({
@@ -141,7 +141,7 @@ export function ReconcilingBanner({
           <Button
             isDisabled={isUpdating}
             style={{ flex: 1, minHeight: styles.mobileMinHeight }}
-            onPress={() => runAction(() => onCreateTransaction(targetDiff))}
+            onPress={() => runAction(onCreateTransaction)}
           >
             <Trans>Create reconciliation transaction</Trans>
           </Button>
