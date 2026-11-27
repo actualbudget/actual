@@ -862,7 +862,6 @@ export async function matchTransactions(
         ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
 
   const hasMatched = new Set();
-  const exactMatchedParentIds = new Set<db.DbViewTransaction['id']>();
 
   const { normalized, payeesToCreate } = isBankSyncAccount
     ? await normalizeBankSyncTransactions(transactions, acctId)
@@ -900,10 +899,6 @@ export async function matchTransactions(
 
       if (match) {
         hasMatched.add(match.id);
-
-        if (isBankSyncAccount && match.is_parent) {
-          exactMatchedParentIds.add(match.id);
-        }
       }
     }
 
@@ -915,65 +910,48 @@ export async function matchTransactions(
       // fields.
       const sevenDaysBefore = db.toDateRepr(monthUtils.subDays(trans.date, 7));
       const sevenDaysAfter = db.toDateRepr(monthUtils.addDays(trans.date, 7));
-      // strictIdChecking has the added behaviour of only matching on transactions with no import ID
-      // if the transaction being imported has an import ID.
-      if (strictIdChecking) {
-        fuzzyDataset = await db.all<
-          Pick<
-            db.DbViewTransaction,
-            | 'id'
-            | 'is_parent'
-            | 'parent_id'
-            | 'date'
-            | 'imported_id'
-            | 'payee'
-            | 'imported_payee'
-            | 'category'
-            | 'notes'
-            | 'reconciled'
-            | 'cleared'
-            | 'amount'
-          >
-        >(
-          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
-          FROM v_transactions
-          WHERE
-            -- If both ids are set, and we didn't match earlier then skip dedup
-            (imported_id IS NULL OR ? IS NULL)
-            AND date >= ? AND date <= ? AND amount = ?
-            AND account = ?`,
-          [
+      // strictIdChecking only matches existing rows without an imported_id when
+      // the incoming row has one. Both modes exclude split children whose parent
+      // already has an imported_id (financial_id).
+      const strictIdFilter = strictIdChecking
+        ? '(t.imported_id IS NULL OR ? IS NULL) AND'
+        : '';
+      const fuzzyParams = strictIdChecking
+        ? [
             trans.imported_id || null,
             sevenDaysBefore,
             sevenDaysAfter,
             trans.amount || 0,
             acctId,
-          ],
-        );
-      } else {
-        fuzzyDataset = await db.all<
-          Pick<
-            db.DbViewTransaction,
-            | 'id'
-            | 'is_parent'
-            | 'parent_id'
-            | 'date'
-            | 'imported_id'
-            | 'payee'
-            | 'imported_payee'
-            | 'category'
-            | 'notes'
-            | 'reconciled'
-            | 'cleared'
-            | 'amount'
-          >
-        >(
-          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
-          FROM v_transactions
-          WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
-          [sevenDaysBefore, sevenDaysAfter, trans.amount || 0, acctId],
-        );
-      }
+          ]
+        : [sevenDaysBefore, sevenDaysAfter, trans.amount || 0, acctId];
+
+      fuzzyDataset = await db.all<
+        Pick<
+          db.DbViewTransaction,
+          | 'id'
+          | 'is_parent'
+          | 'date'
+          | 'imported_id'
+          | 'payee'
+          | 'imported_payee'
+          | 'category'
+          | 'notes'
+          | 'reconciled'
+          | 'cleared'
+          | 'amount'
+        >
+      >(
+        `SELECT t.id, t.is_parent, t.date, t.imported_id, t.payee, t.imported_payee, t.category, t.notes, t.reconciled, t.cleared, t.amount
+        FROM v_transactions t
+        LEFT JOIN transactions p ON p.id = t.parent_id
+        WHERE
+          ${strictIdFilter}
+          (p.financial_id IS NULL OR p.financial_id = '')
+          AND t.date >= ? AND t.date <= ? AND t.amount = ?
+          AND t.account = ?`,
+        fuzzyParams,
+      );
 
       // Sort the matched transactions according to the distance from the original
       // transactions date. i.e. if the original transaction is in 21-02-2024 and
@@ -1002,10 +980,7 @@ export async function matchTransactions(
     if (!data.match && data.fuzzyDataset) {
       // Try to find one where the payees match.
       const match = data.fuzzyDataset.find(
-        row =>
-          !hasMatched.has(row.id) &&
-          !exactMatchedParentIds.has(row.parent_id) &&
-          data.trans.payee === row.payee,
+        row => !hasMatched.has(row.id) && data.trans.payee === row.payee,
       );
 
       if (match) {
@@ -1022,10 +997,7 @@ export async function matchTransactions(
   // around the same date with the same amount.
   const transactionsStep3 = transactionsStep2.map(data => {
     if (!data.match && data.fuzzyDataset) {
-      const match = data.fuzzyDataset.find(
-        row =>
-          !hasMatched.has(row.id) && !exactMatchedParentIds.has(row.parent_id),
-      );
+      const match = data.fuzzyDataset.find(row => !hasMatched.has(row.id));
       if (match) {
         hasMatched.add(match.id);
         return { ...data, match };
