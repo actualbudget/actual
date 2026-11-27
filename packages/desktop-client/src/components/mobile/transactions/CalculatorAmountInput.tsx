@@ -16,6 +16,8 @@ import { amountToCurrency } from '@actual-app/core/shared/util';
 import { css, cx } from '@emotion/css';
 
 import { makeAmountFullStyle } from '#components/budget/util';
+import { useFormat } from '#hooks/useFormat';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 import { CalculatorKeyboard } from './CalculatorKeyboard';
 
@@ -92,6 +94,11 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
     isNegativeAmount(negate && value === 0 ? -value : value);
   const isNegative = useRef(valueIsNegative());
 
+  const format = useFormat();
+  const [hideFraction] = useSyncedPref('hideFraction');
+  const autoDecimals =
+    String(hideFraction) !== 'true' && format.currency.decimalPlaces !== 0;
+
   const blurRef = useRef<HTMLDivElement>(null);
   const [focused, setFocused] = useState(false);
   const isKeepingFocusRef = useRef(false);
@@ -156,8 +163,26 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
   );
 
   const onChangeExpression = useCallback(
-    (text: string) => {
+    (rawText: string, caret?: number | null) => {
       setIosInitialInteraction(true);
+
+      let text = rawText;
+      if (autoDecimals) {
+        const result = applyAutoDecimals(
+          rawText,
+          caret ?? rawText.length,
+          rawText.length < expression.length,
+        );
+        text = result.text;
+        // Write the reformatted text straight to the input so the caret can
+        // be placed now; React then finds nothing left to update. A plain
+        // assignment, not the keypad's native setter: React has to record it.
+        const input = inputRef.current;
+        if (input && text !== rawText) {
+          input.value = text;
+          input.setSelectionRange(result.caret, result.caret);
+        }
+      }
 
       setExpression(text);
       const amount = text.trim() === '' ? 0 : evalArithmetic(text);
@@ -166,7 +191,16 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
       }
       setLiveValue(negate && isNegative.current ? -amount : amount);
     },
-    [setExpression, setLiveValue, setIosInitialInteraction, negate, isNegative],
+    [
+      setExpression,
+      setLiveValue,
+      setIosInitialInteraction,
+      negate,
+      isNegative,
+      autoDecimals,
+      expression,
+      inputRef,
+    ],
   );
 
   const valueRef = useRef(value);
@@ -192,7 +226,9 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
         type="text"
         value={expression}
         placeholder="0.00"
-        onChange={e => onChangeExpression(e.target.value)}
+        onChange={e =>
+          onChangeExpression(e.target.value, e.target.selectionEnd)
+        }
         onFocus={e => {
           onInputFocus();
           onFocus?.(e);
@@ -272,6 +308,50 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
     </>
   );
 });
+
+// A number runs up to the nearest operator or parenthesis on either side
+const NUMBER_BEFORE = /[^-+*/^()]*$/;
+const NUMBER_END = /[-+*/^()]|$/;
+
+// Typed digits fill in from the cents, like the amount input this replaces:
+// 1, 2, 3 reads 1.23. Only the number at the caret is reformatted.
+// ponytail: a number right after * or / is left as typed, so "* 2" doubles
+// instead of multiplying by 0.02. A factor anywhere else ("2 * 1.50",
+// "1.50 * (2") still needs the 2 typed as 200.
+function applyAutoDecimals(text: string, caret: number, isDeleting: boolean) {
+  const start = text.slice(0, caret).search(NUMBER_BEFORE);
+  const end = caret + text.slice(caret).search(NUMBER_END);
+  // A minus right after * or / is the factor's sign, not a subtraction
+  if (/[*/]\s*-?\s*$/.test(text.slice(0, start))) {
+    return { text, caret };
+  }
+
+  const digits = text.slice(start, end).replace(/\D/g, '');
+  const cents = Number(digits);
+  // Deleting the last digit clears the number rather than leaving "0.00"
+  const formatted =
+    digits === '' || (isDeleting && cents === 0)
+      ? ''
+      : amountToCurrency(cents / 100);
+
+  const digitsAfterCaret = text.slice(caret, end).replace(/\D/g, '').length;
+  let offset = formatted.length;
+  let seen = 0;
+  while (offset > 0 && seen < digitsAfterCaret) {
+    offset--;
+    if (/\d/.test(formatted[offset])) seen++;
+  }
+  // Keep the caret against the digit before it, so backspace removes that
+  // digit rather than a separator that would only be put back
+  while (offset > 0 && /\D/.test(formatted[offset - 1])) {
+    offset--;
+  }
+
+  return {
+    text: text.slice(0, start) + formatted + text.slice(end),
+    caret: start + offset,
+  };
+}
 
 function formatAmount(value: number) {
   return value === 0 ? '' : amountToCurrency(value);

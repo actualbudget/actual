@@ -20,17 +20,6 @@ export function CalculatorButtons({
   readonly onInteractionStart?: () => void;
   readonly style?: CSSProperties;
 }) {
-  const focusInputAt = (position: number) => {
-    const input = inputRef.current;
-
-    if (!input) {
-      return;
-    }
-
-    input.focus({ preventScroll: true });
-    input.setSelectionRange(position, position);
-  };
-
   const focusInput = () => {
     inputRef.current?.focus({ preventScroll: true });
   };
@@ -51,8 +40,11 @@ export function CalculatorButtons({
       return;
     }
 
-    setNativeInputValue(input, nextExpression);
-    focusInputAt(caretPosition);
+    // The caret is placed before the change event, so the input's owner can
+    // see where the edit happened and move the caret if it reformats the value.
+    // Focus comes first, so the owner's focus handler runs before the edit.
+    focusInput();
+    setNativeInputValue(input, nextExpression, caretPosition);
   };
 
   const insertExpression = (value: string) => {
@@ -346,7 +338,11 @@ function CalculatorButton({
   );
 }
 
-function setNativeInputValue(input: HTMLInputElement, value: string) {
+function setNativeInputValue(
+  input: HTMLInputElement,
+  value: string,
+  caretPosition: number,
+) {
   // Use the native setter so React-controlled inputs receive the change.
   // oxlint-disable-next-line typescript-eslint/unbound-method
   const nativeSetter = Object.getOwnPropertyDescriptor(
@@ -355,5 +351,7 @@ function setNativeInputValue(input: HTMLInputElement, value: string) {
   )?.set;
 
   nativeSetter?.call(input, value);
+  // Setting the value moves the caret to the end
+  input.setSelectionRange(caretPosition, caretPosition);
   input.dispatchEvent(new Event('input', { bubbles: true }));
 }
