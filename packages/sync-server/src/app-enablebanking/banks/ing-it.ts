@@ -34,18 +34,14 @@ export function extractIngItalyPayee(
 
   const txType = (tx.bank_transaction_code?.description || '').toLowerCase();
 
-  // 1. Operazioni con Carta (Pagamento Carta, Prelievo Carta, Trasferimento...)
-  // Placeholder: "presso <PAYEE>"
-  if (
-    txType.includes('carta') ||
-    txType.includes('accredito su carta') ||
-    /\bpresso\b/i.test(remittance)
-  ) {
-    const cardMatch = remittance.match(
-      /\bpresso\s+(.+?)(?:\s+-\s+Transazione\b|$)/i,
+  // 1. Bonifici in uscita
+  // Placeholder: "A favore di <PAYEE>"
+  if (txType.includes('uscita') || /\bA favore di\b/i.test(remittance)) {
+    const bonificoUscitaMatch = remittance.match(
+      /\bA favore di\s+(.+?)(?:\s+IBAN beneficiario\b|\s+Note:|$)/i,
     );
-    if (cardMatch?.[1]?.trim()) {
-      return cardMatch[1].replace(/\s+/g, ' ').trim();
+    if (bonificoUscitaMatch?.[1]?.trim()) {
+      return bonificoUscitaMatch[1].replace(/\s+/g, ' ').trim();
     }
   }
 
@@ -63,28 +59,32 @@ export function extractIngItalyPayee(
     }
   }
 
-  // 3. Bonifici in uscita
-  // Placeholder: "A favore di <PAYEE>"
-  if (txType.includes('uscita') || /\bA favore di\b/i.test(remittance)) {
-    const bonificoUscitaMatch = remittance.match(
-      /\bA favore di\s+(.+?)(?:\s+IBAN beneficiario\b|\s+Note:|$)/i,
-    );
-    if (bonificoUscitaMatch?.[1]?.trim()) {
-      return bonificoUscitaMatch[1].replace(/\s+/g, ' ').trim();
-    }
-  }
-
-  // 4. Addebito Diretto (SDD)
+  // 3. Addebito Diretto (SDD)
   // Placeholder: "Creditor id. <CID> <PAYEE>"
   if (
     txType.includes('addebito diretto') ||
-    /\bCreditor id\.\b/i.test(remittance)
+    /\bCreditor id\.\s/i.test(remittance)
   ) {
     const sddMatch = remittance.match(
       /\bCreditor id\.\s+\S+\s+(.+?)(?:\s+Id Mandato\b|\s+Debitore\b|\s+Rif\.|$)/i,
     );
     if (sddMatch?.[1]?.trim()) {
       return sddMatch[1].replace(/\s+/g, ' ').trim();
+    }
+  }
+
+  // 4. Operazioni con Carta (Pagamento Carta, Prelievo Carta, Trasferimento...)
+  // Placeholder: "presso <PAYEE>"
+  if (
+    txType.includes('carta') ||
+    txType.includes('accredito su carta') ||
+    /\bpresso\b/i.test(remittance)
+  ) {
+    const cardMatch = remittance.match(
+      /\bpresso\s+(.+?)(?:\s+-\s+Transazione\b|$)/i,
+    );
+    if (cardMatch?.[1]?.trim()) {
+      return cardMatch[1].replace(/\s+/g, ' ').trim();
     }
   }
 

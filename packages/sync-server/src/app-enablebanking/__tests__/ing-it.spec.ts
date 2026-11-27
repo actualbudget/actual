@@ -73,6 +73,28 @@ describe('ING Italy adapter (ing-it)', () => {
       expect(extractIngItalyPayee(tx)).toBe('ENEL ENERGIA SPA');
     });
 
+    it('extracts payee from SDD CORE when bank_transaction_code is absent', () => {
+      const tx: EnableBankingTransaction = {
+        transaction_amount: { currency: 'EUR', amount: '-65.40' },
+        bank_transaction_code: null,
+        remittance_information: [
+          'Addebito SDD CORE Scad. 03/03/2026 Imp. 65,40 Creditor id. IT00ABC123456789 ENEL ENERGIA SPA Id Mandato MAND-98765',
+        ],
+      };
+      expect(extractIngItalyPayee(tx)).toBe('ENEL ENERGIA SPA');
+    });
+
+    it('prioritizes wire transfer recipient over "presso" in transfer notes', () => {
+      const tx: EnableBankingTransaction = {
+        transaction_amount: { currency: 'EUR', amount: '-150.00' },
+        bank_transaction_code: { description: 'Bonifico In Uscita' },
+        remittance_information: [
+          'Bonifico da voi disposto A favore di MARIO ROSSI IBAN beneficiario IT60X0542811101000000123456 Note: Pagamento presso BAR DEL CORSO',
+        ],
+      };
+      expect(extractIngItalyPayee(tx)).toBe('MARIO ROSSI');
+    });
+
     it('extracts payee from 4) Pagamento carta POS con suffisso ("presso <PAYEE>")', () => {
       const tx = typedFixtureTransactions[3];
       expect(extractIngItalyPayee(tx)).toBe('BAR DEL CORSO');
