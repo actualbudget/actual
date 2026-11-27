@@ -14,6 +14,7 @@ import type {
 import { t } from 'i18next';
 
 import { aqlQuery } from '#queries/aqlQuery';
+import * as bindings from '#spreadsheet/bindings';
 
 export async function lockTransactions(accountId: AccountEntity['id']) {
   const { data } = await aqlQuery(
@@ -70,10 +71,7 @@ export async function unlockTransaction(
 
 export async function getClearedBalance(accountId: AccountEntity['id']) {
   const { data } = await aqlQuery(
-    q('transactions')
-      .filter({ cleared: true, account: accountId })
-      .options({ splits: 'none' })
-      .calculate({ $sum: '$amount' }),
+    bindings.accountBalanceCleared(accountId).query,
   );
 
   return data ?? 0;

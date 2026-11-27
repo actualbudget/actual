@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { generateAccount } from '@actual-app/core/mocks';
-import { q } from '@actual-app/core/shared/query';
 import type { AccountEntity } from '@actual-app/core/types/models';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,6 +12,7 @@ import {
   TestProviders,
 } from '#mocks';
 import { mergeSyncedPrefs } from '#prefs/prefsSlice';
+import * as bindings from '#spreadsheet/bindings';
 
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
@@ -30,12 +30,25 @@ describe('ReconcilingMessage math & UI', () => {
     vi.clearAllMocks();
   });
 
-  function makeBalanceQuery() {
-    return {
-      name: 'balance-query-test' as const,
-      query: q('transactions'),
-    };
-  }
+  test('reads the cleared balance that the lock step checks', () => {
+    vi.mocked(useSheetValue).mockReturnValue(5000);
+
+    render(
+      <TestProviders>
+        <ReconcilingMessage
+          accountId="account-1"
+          targetBalance={5000}
+          onDone={vi.fn()}
+          onExit={vi.fn()}
+          onCreateTransaction={vi.fn()}
+        />
+      </TestProviders>,
+    );
+
+    expect(useSheetValue).toHaveBeenCalledWith(
+      bindings.accountBalanceCleared('account-1'),
+    );
+  });
 
   test('shows "All reconciled!" when target matches cleared', async () => {
     vi.mocked(useSheetValue).mockReturnValue(5000);
@@ -47,7 +60,7 @@ describe('ReconcilingMessage math & UI', () => {
     render(
       <TestProviders>
         <ReconcilingMessage
-          balanceQuery={makeBalanceQuery()}
+          accountId="account-1"
           targetBalance={5000}
           onDone={onDone}
           onExit={onExit}
@@ -76,7 +89,7 @@ describe('ReconcilingMessage math & UI', () => {
     render(
       <TestProviders>
         <ReconcilingMessage
-          balanceQuery={makeBalanceQuery()}
+          accountId="account-1"
           targetBalance={10000}
           onDone={onDone}
           onExit={onExit}
@@ -98,7 +111,7 @@ describe('ReconcilingMessage math & UI', () => {
     render(
       <TestProviders>
         <ReconcilingMessage
-          balanceQuery={makeBalanceQuery()}
+          accountId="account-1"
           targetBalance={10000}
           onDone={vi.fn()}
           onExit={vi.fn()}
@@ -127,7 +140,7 @@ describe('ReconcilingMessage math & UI', () => {
     render(
       <TestProviders>
         <ReconcilingMessage
-          balanceQuery={makeBalanceQuery()}
+          accountId="account-1"
           targetBalance={10000}
           onDone={vi.fn()}
           onExit={vi.fn()}
