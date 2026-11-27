@@ -8,16 +8,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getAccountDb } from '#account-db';
 import { SecretName, secretsService } from '#services/secrets-service';
 import { assertUrlAllowed } from '#util/ssrf';
+import type * as Ssrf from '#util/ssrf';
 
 import { handlers as app } from './app-simplefin';
 
 vi.mock('undici', async importOriginal => ({
-  ...(await importOriginal()),
+  ...(await importOriginal<typeof undici>()),
   fetch: vi.fn(),
 }));
 
 vi.mock('#util/ssrf', async importOriginal => ({
-  ...(await importOriginal()),
+  ...(await importOriginal<typeof Ssrf>()),
   assertUrlAllowed: vi.fn().mockResolvedValue(undefined),
   createSsrfDispatcher: vi.fn(),
 }));
