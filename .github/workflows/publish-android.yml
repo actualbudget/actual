@@ -78,3 +78,18 @@ jobs:
           path: |
             packages/mobile-client/build/app-release-signed.apk
             packages/mobile-client/build/app-release-signed.aab
+
+      # GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS (in the `release` environment):
+      # a Google Cloud service account JSON key with permission to release
+      # org.actualbudget to testing and production tracks. Requires the Google
+      # Play Android Developer API. Automatic publication after approval requires
+      # managed publishing to be disabled in Play Console.
+      - name: Upload to Google Play
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS }}
+          TRACK: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'production' || 'internal' }}
+        run: |
+          pipx run --spec codemagic-cli-tools==0.70.0 google-play bundles publish \
+            --bundle packages/mobile-client/build/app-release-signed.aab \
+            --track "$TRACK" \
+            --release-notes '[{"language":"en-US","text":"Full release notes: https://actualbudget.org/docs/releases"}]'
