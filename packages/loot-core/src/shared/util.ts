@@ -579,11 +579,38 @@ export function looselyParseAmount(amount: string) {
     amount = amount.replace(/\u2212/g, '-');
   }
 
-  // Look for a decimal marker, then look for either 1-2 or 4-9 decimal places.
+  // Scientific notation (e.g. "-1.26E-06" from forex exports): parse the
+  // mantissa, then apply the exponent (#9415). Checked after the sign
+  // normalization so "(1.26E-06)" / "−1.26E-06" also match.
+  const scientific = amount.match(/^(.*)e([+-]?\d+)$/i);
+  if (scientific) {
+    // Inside scientific notation the mantissa is a plain decimal number, so
+    // its last separator is the decimal marker even when three digits follow
+    // it: `1.234e2` is 123.4, not the thousands-grouped 1234e2.
+    const mantissaText = scientific[1].replace(/[^0-9.,-]/g, '');
+    const lastSeparator = Math.max(
+      mantissaText.lastIndexOf('.'),
+      mantissaText.lastIndexOf(','),
+    );
+    const mantissa =
+      lastSeparator === -1
+        ? mantissaText
+        : mantissaText.slice(0, lastSeparator).replace(/[.,]/g, '') +
+          '.' +
+          mantissaText.slice(lastSeparator + 1).replace(/[.,]/g, '');
+    // Keep the mantissa as text: going through Number() would print small
+    // values back in exponential form (`1e-7`), which parseFloat cannot
+    // combine with a second exponent (`1e-7e8` -> 1e-7). parseFloat rounds
+    // the combined string correctly, so `0.0000001e8` is 10 and
+    // `1000000000000000e-14` is 10 rather than being rejected as unsafe.
+    return safeNumber(parseFloat(`${mantissa}e${scientific[2]}`));
+  }
+
+  // Look for a decimal marker, then look for either 1-2 or 4+ decimal places.
   // This avoids matching against 3 places which may not actually be decimal.
   // Only digits count as places, so a currency symbol or code after the
   // number does not change how many there are.
-  const m = amount.match(/[.,](\d{4,9}|\d{1,2})[^\d.,]*$/);
+  const m = amount.match(/[.,](\d{4,}|\d{1,2})[^\d.,]*$/);
   if (!m || m.index === undefined) {
     return safeNumber(parseFloat(extractNumbers(amount)));
   }
