@@ -4,9 +4,6 @@ import type {
   NearbyPayeeEntity,
   PayeeLocationEntity,
 } from '@actual-app/core/types/models';
-import { Geolocation } from '@capacitor/geolocation';
-
-import { hasOnlyApproximateNativeLocation } from './native-location-permission';
 
 /**
  * Abstraction for geolocation functionality
@@ -31,7 +28,7 @@ export type LocationApiClient = {
   ): Promise<NearbyPayeeEntity[]>;
 };
 
-const DEFAULT_POSITION_OPTIONS: PositionOptions = {
+export const DEFAULT_POSITION_OPTIONS: PositionOptions = {
   enableHighAccuracy: true,
   timeout: 15000, // 15 second timeout
   maximumAge: 60000, // Accept 1-minute-old cached position
@@ -56,28 +53,6 @@ export class BrowserGeolocationAdapter implements GeolocationAdapter {
         });
       },
     );
-    return {
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
-    };
-  }
-}
-
-/**
- * Native (Capacitor) implementation of geolocation. It reads the location
- * from the operating system, which asks for permission once. The Web
- * Geolocation API would make the web view ask a second time.
- */
-export class CapacitorGeolocationAdapter implements GeolocationAdapter {
-  async getCurrentPosition(
-    options: PositionOptions = {},
-  ): Promise<LocationCoordinates> {
-    const isApproximateOnly = await hasOnlyApproximateNativeLocation();
-    const position = await Geolocation.getCurrentPosition({
-      ...DEFAULT_POSITION_OPTIONS,
-      ...options,
-      ...(isApproximateOnly && { enableHighAccuracy: false }),
-    });
     return {
       latitude: position.coords.latitude,
       longitude: position.coords.longitude,

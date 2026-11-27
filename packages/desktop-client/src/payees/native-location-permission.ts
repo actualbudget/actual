@@ -45,6 +45,7 @@ export async function refreshNativeLocationPermission() {
     state = 'denied';
   }
   notify(state);
+  return state;
 }
 
 /** Shows the system permission prompt and tells every subscriber the answer. */
@@ -56,6 +57,7 @@ export async function requestNativeLocationPermission() {
     state = 'denied';
   }
   notify(state);
+  return state;
 }
 
 /**
