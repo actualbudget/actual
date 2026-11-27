@@ -103,7 +103,7 @@ jobs:
       # Automatic publication after approval requires managed publishing to be off.
       - name: Upload to Google Play
         env:
-          TRACK: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'production' || 'internal' }}
+          TRACK: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'production' || 'alpha' }}
           FASTLANE_SKIP_UPDATE_CHECK: '1'
           FASTLANE_OPT_OUT_USAGE: '1'
         run: |
