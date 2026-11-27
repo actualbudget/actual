@@ -21,6 +21,7 @@ import { Checkbox, FormField, FormLabel } from '#components/forms';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useServerURL, useServerVersion } from '#components/ServerContext';
+import { useAppLockStatus } from '#hooks/useAppLockStatus';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useMetadataPref } from '#hooks/useMetadataPref';
@@ -29,6 +30,7 @@ import { loadPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 
 import { ApiKeys } from './ApiKeys';
+import { AppLockSettings } from './AppLockSettings';
 import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
@@ -280,6 +282,7 @@ export function GeneralSettings() {
   const [fileId] = useMetadataPref('cloudFileId');
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
   const serverURL = useServerURL();
+  const [appLockStatus, setAppLockStatus] = useAppLockStatus();
 
   return (
     <SettingsSections title={t('General')}>
@@ -292,11 +295,19 @@ export function GeneralSettings() {
       <SettingsGroup title={t('Budget')}>
         <BudgetTypeSettings />
       </SettingsGroup>
-      {serverURL && (
+      {(serverURL || appLockStatus) && (
         <SettingsGroup title={t('Security')}>
+          {appLockStatus && (
+            <AppLockSettings
+              status={appLockStatus}
+              onStatusChange={setAppLockStatus}
+            />
+          )}
           <AuthSettings />
           <EncryptionSettings />
-          {fileId && <ApiKeys key={`${serverURL}:${fileId}`} fileId={fileId} />}
+          {serverURL && fileId && (
+            <ApiKeys key={`${serverURL}:${fileId}`} fileId={fileId} />
+          )}
         </SettingsGroup>
       )}
       <SettingsGroup title={t('Data')}>

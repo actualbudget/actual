@@ -12,6 +12,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, UIGestureRecognizerDele
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
+        AppLock.shared.sceneWillConnect(scene)
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
@@ -28,6 +29,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, UIGestureRecognizerDele
     // only on a page header. A recognizer attached to the web view is held
     // back the same way, hence the window.
     func sceneDidBecomeActive(_ scene: UIScene) {
+        AppLock.shared.sceneDidBecomeActive(scene)
         guard backSwipe == nil, let window = window else {
             return
         }
@@ -54,6 +56,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, UIGestureRecognizerDele
             return
         }
         (window?.rootViewController as? CAPBridgeViewController)?.webView?.goBack()
+    }
+
+    func sceneWillResignActive(_ scene: UIScene) {
+        AppLock.shared.sceneWillResignActive(scene)
+    }
+
+    func sceneDidEnterBackground(_ scene: UIScene) {
+        AppLock.shared.sceneDidEnterBackground(scene)
     }
 
 }

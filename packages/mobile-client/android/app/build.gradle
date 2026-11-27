@@ -36,6 +36,9 @@ repositories {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    // 1.1.0 (the last stable release) does not fall back to the PIN, pattern
+    // or password on Android 10 devices without biometric hardware.
+    implementation "androidx.biometric:biometric:1.2.0-alpha05"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')

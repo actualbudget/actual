@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { isElectron } from '@actual-app/core/shared/environment';
+import { isNativeMobileApp } from '@actual-app/core/shared/platform';
 import type { FeatureFlag, ServerPrefs } from '@actual-app/core/types/prefs';
 
 import { useAuth } from '#auth/AuthProvider';
@@ -254,6 +255,11 @@ export function ExperimentalFeatures() {
       >
         <Trans>Monte Carlo Analysis Report</Trans>
       </FeatureToggle>
+      {isNativeMobileApp && (
+        <FeatureToggle flag="nativeAppFeatures">
+          <Trans>Native app features (app lock)</Trans>
+        </FeatureToggle>
+      )}
       {showServerPrefs && (
         <ServerFeatureToggle
           prefName="flags.plugins"
