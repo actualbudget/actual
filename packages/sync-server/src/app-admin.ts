@@ -96,14 +96,12 @@ app.post('/users', validateSessionMiddleware, async (req, res) => {
   }
 
   const userId = uuidv4();
-  // `role` is checked above but has never been passed on, so a new user is
-  // stored without a role.
   UserService.insertUser(
     userId,
     userName,
     displayName || null,
     enabled ? 1 : 0,
-    undefined,
+    role,
   );
 
   res.status(200).send({ status: 'ok', data: { id: userId } });
