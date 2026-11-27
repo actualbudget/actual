@@ -1,5 +1,6 @@
 import createDebug from 'debug';
 import express from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { fetch } from 'undici';
 
 import { handleError } from '#app-gocardless/util/handle-error';
@@ -14,6 +15,58 @@ import {
 import { isValidFileId } from '#util/paths';
 import { assertUrlAllowed, createSsrfDispatcher } from '#util/ssrf';
 import { validateBankSyncSession } from '#util/validate-budget-session';
+
+// The parts of a SimpleFIN `GET /accounts` response that this file reads.
+// `payee` is not in the protocol; the SimpleFIN Bridge adds it.
+type SimpleFinTransaction = {
+  id: string;
+  posted: number;
+  amount: string;
+  description: string;
+  payee?: string;
+  transacted_at?: number;
+  pending?: boolean;
+};
+
+type SimpleFinAccount = {
+  id: string;
+  org: { name?: string };
+  currency: string;
+  balance: string;
+  'balance-date': number;
+  transactions?: SimpleFinTransaction[];
+};
+
+type AccountError = {
+  error_type: string;
+  error_code: string;
+  reason: string;
+};
+
+// `getAccounts` moves SimpleFIN's own `errors` to `sferrors` and uses `errors`
+// for the errors per account.
+type SimpleFinResults = {
+  accounts?: SimpleFinAccount[];
+  sferrors: string[];
+  hasError: boolean;
+  errors: Record<string, AccountError[]>;
+};
+
+type BankSyncTransaction = {
+  booked: boolean;
+  sortOrder: number;
+  date: string;
+  payeeName?: string;
+  notes: string;
+  transactionAmount: { amount: string; currency: string };
+  transactionId: string;
+  bookingDate?: string;
+  valueDate?: string;
+  transactedDate?: string;
+  postedDate?: string;
+};
+
+type AccountResponse = ReturnType<typeof getAccountResponse>;
 
 const debugSensitive = createDebug('actual-sensitive:simplefin');
 const networkOptions = {
@@ -41,7 +94,7 @@ budgetAccounts.use(validateBankSyncSession());
 app.use(bankSync, budgetAccounts);
 app.use(validateSessionMiddleware);
 
-function selectCredentials(req, res, next) {
+function selectCredentials(req: Request, res: Response, next: NextFunction) {
   const fileId = req.get('X-Actual-File-Id');
   if (fileId != null) {
     if (!isValidFileId(fileId)) {
@@ -99,7 +152,7 @@ budgetAccounts.post(
       res.locals.credentialFileId,
     );
 
-    if (isInvalidAccessKey(accessKey)) {
+    if (accessKey === null || isInvalidAccessKey(accessKey)) {
       const token = secretsService.get(
         SecretName.simplefin_token,
         res.locals.credentialFileId,
@@ -170,7 +223,7 @@ bankSync.post(
       res.locals.credentialFileId,
     );
 
-    if (isInvalidAccessKey(accessKey)) {
+    if (accessKey === null || isInvalidAccessKey(accessKey)) {
       invalidToken(res);
       return;
     }
@@ -197,7 +250,7 @@ bankSync.post(
         new Date(earliestStartDate),
       );
     } catch (e) {
-      if (isForbidden(e.message)) {
+      if (e instanceof Error && isForbidden(e.message)) {
         invalidToken(res);
       } else {
         serverDown(e, res);
@@ -205,7 +258,7 @@ bankSync.post(
       return;
     }
 
-    let response = {};
+    let response: Record<string, AccountResponse> | AccountResponse = {};
     if (Array.isArray(accountId)) {
       for (let i = 0; i < accountId.length; i++) {
         const id = accountId[i];
@@ -235,16 +288,26 @@ bankSync.post(
   }),
 );
 
-function logAccountError(results, accountId, data) {
+function logAccountError(
+  results: SimpleFinResults,
+  accountId: string,
+  data: AccountError,
+) {
   const errors = results.errors[accountId] || [];
   errors.push(data);
   results.errors[accountId] = errors;
   results.hasError = true;
 }
 
-function getAccountResponse(results, accountId, startDate) {
-  const account =
-    !results?.accounts || results.accounts.find(a => a.id === accountId);
+function getAccountResponse(
+  results: SimpleFinResults,
+  accountId: string,
+  startDate: Date,
+) {
+  if (!results?.accounts) {
+    throw new Error('SimpleFIN returned no list of accounts');
+  }
+  const account = results.accounts.find(a => a.id === accountId);
   if (!account) {
     console.log(
       `The account "${accountId}" was not found. Here were the accounts returned:`,
@@ -294,21 +357,28 @@ function getAccountResponse(results, accountId, startDate) {
     },
   ];
 
-  const all = [];
-  const booked = [];
-  const pending = [];
+  const all: BankSyncTransaction[] = [];
+  const booked: BankSyncTransaction[] = [];
+  const pending: BankSyncTransaction[] = [];
+
+  if (account.transactions === undefined) {
+    throw new Error(`SimpleFIN returned no transactions for "${accountId}"`);
+  }
 
   for (const trans of account.transactions) {
-    const newTrans = {};
-
-    let dateToUse = 0;
+    let isBooked: boolean;
+    let dateToUse: number | undefined;
 
     if (trans.pending ?? trans.posted === 0) {
-      newTrans.booked = false;
+      isBooked = false;
       dateToUse = trans.transacted_at;
     } else {
-      newTrans.booked = true;
+      isBooked = true;
       dateToUse = trans.posted;
+    }
+
+    if (dateToUse === undefined) {
+      throw new Error('SimpleFIN returned a transaction without a date');
     }
 
     const transactionDate = new Date(dateToUse * 1000);
@@ -317,12 +387,15 @@ function getAccountResponse(results, accountId, startDate) {
       continue;
     }
 
-    newTrans.sortOrder = dateToUse;
-    newTrans.date = getDate(transactionDate);
-    newTrans.payeeName = trans.payee;
-    newTrans.notes = trans.description;
-    newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
-    newTrans.transactionId = trans.id;
+    const newTrans: BankSyncTransaction = {
+      booked: isBooked,
+      sortOrder: dateToUse,
+      date: getDate(transactionDate),
+      payeeName: trans.payee,
+      notes: trans.description,
+      transactionAmount: { amount: trans.amount, currency: 'USD' },
+      transactionId: trans.id,
+    };
     newTrans.valueDate = newTrans.bookingDate;
 
     if (trans.transacted_at) {
@@ -341,7 +414,8 @@ function getAccountResponse(results, accountId, startDate) {
     all.push(newTrans);
   }
 
-  const sortFunction = (a, b) => b.sortOrder - a.sortOrder;
+  const sortFunction = (a: BankSyncTransaction, b: BankSyncTransaction) =>
+    b.sortOrder - a.sortOrder;
 
   const bookedSorted = booked.sort(sortFunction);
   const pendingSorted = pending.sort(sortFunction);
@@ -358,7 +432,7 @@ function getAccountResponse(results, accountId, startDate) {
   };
 }
 
-function invalidToken(res) {
+function invalidToken(res: Response) {
   res.send({
     status: 'ok',
     data: {
@@ -371,7 +445,7 @@ function invalidToken(res) {
   });
 }
 
-function serverDown(e, res) {
+function serverDown(e: unknown, res: Response) {
   console.log('Error communicating with SimpleFIN');
   debugSensitive('Error communicating with SimpleFIN: %O', e);
   res.send({
@@ -387,7 +461,7 @@ function serverDown(e, res) {
 
 const ACCESS_KEY_FORMAT = /^.*\/\/.*:.*@.*$/;
 
-function parseAccessKey(accessKey) {
+function parseAccessKey(accessKey: string) {
   let scheme = null;
   let rest = null;
   let auth = null;
@@ -409,7 +483,7 @@ function parseAccessKey(accessKey) {
   };
 }
 
-function decodeClaimUrl(base64Token) {
+function decodeClaimUrl(base64Token: string) {
   const decoded = Buffer.from(base64Token, 'base64').toString();
 
   let url;
@@ -426,7 +500,7 @@ function decodeClaimUrl(base64Token) {
   return decoded;
 }
 
-async function claimAccessKey(claimUrl) {
+async function claimAccessKey(claimUrl: string) {
   await assertUrlAllowed(claimUrl, networkOptions);
 
   // don't auto-follow redirects for SSRF safety
@@ -443,11 +517,11 @@ async function claimAccessKey(claimUrl) {
   return (await response.text()).trim();
 }
 
-function isForbidden(value) {
+function isForbidden(value: unknown) {
   return typeof value === 'string' && value.startsWith('Forbidden');
 }
 
-function isInvalidAccessKey(accessKey) {
+function isInvalidAccessKey(accessKey: unknown) {
   return (
     typeof accessKey !== 'string' ||
     isForbidden(accessKey) ||
@@ -455,7 +529,12 @@ function isInvalidAccessKey(accessKey) {
   );
 }
 
-async function getTransactions(accessKey, accounts, startDate, endDate) {
+async function getTransactions(
+  accessKey: string,
+  accounts: string[],
+  startDate: Date,
+  endDate?: Date,
+) {
   const now = new Date();
   startDate = startDate || new Date(now.getFullYear(), now.getMonth(), 1);
   endDate = endDate || new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -463,24 +542,24 @@ async function getTransactions(accessKey, accounts, startDate, endDate) {
   return await getAccounts(accessKey, accounts, startDate, endDate);
 }
 
-function getDate(date) {
+function getDate(date: Date) {
   return date.toISOString().split('T')[0];
 }
 
-function normalizeDate(date) {
+function normalizeDate(date: Date) {
   return (date.valueOf() - date.getTimezoneOffset() * 60 * 1000) / 1000;
 }
 
 async function getAccounts(
-  accessKey,
-  accounts,
-  startDate,
-  endDate,
+  accessKey: string,
+  accounts: string[] | null,
+  startDate: Date | null,
+  endDate: Date | null,
   noTransactions = false,
-) {
+): Promise<SimpleFinResults> {
   const sfin = parseAccessKey(accessKey);
 
-  const headers = {
+  const headers: Record<string, string> = {
     Authorization: `Basic ${Buffer.from(
       `${sfin.username}:${sfin.password}`,
     ).toString('base64')}`,
@@ -489,10 +568,10 @@ async function getAccounts(
   const params = new URLSearchParams();
   if (!noTransactions) {
     if (startDate) {
-      params.append('start-date', normalizeDate(startDate));
+      params.append('start-date', String(normalizeDate(startDate)));
     }
     if (endDate) {
-      params.append('end-date', normalizeDate(endDate));
+      params.append('end-date', String(normalizeDate(endDate)));
     }
     params.append('pending', '1');
   } else {
