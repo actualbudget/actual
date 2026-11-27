@@ -4,8 +4,10 @@ import { colors } from './colors';
 import {
   accentSurfaceTokens,
   deriveAccent,
+  deriveStatus,
   nearestWithContrast,
   shapeContrast,
+  strongTextContrast,
   textContrast,
 } from './derive';
 import { palette } from './palette';
@@ -148,6 +150,47 @@ describe('deriveAccent', () => {
       expect(ratios.subtleTextOnSubtle).toBeGreaterThanOrEqual(textContrast);
       expect(ratios.borderOnSurface).toBeGreaterThanOrEqual(shapeContrast);
       expect(ratios.borderOnPage).toBeGreaterThanOrEqual(shapeContrast);
+    });
+  });
+});
+
+describe('deriveStatus', () => {
+  it('makes a pale fill on a light table and a deep one on a dark table', () => {
+    const onLight = deriveStatus('#27ab83', surfacesOf('light'));
+    const onDark = deriveStatus('#27ab83', surfacesOf('dark'));
+
+    expect(wcagContrast(onLight.fill, '#ffffff')).toBeLessThan(1.3);
+    expect(wcagContrast(onDark.fill, '#ffffff')).toBeGreaterThan(4);
+    expect(wcagContrast(onLight.fillSubtle, '#ffffff')).toBeLessThan(
+      wcagContrast(onLight.fill, '#ffffff'),
+    );
+    expect(wcagContrast(onDark.fillSubtle, '#ffffff')).toBeGreaterThan(
+      wcagContrast(onDark.fill, '#ffffff'),
+    );
+  });
+
+  describe.each(themeNames)('on the %s theme', theme => {
+    const surfaces = surfacesOf(theme);
+    const backgrounds = [surfaces.surface, surfaces.page, surfaces.mobilePage];
+    const lowest = (color: string, fill: string) =>
+      Math.min(
+        ...[...backgrounds, fill].map(background =>
+          wcagContrast(color, background),
+        ),
+      );
+
+    it.each(sweep)('keeps %s readable on its fills and the surfaces', input => {
+      const status = deriveStatus(input, surfaces);
+
+      expect(lowest(status.text, status.fill)).toBeGreaterThanOrEqual(
+        textContrast,
+      );
+      expect(
+        lowest(status.textOnSubtle, status.fillSubtle),
+      ).toBeGreaterThanOrEqual(textContrast);
+      expect(lowest(status.textStrong, status.fill)).toBeGreaterThanOrEqual(
+        strongTextContrast,
+      );
     });
   });
 });

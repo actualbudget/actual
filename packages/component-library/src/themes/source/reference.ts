@@ -36,6 +36,12 @@ function source(value: TokenValue) {
     const over = value.over == null ? '' : ` over \`--color-${value.over}\``;
     return `Black or white on \`--color-${value.contrastOn}\`${over}`;
   }
+  if ('statusOf' in value) {
+    const input = `\`--color-${value.statusOf}\``;
+    return value.part === 'fill' || value.part === 'fillSubtle'
+      ? `${input}, as a fill`
+      : `${input}, readable as text`;
+  }
   if ('raw' in value) {
     const mixed = [...value.raw.matchAll(/var\(--color-([A-Za-z0-9]+)\)/g)].map(
       match => `\`--color-${match[1]}\``,

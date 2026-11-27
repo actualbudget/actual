@@ -4,6 +4,7 @@ import {
   accentSurfaceTokens,
   deriveAccent,
   derivedAccentTokens,
+  deriveStatus,
   nearestWithContrast,
   pickContrast,
   textContrast,
@@ -34,6 +35,15 @@ function accentTextOnTokens(theme: ThemeName) {
             contrast: value.contrast ?? textContrast,
           },
         ]
+      : [];
+  });
+}
+
+function statusTokens(theme: ThemeName) {
+  return Object.entries(definitions).flatMap(([name, definition]) => {
+    const value = 'all' in definition ? definition.all : definition[theme];
+    return typeof value === 'object' && 'statusOf' in value
+      ? [{ name, status: value.statusOf, part: value.part }]
       : [];
   });
 }
@@ -152,13 +162,33 @@ function derive(theme: ThemeName, css: string) {
       mobilePage: toHex(mobilePage),
     },
   );
-  const resolveWithSet = createResolver(
-    theme,
-    declarations,
-    Object.fromEntries(
+  const statusFollowers = statusTokens(theme);
+  const statusValues = new Map<string, string>();
+  for (const status of new Set(statusFollowers.map(token => token.status))) {
+    const followers = statusFollowers.filter(token => token.status === status);
+    if (followers.every(token => declarations.has(`color-${token.name}`))) {
+      continue;
+    }
+    const input = resolve(`color-${status}`) ?? builtIn(status);
+    const statusSet = deriveStatus(
+      toHex(input.alpha < 1 ? composite(input, surface) : input),
+      {
+        surface: toHex(surface),
+        page: toHex(page),
+        mobilePage: toHex(mobilePage),
+      },
+    );
+    for (const follower of followers) {
+      statusValues.set(follower.name, statusSet[follower.part]);
+    }
+  }
+
+  const resolveWithSet = createResolver(theme, declarations, {
+    ...Object.fromEntries(
       derivedAccentTokens.map(name => [name, accentSet[name]]),
     ),
-  );
+    ...Object.fromEntries(statusValues),
+  });
   const readSetSurface = surfaceReader(resolveWithSet);
   const readFill = (token: string, over?: string) => {
     const fill = resolveWithSet(`color-${token}`) ?? builtIn(token);
@@ -169,6 +199,7 @@ function derive(theme: ThemeName, css: string) {
   };
   const derived = [
     ...derivedAccentTokens.map(name => ({ name, value: accentSet[name] })),
+    ...[...statusValues].map(([name, value]) => ({ name, value })),
     ...textOnTokens.map(token => ({
       name: token.name,
       value: nearestWithContrast(

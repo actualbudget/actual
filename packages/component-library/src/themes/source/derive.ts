@@ -5,6 +5,7 @@ import {
   interpolate,
   parse,
   wcagContrast,
+  wcagLuminance,
 } from './color';
 
 export type AccentSet = {
@@ -18,6 +19,16 @@ export type AccentSet = {
 };
 
 export type DerivedAccentToken = Exclude<keyof AccentSet, 'accent'>;
+
+export type StatusSet = {
+  fill: string;
+  fillSubtle: string;
+  text: string;
+  textOnSubtle: string;
+  textStrong: string;
+};
+
+export type StatusPart = keyof StatusSet;
 
 export type AccentSurfaces = {
   surface: string;
@@ -41,6 +52,7 @@ export const derivedAccentTokens: DerivedAccentToken[] = [
 ];
 
 export const textContrast = 4.5;
+export const strongTextContrast = 6;
 export const shapeContrast = 3;
 
 const white = '#ffffff';
@@ -50,8 +62,12 @@ const lightnessSteps = 200;
 const subtleWeightOnLight = 0.12;
 const subtleWeightOnDark = 0.28;
 
+const statusFillLightness = { light: 0.94, dark: 0.46 };
+const statusFillSubtleLightness = { light: 0.97, dark: 0.37 };
+
 const toOklch = converter('oklch');
 const cache = new Map<string, AccentSet>();
+const statusCache = new Map<string, StatusSet>();
 
 function toColor(css: string) {
   const color = toOklch(parse(css));
@@ -61,20 +77,96 @@ function toColor(css: string) {
   return color;
 }
 
-function withLightness(css: string, lightness: number) {
+function atLightness(color: ReturnType<typeof toColor>, lightness: number) {
   return formatHex(
     clampChroma(
-      { ...toColor(css), l: Math.min(1, Math.max(0, lightness)) },
+      { ...color, l: Math.min(1, Math.max(0, lightness)) },
       'oklch',
       'rgb',
     ),
   );
 }
 
-function lowestContrast(css: string, backgrounds: string[]) {
-  return Math.min(
-    ...backgrounds.map(background => wcagContrast(css, background)),
-  );
+function withLightness(css: string, lightness: number) {
+  return atLightness(toColor(css), lightness);
+}
+
+type ContrastGoal = { backgrounds: string[]; target: number };
+type LightnessStep = { color: string; luminance: number };
+
+const stepCache = new Map<string, Array<LightnessStep | undefined>>();
+
+function stepsOf(start: string, base: ReturnType<typeof toColor>) {
+  let steps = stepCache.get(start);
+  if (steps == null) {
+    steps = [];
+    stepCache.set(start, steps);
+  }
+  const cached = steps;
+  return (index: number) => {
+    let step = cached[index];
+    if (step == null) {
+      const color = atLightness(base, index / lightnessSteps);
+      step = { color, luminance: wcagLuminance(color) };
+      cached[index] = step;
+    }
+    return step;
+  };
+}
+
+export function nearestWithContrasts(css: string, goals: ContrastGoal[]) {
+  const base = toColor(css);
+  const start = formatHex(base);
+  const searches = goals.map(goal => ({
+    target: goal.target,
+    luminances: goal.backgrounds.map(background => wcagLuminance(background)),
+    found: null as string | null,
+    strongest: { color: start, contrast: 0 },
+  }));
+
+  const measure = ({ color, luminance: own }: LightnessStep) => {
+    let open = 0;
+    for (const search of searches) {
+      if (search.found != null) {
+        continue;
+      }
+      let lowest = Infinity;
+      for (const luminance of search.luminances) {
+        const contrast =
+          (Math.max(own, luminance) + 0.05) / (Math.min(own, luminance) + 0.05);
+        if (contrast < lowest) {
+          lowest = contrast;
+        }
+      }
+      if (lowest >= search.target) {
+        search.found = color;
+      } else {
+        open += 1;
+        if (lowest > search.strongest.contrast) {
+          search.strongest = { color, contrast: lowest };
+        }
+      }
+    }
+    return open;
+  };
+
+  if (measure({ color: start, luminance: wcagLuminance(start) }) > 0) {
+    const stepAt = stepsOf(start, base);
+    const nearestFirst = Array.from(
+      { length: lightnessSteps + 1 },
+      (_, index) => index,
+    ).sort(
+      (a, b) =>
+        Math.abs(a / lightnessSteps - base.l) -
+        Math.abs(b / lightnessSteps - base.l),
+    );
+    for (const index of nearestFirst) {
+      if (measure(stepAt(index)) === 0) {
+        break;
+      }
+    }
+  }
+  return searches.map(search => search.found ?? search.strongest.color);
 }
 
 export function nearestWithContrast(
@@ -82,31 +174,7 @@ export function nearestWithContrast(
   backgrounds: string[],
   target: number,
 ) {
-  const start = formatHex(toColor(css));
-  let strongest = {
-    color: start,
-    contrast: lowestContrast(start, backgrounds),
-  };
-  if (strongest.contrast >= target) {
-    return start;
-  }
-
-  const startLightness = toColor(css).l;
-  const nearestFirst = Array.from(
-    { length: lightnessSteps + 1 },
-    (_, step) => step / lightnessSteps,
-  ).sort((a, b) => Math.abs(a - startLightness) - Math.abs(b - startLightness));
-  for (const lightness of nearestFirst) {
-    const color = withLightness(css, lightness);
-    const contrast = lowestContrast(color, backgrounds);
-    if (contrast >= target) {
-      return color;
-    }
-    if (contrast > strongest.contrast) {
-      strongest = { color, contrast };
-    }
-  }
-  return strongest.color;
+  return nearestWithContrasts(css, [{ backgrounds, target }])[0];
 }
 
 export function pickContrast(fill: string) {
@@ -160,4 +228,30 @@ export function deriveAccent(
   };
   cache.set(key, accentSet);
   return accentSet;
+}
+
+export function deriveStatus(
+  status: string,
+  { surface, page, mobilePage }: AccentSurfaces,
+): StatusSet {
+  const key = `${status}|${surface}|${page}|${mobilePage}`;
+  const cached = statusCache.get(key);
+  if (cached != null) {
+    return cached;
+  }
+
+  const input = toColor(status);
+  const tone = toColor(surface).l > 0.5 ? 'light' : 'dark';
+  const fill = atLightness(input, statusFillLightness[tone]);
+  const fillSubtle = atLightness(input, statusFillSubtleLightness[tone]);
+  const surfaces = [surface, page, mobilePage];
+  const [text, textOnSubtle, textStrong] = nearestWithContrasts(status, [
+    { backgrounds: [...surfaces, fill], target: textContrast },
+    { backgrounds: [...surfaces, fillSubtle], target: textContrast },
+    { backgrounds: [...surfaces, fill], target: strongTextContrast },
+  ]);
+
+  const statusSet = { fill, fillSubtle, text, textOnSubtle, textStrong };
+  statusCache.set(key, statusSet);
+  return statusSet;
 }
