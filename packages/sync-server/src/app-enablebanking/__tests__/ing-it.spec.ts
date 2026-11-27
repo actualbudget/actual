@@ -6,11 +6,11 @@ import {
   extractIngItalyPayee,
   isIngItaly,
 } from '#app-enablebanking/banks/ing-it';
-import type { EnableBankingTransaction } from '#app-enablebanking/services/enablebanking-service';
 import {
   normalizeTransaction,
   normalizeTransactions,
 } from '#app-enablebanking/services/enablebanking-service';
+import type { EnableBankingTransaction } from '#app-enablebanking/services/enablebanking-service';
 
 const fixtureTransactions: EnableBankingTransaction[] = JSON.parse(
   readFileSync(
