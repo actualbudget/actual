@@ -1,0 +1,48 @@
+name: custom-budget CI
+
+# Runs the custom-budget patch checks (plain Node, no extra dependencies).
+# This workflow lives at the repo root (.github/workflows/ci.yml) because
+# GitHub Actions only reads workflows from there. It only tests the files
+# under custom-budget/ — it does not build or touch the upstream app.
+#
+# The patch is generated, not committed: CI builds it from
+# custom-budget/actual-budget-tweaks.js.template + config.example.yml
+# (via build-patch.js, which also validates that the demo figures
+# reconcile), then checks and tests the generated file.
+on:
+  push:
+    paths:
+      - 'custom-budget/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    paths:
+      - 'custom-budget/**'
+      - '.github/workflows/ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build the patch from the demo config
+        run: node custom-budget/build-patch.js custom-budget/config.example.yml
+      - name: Syntax-check the generated patch
+        run: node --check custom-budget/actual-budget-tweaks.js
+      - name: Run the fake-DOM test suite
+        run: node custom-budget/tests/test-tweaks.js
+      - name: Run the build-step tests
+        run: node custom-budget/tests/test-build.js
+      - name: Confirm no secrets in the demo files
+        # The demo files must not contain a pasted Actual API key (the
+        # "actual_..." key format) or a non-placeholder hostname/IP.
+        # The demo figures themselves are checked by the reconciliation
+        # assertions in the test suite. (This step deliberately does not
+        # name any real value — it matches the key format only.)
+        run: |
+          ! grep -R -E "actual_[A-Za-z0-9]{20,}" custom-budget/ || (echo "possible API key found in custom-budget/" && exit 1)
+          ! grep -R -E "https?://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" custom-budget/ || (echo "IP-based URL found in custom-budget/ (use example.com)" && exit 1)
+          echo "no secrets found"
