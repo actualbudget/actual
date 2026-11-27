@@ -104,7 +104,7 @@ jobs:
       # Automatic publication after approval requires managed publishing to be off.
       - name: Upload to Google Play
         env:
-          TRACK: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'production' || 'internal' }}
+          TRACK: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'production' || 'alpha' }}
           # The store listing is shared across tracks; update it only for stable releases.
           SKIP_UPLOAD_LISTING: ${{ github.event_name != 'release' || github.event.release.prerelease }}
           FASTLANE_SKIP_UPDATE_CHECK: '1'
