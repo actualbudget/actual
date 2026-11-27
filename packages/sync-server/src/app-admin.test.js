@@ -310,6 +310,31 @@ describe('/admin', () => {
         expect(res.body.data.someDeletionsFailed).toBe(false);
       });
 
+      it("should give the deleted user's files to the OpenID owner", async () => {
+        const fileId = uuidv4();
+        getAccountDb().mutate('INSERT INTO files (id, owner) VALUES (?, ?)', [
+          fileId,
+          testUserId,
+        ]);
+
+        const res = await request(app)
+          .delete('/users')
+          .send({ ids: [testUserId] })
+          .set('x-actual-token', sessionToken);
+
+        const newOwner = getAccountDb().first(
+          `SELECT users.user_name, users.owner
+           FROM files JOIN users ON users.id = files.owner
+           WHERE files.id = ?`,
+          [fileId],
+        );
+        getAccountDb().mutate('DELETE FROM files WHERE id = ?', [fileId]);
+
+        expect(res.statusCode).toEqual(200);
+        expect(newOwner.owner).toBe(1);
+        expect(newOwner.user_name).not.toBe('');
+      });
+
       it('should return 400 if not all users are deleted', async () => {
         const userToDelete = {
           ids: ['non-existing-id'],
@@ -323,6 +348,69 @@ describe('/admin', () => {
         expect(res.statusCode).toEqual(400);
         expect(res.body.status).toBe('error');
         expect(res.body.reason).toBe('not-all-deleted');
+      });
+    });
+
+    describe('DELETE /users before anyone has logged in through OpenID', () => {
+      let namedOwnerIds, sessionUserId, testUserId, fileId, sessionToken;
+
+      beforeEach(() => {
+        // Until the first OpenID login, the only owner is the password user
+        // that the multi-user migration created (it has an empty user name).
+        namedOwnerIds = getAccountDb()
+          .all("SELECT id FROM users WHERE user_name <> '' AND owner = 1")
+          .map(row => row.id);
+        getAccountDb().mutate(
+          "UPDATE users SET owner = 0 WHERE user_name <> '' AND owner = 1",
+        );
+
+        sessionUserId = uuidv4();
+        testUserId = uuidv4();
+        fileId = uuidv4();
+        sessionToken = generateSessionToken();
+
+        createUser(sessionUserId, 'sessionUser', ADMIN_ROLE);
+        createSession(sessionUserId, sessionToken);
+        createUser(testUserId, 'testUser', BASIC_ROLE);
+        getAccountDb().mutate('INSERT INTO files (id, owner) VALUES (?, ?)', [
+          fileId,
+          testUserId,
+        ]);
+      });
+
+      afterEach(() => {
+        deleteUser(sessionUserId);
+        deleteUser(testUserId);
+        getAccountDb().mutate('DELETE FROM files WHERE id = ?', [fileId]);
+        namedOwnerIds.forEach(id => {
+          getAccountDb().mutate('UPDATE users SET owner = 1 WHERE id = ?', [
+            id,
+          ]);
+        });
+      });
+
+      it('should delete the user and give their files to the original owner', async () => {
+        const { id: originalOwnerId } = getAccountDb().first(
+          "SELECT id FROM users WHERE user_name = '' AND owner = 1",
+        );
+
+        const res = await request(app)
+          .delete('/users')
+          .send({ ids: [testUserId] })
+          .set('x-actual-token', sessionToken);
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data.someDeletionsFailed).toBe(false);
+        expect(
+          getAccountDb().first('SELECT id FROM users WHERE id = ?', [
+            testUserId,
+          ]),
+        ).toBeNull();
+        expect(
+          getAccountDb().first('SELECT owner FROM files WHERE id = ?', [
+            fileId,
+          ]),
+        ).toEqual({ owner: originalOwnerId });
       });
     });
   });
