@@ -111,6 +111,13 @@ export const colors = {
     midnight: 'red500',
     description: 'Error messages. Their fills and text are worked out from it.',
   },
+  info: {
+    light: 'blue500',
+    dark: 'blue400',
+    midnight: 'blue400',
+    description:
+      'Informational messages. Their fill and text are worked out from it.',
+  },
 
   pageBackground: { all: { ref: 'backgroundPage' } },
   pageBackgroundTopLeft: {
@@ -468,6 +475,8 @@ export const colors = {
   errorTextDarker: { all: { ref: 'errorTextDark' } },
   errorTextMenu: { all: 'red200' },
   errorBorder: { all: { ref: 'error' } },
+  infoBackground: { all: { statusOf: 'info', part: 'fill' } },
+  infoText: { all: { statusOf: 'info', part: 'textStrong' } },
   upcomingBackground: { all: { ref: 'accentSubtle' } },
   upcomingText: { all: { ref: 'accentSubtleText' } },
 

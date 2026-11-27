@@ -372,6 +372,17 @@ describe('deriveAccentCss', () => {
     );
   });
 
+  it('works out the info colors from an info color the theme sets', () => {
+    const derived = declarations(
+      deriveAccentCss('light', ':root { --color-info: #0a7d5a; }'),
+    );
+
+    expect(Object.keys(derived)).toEqual(['infoBackground', 'infoText']);
+    expect(
+      wcagContrast(derived.infoText, derived.infoBackground),
+    ).toBeGreaterThanOrEqual(4.5);
+  });
+
   it('keeps the status colors a theme sets itself', () => {
     const partly = declarations(
       deriveAccentCss(

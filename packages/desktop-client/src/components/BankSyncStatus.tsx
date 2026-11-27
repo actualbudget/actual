@@ -46,8 +46,8 @@ export function BankSyncStatus() {
               <View
                 style={{
                   borderRadius: 4,
-                  backgroundColor: theme.pillBackgroundSelected,
-                  color: theme.pillTextSelected,
+                  backgroundColor: theme.infoBackground,
+                  color: theme.infoText,
                   padding: '5px 13px',
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -56,7 +56,7 @@ export function BankSyncStatus() {
               >
                 <AnimatedRefresh
                   animating
-                  iconStyle={{ color: theme.pillTextSelected }}
+                  iconStyle={{ color: theme.infoText }}
                 />
                 <Text style={{ marginLeft: 5 }}>
                   <Trans count={accountsSyncingCount}>
