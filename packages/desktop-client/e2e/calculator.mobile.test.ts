@@ -45,7 +45,7 @@ test('calculator backspace supports tap, hold and touch cancellation', async ({
       type: 'touchEnd',
       touchPoints: [],
     });
-    await expect(transaction.amountField).toHaveValue('12345678');
+    await expect(transaction.amountField).toHaveValue('123,456.78');
 
     await transaction.amountField.fill('123456789');
     await transaction.amountField.press('End');
@@ -54,13 +54,13 @@ test('calculator backspace supports tap, hold and touch cancellation', async ({
       touchPoints,
     });
     await page.clock.runFor(600);
-    await expect(transaction.amountField).toHaveValue('123456');
+    await expect(transaction.amountField).toHaveValue('1,234.56');
     await session.send('Input.dispatchTouchEvent', {
       type: 'touchEnd',
       touchPoints: [],
     });
     await page.clock.runFor(1000);
-    await expect(transaction.amountField).toHaveValue('123456');
+    await expect(transaction.amountField).toHaveValue('1,234.56');
     await expect(transaction.amountField).toBeFocused();
     await page.screenshot({
       path: testInfo.outputPath('calculator-after.png'),
@@ -71,13 +71,13 @@ test('calculator backspace supports tap, hold and touch cancellation', async ({
       touchPoints,
     });
     await page.clock.runFor(400);
-    await expect(transaction.amountField).toHaveValue('12345');
+    await expect(transaction.amountField).toHaveValue('123.45');
     await session.send('Input.dispatchTouchEvent', {
       type: 'touchCancel',
       touchPoints: [],
     });
     await page.clock.runFor(1000);
-    await expect(transaction.amountField).toHaveValue('12345');
+    await expect(transaction.amountField).toHaveValue('123.45');
     await session.detach();
   } finally {
     await page.close();

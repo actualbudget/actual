@@ -1,47 +1,34 @@
-import { setNumberFormat } from '@actual-app/core/shared/util';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+
+import { createTestAppStore, TestProviders } from '#mocks';
+import { mergeSyncedPrefs } from '#prefs/prefsSlice';
 
 import { CalculatorAmountInput } from './CalculatorAmountInput';
 
-const mockPrefs = vi.hoisted(() => ({
-  hideFraction: 'false',
-  currencyCode: '',
-}));
-
-vi.mock('#hooks/useSyncedPref', () => ({
-  useSyncedPref: (name: string) => [
-    name === 'hideFraction'
-      ? mockPrefs.hideFraction
-      : name === 'defaultCurrencyCode'
-        ? mockPrefs.currencyCode
-        : undefined,
-    vi.fn(),
-  ],
-}));
-
-function setup(value = 0) {
-  render(<CalculatorAmountInput value={value} autoFocus />);
+function setup(prefs: Parameters<typeof mergeSyncedPrefs>[0] = {}) {
+  const store = createTestAppStore();
+  store.dispatch(mergeSyncedPrefs(prefs));
+  render(
+    <TestProviders store={store}>
+      <CalculatorAmountInput value={0} autoFocus />
+    </TestProviders>,
+  );
   const input = screen.getByTestId<HTMLInputElement>('amount-input');
   const press = (keys: string) => {
     for (const key of keys) {
       const name = key === '<' ? '⌫' : key === '*' ? '×' : key;
-      fireEvent.click(screen.getByRole('button', { name }));
+      fireEvent.click(screen.getByText(name));
     }
   };
   return { input, press };
 }
 
 describe('CalculatorAmountInput', () => {
-  beforeEach(() => {
-    mockPrefs.hideFraction = 'false';
-    mockPrefs.currencyCode = '';
-    setNumberFormat({ format: 'comma-dot', hideFraction: false });
-  });
-  afterEach(cleanup);
-
   it('fills typed digits in from the cents', () => {
     const { input, press } = setup();
+    press('0');
+    expect(input).toHaveValue('0.00');
     press('1');
     expect(input).toHaveValue('0.01');
     press('23456');
@@ -50,15 +37,15 @@ describe('CalculatorAmountInput', () => {
   });
 
   it('keeps a number with an apostrophe separator together', () => {
-    setNumberFormat({ format: 'apostrophe-dot', hideFraction: false });
-    const { input, press } = setup();
-    press('123456');
-    expect(input.value.replace(/\D/g, '')).toBe('123456');
-    expect(input.value).toMatch(/^1.234\.56$/);
+    const { input, press } = setup({ numberFormat: 'apostrophe-dot' });
+    press('1234567');
+    expect(input).toHaveValue('12\u2019345.67');
   });
 
   it('formats each number of a sum and ignores the decimal key', () => {
     const { input, press } = setup();
+    press('.');
+    expect(input).toHaveValue('');
     press('150+2.5');
     expect(input).toHaveValue('1.50+0.25');
     press('=');
@@ -73,6 +60,14 @@ describe('CalculatorAmountInput', () => {
     expect(input).toHaveValue('3.00');
   });
 
+  it('leaves a negative factor as typed but keeps subtraction in cents', () => {
+    const { input, press } = setup();
+    press('150*-2');
+    expect(input).toHaveValue('1.50*-2');
+    press('-5');
+    expect(input).toHaveValue('1.50*-2-0.05');
+  });
+
   it('backspaces digit by digit until the number is gone', () => {
     const { input, press } = setup();
     press('123456<');
@@ -83,32 +78,48 @@ describe('CalculatorAmountInput', () => {
     expect(input).toHaveValue('');
   });
 
-  it('edits in the middle of a number', () => {
+  it('keeps the caret in place when editing in the middle of a number', () => {
+    const { input, press } = setup();
+    press('123456');
+    input.setSelectionRange(3, 3);
+    press('9');
+    expect(input).toHaveValue('12,934.56');
+    expect(input.selectionStart).toBe(4);
+    press('..');
+    expect(input).toHaveValue('12,934.56');
+    expect(input.selectionStart).toBe(4);
+  });
+
+  it('removes the digit just typed before a separator', () => {
     const { input, press } = setup();
     press('1234');
-    input.setSelectionRange(2, 2);
+    input.setSelectionRange(3, 3);
     press('5');
     expect(input).toHaveValue('125.34');
-    expect(input.selectionStart).toBe(3);
-    press('<<');
-    expect(input).toHaveValue('1.34');
+    press('<');
+    expect(input).toHaveValue('12.34');
+  });
+
+  it('backspaces past a thousands separator', () => {
+    const { input, press } = setup();
+    press('123456');
+    input.setSelectionRange(2, 2);
+    press('<');
+    expect(input).toHaveValue('1,234.56');
     expect(input.selectionStart).toBe(1);
-    press('9');
-    expect(input).toHaveValue('19.34');
-    expect(input.selectionStart).toBe(2);
+    press('<');
+    expect(input).toHaveValue('234.56');
+    expect(input.selectionStart).toBe(0);
   });
 
   it('takes digits as typed when fractions are hidden', () => {
-    mockPrefs.hideFraction = 'true';
-    setNumberFormat({ format: 'comma-dot', hideFraction: true });
-    const { input, press } = setup();
+    const { input, press } = setup({ hideFraction: 'true' });
     press('123');
     expect(input).toHaveValue('123');
   });
 
   it('takes digits as whole units in a currency without decimals', () => {
-    mockPrefs.currencyCode = 'JPY';
-    const { input, press } = setup();
+    const { input, press } = setup({ defaultCurrencyCode: 'JPY' });
     press('123');
     expect(input).toHaveValue('123');
   });

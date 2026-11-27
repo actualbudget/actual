@@ -98,7 +98,6 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
   const [hideFraction] = useSyncedPref('hideFraction');
   const autoDecimals =
     String(hideFraction) !== 'true' && format.currency.decimalPlaces !== 0;
-  const pendingCaret = useRef<number | null>(null);
 
   const blurRef = useRef<HTMLDivElement>(null);
   const [focused, setFocused] = useState(false);
@@ -164,19 +163,24 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
   );
 
   const onChangeExpression = useCallback(
-    (rawText: string, caret = rawText.length) => {
+    (rawText: string, caret?: number | null) => {
       setIosInitialInteraction(true);
 
       let text = rawText;
       if (autoDecimals) {
         const result = applyAutoDecimals(
           rawText,
-          caret,
+          caret ?? rawText.length,
           rawText.length < expression.length,
         );
         text = result.text;
-        if (text !== rawText && text !== expression) {
-          pendingCaret.current = result.caret;
+        // Write the reformatted text straight to the input so the caret can
+        // be placed now; React then finds nothing left to update. A plain
+        // assignment, not the keypad's native setter: React has to record it.
+        const input = inputRef.current;
+        if (input && text !== rawText) {
+          input.value = text;
+          input.setSelectionRange(result.caret, result.caret);
         }
       }
 
@@ -195,17 +199,9 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
       isNegative,
       autoDecimals,
       expression,
+      inputRef,
     ],
   );
-
-  // Reformatting moves the caret to the end; put it back where it belongs.
-  useLayoutEffect(() => {
-    const caret = pendingCaret.current;
-    pendingCaret.current = null;
-    if (caret !== null) {
-      inputRef.current?.setSelectionRange(caret, caret);
-    }
-  }, [inputRef, expression]);
 
   const valueRef = useRef(value);
   if (value !== valueRef.current) {
@@ -231,7 +227,7 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
         value={expression}
         placeholder="0.00"
         onChange={e =>
-          onChangeExpression(e.target.value, e.target.selectionEnd ?? undefined)
+          onChangeExpression(e.target.value, e.target.selectionEnd)
         }
         onFocus={e => {
           onInputFocus();
@@ -313,9 +309,9 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
   );
 });
 
-// The characters a number can contain, as in the arithmetic parser
-const NUMBER_BEFORE = /[\d,.'\u2019\u00A0\u202F ]*$/;
-const NUMBER_AFTER = /^[\d,.'\u2019\u00A0\u202F ]*/;
+// A number runs up to the nearest operator or parenthesis on either side
+const NUMBER_BEFORE = /[^-+*/^()]*$/;
+const NUMBER_END = /[-+*/^()]|$/;
 
 // Typed digits fill in from the cents, like the amount input this replaces:
 // 1, 2, 3 reads 1.23. Only the number at the caret is reformatted.
@@ -323,11 +319,12 @@ const NUMBER_AFTER = /^[\d,.'\u2019\u00A0\u202F ]*/;
 // instead of multiplying by 0.02. A factor anywhere else ("2 * 1.50",
 // "1.50 * (2") still needs the 2 typed as 200.
 function applyAutoDecimals(text: string, caret: number, isDeleting: boolean) {
-  const start =
-    caret - (text.slice(0, caret).match(NUMBER_BEFORE)?.[0].length ?? 0);
-  const end = caret + (text.slice(caret).match(NUMBER_AFTER)?.[0].length ?? 0);
-  const previousChar = text[start - 1];
-  if (start === end || previousChar === '*' || previousChar === '/') {
+  const start = text.slice(0, caret).search(NUMBER_BEFORE);
+  const end = caret + text.slice(caret).search(NUMBER_END);
+  // A minus right after * or / is the factor's sign, not a subtraction
+  const previousChar =
+    text[start - 1] === '-' ? text[start - 2] : text[start - 1];
+  if (previousChar === '*' || previousChar === '/') {
     return { text, caret };
   }
 
@@ -346,8 +343,9 @@ function applyAutoDecimals(text: string, caret: number, isDeleting: boolean) {
     offset--;
     if (/\d/.test(formatted[offset])) seen++;
   }
-  // Step over separators so backspace reaches the next digit
-  while (isDeleting && offset > 0 && /\D/.test(formatted[offset - 1])) {
+  // Keep the caret against the digit before it, so backspace removes that
+  // digit rather than a separator that would only be put back
+  while (offset > 0 && /\D/.test(formatted[offset - 1])) {
     offset--;
   }
 

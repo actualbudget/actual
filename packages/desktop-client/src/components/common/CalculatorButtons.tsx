@@ -42,6 +42,7 @@ export function CalculatorButtons({
 
     // The caret is placed before the change event, so the input's owner can
     // see where the edit happened and move the caret if it reformats the value.
+    // Focus comes first, so the owner's focus handler runs before the edit.
     focusInput();
     setNativeInputValue(input, nextExpression, caretPosition);
   };
