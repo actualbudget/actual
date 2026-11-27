@@ -39,3 +39,5 @@ Lage = "Lage"
 lage = "lage"
 # Hex color component (e.g. "FB BA 00" in the theming docs).
 BA = "BA"
+# The Nife cloud platform (https://nife.io).
+Nife = "Nife"
