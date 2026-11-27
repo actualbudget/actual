@@ -9,9 +9,16 @@ import { registerSW } from 'virtual:pwa-register';
 import packageJson from '../package.json';
 
 import SharedBrowserServerWorker from './shared-browser-server.ts?sharedworker';
+import { RELOAD_FROM_SERVER_SEARCH } from './util/reloadFromServer';
 import { computeClientVersion } from './util/versions';
 
 const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
+
+// Drop the marker left by reloadFromServer() so that later reloads of this tab
+// are served from the service worker cache again and keep working offline.
+if (window.location.search === RELOAD_FROM_SERVER_SEARCH) {
+  window.history.replaceState(null, '', window.location.pathname);
+}
 
 // This file installs global variables that the app expects.
 // Normally these are already provided by electron, but in a real
