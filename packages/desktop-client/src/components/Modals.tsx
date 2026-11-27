@@ -79,6 +79,8 @@ import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
 import { StorageMigrationFailedModal } from './modals/StorageMigrationFailedModal';
 import { TagColorModal } from './modals/TagColorModal';
+import { TotpDisableModal } from './modals/TotpDisableModal';
+import { TotpEnableModal } from './modals/TotpEnableModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
 import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuModal';
@@ -442,6 +444,12 @@ export function Modals() {
 
         case 'enable-password-auth':
           return <PasswordEnableModal key={key} {...modal.options} />;
+
+        case 'enable-totp':
+          return <TotpEnableModal key={key} {...modal.options} />;
+
+        case 'disable-totp':
+          return <TotpDisableModal key={key} {...modal.options} />;
 
         default:
           throw new Error('Unknown modal');

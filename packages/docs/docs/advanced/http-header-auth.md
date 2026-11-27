@@ -20,5 +20,9 @@ The SSO provider then needs to be configured to pass an extra HTTP header to Act
 If your setup needs it, it is possible to configure trusted proxies for authentication. See [`trustedAuthProxies` configuration](../config/index.md#trustedauthproxies) for details.
 
 :::note
+[Two-factor authentication](../config/two-factor-auth.md) is skipped for header authentication, since your SSO provider has already authenticated the request. Configure multi-factor authentication there instead.
+:::
+
+:::note
 This feature is not an HTTP basic auth, but a different form of using a password. For HTTP basic auth or user accounts see [this issue](https://github.com/actualbudget/actual/issues/524)
 :::
