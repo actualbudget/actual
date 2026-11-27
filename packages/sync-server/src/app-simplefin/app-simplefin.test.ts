@@ -27,30 +27,43 @@ const SETUP_TOKEN = Buffer.from(
   'https://bridge.example.com/claim/abc',
 ).toString('base64');
 
-const statusResponse = (status, body = '') => ({
-  ok: status >= 200 && status < 300,
+type StubbedResponse = { status: number; body: string };
+
+const statusResponse = (status: number, body = ''): StubbedResponse => ({
   status,
-  headers: { get: () => null },
-  text: () => Promise.resolve(body),
+  body,
 });
 
-const okResponse = body => statusResponse(200, body);
+const okResponse = (body: string) => statusResponse(200, body);
 
 // The claim is a POST to the bridge; listing accounts is a GET. Route the mock
 // by method so a test can stub one or both.
-function mockFetch({ claim, accounts }) {
-  vi.mocked(undici.fetch).mockImplementation((url, options) =>
-    Promise.resolve(options?.method === 'POST' ? claim : accounts),
-  );
+function mockFetch({
+  claim,
+  accounts,
+}: {
+  claim?: StubbedResponse;
+  accounts?: StubbedResponse;
+}) {
+  vi.mocked(undici.fetch).mockImplementation((url, options) => {
+    const stub = options?.method === 'POST' ? claim : accounts;
+    if (!stub) {
+      return Promise.reject(new Error('No response stubbed for this request'));
+    }
+    // A response can be read only once, so every call gets its own.
+    return Promise.resolve(
+      new undici.Response(stub.body, { status: stub.status }),
+    );
+  });
 }
 
-const post = path =>
+const post = (path: string) =>
   request(app).post(path).set('x-actual-token', 'valid-token');
 
 describe('app-simplefin', () => {
   beforeEach(() => {
-    secretsService.set(SecretName.simplefin_token, null);
-    secretsService.set(SecretName.simplefin_accessKey, null);
+    secretsService.reset(SecretName.simplefin_token);
+    secretsService.reset(SecretName.simplefin_accessKey);
     vi.spyOn(console, 'log').mockImplementation(vi.fn());
   });
 
@@ -268,7 +281,7 @@ describe('app-simplefin', () => {
 
     it('reports SERVER_DOWN when the claim URL fails the SSRF preflight', async () => {
       secretsService.set(SecretName.simplefin_token, SETUP_TOKEN);
-      assertUrlAllowed.mockRejectedValueOnce(
+      vi.mocked(assertUrlAllowed).mockRejectedValueOnce(
         new Error('Unable to resolve host: bridge.example.com'),
       );
       vi.mocked(undici.fetch).mockReset();
@@ -464,7 +477,7 @@ describe('per-budget credentials', () => {
     expect(
       (await post('/status').set('X-Actual-File-Id', fileA)).body.data.source,
     ).toBe('per-budget-file');
-    secretsService.set(SecretName.simplefin_token, null, fileA);
+    secretsService.reset(SecretName.simplefin_token, fileA);
     expect(
       (await post('/status').set('X-Actual-File-Id', fileA)).body.data.source,
     ).toBe('global');
