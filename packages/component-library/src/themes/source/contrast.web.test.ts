@@ -8,25 +8,9 @@ import type { ThemeName, TokenDefinition } from './types';
 const knownFailures = new Set<string>([
   'light: pageTextSubdued on pageBackground',
   'light: pageTextSubdued on tableBackground',
-  'light: tableTextLight on tableBackground',
-  'light: mobileNavItem on mobileNavBackground',
-  'light: noticeText on noticeBackground',
-  'light: noticeTextLight on tableBackground',
-  'light: warningText on warningBackground',
-  'light: warningText on tableBackground',
-  'light: errorText on errorBackground',
   'light: formInputTextPlaceholder on formInputBackground',
-  'dark: pageTextSubdued on tableBackground',
-  'dark: tableHeaderText on tableHeaderBackground',
-  'dark: menuItemTextHover on menuItemBackgroundHover',
-  'dark: noticeText on noticeBackground',
-  'dark: noticeTextLight on tableBackground',
-  'midnight: pageTextSubdued on pageBackground',
-  'midnight: menuAutoCompleteTextHover on menuAutoCompleteBackgroundHover',
-  'midnight: buttonNormalTextHover on buttonNormalBackgroundHover',
-  'midnight: noticeText on noticeBackground',
-  'midnight: noticeTextDark on noticeBackground',
-  'midnight: pillText on pillBackground',
+  'dark: tableTextInactive on tableRowBackgroundHover',
+  'midnight: tableTextInactive on tableRowBackgroundHover',
 ]);
 
 function describePair(theme: ThemeName, text: string, background: string) {
