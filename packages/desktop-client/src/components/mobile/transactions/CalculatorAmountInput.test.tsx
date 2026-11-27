@@ -49,6 +49,14 @@ describe('CalculatorAmountInput', () => {
     expect(input.selectionStart).toBe(8);
   });
 
+  it('keeps a number with an apostrophe separator together', () => {
+    setNumberFormat({ format: 'apostrophe-dot', hideFraction: false });
+    const { input, press } = setup();
+    press('123456');
+    expect(input.value.replace(/\D/g, '')).toBe('123456');
+    expect(input.value).toMatch(/^1.234\.56$/);
+  });
+
   it('formats each number of a sum and ignores the decimal key', () => {
     const { input, press } = setup();
     press('150+2.5');

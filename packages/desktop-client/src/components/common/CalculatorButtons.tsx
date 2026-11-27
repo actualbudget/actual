@@ -20,17 +20,6 @@ export function CalculatorButtons({
   readonly onInteractionStart?: () => void;
   readonly style?: CSSProperties;
 }) {
-  const focusInputAt = (position: number) => {
-    const input = inputRef.current;
-
-    if (!input) {
-      return;
-    }
-
-    input.focus({ preventScroll: true });
-    input.setSelectionRange(position, position);
-  };
-
   const focusInput = () => {
     inputRef.current?.focus({ preventScroll: true });
   };
@@ -51,13 +40,10 @@ export function CalculatorButtons({
       return;
     }
 
+    // The caret is placed before the change event, so the input's owner can
+    // see where the edit happened and move the caret if it reformats the value.
+    focusInput();
     setNativeInputValue(input, nextExpression, caretPosition);
-    // The input's owner may reformat the value and place the caret itself
-    if (input.value === nextExpression) {
-      focusInputAt(caretPosition);
-    } else {
-      focusInput();
-    }
   };
 
   const insertExpression = (value: string) => {
@@ -364,8 +350,7 @@ function setNativeInputValue(
   )?.set;
 
   nativeSetter?.call(input, value);
-  // Setting the value moves the caret to the end; the change handler needs
-  // to see where the edit happened.
+  // Setting the value moves the caret to the end
   input.setSelectionRange(caretPosition, caretPosition);
   input.dispatchEvent(new Event('input', { bubbles: true }));
 }

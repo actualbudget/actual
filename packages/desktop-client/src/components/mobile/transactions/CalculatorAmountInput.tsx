@@ -164,11 +164,11 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
   );
 
   const onChangeExpression = useCallback(
-    (rawText: string, caret: number | null = null) => {
+    (rawText: string, caret = rawText.length) => {
       setIosInitialInteraction(true);
 
       let text = rawText;
-      if (autoDecimals && caret !== null) {
+      if (autoDecimals) {
         const result = applyAutoDecimals(
           rawText,
           caret,
@@ -231,7 +231,7 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
         value={expression}
         placeholder="0.00"
         onChange={e =>
-          onChangeExpression(e.target.value, e.target.selectionEnd)
+          onChangeExpression(e.target.value, e.target.selectionEnd ?? undefined)
         }
         onFocus={e => {
           onInputFocus();
@@ -313,14 +313,15 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
   );
 });
 
-const NUMBER_CHARS = "[\\d,.''   ]*";
-const NUMBER_BEFORE = new RegExp(NUMBER_CHARS + '$');
-const NUMBER_AFTER = new RegExp('^' + NUMBER_CHARS);
+// The characters a number can contain, as in the arithmetic parser
+const NUMBER_BEFORE = /[\d,.'\u2019\u00A0\u202F ]*$/;
+const NUMBER_AFTER = /^[\d,.'\u2019\u00A0\u202F ]*/;
 
 // Typed digits fill in from the cents, like the amount input this replaces:
 // 1, 2, 3 reads 1.23. Only the number at the caret is reformatted.
 // ponytail: a number right after * or / is left as typed, so "* 2" doubles
-// instead of multiplying by 0.02. "2 * 1.50" still needs the 2 typed as 200.
+// instead of multiplying by 0.02. A factor anywhere else ("2 * 1.50",
+// "1.50 * (2") still needs the 2 typed as 200.
 function applyAutoDecimals(text: string, caret: number, isDeleting: boolean) {
   const start =
     caret - (text.slice(0, caret).match(NUMBER_BEFORE)?.[0].length ?? 0);
