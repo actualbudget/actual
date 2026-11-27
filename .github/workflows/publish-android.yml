@@ -25,6 +25,9 @@ jobs:
   build-android-release:
     runs-on: depot-macos-latest
     environment: release
+    permissions:
+      contents: read
+      id-token: write
     timeout-minutes: 60
     env:
       ANDROID_HOME: /Users/runner/Library/Android/sdk
@@ -78,3 +81,37 @@ jobs:
           path: |
             packages/mobile-client/build/app-release-signed.apk
             packages/mobile-client/build/app-release-signed.aab
+
+      - name: Install Fastlane
+        run: |
+          export GEM_HOME="$RUNNER_TEMP/fastlane-gems"
+          echo "GEM_HOME=$GEM_HOME" >> "$GITHUB_ENV"
+          gem install fastlane --version 2.241.2 --no-document
+
+      # Secrets in the `release` environment: GOOGLE_PLAY_WIF_PROVIDER is the
+      # full Workload Identity Provider resource name; GOOGLE_PLAY_SERVICE_ACCOUNT
+      # is the email of the service account with testing and production release
+      # access to org.actualbudget. Federation trust is restricted to this workflow
+      # and the release environment. Requires the Google Play Android Developer API.
+      # Setup: https://docs.cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines#impersonation
+      - name: Authenticate to Google Play
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ secrets.GOOGLE_PLAY_WIF_PROVIDER }}
+          service_account: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}
+
+      # Automatic publication after approval requires managed publishing to be off.
+      - name: Upload to Google Play
+        env:
+          TRACK: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'production' || 'internal' }}
+          FASTLANE_SKIP_UPDATE_CHECK: '1'
+          FASTLANE_OPT_OUT_USAGE: '1'
+        run: |
+          "$GEM_HOME/bin/fastlane" supply \
+            --json_key "$GOOGLE_APPLICATION_CREDENTIALS" \
+            --package_name org.actualbudget \
+            --aab packages/mobile-client/build/app-release-signed.aab \
+            --track "$TRACK" \
+            --metadata_path packages/mobile-client/android/fastlane/metadata \
+            --skip_upload_metadata true --skip_upload_images true --skip_upload_screenshots true \
+            --rescue_changes_not_sent_for_review false
