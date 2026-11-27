@@ -32,7 +32,6 @@ jobs:
     env:
       ANDROID_HOME: /Users/runner/Library/Android/sdk
       ANDROID_SDK_ROOT: /Users/runner/Library/Android/sdk
-      GEM_HOME: ${{ runner.temp }}/fastlane-gems
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -84,7 +83,10 @@ jobs:
             packages/mobile-client/build/app-release-signed.aab
 
       - name: Install Fastlane
-        run: gem install fastlane --version 2.241.2 --no-document
+        run: |
+          export GEM_HOME="$RUNNER_TEMP/fastlane-gems"
+          echo "GEM_HOME=$GEM_HOME" >> "$GITHUB_ENV"
+          gem install fastlane --version 2.241.2 --no-document
 
       # Secrets in the `release` environment: GOOGLE_PLAY_WIF_PROVIDER is the
       # full Workload Identity Provider resource name; GOOGLE_PLAY_SERVICE_ACCOUNT
