@@ -35,6 +35,8 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Your location is used to suggest nearby payees when you add a transaction.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to suggest nearby payees when you add a transaction.</string>
 	<key>UIApplicationSceneManifest</key>
