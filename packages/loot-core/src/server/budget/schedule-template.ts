@@ -649,22 +649,23 @@ const DAYS_PER_YEAR = 365.25;
 function getMonthlyRate(entry: ScheduleTemplateTarget) {
   if (!entry.repeat || entry.completed) return 0;
   const interval = entry.target_interval;
-  switch (entry.target_frequency) {
-    case 'daily':
+  if (entry.target_frequency === 'daily') {
+    // Weekend shifts can merge occurrences up to two days apart.
+    if (!entry.dateConditions.value.skipWeekend || interval > 2) {
       return (entry.perOccurrenceAmount * DAYS_PER_YEAR) / 12 / interval;
-    case 'weekly':
-      return (entry.perOccurrenceAmount * DAYS_PER_YEAR) / 7 / 12 / interval;
-    default: {
-      const months = 12 * interval;
-      const from = monthUtils.addMonths(entry.next_date_string, 1);
-      const occurrences = getOccurrencesBetween(
-        entry.dateConditions,
-        `${from}-01`,
-        `${monthUtils.addMonths(from, months)}-01`,
-      ).length;
-      return (entry.perOccurrenceAmount * occurrences) / months;
     }
   }
+  if (entry.target_frequency === 'weekly') {
+    return (entry.perOccurrenceAmount * DAYS_PER_YEAR) / 7 / 12 / interval;
+  }
+  const months = 12 * interval;
+  const from = monthUtils.addMonths(entry.next_date_string, 1);
+  const occurrences = getOccurrencesBetween(
+    entry.dateConditions,
+    `${from}-01`,
+    `${monthUtils.addMonths(from, months)}-01`,
+  ).length;
+  return (entry.perOccurrenceAmount * occurrences) / months;
 }
 
 // Pure, synchronous: given a starting balance, a projected monthly-outflow

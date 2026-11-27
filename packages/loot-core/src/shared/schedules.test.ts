@@ -901,5 +901,75 @@ describe('schedules', () => {
 
       expect(result).toEqual(['2020-12-07']);
     });
+
+    it('lists a day once when the weekend move collapses two occurrences onto it', () => {
+      // Daily from Saturday 2024-01-06 with skipWeekend + 'after': Saturday
+      // and Sunday both move to Monday 2024-01-08. That Monday is a single
+      // payment, so it must appear once rather than twice.
+      const dateCond = {
+        op: 'is' as const,
+        field: 'date' as const,
+        value: {
+          start: '2024-01-06',
+          interval: 1,
+          frequency: 'daily' as const,
+          patterns: [],
+          skipWeekend: true,
+          weekendSolveMode: 'after' as const,
+          endMode: 'never' as const,
+          endOccurrences: 1,
+          endDate: '2099-01-01',
+        },
+      };
+
+      const result = getOccurrencesBetween(
+        dateCond,
+        '2024-01-06',
+        '2024-01-15',
+      );
+
+      expect(result).toEqual([
+        '2024-01-08',
+        '2024-01-09',
+        '2024-01-10',
+        '2024-01-11',
+        '2024-01-12',
+      ]);
+    });
+
+    it('lists a day once when the weekend move collapses two occurrences onto it going backward', () => {
+      // Same schedule with 'before': Saturday and Sunday both move to the
+      // Friday before, which is one payment.
+      const dateCond = {
+        op: 'is' as const,
+        field: 'date' as const,
+        value: {
+          start: '2024-01-05',
+          interval: 1,
+          frequency: 'daily' as const,
+          patterns: [],
+          skipWeekend: true,
+          weekendSolveMode: 'before' as const,
+          endMode: 'never' as const,
+          endOccurrences: 1,
+          endDate: '2099-01-01',
+        },
+      };
+
+      const result = getOccurrencesBetween(
+        dateCond,
+        '2024-01-05',
+        '2024-01-15',
+      );
+
+      expect(result).toEqual([
+        '2024-01-05',
+        '2024-01-08',
+        '2024-01-09',
+        '2024-01-10',
+        '2024-01-11',
+        '2024-01-12',
+      ]);
+    });
   });
 });

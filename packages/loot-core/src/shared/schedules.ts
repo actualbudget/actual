@@ -487,6 +487,11 @@ export function getOccurrencesBetween(
     return rawDates.filter(dt => dt >= startDay && dt < endDay);
   }
 
+  // A daily schedule's Saturday and Sunday both move to the same Monday (and
+  // both weekend days move to the same Friday for 'before'), so the weekend
+  // move can collapse two occurrences onto one day. That day is one bill, not
+  // two: list it once, so callers counting occurrences for a forecast or a
+  // preview row don't charge (and show) the payment twice.
   const dates: string[] = [];
   for (const rawDate of rawDates) {
     const adjustedDate = formatOccurrenceDay(
@@ -495,7 +500,13 @@ export function getOccurrencesBetween(
         schedule.data.weekendSolve,
       ),
     );
-    if (adjustedDate >= startDay && adjustedDate < endDay) {
+    // `rawDates` ascends and the weekend move never reorders it, so the
+    // duplicate always lands next to the entry just pushed.
+    if (
+      adjustedDate >= startDay &&
+      adjustedDate < endDay &&
+      dates[dates.length - 1] !== adjustedDate
+    ) {
       dates.push(adjustedDate);
     }
   }
