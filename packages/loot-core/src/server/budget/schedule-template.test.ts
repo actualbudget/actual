@@ -40,6 +40,8 @@ type RuleSpec = {
   start: string;
   amount: number;
   frequency: 'monthly' | 'yearly' | 'weekly' | 'daily';
+  skipWeekend?: boolean;
+  weekendSolveMode?: 'before' | 'after';
   interval?: number;
   actions?: ConstructorParameters<typeof Rule>[0]['actions'];
 };
@@ -50,6 +52,8 @@ function makeRule({
   amount,
   frequency,
   interval = 1,
+  skipWeekend = false,
+  weekendSolveMode = 'before',
   actions = [],
 }: RuleSpec): Rule {
   return new Rule({
@@ -65,8 +69,8 @@ function makeRule({
           interval,
           frequency,
           patterns: [],
-          skipWeekend: false,
-          weekendSolveMode: 'before',
+          skipWeekend,
+          weekendSolveMode,
           endMode: 'never',
           endOccurrences: 1,
           endDate: '2099-01-01',
@@ -697,6 +701,56 @@ describe('runScheduleForecast', () => {
     vi.mocked(db.getAccounts).mockResolvedValue([]);
     vi.mocked(aqlQuery).mockResolvedValue({ data: [], dependencies: [] });
   });
+
+  it.each(['before', 'after'] as const)(
+    'weights daily bills by distinct payments shifted %s the weekend',
+    async weekendSolveMode => {
+      const daily = {
+        type: 'schedule',
+        name: 'Daily',
+        priority: 0,
+        directive: 'template',
+      } as const;
+      const everySaturday = { ...daily, name: 'Every Saturday' };
+      mockSchedulesByName({
+        Daily: {
+          spec: {
+            start: '2024-01-06',
+            amount: -1000,
+            frequency: 'daily',
+            skipWeekend: true,
+            weekendSolveMode,
+          },
+        },
+        'Every Saturday': {
+          spec: {
+            start: '2024-01-06',
+            amount: -5000,
+            frequency: 'daily',
+            interval: 7,
+            skipWeekend: true,
+            weekendSolveMode,
+          },
+        },
+      });
+
+      const result = await runScheduleForecast(
+        [daily, everySaturday],
+        '2024-01',
+        10000,
+        0,
+        defaultCategory,
+      );
+
+      // Five distinct weekday payments of $10 have the same weekly cost
+      // as one $50 Saturday payment shifted to a weekday.
+      expect(result.perScheduleMonthly.get(daily)).toBeGreaterThan(0);
+      expect(result.perScheduleMonthly.get(everySaturday)).toBeCloseTo(
+        result.perScheduleMonthly.get(daily)!,
+        -3,
+      );
+    },
+  );
 
   it('contributes the exact monthly amount for a single monthly schedule', async () => {
     const template_lines = [
