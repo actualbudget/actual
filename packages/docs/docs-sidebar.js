@@ -198,6 +198,7 @@ const sidebars = {
         },
         'settings/index',
         'custom-themes',
+        'custom-themes-variables',
         'notifications',
         {
           type: 'category',

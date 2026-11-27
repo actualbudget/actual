@@ -2,6 +2,7 @@ import {
   clampChroma,
   converter,
   formatHex,
+  formatHex8,
   interpolate,
   modeHsl,
   modeLrgb,
@@ -19,4 +20,12 @@ registerMode(modeLrgb);
 registerMode(modeOklab);
 registerMode(modeOklch);
 
-export { clampChroma, converter, formatHex, interpolate, parse, wcagContrast };
+export {
+  clampChroma,
+  converter,
+  formatHex,
+  formatHex8,
+  interpolate,
+  parse,
+  wcagContrast,
+};
