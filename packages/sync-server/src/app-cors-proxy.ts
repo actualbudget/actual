@@ -23,8 +23,12 @@ app.use(
   }),
 );
 
+type PluginStoreEntry = {
+  url: string;
+};
+
 // Cache for the allowlist to avoid fetching it on every request
-let allowlistedRepos = [];
+let allowlistedRepos: string[] = [];
 let lastAllowlistFetch = 0;
 const ALLOWLIST_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -50,7 +54,7 @@ async function fetchAllowlist() {
     if (!response.ok) {
       throw new Error(`Failed to fetch allowlist: ${response.status}`);
     }
-    const plugins = await response.json();
+    const plugins = (await response.json()) as PluginStoreEntry[];
     allowlistedRepos = plugins.map(plugin => plugin.url);
     lastAllowlistFetch = now;
     console.log('Updated plugin allowlist:', allowlistedRepos);
@@ -66,7 +70,7 @@ async function fetchAllowlist() {
 /**
  * Return true only if the URL is on an allowlist and not a local/private address.
  */
-function isUrlAllowed(targetUrl) {
+function isUrlAllowed(targetUrl: string): boolean {
   try {
     const url = new URL(targetUrl);
     const hostname = url.hostname;
@@ -108,7 +112,7 @@ function isUrlAllowed(targetUrl) {
         console.warn(
           'Invalid repository URL in allowlist:',
           repoUrl,
-          e.message,
+          e instanceof Error ? e.message : String(e),
         );
       }
     }
@@ -258,9 +262,10 @@ app.use('/', async (req, res) => {
       res.json(binaryData);
     }
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: 'Error proxying request', details: err.message });
+    res.status(500).json({
+      error: 'Error proxying request',
+      details: err instanceof Error ? err.message : String(err),
+    });
   }
 });
 
