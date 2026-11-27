@@ -2,6 +2,7 @@ import * as argon2 from 'argon2';
 import * as bcrypt from 'bcrypt';
 
 import { bootstrap, getAccountDb } from '#account-db';
+import { config } from '#load-config';
 
 import {
   bootstrapPassword,
@@ -313,5 +314,40 @@ describe('password session revocation', () => {
     } finally {
       verify.mockRestore();
     }
+  });
+});
+
+describe('bootstrap with enforced OpenID', () => {
+  afterEach(() => {
+    config.set('enforceOpenId', false);
+  });
+
+  it('refuses a password bootstrap when OpenID is enforced', async () => {
+    config.set('enforceOpenId', true);
+
+    expect(await bootstrap({ password: 'hunter2' })).toEqual({
+      error: 'openid-enforced',
+    });
+    expect(getStoredPasswordHash()).toBeNull();
+    expect(getAuthMethods()).toEqual([]);
+  });
+
+  it('reports the enforcement before validating the password', async () => {
+    config.set('enforceOpenId', true);
+
+    expect(await bootstrap({ password: '' })).toEqual({
+      error: 'openid-enforced',
+    });
+    expect(getStoredPasswordHash()).toBeNull();
+  });
+
+  it('still bootstraps with a password when OpenID is not enforced', async () => {
+    config.set('enforceOpenId', false);
+
+    const result = await bootstrap({ password: 'hunter2' });
+
+    expect(result.error).toBeUndefined();
+    expect(result.token).toBeTruthy();
+    expect(getStoredPasswordHash()).toMatch(/^\$argon2id\$/);
   });
 });

@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getAccountDb, getLoginMethod, getServerPrefs } from './account-db';
 import { bootstrapPassword, checkPassword } from './accounts/password';
 import { handlers as app, authRateLimiter } from './app-account';
+import { config } from './load-config';
 
 const ADMIN_ROLE = 'ADMIN';
 const BASIC_ROLE = 'BASIC';
@@ -87,6 +88,49 @@ describe('auth rate limiting', () => {
 
     const res = await request(app).get('/needs-bootstrap');
     expect(res.statusCode).toEqual(200);
+  });
+});
+
+describe('/bootstrap', () => {
+  beforeEach(() => {
+    clearAuth();
+  });
+
+  afterEach(() => {
+    clearAuth();
+    getAccountDb().mutate(
+      "DELETE FROM sessions WHERE auth_method = 'password'",
+    );
+    config.set('enforceOpenId', false);
+  });
+
+  it('refuses a password bootstrap when OpenID is enforced', async () => {
+    config.set('enforceOpenId', true);
+
+    const res = await request(app)
+      .post('/bootstrap')
+      .send({ password: 'testpassword' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toEqual({
+      status: 'error',
+      reason: 'openid-enforced',
+    });
+    expect(getAccountDb().all('SELECT method FROM auth')).toEqual([]);
+  });
+
+  it('bootstraps with a password when OpenID is not enforced', async () => {
+    config.set('enforceOpenId', false);
+
+    const res = await request(app)
+      .post('/bootstrap')
+      .send({ password: 'testpassword' });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty('status', 'ok');
+    expect(getAccountDb().all('SELECT method FROM auth')).toEqual([
+      { method: 'password' },
+    ]);
   });
 });
 
