@@ -530,3 +530,129 @@ describe('normalizeAccount', () => {
     expect(result.institution).toBe('Unknown');
   });
 });
+
+describe('swapCreditDebit', () => {
+  // A card that reports purchases as CRDT and payments as DBIT.
+  const cardPurchase: EnableBankingTransaction = {
+    entry_reference: 'ref-card-1',
+    transaction_amount: { currency: 'EUR', amount: '4.99' },
+    credit_debit_indicator: 'CRDT',
+    status: 'BOOK',
+    booking_date: '2026-11-12',
+    creditor: { name: 'Merchant' },
+    debtor: { name: 'Card Holder' },
+    remittance_information: ['Card purchase'],
+  };
+  const cardPayment: EnableBankingTransaction = {
+    entry_reference: 'ref-card-2',
+    transaction_amount: { currency: 'EUR', amount: '103.86' },
+    credit_debit_indicator: 'DBIT',
+    status: 'BOOK',
+    booking_date: '2026-11-12',
+    creditor: { name: 'Card Issuer' },
+    debtor: { name: 'Card Holder' },
+    remittance_information: ['Automatic payment'],
+  };
+
+  it('keeps the bank indicator by default', () => {
+    expect(normalizeTransaction(cardPurchase)).toMatchObject({
+      credit_debit_indicator: 'CRDT',
+      transactionAmount: { amount: '4.99', currency: 'EUR' },
+      payeeName: 'Card Holder',
+    });
+    expect(
+      normalizeTransaction(cardPurchase, { swapCreditDebit: false }),
+    ).toEqual(normalizeTransaction(cardPurchase));
+  });
+
+  it('turns a CRDT sample into a DBIT outflow with the merchant as payee', () => {
+    expect(
+      normalizeTransaction(cardPurchase, { swapCreditDebit: true }),
+    ).toMatchObject({
+      credit_debit_indicator: 'DBIT',
+      transactionAmount: { amount: '-4.99', currency: 'EUR' },
+      payeeName: 'Merchant',
+    });
+  });
+
+  it('turns a DBIT sample into a CRDT inflow with the debtor as payee', () => {
+    expect(
+      normalizeTransaction(cardPayment, { swapCreditDebit: true }),
+    ).toMatchObject({
+      credit_debit_indicator: 'CRDT',
+      transactionAmount: { amount: '103.86', currency: 'EUR' },
+      payeeName: 'Card Holder',
+    });
+  });
+
+  it('leaves transactions without an indicator untouched', () => {
+    const { credit_debit_indicator: _indicator, ...withoutIndicator } =
+      cardPurchase;
+    const result = normalizeTransaction(
+      {
+        ...withoutIndicator,
+        transaction_amount: { currency: 'EUR', amount: '-7.00' },
+      },
+      { swapCreditDebit: true },
+    );
+    expect(result.transactionAmount.amount).toBe('-7.00');
+    expect(result.credit_debit_indicator).toBeUndefined();
+  });
+
+  it('does not mutate its input', () => {
+    normalizeTransaction(cardPurchase, { swapCreditDebit: true });
+    expect(cardPurchase.credit_debit_indicator).toBe('CRDT');
+  });
+
+  it('applies to every transaction of a response', () => {
+    const result = normalizeTransactions([cardPurchase, cardPayment], {
+      swapCreditDebit: true,
+    });
+    expect(result.map(t => t.transactionAmount.amount)).toEqual([
+      '-4.99',
+      '103.86',
+    ]);
+  });
+
+  it('derives ids from the bank fields, not from the swapped indicator', () => {
+    const withoutId = (
+      indicator: 'CRDT' | 'DBIT',
+    ): EnableBankingTransaction => ({
+      transaction_amount: { currency: 'EUR', amount: '10.00' },
+      credit_debit_indicator: indicator,
+      status: 'BOOK',
+      booking_date: '2026-11-12',
+      remittance_information: ['Same text'],
+    });
+    const idOf = (indicator: 'CRDT' | 'DBIT', swapCreditDebit: boolean) =>
+      normalizeTransactions([withoutId(indicator)], { swapCreditDebit })[0]
+        .transactionId;
+
+    // The same bank transaction keeps its id when the option is toggled...
+    expect(idOf('DBIT', true)).toBe(idOf('DBIT', false));
+    expect(idOf('CRDT', true)).toBe(idOf('CRDT', false));
+    // ...and two distinct transactions never share one.
+    expect(idOf('DBIT', true)).not.toBe(idOf('CRDT', false));
+  });
+
+  it('reverses the balance with the transactions', () => {
+    expect(
+      normalizeBalance(mockBalance, { swapCreditDebit: true }).balanceAmount
+        .amount,
+    ).toBe(-123456);
+    expect(
+      normalizeBalance(mockNegativeBalance, { swapCreditDebit: true })
+        .balanceAmount.amount,
+    ).toBe(5075);
+    expect(
+      normalizeBalance(
+        {
+          balance_amount: { currency: 'EUR', amount: '0' },
+          balance_type: 'CLAV',
+        },
+        { swapCreditDebit: true },
+      ).balanceAmount.amount,
+    ).toBe(0);
+    expect(normalizeBalance(mockBalance).balanceAmount.amount).toBe(123456);
+  });
+});

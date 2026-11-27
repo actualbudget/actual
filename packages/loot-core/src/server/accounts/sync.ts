@@ -365,11 +365,27 @@ function getImportPending(id: string): Promise<boolean> {
   ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
 }
 
+// Some banks report the credit/debit indicator the wrong way round (e.g. card
+// purchases as credit). The Enable Banking server swaps it before it derives
+// the amount sign and the payee, but only when both the experimental flag and
+// the per-account option are enabled.
+async function isSwapCreditDebitEnabled(id: string) {
+  const [isFlagEnabled, isAccountEnabled] = await Promise.all(
+    ['flags.bankSyncReverseAmounts', `sync-reverse-amounts-${id}`].map(prefId =>
+      aqlQuery(q('preferences').filter({ id: prefId }).select('value')).then(
+        data => String(data?.data?.[0]?.value ?? 'false') === 'true',
+      ),
+    ),
+  );
+  return isFlagEnabled && isAccountEnabled;
+}
+
 async function downloadEnableBankingTransactions(
   acctId: string,
   since: string,
   importPending: boolean,
   aspspName?: string,
+  swapCreditDebit = false,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -383,6 +399,7 @@ async function downloadEnableBankingTransactions(
       startDate: since,
       aspspName,
       importPending,
+      ...(swapCreditDebit ? { swapCreditDebit } : {}),
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -1297,6 +1314,8 @@ export async function syncAccount(
       syncStartDate,
       await getImportPending(id),
       bankRow?.name,
+      // The option is stored under the Actual account id, not the bank one.
+      await isSwapCreditDebitEnabled(id),
     );
   } else {
     throw new Error(

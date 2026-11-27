@@ -11,6 +11,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { ToggleField } from '#components/mobile/MobileForms';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 type CheckboxOptionProps = {
   id: string;
@@ -155,6 +156,11 @@ type BankSyncCheckboxOptionsProps = {
   setImportTransactions: (value: boolean) => void;
   updateDates: boolean;
   setUpdateDates: (value: boolean) => void;
+  reverseAmounts: boolean;
+  setReverseAmounts: (value: boolean) => void;
+  // The option swaps the credit/debit indicator in the Enable Banking server,
+  // so it only applies to accounts synced through it.
+  isEnableBanking?: boolean;
   helpMode?: 'desktop' | 'mobile';
 };
 
@@ -169,9 +175,13 @@ export function BankSyncCheckboxOptions({
   setImportTransactions,
   updateDates,
   setUpdateDates,
+  reverseAmounts,
+  setReverseAmounts,
+  isEnableBanking = false,
   helpMode = 'desktop',
 }: BankSyncCheckboxOptionsProps) {
   const { t } = useTranslation();
+  const isReverseAmountsEnabled = useFeatureFlag('bankSyncReverseAmounts');
 
   return (
     <>
@@ -220,6 +230,20 @@ export function BankSyncCheckboxOptions({
       >
         <Trans>Update Dates</Trans>
       </CheckboxOptionWithHelp>
+
+      {isReverseAmountsEnabled && isEnableBanking && (
+        <CheckboxOptionWithHelp
+          id="form_reverse_amounts"
+          checked={reverseAmounts}
+          onChange={() => setReverseAmounts(!reverseAmounts)}
+          helpText={t(
+            'Use when the bank reports credit and debit the wrong way round (for example card purchases shown as credits): swaps them so imported amounts get the opposite sign.',
+          )}
+          helpMode={helpMode}
+        >
+          <Trans>Reverse transaction amounts</Trans>
+        </CheckboxOptionWithHelp>
+      )}
 
       <CheckboxOptionWithHelp
         id="form_import_transactions"

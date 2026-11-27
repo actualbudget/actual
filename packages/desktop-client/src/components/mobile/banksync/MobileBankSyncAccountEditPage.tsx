@@ -40,6 +40,8 @@ export function MobileBankSyncAccountEditPage() {
     setImportTransactions,
     updateDates,
     setUpdateDates,
+    reverseAmounts,
+    setReverseAmounts,
     mappings,
     setMapping,
     fields,
@@ -156,6 +158,9 @@ export function MobileBankSyncAccountEditPage() {
               setImportTransactions={setImportTransactions}
               updateDates={updateDates}
               setUpdateDates={setUpdateDates}
+              reverseAmounts={reverseAmounts}
+              setReverseAmounts={setReverseAmounts}
+              isEnableBanking={account.account_sync_source === 'enableBanking'}
               helpMode="mobile"
             />
           </View>

@@ -257,28 +257,56 @@ function deriveTransactionId(
 // id so they never take a number.
 export function normalizeTransactions(
   transactions: EnableBankingTransaction[],
+  options: NormalizeTransactionOptions = {},
 ): BankSyncTransaction[] {
-  const normalized = transactions.map(normalizeTransaction);
+  const normalized = transactions.map(tx => normalizeTransaction(tx, options));
   const derivedIdCounts = new Map<string, number>();
 
   for (const isBooked of [true, false]) {
-    for (const tx of normalized) {
+    normalized.forEach((tx, index) => {
       if (
         !tx.transactionId &&
         tx.booked === isBooked &&
         isImportableTransaction(tx)
       ) {
-        tx.transactionId = deriveTransactionId(tx, derivedIdCounts);
+        // Derive the id from the transaction as the bank sent it, so it does
+        // not change with the swapCreditDebit option.
+        tx.transactionId = deriveTransactionId(
+          transactions[index],
+          derivedIdCounts,
+        );
       }
-    }
+    });
   }
 
   return normalized;
 }
 
+export type NormalizeTransactionOptions = {
+  // Some banks report credit/debit the wrong way round (e.g. card purchases
+  // as CRDT). When set, CRDT and DBIT are swapped before the sign and the
+  // counterparty are derived, so amount, indicator and payee stay coherent.
+  swapCreditDebit?: boolean;
+};
+
+function swapIndicator(
+  indicator: EnableBankingTransaction['credit_debit_indicator'],
+): EnableBankingTransaction['credit_debit_indicator'] {
+  if (indicator === 'CRDT') return 'DBIT';
+  if (indicator === 'DBIT') return 'CRDT';
+  return indicator;
+}
+
 export function normalizeTransaction(
-  tx: EnableBankingTransaction,
+  rawTx: EnableBankingTransaction,
+  { swapCreditDebit = false }: NormalizeTransactionOptions = {},
 ): BankSyncTransaction {
+  const tx = swapCreditDebit
+    ? {
+        ...rawTx,
+        credit_debit_indicator: swapIndicator(rawTx.credit_debit_indicator),
+      }
+    : rawTx;
   const transactionId = tx.entry_reference || tx.transaction_id || '';
   const bookingDate =
     tx.booking_date || tx.value_date || tx.transaction_date || '';
@@ -354,8 +382,14 @@ export function isImportableTransaction(tx: BankSyncTransaction): boolean {
   );
 }
 
-export function normalizeBalance(bal: EnableBankingBalance): BankSyncBalance {
-  const amount = Math.round(parseFloat(bal.balance_amount.amount) * 100);
+export function normalizeBalance(
+  bal: EnableBankingBalance,
+  { swapCreditDebit = false }: NormalizeTransactionOptions = {},
+): BankSyncBalance {
+  const rounded = Math.round(parseFloat(bal.balance_amount.amount) * 100);
+  // Reverse the balance with the transactions, so the opening balance the
+  // client derives from both stays consistent. `|| 0` avoids a negative zero.
+  const amount = swapCreditDebit ? -rounded || 0 : rounded;
   return {
     balanceAmount: {
       amount,

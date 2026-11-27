@@ -1453,4 +1453,59 @@ describe('Enable Banking sync', () => {
       expect(sent.importPending).toBe(expected);
     },
   );
+
+  describe('swap credit/debit option', () => {
+    const flagKey = 'flags.bankSyncReverseAmounts' satisfies keyof SyncedPrefs;
+
+    async function setPref(id: keyof SyncedPrefs, value: string) {
+      await db.update('preferences', { id, value });
+    }
+
+    async function syncAndGetRequestBody(prefs: Record<string, string>) {
+      const acctId = await prepareEnableBankingAccount();
+      for (const [key, value] of Object.entries(prefs)) {
+        await setPref(key.replace('{id}', acctId) as keyof SyncedPrefs, value);
+      }
+
+      let body;
+      handlers['/enablebanking/transactions'] = data => {
+        body = data;
+        return {
+          transactions: { all: [], booked: [], pending: [] },
+          balances: [],
+          startingBalance: null,
+        };
+      };
+
+      const result = await accountsApp.handlers['accounts-bank-sync']({
+        ids: [acctId],
+      });
+      expect(result.errors).toHaveLength(0);
+      return body;
+    }
+
+    test.each([
+      ['nothing is enabled', {}],
+      ['only the experimental feature is enabled', { [flagKey]: 'true' }],
+      [
+        'only the account option is enabled',
+        { 'sync-reverse-amounts-{id}': 'true' },
+      ],
+    ])('does not ask for a swap when %s', async (_case, prefs) => {
+      const body = await syncAndGetRequestBody(prefs);
+      expect(body).toMatchObject({ accountId: 'eb-acct-1' });
+      expect(body).not.toHaveProperty('swapCreditDebit');
+    });
+
+    test('asks the server to swap when the feature and the account option are enabled', async () => {
+      const body = await syncAndGetRequestBody({
+        [flagKey]: 'true',
+        'sync-reverse-amounts-{id}': 'true',
+      });
+      expect(body).toMatchObject({
+        accountId: 'eb-acct-1',
+        swapCreditDebit: true,
+      });
+    });
+  });
 });
