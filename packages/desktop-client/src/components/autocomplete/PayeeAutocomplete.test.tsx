@@ -155,6 +155,113 @@ function mockNearbyPayeesResult(
   };
 }
 
+describe('PayeeAutocomplete with a payee set and nothing typed', () => {
+  const transferPayee: PayeeEntity = {
+    id: 'transfer-id',
+    name: 'Test',
+    favorite: false,
+    transfer_acct: accounts[0].id,
+  };
+  const testA = makePayee('Test A');
+  const testB = makePayee('Test B');
+  const testC = makePayee('Test C');
+
+  const scenarios = {
+    // The payees in the order the list draws them.
+    plain: { payees: [testA, testB, transferPayee], nearbyPayees: [] },
+    // The nearby payee is drawn first, in front of the other payees.
+    nearby: {
+      payees: [testA, testB, testC, transferPayee],
+      nearbyPayees: [makeNearbyPayee('Test C', 0.2)],
+    },
+    // The transfer payee comes first in `payees` but is drawn last.
+    transferFirst: { payees: [transferPayee, testA, testB], nearbyPayees: [] },
+  };
+
+  async function arrowDownThenKey(
+    scenario: keyof typeof scenarios,
+    arrowDowns: number,
+    key: '{Tab}' | '{Enter}',
+  ) {
+    const { payees, nearbyPayees } = scenarios[scenario];
+    vi.mocked(useNearbyPayees).mockReturnValue(
+      mockNearbyPayeesResult(nearbyPayees),
+    );
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(payeeQueries.listCommon().queryKey, []);
+    const onUpdate = vi.fn();
+    const onSelect = vi.fn();
+
+    render(
+      <TestProviders queryClient={queryClient}>
+        <AuthProvider>
+          <PayeeAutocomplete
+            type="single"
+            value={testB.id}
+            embedded={false}
+            payees={payees}
+            accounts={accounts}
+            onUpdate={onUpdate}
+            onSelect={onSelect}
+          />
+        </AuthProvider>
+      </TestProviders>,
+    );
+
+    await userEvent.click(screen.getByLabelText('Payee'));
+    for (let i = 0; i < arrowDowns; i++) {
+      await userEvent.keyboard('{ArrowDown}');
+    }
+    const highlighted = document
+      .querySelector('[data-highlighted]')
+      ?.getAttribute('data-testid');
+    await userEvent.keyboard(key);
+    await waitForAutocomplete();
+
+    // A table saves the value last reported through onUpdate on Tab, and the
+    // one passed to onSelect on Enter.
+    const calls = key === '{Tab}' ? onUpdate.mock.calls : onSelect.mock.calls;
+    return { highlighted, committed: calls.at(-1)?.[0] };
+  }
+
+  const cases: [keyof typeof scenarios, number, string, string][] = [
+    ['plain', 1, 'Test A-payee-item', testA.id],
+    ['plain', 2, 'Test B-payee-item', testB.id],
+    ['plain', 3, 'Test-payee-item', transferPayee.id],
+    ['nearby', 1, 'Test C-payee-item', testC.id],
+    ['nearby', 2, 'Test A-payee-item', testA.id],
+    ['nearby', 5, 'Test-payee-item', transferPayee.id],
+    ['transferFirst', 1, 'Test A-payee-item', testA.id],
+    ['transferFirst', 3, 'Test-payee-item', transferPayee.id],
+  ];
+
+  test.each(cases)(
+    '%s list, ArrowDown %i time(s), Tab takes the highlighted row',
+    async (scenario, arrowDowns, row, id) => {
+      const { highlighted, committed } = await arrowDownThenKey(
+        scenario,
+        arrowDowns,
+        '{Tab}',
+      );
+      expect(highlighted).toBe(row);
+      expect(committed).toBe(id);
+    },
+  );
+
+  test.each(cases)(
+    '%s list, ArrowDown %i time(s), Enter takes the highlighted row',
+    async (scenario, arrowDowns, row, id) => {
+      const { highlighted, committed } = await arrowDownThenKey(
+        scenario,
+        arrowDowns,
+        '{Enter}',
+      );
+      expect(highlighted).toBe(row);
+      expect(committed).toBe(id);
+    },
+  );
+});
+
 describe('PayeeAutocomplete.getPayeeSuggestions', () => {
   const queryClient = createTestQueryClient();
 

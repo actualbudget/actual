@@ -340,6 +340,10 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   }
 
   const filtered = isChanged ? filteredSuggestions || suggestions : suggestions;
+  // The items in the order the menu last drew them. Downshift numbers the
+  // highlighted item by the order of the getItemProps calls, which can differ
+  // from the order of `filtered` (a list can draw its items in groups).
+  const drawnItems = useRef<T[]>([]);
   const inputRef = useRef(null);
   useProperFocus(inputRef, focused);
 
@@ -471,7 +475,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
           fireUpdate(
             onUpdate,
             strict,
-            filteredSuggestions || suggestions,
+            drawnItems.current,
             changes.highlightedIndex != null
               ? changes.highlightedIndex
               : highlightedIndex,
@@ -490,7 +494,11 @@ function SingleAutocomplete<T extends AutocompleteItem>({
         inputValue,
         highlightedIndex,
       }) => {
-        const wrappedGetItemProps = itemProps => getItemProps({ ...itemProps });
+        drawnItems.current = [];
+        const wrappedGetItemProps = itemProps => {
+          drawnItems.current.push(itemProps.item);
+          return getItemProps({ ...itemProps });
+        };
         return (
           // Super annoying but it works best to return a div so we
           // can't use a View here, but we can fake it be using the
