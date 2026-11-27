@@ -91,73 +91,11 @@ Accent text that sits on its own background, such as the selected sidebar item o
 
 ### Available CSS Variables
 
-Custom themes can override any of the CSS variables defined in Actual's base themes. These variables correspond to the token names in the theme source file, `packages/component-library/src/themes/source/colors.ts`.
+Custom themes can override any of the CSS variables in Actual's built-in themes. The [Theme Variable Reference](./custom-themes-variables.md) lists every one, with its color in each built-in theme and the variable it follows.
 
-Common variables include:
-
-**Accent Colors:**
-
-- `--color-accent` - Primary buttons, links, focus rings and selection. See [Changing the Accent Color](#changing-the-accent-color)
-
-**Base Colors:**
-
-A few of the variables below follow these base colors when a theme does not set them: the page and table backgrounds, the menu and tooltip backgrounds, table borders, and page and table text. Many other variables keep their own colors, including most cards and buttons, modals, form inputs and menu text, so a theme still needs to set those.
+Start with the accent and base colors at the top of that page. Many other variables follow them, so setting a few of them restyles most of the app. Others keep their own colors, including most cards and buttons, modals and form inputs, so a theme needs to set those itself.
 
 Do not point a base color at a variable that follows it, such as `--color-background: var(--color-tableBackground)`. The two would refer to each other and neither would work.
-
-- `--color-backgroundPage` - The page behind cards and tables
-- `--color-background` - Tables and other content surfaces
-- `--color-backgroundRaised` - Menus and tooltips
-- `--color-backgroundHover` - A hovered table row
-- `--color-backgroundSelected` - A selected table row
-- `--color-border` - Lines between table rows
-- `--color-text` - Primary text
-- `--color-textSecondary` - Supporting text such as descriptions
-- `--color-textTertiary` - The least prominent text, such as hints
-
-**Page Colors:**
-
-- `--color-pageBackground` - Main page background
-- `--color-pageText` - Primary text color
-- `--color-pageTextSubdued` - Secondary/subdued text
-- `--color-pageTextPositive` - Positive/action text color
-- `--color-pageTextLink` - Link text color
-
-**Table Colors:**
-
-- `--color-tableBackground` - Table background
-- `--color-tableText` - Table text
-- `--color-tableBorder` - Table borders
-- `--color-tableRowBackgroundHover` - Row hover background
-
-**Button Colors:**
-
-- `--color-buttonPrimaryBackground` - Primary button background
-- `--color-buttonPrimaryText` - Primary button text
-- `--color-buttonNormalBackground` - Normal button background
-- `--color-buttonNormalText` - Normal button text
-
-**Sidebar Colors:**
-
-- `--color-sidebarBackground` - Sidebar background
-- `--color-sidebarItemText` - Sidebar item text
-- `--color-sidebarItemTextSelected` - Selected sidebar item text
-
-**Graph Colors:**
-
-These color palette impact custom report series colors in all variations - bar, line, donut, etc...
-
-- `--color-chartQual1`
-- `--color-chartQual2`
-- `--color-chartQual3`
-- `--color-chartQual4`
-- `--color-chartQual5`
-- `--color-chartQual6`
-- `--color-chartQual7`
-- `--color-chartQual8`
-- `--color-chartQual9`
-
-And many more! To see all available variables, check the theme files in the source code or look at an existing theme.
 
 ### Validation Rules
 

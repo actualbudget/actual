@@ -4,6 +4,10 @@ import type { WrappedDatabase } from '#db';
 import { isValidFileId, isValidGroupId } from '#util/paths';
 import type { FileId, GroupId } from '#util/paths';
 
+// Callers pass the `x-actual-format` header, which is a string. The column is
+// a SMALLINT, so SQLite stores a numeric string as a number and returns that.
+type SyncVersion = string | number;
+
 class FileBase {
   name: string | null | undefined;
   groupId: GroupId | null | undefined;
@@ -11,7 +15,7 @@ class FileBase {
   encryptTest: string | null | undefined;
   encryptKeyId: string | null | undefined;
   encryptMeta: string | null | undefined;
-  syncVersion: string | null | undefined;
+  syncVersion: SyncVersion | null | undefined;
   deleted: boolean;
   owner: string | null | undefined;
 
@@ -22,7 +26,7 @@ class FileBase {
     encryptTest: string | null | undefined,
     encryptKeyId: string | null | undefined,
     encryptMeta: string | null | undefined,
-    syncVersion: string | null | undefined,
+    syncVersion: SyncVersion | null | undefined,
     deleted: number | boolean | undefined,
     owner: string | null | undefined,
   ) {
@@ -46,9 +50,9 @@ type FileConstructorArgs = {
   encryptTest?: string | null;
   encryptKeyId?: string | null;
   encryptMeta: string | null;
-  syncVersion: string | null;
+  syncVersion: SyncVersion | null;
   deleted?: number | boolean;
-  owner: string | null;
+  owner?: string | null;
 };
 
 class File extends FileBase {
@@ -119,7 +123,7 @@ const boolToInt = (bool: boolean) => {
 type RawFile = {
   id: string;
   group_id: string | null;
-  sync_version: string | null;
+  sync_version: SyncVersion | null;
   name: string | null;
   encrypt_meta: string | null;
   encrypt_salt: string | null;

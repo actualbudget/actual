@@ -7,9 +7,27 @@ import {
   FilesService,
   FileUpdate,
 } from '#app-sync/services/files-service'; // Adjust the path as necessary
+import type { WrappedDatabase } from '#db';
+import { isValidFileId, isValidGroupId } from '#util/paths';
+import type { FileId, GroupId } from '#util/paths';
+
+function toFileId(id: string): FileId {
+  if (!isValidFileId(id)) {
+    throw new Error(`Invalid file id in test: ${id}`);
+  }
+  return id;
+}
+
+function toGroupId(id: string): GroupId {
+  if (!isValidGroupId(id)) {
+    throw new Error(`Invalid group id in test: ${id}`);
+  }
+  return id;
+}
+
 describe('FilesService', () => {
-  let filesService;
-  let accountDb;
+  let filesService: FilesService;
+  let accountDb: WrappedDatabase;
 
   const insertToyExampleData = () => {
     accountDb.mutate(
@@ -47,10 +65,10 @@ describe('FilesService', () => {
   });
 
   test('get should return a file', () => {
-    const file = filesService.get('1');
+    const file = filesService.get(toFileId('1'));
     const expectedFile = new File({
-      id: '1',
-      groupId: 'group1',
+      id: toFileId('1'),
+      groupId: toGroupId('group1'),
       syncVersion: 1,
       name: 'file1',
       encryptMeta: '{"key":"value"}',
@@ -64,7 +82,7 @@ describe('FilesService', () => {
   });
 
   test('get should throw FileNotFound if file is deleted or does not exist', () => {
-    const fileId = crypto.randomBytes(16).toString('hex');
+    const fileId = toFileId(crypto.randomBytes(16).toString('hex'));
     accountDb.mutate(
       'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, encrypt_salt, encrypt_test, encrypt_keyid, deleted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
@@ -85,17 +103,17 @@ describe('FilesService', () => {
     }).toThrow(FileNotFound);
 
     expect(() => {
-      filesService.get(crypto.randomBytes(16).toString('hex'));
+      filesService.get(toFileId(crypto.randomBytes(16).toString('hex')));
     }).toThrow(FileNotFound);
   });
 
   test.each([true, false])(
     'set should insert a new file with deleted: %p',
     deleted => {
-      const fileId = crypto.randomBytes(16).toString('hex');
+      const fileId = toFileId(crypto.randomBytes(16).toString('hex'));
       const newFile = new File({
         id: fileId,
-        groupId: 'group2',
+        groupId: toGroupId('group2'),
         syncVersion: 1,
         name: 'file2',
         encryptMeta: '{"key":"value2"}',
@@ -104,10 +122,14 @@ describe('FilesService', () => {
 
       filesService.set(newFile);
 
-      const file = filesService.validate(filesService.getRaw(fileId));
+      const rawFile = filesService.getRaw(fileId);
+      if (!rawFile) {
+        throw new Error('The file was not inserted');
+      }
+      const file = filesService.validate(rawFile);
       const expectedFile = new File({
         id: fileId,
-        groupId: 'group2',
+        groupId: toGroupId('group2'),
         syncVersion: 1,
         name: 'file2',
         encryptMeta: '{"key":"value2"}',
@@ -126,8 +148,8 @@ describe('FilesService', () => {
     expect(files.length).toBe(1);
     expect(files[0]).toEqual(
       new File({
-        id: '1',
-        groupId: 'group1',
+        id: toFileId('1'),
+        groupId: toGroupId('group1'),
         syncVersion: 1,
         name: 'file1',
         encryptMeta: '{"key":"value"}',
@@ -142,8 +164,8 @@ describe('FilesService', () => {
   test('find should respect the limit parameter', () => {
     filesService.set(
       new File({
-        id: crypto.randomBytes(16).toString('hex'),
-        groupId: 'group2',
+        id: toFileId(crypto.randomBytes(16).toString('hex')),
+        groupId: toGroupId('group2'),
         syncVersion: 1,
         name: 'file2',
         encryptMeta: '{"key":"value2"}',
@@ -165,7 +187,7 @@ describe('FilesService', () => {
   test('update should modify all attributes of an existing file', () => {
     const fileUpdate = new FileUpdate({
       name: 'updatedFile1',
-      groupId: 'updatedGroup1',
+      groupId: toGroupId('updatedGroup1'),
       encryptSalt: 'updatedSalt',
       encryptTest: 'updatedTest',
       encryptKeyId: 'updatedKeyId',
@@ -173,13 +195,13 @@ describe('FilesService', () => {
       syncVersion: 2,
       deleted: true,
     });
-    const updatedFile = filesService.update('1', fileUpdate);
+    const updatedFile = filesService.update(toFileId('1'), fileUpdate);
 
     expect(updatedFile).toEqual(
       new File({
-        id: '1',
+        id: toFileId('1'),
         name: 'updatedFile1',
-        groupId: 'updatedGroup1',
+        groupId: toGroupId('updatedGroup1'),
         encryptSalt: 'updatedSalt',
         encryptTest: 'updatedTest',
         encryptMeta: '{"key":"updatedValue"}',
@@ -193,8 +215,8 @@ describe('FilesService', () => {
   test('find should return only files accessible to the user', () => {
     filesService.set(
       new File({
-        id: crypto.randomBytes(16).toString('hex'),
-        groupId: 'group2',
+        id: toFileId(crypto.randomBytes(16).toString('hex')),
+        groupId: toGroupId('group2'),
         syncVersion: 1,
         name: 'file2',
         encryptMeta: '{"key":"value2"}',
@@ -205,8 +227,8 @@ describe('FilesService', () => {
 
     filesService.set(
       new File({
-        id: crypto.randomBytes(16).toString('hex'),
-        groupId: 'group2',
+        id: toFileId(crypto.randomBytes(16).toString('hex')),
+        groupId: toGroupId('group2'),
         syncVersion: 1,
         name: 'file2',
         encryptMeta: '{"key":"value2"}',
@@ -225,15 +247,15 @@ describe('FilesService', () => {
     'update should modify a single attribute with groupId = $groupId',
     newGroupId => {
       const fileUpdate = new FileUpdate({
-        groupId: newGroupId,
+        groupId: toGroupId(newGroupId),
       });
-      const updatedFile = filesService.update('1', fileUpdate);
+      const updatedFile = filesService.update(toFileId('1'), fileUpdate);
 
       expect(updatedFile).toEqual(
         new File({
-          id: '1',
+          id: toFileId('1'),
           name: 'file1',
-          groupId: newGroupId,
+          groupId: toGroupId(newGroupId),
           syncVersion: 1,
           encryptMeta: '{"key":"value"}',
           encryptSalt: 'salt',

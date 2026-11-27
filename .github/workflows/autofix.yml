@@ -26,6 +26,8 @@ jobs:
       # the reviewed file is always current; autofix.ci commits any change.
       - name: Generate news feed
         run: yarn generate:news-feed
+      - name: Generate theme variable reference
+        run: yarn generate:theme-reference
       - name: Format code
         run: yarn lint:fix
       - uses: autofix-ci/action@7a166d7532b277f34e16238930461bf77f9d7ed8 # v1.3.3

@@ -1,0 +1,46 @@
+name: Theme reference check
+
+# The theme variable reference (packages/docs/docs/custom-themes-variables.md)
+# is generated from the theme source and committed so the docs build has it.
+# autofix.ci regenerates it on every PR; this check fails the PR if the
+# committed copy is still out of date (for example if autofix was skipped).
+
+on:
+  pull_request:
+    paths:
+      - 'packages/component-library/src/themes/source/**'
+      - 'packages/docs/docs/custom-themes-variables.md'
+      - 'packages/ci-actions/bin/generate-theme-reference.ts'
+      - '.github/workflows/theme-reference-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check-theme-reference:
+    runs-on: depot-ubuntu-latest
+    name: Ensure the theme variable reference is up to date
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+
+      - name: Regenerate the theme variable reference
+        run: yarn generate:theme-reference
+
+      - name: Verify the committed page matches
+        run: |
+          set -euo pipefail
+
+          if ! git diff --quiet -- packages/docs/docs/custom-themes-variables.md; then
+            git --no-pager diff -- packages/docs/docs/custom-themes-variables.md
+            echo "::error file=packages/docs/docs/custom-themes-variables.md::The theme variable reference is out of date. Run \`yarn generate:theme-reference\` and commit the result (autofix.ci normally does this for you)."
+            exit 1
+          fi
+
+          echo "The theme variable reference is up to date."
