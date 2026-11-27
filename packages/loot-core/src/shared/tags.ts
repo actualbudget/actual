@@ -27,8 +27,10 @@ export function renameTagInNotes(
   newTag: string,
 ) {
   const escaped = oldTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const pattern = new RegExp(`(?<!#)#${escaped}(?=[\\s#]|$)`, 'g');
-  return notes.replace(pattern, () => `#${newTag}`);
+  const pattern = new RegExp(`#${escaped}(?=[\\s#]|$)`, 'g');
+  return notes.replace(pattern, (match, offset) =>
+    notes[offset - 1] === '#' ? match : `#${newTag}`,
+  );
 }
 
 export function extractTagsFromText(value: string): string[] {
@@ -36,7 +38,10 @@ export function extractTagsFromText(value: string): string[] {
 
   const tags: string[] = [];
   const seenTags = new Set<string>();
-  for (const match of value.matchAll(/(?<!#)#([^#\s]+)/g)) {
+  for (const match of value.matchAll(/#([^#\s]+)/g)) {
+    if (value[match.index - 1] === '#') {
+      continue;
+    }
     const tag = match[1];
     if (!seenTags.has(tag)) {
       seenTags.add(tag);

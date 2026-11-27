@@ -119,6 +119,7 @@
     "glob-hasher-linux-arm64-gnu": "1.4.2"
   },
   "resolutions": {
+    "mdast-util-gfm-autolink-literal@npm:^2.0.0": "patch:mdast-util-gfm-autolink-literal@npm%3A2.0.1#~/.yarn/patches/mdast-util-gfm-autolink-literal-npm-2.0.1-dd870d9308.patch",
     "serialize-javascript": "^7.0.5"
   },
   "browserslist": [

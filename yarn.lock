@@ -19079,7 +19079,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mdast-util-gfm-autolink-literal@npm:^2.0.0":
+"mdast-util-gfm-autolink-literal@npm:2.0.1":
   version: 2.0.1
   resolution: "mdast-util-gfm-autolink-literal@npm:2.0.1"
   dependencies:
@@ -19089,6 +19089,19 @@ __metadata:
     mdast-util-find-and-replace: "npm:^3.0.0"
     micromark-util-character: "npm:^2.0.0"
   checksum: 10/d933b42feb126bd094d4be4a4955326c4a9e727a5d0dbe3c824534a19d831996fcf16f67df3dd29550a7d2ac4ac568c80485bee380151ebb42c62848ab20dfa6
+  languageName: node
+  linkType: hard
+
+"mdast-util-gfm-autolink-literal@patch:mdast-util-gfm-autolink-literal@npm%3A2.0.1#~/.yarn/patches/mdast-util-gfm-autolink-literal-npm-2.0.1-dd870d9308.patch":
+  version: 2.0.1
+  resolution: "mdast-util-gfm-autolink-literal@patch:mdast-util-gfm-autolink-literal@npm%3A2.0.1#~/.yarn/patches/mdast-util-gfm-autolink-literal-npm-2.0.1-dd870d9308.patch::version=2.0.1&hash=539934"
+  dependencies:
+    "@types/mdast": "npm:^4.0.0"
+    ccount: "npm:^2.0.0"
+    devlop: "npm:^1.0.0"
+    mdast-util-find-and-replace: "npm:^3.0.0"
+    micromark-util-character: "npm:^2.0.0"
+  checksum: 10/ac894a0e22b94910d9d0b56a06ce87fdbe0df11452de3458b8925ae8b5fd0fda4ee6543cd8dceb693032c408039a5c05c7c992833c549f007874fc66b7079c8b
   languageName: node
   linkType: hard
 
