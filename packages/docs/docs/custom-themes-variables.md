@@ -28,6 +28,7 @@ Start with these. Many of the variables further down follow them, so a theme can
 | `--color-success`            | Success and notice messages. Their fills and text are worked out from it.                | `#27ab83` | `#3ebd93` | `#3ebd93` |
 | `--color-warning`            | Warning messages. Their fills and text are worked out from it.                           | `#e6bb20` | `#f5e35d` | `#f5e35d` |
 | `--color-error`              | Error messages. Their fills and text are worked out from it.                             | `#e12d39` | `#e12d39` | `#e12d39` |
+| `--color-info`               | Informational messages. Their fill and text are worked out from it.                      | `#2b8fed` | `#40a5f7` | `#40a5f7` |
 
 ## All Other Variables
 
@@ -204,6 +205,8 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-errorTextDarker`                   | `#b1001f`   | `#ffd8d5`   | `#ffd8d5`   | `--color-errorTextDark`                                                                   |
 | `--color-errorTextMenu`                     | `#ff9b9b`   | `#ff9b9b`   | `#ff9b9b`   |                                                                                           |
 | `--color-errorBorder`                       | `#e12d39`   | `#e12d39`   | `#e12d39`   | `--color-error`                                                                           |
+| `--color-infoBackground`                    | `#ddedff`   | `#005c97`   | `#005c97`   | `--color-info`, as a fill                                                                 |
+| `--color-infoText`                          | `#0059a0`   | `#dfefff`   | `#dfefff`   | `--color-info`, readable as text                                                          |
 | `--color-upcomingBackground`                | `#efe7fe`   | `#44427c`   | `#342553`   | `--color-accentSubtle`                                                                    |
 | `--color-upcomingText`                      | `#8719e0`   | `#cbaeff`   | `#bb91ff`   | `--color-accentSubtleText`                                                                |
 | `--color-formLabelText`                     | `#8719e0`   | `#cbaeff`   | `#bb91ff`   | `--color-accentText`                                                                      |

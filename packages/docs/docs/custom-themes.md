@@ -91,19 +91,20 @@ Accent text that sits on its own background, such as the selected sidebar item o
 
 ### Changing the Status Colors
 
-Success, warning and error messages each take their colors from one variable:
+Success, warning, error and information messages each take their colors from one variable:
 
 ```css
 :root {
   --color-success: #2e9e6b;
   --color-warning: #d99a1c;
   --color-error: #c6283b;
+  --color-info: #2f7fd6;
 }
 ```
 
-Actual works out the fill, the text and the stronger text for each kind of message from that color and from your theme's table and page backgrounds, so messages stay readable. The border uses the color as it is. A mid-tone works best, because the same color has to make a pale or deep fill and readable text.
+Actual works out the fill and the text for each kind of message from that color and from your theme's table and page backgrounds, so messages stay readable. The border uses the color as it is. A mid-tone works best, because the same color has to make a pale or deep fill and readable text.
 
-You can still set any of the individual variables, such as `--color-errorText` or `--color-noticeBackground`. Actual keeps your value and only works out the ones you leave out.
+You can still set any of the individual variables, such as `--color-errorText`, `--color-noticeBackground` or `--color-infoBackground`. Actual keeps your value and only works out the ones you leave out.
 
 ### Available CSS Variables
 
