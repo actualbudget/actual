@@ -33,10 +33,11 @@ export function extractIngItalyPayee(
   }
 
   const txType = (tx.bank_transaction_code?.description || '').toLowerCase();
+  const preNote = remittance.split(/\bNote:/i)[0];
 
   // 1. Bonifici in uscita
   // Placeholder: "A favore di <PAYEE>"
-  if (txType.includes('uscita') || /\bA favore di\b/i.test(remittance)) {
+  if (txType.includes('uscita') || /\bA favore di\b/i.test(preNote)) {
     const bonificoUscitaMatch = remittance.match(
       /\bA favore di\s+(.+?)(?:\s+IBAN beneficiario\b|\s+Note:|$)/i,
     );

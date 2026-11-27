@@ -95,6 +95,17 @@ describe('ING Italy adapter (ing-it)', () => {
       expect(extractIngItalyPayee(tx)).toBe('MARIO ROSSI');
     });
 
+    it('does not treat "A favore di" inside incoming transfer notes as an outgoing transfer', () => {
+      const tx: EnableBankingTransaction = {
+        transaction_amount: { currency: 'EUR', amount: '50.00' },
+        bank_transaction_code: { description: 'Bonifico in accredito' },
+        remittance_information: [
+          'Bonifico istantaneo Anagrafica Ordinante LUCA BIANCHI Note: A favore di MARIO ROSSI per compleanno',
+        ],
+      };
+      expect(extractIngItalyPayee(tx)).toBe('LUCA BIANCHI');
+    });
+
     it('extracts payee from 4) Pagamento carta POS con suffisso ("presso <PAYEE>")', () => {
       const tx = typedFixtureTransactions[3];
       expect(extractIngItalyPayee(tx)).toBe('BAR DEL CORSO');
