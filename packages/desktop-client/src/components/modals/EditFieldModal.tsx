@@ -348,6 +348,7 @@ export function EditFieldModal({
             </View>
             <View>
               <Button
+                variant="primary"
                 onPress={() => {
                   const close = apply(value);
                   if (close) state.close();
