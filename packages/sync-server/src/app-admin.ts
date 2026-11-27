@@ -10,6 +10,16 @@ import {
 } from './util/middlewares';
 import { validateSession } from './util/validate-user';
 
+// The columns that `UserService.getAllUsers` selects.
+type UserRow = {
+  id: string;
+  userName: string;
+  displayName: string | null;
+  enabled: number;
+  owner: number;
+  role: string | null;
+};
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -34,7 +44,7 @@ app.get('/owner-created/', (req, res) => {
 // target user is necessarily an admin — adding isAdmin would break that flow
 // without a substantial refactor.
 app.get('/users/', validateSessionMiddleware, (req, res) => {
-  const users = UserService.getAllUsers();
+  const users: UserRow[] = UserService.getAllUsers();
   res.json(
     users.map(u => ({
       ...u,
@@ -86,11 +96,14 @@ app.post('/users', validateSessionMiddleware, async (req, res) => {
   }
 
   const userId = uuidv4();
+  // `role` is checked above but has never been passed on, so a new user is
+  // stored without a role.
   UserService.insertUser(
     userId,
     userName,
     displayName || null,
     enabled ? 1 : 0,
+    undefined,
   );
 
   res.status(200).send({ status: 'ok', data: { id: userId } });
@@ -160,7 +173,7 @@ app.delete('/users', validateSessionMiddleware, async (req, res) => {
 
   const { ids } = req.body || {};
   let totalDeleted = 0;
-  ids.forEach(item => {
+  ids.forEach((item: unknown) => {
     const ownerId = UserService.getOwnerId();
 
     if (item === ownerId) return;
