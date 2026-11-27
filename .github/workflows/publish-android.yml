@@ -91,7 +91,8 @@ jobs:
       # Secrets in the `release` environment: GOOGLE_PLAY_WIF_PROVIDER is the
       # full Workload Identity Provider resource name; GOOGLE_PLAY_SERVICE_ACCOUNT
       # is the email of the service account with testing and production release
-      # access to org.actualbudget. Federation trust is restricted to this workflow
+      # access and Manage store presence permission for org.actualbudget.
+      # Federation trust is restricted to this workflow
       # and the release environment. Requires the Google Play Android Developer API.
       # Setup: https://docs.cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines#impersonation
       - name: Authenticate to Google Play
@@ -104,6 +105,8 @@ jobs:
       - name: Upload to Google Play
         env:
           TRACK: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'production' || 'alpha' }}
+          # The store listing is shared across tracks; update it only for stable releases.
+          SKIP_UPLOAD_LISTING: ${{ github.event_name != 'release' || github.event.release.prerelease }}
           FASTLANE_SKIP_UPDATE_CHECK: '1'
           FASTLANE_OPT_OUT_USAGE: '1'
         run: |
@@ -113,5 +116,6 @@ jobs:
             --aab packages/mobile-client/build/app-release-signed.aab \
             --track "$TRACK" \
             --metadata_path packages/mobile-client/android/fastlane/metadata \
-            --skip_upload_metadata true --skip_upload_images true --skip_upload_screenshots true \
+            --skip_upload_metadata "$SKIP_UPLOAD_LISTING" \
+            --skip_upload_images "$SKIP_UPLOAD_LISTING" --skip_upload_screenshots "$SKIP_UPLOAD_LISTING" \
             --rescue_changes_not_sent_for_review false
