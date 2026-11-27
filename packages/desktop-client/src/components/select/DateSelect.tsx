@@ -312,6 +312,7 @@ type DateSelectProps = {
   clearOnBlur?: boolean;
   onUpdate?: (selectedDate: string) => void;
   onSelect: (selectedDate: string) => void;
+  onCalendarSelect?: () => void;
   transferDateSyncChecked?: boolean;
   onTransferDateSyncChange?: (checked: boolean) => void;
 };
@@ -330,6 +331,7 @@ function DateSelectDesktop({
   clearOnBlur = true,
   onUpdate,
   onSelect,
+  onCalendarSelect,
   transferDateSyncChecked,
   onTransferDateSyncChange,
 }: DateSelectProps) {
@@ -544,8 +546,9 @@ function DateSelectDesktop({
             }}
             onSelect={date => {
               setValue(format(date, dateFormat));
-              onSelect(format(date, 'yyyy-MM-dd'));
               setOpen(false);
+              onSelect(format(date, 'yyyy-MM-dd'));
+              onCalendarSelect?.();
             }}
           />
           {onTransferDateSyncChange && (
@@ -580,7 +583,11 @@ function DateSelectMobile(props: DateSelectProps) {
         type="date"
         value={props.value ?? ''}
         onChange={event => {
-          props.onSelect(event.target.value);
+          const date = event.target.value;
+          props.onSelect(date);
+          if (date) {
+            props.onCalendarSelect?.();
+          }
         }}
         style={{ height: 28, ...inputStyle }}
         {...restInputProps}

@@ -990,6 +990,7 @@ function PayeeIcons({
 }
 
 type TransactionProps = {
+  onDatePicked?: () => void;
   allTransactions?: TransactionEntity[];
   transaction: TransactionEntity;
   subtransactions: TransactionEntity[] | null;
@@ -1061,6 +1062,7 @@ type TransactionProps = {
 };
 
 const Transaction = memo(function Transaction({
+  onDatePicked,
   allTransactions,
   transaction: originalTransaction,
   subtransactions,
@@ -1676,6 +1678,7 @@ const Transaction = memo(function Transaction({
                 clearOnBlur
                 onUpdate={onUpdate}
                 onSelect={onSave}
+                onCalendarSelect={onDatePicked}
                 transferDateSyncChecked={syncTransferDate}
                 onTransferDateSyncChange={
                   transaction.transfer_id ||
@@ -2877,6 +2880,7 @@ function TransactionTableInner({
     return (
       <Transaction
         allTransactions={props.transactions}
+        onDatePicked={() => tableNavigator.onEdit(null)}
         editing={editing}
         transaction={trans}
         transferAccountsByTransaction={props.transferAccountsByTransaction}
