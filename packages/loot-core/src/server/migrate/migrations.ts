@@ -10,8 +10,8 @@ import m1765518577215 from '#migrations/1765518577215_multiple_dashboards';
 import m1788468782000 from '#migrations/1788468782000_add_messages_pending';
 import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
-import type { Database } from '#platform/server/sqlite';
 import * as sqlite from '#platform/server/sqlite';
+import type { Database } from '#platform/server/sqlite';
 import * as prefs from '#server/prefs';
 
 let MIGRATIONS_DIR = fs.migrationsPath;

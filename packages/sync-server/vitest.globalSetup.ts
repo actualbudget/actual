@@ -6,7 +6,13 @@ const GENERIC_USER_ID = 'genericUser';
 const ADMIN_ROLE_ID = 'ADMIN';
 const BASIC_ROLE_ID = 'BASIC';
 
-const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
+const createUser = (
+  userId: string,
+  userName: string,
+  role: string,
+  owner = 0,
+  enabled = 1,
+) => {
   const missingParams = [];
   if (!userId) missingParams.push('userId');
   if (!userName) missingParams.push('userName');
@@ -36,7 +42,7 @@ const createUser = (userId, userName, role, owner = 0, enabled = 1) => {
   }
 };
 
-const setSessionUser = (userId, token = 'valid-token') => {
+const setSessionUser = (userId: string, token = 'valid-token') => {
   if (!userId) {
     throw new Error('userId is required');
   }
@@ -90,7 +96,8 @@ export async function setup() {
     await db.mutate('COMMIT');
   } catch (error) {
     await db.mutate('ROLLBACK');
-    throw new Error(`Failed to setup test sessions: ${error.message}`);
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to setup test sessions: ${reason}`);
   }
 
   setSessionUser('genericAdmin');

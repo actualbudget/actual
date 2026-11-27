@@ -45,7 +45,6 @@ import { FieldMappings } from './FieldMappings';
 import { InOutOption } from './InOutOption';
 import { MultiplierOption } from './MultiplierOption';
 import { Transaction } from './Transaction';
-import type { DateFormat, FieldMapping, ImportTransaction } from './utils';
 import {
   applyFieldMappings,
   dateFormats,
@@ -56,6 +55,7 @@ import {
   parseDate,
   stripCsvImportTransaction,
 } from './utils';
+import type { DateFormat, FieldMapping, ImportTransaction } from './utils';
 
 function CheckboxToggle({
   id,

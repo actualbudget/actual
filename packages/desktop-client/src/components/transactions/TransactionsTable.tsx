@@ -5,7 +5,6 @@ import {
   memo,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -129,7 +128,6 @@ import { useLocalPref } from '#hooks/useLocalPref';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { usePrevious } from '#hooks/usePrevious';
 import { useProperFocus } from '#hooks/useProperFocus';
-import { useResizeObserver } from '#hooks/useResizeObserver';
 import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
@@ -2307,19 +2305,10 @@ function NotesCell({
   }
 
   const textRef = useRef<HTMLSpanElement | null>(null);
-  const [isTruncated, setIsTruncated] = useState(false);
-  const checkTruncated = useCallback(() => {
+  const isTruncated = useCallback(() => {
     const el = textRef.current;
-    setIsTruncated(el != null && el.scrollWidth > el.clientWidth);
+    return el != null && el.scrollWidth > el.clientWidth;
   }, []);
-  const resizeRef = useResizeObserver<HTMLSpanElement>(checkTruncated);
-  const setTextRef = useCallback(
-    (el: HTMLSpanElement | null) => {
-      textRef.current = el;
-      resizeRef(el as HTMLSpanElement);
-    },
-    [resizeRef],
-  );
 
   function onKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter' || e.key === 'Tab') {
@@ -2333,10 +2322,6 @@ function NotesCell({
   // Tags can only be removed from the transaction's own note (not the
   // schedule name shown as a fallback), and only where the cell is editable.
   const onNotesChange = !isReadOnly && note ? onUpdate : undefined;
-
-  useLayoutEffect(() => {
-    checkTruncated();
-  }, [displayedNote, checkTruncated]);
 
   return (
     <CustomCell
@@ -2371,9 +2356,10 @@ function NotesCell({
           }
           style={{ ...styles.tooltip }}
           placement="bottom start"
-          triggerProps={{ delay: 500, isDisabled: !isTruncated }}
+          shouldOpen={isTruncated}
+          triggerProps={{ delay: 500, isDisabled: !displayedNote }}
         >
-          <UnexposedCellContent {...props} ref={setTextRef} />
+          <UnexposedCellContent {...props} ref={textRef} />
         </Tooltip>
       )}
     >

@@ -3,8 +3,8 @@ import * as path from 'path';
 
 import { describe, expect, it } from 'vitest';
 
-import type { Database } from '#platform/server/sqlite';
 import * as sqlite from '#platform/server/sqlite';
+import type { Database } from '#platform/server/sqlite';
 
 import {
   ADDITIVE_ONLY_CUTOFF,

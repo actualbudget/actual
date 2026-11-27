@@ -59,6 +59,9 @@ for (const viewport of [
           await expect(budgetPage.nextMonthButton).toBeDisabled();
         }
         await expect(selected).toHaveAttribute('data-month', month);
+        if (budgetPage instanceof BudgetPage) {
+          await budgetPage.expectNextMonthInRange(false);
+        }
       }
 
       // The test clock is January 2017, so the default range ends 12 months later
@@ -68,6 +71,14 @@ for (const viewport of [
       await expectLastMonth('2018-01');
 
       await setBudgetAmount(page, '2018-01', 200);
+      if (budgetPage instanceof BudgetPage) {
+        // The range only grows once the app has refetched the budget bounds,
+        // and that refetch is what creates the new months, so it can be slow
+        // under load. Until then desktop ignores "Next month" on the old last
+        // month. Mobile disables the button instead, which Playwright waits
+        // for.
+        await budgetPage.expectNextMonthInRange(true);
+      }
       for (let index = 0; index < 3; index++) {
         await budgetPage.goToNextMonth();
       }

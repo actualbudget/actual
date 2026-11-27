@@ -11,7 +11,6 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import type { Query } from '@actual-app/core/shared/query';
 import { tsToRelativeTime } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { AccountEntity } from '@actual-app/core/types/models';
@@ -26,7 +25,7 @@ import { useSheetValue } from '#hooks/useSheetValue';
 import * as bindings from '#spreadsheet/bindings';
 
 type ReconcilingMessageProps = {
-  balanceQuery: { name: `balance-query-${string}`; query: Query };
+  accountId: AccountEntity['id'];
   targetBalance: number;
   onDone: () => void;
   onExit: () => void;
@@ -34,19 +33,16 @@ type ReconcilingMessageProps = {
 };
 
 export function ReconcilingMessage({
-  balanceQuery,
+  accountId,
   targetBalance,
   onDone,
   onExit,
   onCreateTransaction,
 }: ReconcilingMessageProps) {
   const cleared =
-    useSheetValue<'balance', `balance-query-${string}-cleared`>({
-      name: (balanceQuery.name +
-        '-cleared') as `balance-query-${string}-cleared`,
-      value: 0,
-      query: balanceQuery.query.filter({ cleared: true }),
-    }) ?? 0;
+    useSheetValue<'account', 'balanceCleared'>(
+      bindings.accountBalanceCleared(accountId),
+    ) ?? 0;
   const format = useFormat();
   const targetDiff = targetBalance - cleared;
 

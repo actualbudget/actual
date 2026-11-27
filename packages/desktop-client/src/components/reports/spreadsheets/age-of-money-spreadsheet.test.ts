@@ -1,10 +1,6 @@
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import { describe, expect, it } from 'vitest';
 
-import type {
-  Transaction,
-  TransactionWithCategory,
-} from './age-of-money-spreadsheet';
 import {
   buildTransferInclusionFilter,
   calculateAgeOfMoney,
@@ -13,6 +9,10 @@ import {
   calculateTrend,
   classifyTransactions,
   formatPeriodLabel,
+} from './age-of-money-spreadsheet';
+import type {
+  Transaction,
+  TransactionWithCategory,
 } from './age-of-money-spreadsheet';
 
 describe('Age of Money calculations', () => {

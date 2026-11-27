@@ -8,16 +8,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getAccountDb } from '#account-db';
 import { SecretName, secretsService } from '#services/secrets-service';
 import { assertUrlAllowed } from '#util/ssrf';
+import type * as Ssrf from '#util/ssrf';
 
 import { handlers as app } from './app-simplefin';
 
 vi.mock('undici', async importOriginal => ({
-  ...(await importOriginal()),
+  ...(await importOriginal<typeof undici>()),
   fetch: vi.fn(),
 }));
 
 vi.mock('#util/ssrf', async importOriginal => ({
-  ...(await importOriginal()),
+  ...(await importOriginal<typeof Ssrf>()),
   assertUrlAllowed: vi.fn().mockResolvedValue(undefined),
   createSsrfDispatcher: vi.fn(),
 }));
@@ -27,24 +28,37 @@ const SETUP_TOKEN = Buffer.from(
   'https://bridge.example.com/claim/abc',
 ).toString('base64');
 
-const statusResponse = (status, body = '') => ({
-  ok: status >= 200 && status < 300,
+type StubbedResponse = { status: number; body: string };
+
+const statusResponse = (status: number, body = ''): StubbedResponse => ({
   status,
-  headers: { get: () => null },
-  text: () => Promise.resolve(body),
+  body,
 });
 
-const okResponse = body => statusResponse(200, body);
+const okResponse = (body: string) => statusResponse(200, body);
 
 // The claim is a POST to the bridge; listing accounts is a GET. Route the mock
 // by method so a test can stub one or both.
-function mockFetch({ claim, accounts }) {
-  vi.mocked(undici.fetch).mockImplementation((url, options) =>
-    Promise.resolve(options?.method === 'POST' ? claim : accounts),
-  );
+function mockFetch({
+  claim,
+  accounts,
+}: {
+  claim?: StubbedResponse;
+  accounts?: StubbedResponse;
+}) {
+  vi.mocked(undici.fetch).mockImplementation((url, options) => {
+    const stub = options?.method === 'POST' ? claim : accounts;
+    if (!stub) {
+      return Promise.reject(new Error('No response stubbed for this request'));
+    }
+    // A response can be read only once, so every call gets its own.
+    return Promise.resolve(
+      new undici.Response(stub.body, { status: stub.status }),
+    );
+  });
 }
 
-const post = path =>
+const post = (path: string) =>
   request(app).post(path).set('x-actual-token', 'valid-token');
 
 describe('app-simplefin', () => {
@@ -268,7 +282,7 @@ describe('app-simplefin', () => {
 
     it('reports SERVER_DOWN when the claim URL fails the SSRF preflight', async () => {
       secretsService.set(SecretName.simplefin_token, SETUP_TOKEN);
-      assertUrlAllowed.mockRejectedValueOnce(
+      vi.mocked(assertUrlAllowed).mockRejectedValueOnce(
         new Error('Unable to resolve host: bridge.example.com'),
       );
       vi.mocked(undici.fetch).mockReset();

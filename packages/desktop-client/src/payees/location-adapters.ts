@@ -28,6 +28,12 @@ export type LocationApiClient = {
   ): Promise<NearbyPayeeEntity[]>;
 };
 
+export const DEFAULT_POSITION_OPTIONS: PositionOptions = {
+  enableHighAccuracy: true,
+  timeout: 15000, // 15 second timeout
+  maximumAge: 60000, // Accept 1-minute-old cached position
+};
+
 /**
  * Browser implementation of geolocation using the Web Geolocation API
  */
@@ -39,16 +45,10 @@ export class BrowserGeolocationAdapter implements GeolocationAdapter {
       throw new Error('Geolocation is not supported by this browser');
     }
 
-    const defaultOptions: PositionOptions = {
-      enableHighAccuracy: true,
-      timeout: 15000, // 15 second timeout
-      maximumAge: 60000, // Accept 1-minute-old cached position
-    };
-
     const position = await new Promise<GeolocationPosition>(
       (resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
-          ...defaultOptions,
+          ...DEFAULT_POSITION_OPTIONS,
           ...options,
         });
       },

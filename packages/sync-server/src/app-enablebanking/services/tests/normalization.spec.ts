@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 
-import type { EnableBankingTransaction } from '#app-enablebanking/services/enablebanking-service';
 import {
   isImportableTransaction,
   normalizeAccount,
@@ -8,6 +7,7 @@ import {
   normalizeTransaction,
   normalizeTransactions,
 } from '#app-enablebanking/services/enablebanking-service';
+import type { EnableBankingTransaction } from '#app-enablebanking/services/enablebanking-service';
 
 import {
   mockBalance,

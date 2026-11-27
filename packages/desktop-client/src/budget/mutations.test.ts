@@ -1,5 +1,5 @@
-import type { TFunction } from 'i18next';
 import i18next from 'i18next';
+import type { TFunction } from 'i18next';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { translateBudgetTemplateNotification } from './mutations';

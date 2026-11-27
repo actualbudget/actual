@@ -6,8 +6,8 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
-import type { Locale } from 'date-fns';
 import * as d from 'date-fns';
+import type { Locale } from 'date-fns';
 import { t } from 'i18next';
 
 import { FinancialText } from '#components/FinancialText';

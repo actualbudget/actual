@@ -71,7 +71,7 @@ type AccountHeaderProps = {
   showExtraBalances: boolean;
   showReconciled: boolean;
   showEmptyMessage: boolean;
-  balanceQuery: ComponentProps<typeof ReconcilingMessage>['balanceQuery'];
+  balanceQuery: ComponentProps<typeof Balances>['balanceQuery'];
   reconcileAmount?: number | null;
   isFiltered: boolean;
   filteredAmount?: number | null;
@@ -578,10 +578,10 @@ export function AccountHeader({
           />
         )}
       </View>
-      {reconcileAmount != null && (
+      {reconcileAmount != null && account && (
         <ReconcilingMessage
           targetBalance={reconcileAmount}
-          balanceQuery={balanceQuery}
+          accountId={account.id}
           onDone={onDoneReconciling}
           onExit={onExitReconciling}
           onCreateTransaction={onCreateReconciliationTransaction}
