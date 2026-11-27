@@ -136,6 +136,9 @@ export const contrastPairs: ContrastPair[] = [
   text('errorText', 'tableBackground'),
   text('errorText', 'pageBackground'),
   text('errorText', 'mobilePageBackground'),
+  text('infoText', 'infoBackground'),
+  text('infoText', 'tableBackground'),
+  text('infoText', 'pageBackground'),
   text('upcomingText', 'upcomingBackground'),
 
   text('formInputText', 'formInputBackground'),
