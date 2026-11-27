@@ -73,6 +73,7 @@ Content contained on external links is not managed or maintained by the Actual B
 - [Home Assistant](https://github.com/sztupy/hassio-actualbudget/blob/main/README.md)
 - [Hostim](https://hostim.dev/docs/templates/actual) - one-click managed Docker hosting with a persistent volume and free SSL.
 - [MASH](https://github.com/mother-of-all-self-hosting/mash-playbook/blob/main/components/actual/README.md) - Ansible playbook that deploys Actual (and 250+ other self-hosted services) as Docker containers.
+- [Nife](https://launch.nife.io/marketplace/Actual%20Budget?autodeploy=true) - one-click deploy from Nife's OpenHub catalog, free to start.
 - [Pethost](https://pethost.dev/templates/actual-budget/) - one-click template on managed Docker hosting, with a persistent volume and nightly backups.
 - [podway](https://podway.io/start?app=actual-budget) - managed hosting with an AI admin you steer from your Claude plan.
 - [Proxmox VE Helper-Scripts](https://community-scripts.github.io/ProxmoxVE/scripts?id=actualbudget)
