@@ -1,4 +1,5 @@
 import express from 'express';
+import type { Account, Transaction } from 'pluggy-sdk';
 
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
@@ -11,6 +12,9 @@ import { isValidFileId } from '#util/paths';
 import { validateBankSyncSession } from '#util/validate-budget-session';
 
 import { pluggyaiService } from './pluggyai-service';
+
+// The service marks the transactions of Pluggy's sandbox account.
+type PluggyTransaction = Transaction & { sandbox?: boolean };
 
 const app = express();
 export { app as handlers };
@@ -117,7 +121,7 @@ budgetAccounts.post(
         .map(item => item.trim())
         .filter(Boolean);
 
-      let accounts = [];
+      let accounts: Account[] = [];
 
       for (const item of itemIds) {
         const partial = await pluggyaiService.getAccountsByItemId(
@@ -138,7 +142,7 @@ budgetAccounts.post(
       res.send({
         status: 'ok',
         data: {
-          error: error.message,
+          error: getErrorMessage(error),
         },
       });
     }
@@ -219,6 +223,11 @@ bankSync.post(
       if (account.type === 'CREDIT') {
         startingBalance = -startingBalance;
       }
+      // The Pluggy API returns `updatedAt` on accounts, but the SDK's
+      // `Account` type leaves it out.
+      if (!('updatedAt' in account) || !(account.updatedAt instanceof Date)) {
+        throw new Error('Pluggy account has no update date');
+      }
       const date = getDate(account.updatedAt);
 
       const balances = [
@@ -236,24 +245,16 @@ bankSync.post(
       const booked = [];
       const pending = [];
 
-      for (const trans of Object.values(transactions)) {
-        if (typeof trans !== 'object' || Object.keys(trans).length === 0) {
+      for (const trans of Object.values<unknown>(transactions)) {
+        if (!isTransaction(trans)) {
           continue;
         }
-
-        const newTrans = {};
-
-        newTrans.booked = !(trans.status === 'PENDING');
 
         const transactionDate = trans.date;
 
         if (transactionDate < startDate && !trans.sandbox) {
           continue;
         }
-
-        newTrans.date = getDate(transactionDate);
-        newTrans.payeeName = getPayeeName(trans);
-        newTrans.notes = trans.descriptionRaw || trans.description;
 
         if (account.type === 'CREDIT') {
           if (trans.amountInAccountCurrency) {
@@ -266,20 +267,24 @@ bankSync.post(
         let amountInCurrency = trans.amountInAccountCurrency ?? trans.amount;
         amountInCurrency = Math.round(amountInCurrency * 100) / 100;
 
-        newTrans.transactionAmount = {
-          amount: amountInCurrency,
-          currency: trans.currencyCode,
+        const newTrans = {
+          booked: !(trans.status === 'PENDING'),
+          date: getDate(getTransactionDateCorrected(trans)),
+          payeeName: getPayeeName(trans),
+          notes: trans.descriptionRaw || trans.description,
+          transactionAmount: {
+            amount: amountInCurrency,
+            currency: trans.currencyCode,
+          },
+          transactionId: trans.id,
+          sortOrder: transactionDate.getTime(),
+          originalDate: getDate(transactionDate),
         };
 
-        newTrans.transactionId = trans.id;
-        newTrans.sortOrder = transactionDate.getTime();
+        const flattened = flattenObject(trans);
+        delete flattened.amount;
 
-        newTrans.originalDate = getDate(transactionDate);
-        newTrans.date = getDate(getTransactionDateCorrected(trans));
-
-        delete trans.amount;
-
-        const finalTrans = { ...flattenObject(trans), ...newTrans };
+        const finalTrans = { ...flattened, ...newTrans };
 
         if (newTrans.booked) {
           booked.push(finalTrans);
@@ -289,7 +294,10 @@ bankSync.post(
         all.push(finalTrans);
       }
 
-      const sortFunction = (a, b) => b.sortOrder - a.sortOrder;
+      const sortFunction = (
+        a: { sortOrder: number },
+        b: { sortOrder: number },
+      ) => b.sortOrder - a.sortOrder;
 
       const bookedSorted = booked.sort(sortFunction);
       const pendingSorted = pending.sort(sortFunction);
@@ -311,7 +319,7 @@ bankSync.post(
       res.send({
         status: 'ok',
         data: {
-          error: error.message,
+          error: getErrorMessage(error),
         },
       });
     }
@@ -319,12 +327,30 @@ bankSync.post(
   }),
 );
 
-function getDate(date) {
+function getDate(date: Date) {
   return date.toISOString().split('T')[0];
 }
 
-function flattenObject(obj, prefix = '') {
-  const result = {};
+// The Pluggy SDK rejects with the response body of a failed request, which is
+// a plain object and not an Error.
+function getErrorMessage(error: unknown): unknown {
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    return error.message;
+  }
+
+  return undefined;
+}
+
+// The service returns the transactions spread into one object next to
+// `hasError` and `errors`, so not every value is a transaction.
+function isTransaction(value: unknown): value is PluggyTransaction {
+  return (
+    typeof value === 'object' && value !== null && Object.keys(value).length > 0
+  );
+}
+
+function flattenObject(obj: object, prefix = '') {
+  const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(obj)) {
     const newKey = prefix ? `${prefix}.${key}` : key;
@@ -343,7 +369,7 @@ function flattenObject(obj, prefix = '') {
   return result;
 }
 
-function getPayeeName(trans) {
+function getPayeeName(trans: Transaction) {
   if (trans.merchant && (trans.merchant.name || trans.merchant.businessName)) {
     return trans.merchant.name || trans.merchant.businessName || '';
   }
@@ -364,7 +390,7 @@ function getPayeeName(trans) {
 }
 
 //useful to avoid add month to day 31, which would result in day 01 skipping to the next month
-function addMonthsClamped(date, months) {
+function addMonthsClamped(date: Date, months: number) {
   const result = new Date(date);
   const day = result.getUTCDate();
   result.setUTCDate(1);
@@ -376,7 +402,7 @@ function addMonthsClamped(date, months) {
   return result;
 }
 
-function getTransactionDateCorrected(trans) {
+function getTransactionDateCorrected(trans: Transaction) {
   if (trans.creditCardMetadata?.installmentNumber != null) {
     return addMonthsClamped(
       trans.creditCardMetadata.purchaseDate || trans.date,

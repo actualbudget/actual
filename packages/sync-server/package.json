@@ -35,7 +35,7 @@
     "#app-gocardless/services/tests/*": "./src/app-gocardless/services/tests/*.js",
     "#app-gocardless/util/*": "./src/app-gocardless/util/*.js",
     "#app-gocardless/*": "./src/app-gocardless/*.js",
-    "#app-pluggyai/*": "./src/app-pluggyai/*.js",
+    "#app-pluggyai/*": "./src/app-pluggyai/*.ts",
     "#app-simplefin/*": "./src/app-simplefin/*.js",
     "#app-sync/services/*": "./src/app-sync/services/*.js",
     "#app-sync/*": "./src/app-sync/*.js",
