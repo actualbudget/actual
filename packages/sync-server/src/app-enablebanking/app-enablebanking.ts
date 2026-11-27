@@ -73,6 +73,11 @@ function extractPsuHeaders(req: Request): PsuHeaders {
 // though they require them during the authorization step. List their names here.
 const ASPSPS_WITHOUT_DATA_ACCESS_PSU_HEADERS = new Set(['HypoVereinsbank']);
 
+const sessionAspspsByAccountUid = new Map<
+  string,
+  { name?: string; country?: string }
+>();
+
 function dataAccessPsuHeaders(
   aspspName: string | undefined,
   psuHeaders: PsuHeaders | undefined,
@@ -88,6 +93,11 @@ async function buildSessionResult(
   psuHeaders?: PsuHeaders,
 ) {
   const accessHeaders = dataAccessPsuHeaders(session.aspsp?.name, psuHeaders);
+  if (session.aspsp) {
+    for (const account of session.accounts) {
+      sessionAspspsByAccountUid.set(account.uid, session.aspsp);
+    }
+  }
   const accountsWithBalances = await Promise.all(
     session.accounts.map(async account => {
       const normalized = normalizeAccount(account, session.aspsp);
@@ -561,7 +571,15 @@ app.post(
 bankSync.post(
   '/transactions',
   handleError(async (req: Request, res: Response) => {
-    const { accountId, startDate, aspspName, importPending } = req.body || {};
+    const {
+      accountId,
+      startDate,
+      aspspName,
+      aspspCountry,
+      aspsp: aspspBody,
+      country,
+      importPending,
+    } = req.body || {};
 
     if (!accountId || !startDate) {
       res.send({
@@ -573,6 +591,27 @@ bankSync.post(
       });
       return;
     }
+
+    const cachedAspsp = sessionAspspsByAccountUid.get(accountId);
+    const aspsp =
+      aspspBody ??
+      (aspspName || aspspCountry || country || cachedAspsp
+        ? {
+            name:
+              typeof aspspBody === 'object' && aspspBody?.name
+                ? aspspBody.name
+                : (aspspName ?? cachedAspsp?.name),
+            country:
+              typeof aspspBody === 'object' && aspspBody?.country
+                ? aspspBody.country
+                : (aspspCountry ??
+                  country ??
+                  cachedAspsp?.country ??
+                  (aspspName?.trim().toUpperCase() === 'ING'
+                    ? 'IT'
+                    : undefined)),
+          }
+        : undefined);
 
     try {
       const dateTo = new Date().toISOString().split('T')[0];
@@ -628,7 +667,7 @@ bankSync.post(
       const booked: ReturnType<typeof normalizeTransactions> = [];
       const pending: ReturnType<typeof normalizeTransactions> = [];
 
-      for (const normalized of normalizeTransactions(rawTransactions)) {
+      for (const normalized of normalizeTransactions(rawTransactions, aspsp)) {
         // Drop records Actual's client can't insert (empty/non-ISO date or
         // non-numeric amount) — one of them would otherwise abort the entire
         // account sync. Pending transactions that carry a date are unaffected.

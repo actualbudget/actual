@@ -5,6 +5,10 @@ import { fetch } from 'undici';
 import type { RequestInit, Response } from 'undici';
 
 import {
+  extractIngItalyPayee,
+  isIngItaly,
+} from '#app-enablebanking/banks/ing-it';
+import {
   EnableBankingError,
   handleEnableBankingError,
 } from '#app-enablebanking/utils/errors';
@@ -30,6 +34,11 @@ export type EnableBankingTransaction = {
   booking_date?: string;
   value_date?: string;
   transaction_date?: string;
+  bank_transaction_code?: {
+    description?: string | null;
+    code?: string | null;
+    sub_code?: string | null;
+  } | null;
   remittance_information?: string[];
 };
 
@@ -257,8 +266,9 @@ function deriveTransactionId(
 // id so they never take a number.
 export function normalizeTransactions(
   transactions: EnableBankingTransaction[],
+  aspsp?: { name?: string | null; country?: string | null },
 ): BankSyncTransaction[] {
-  const normalized = transactions.map(normalizeTransaction);
+  const normalized = transactions.map(tx => normalizeTransaction(tx, aspsp));
   const derivedIdCounts = new Map<string, number>();
 
   for (const isBooked of [true, false]) {
@@ -278,6 +288,7 @@ export function normalizeTransactions(
 
 export function normalizeTransaction(
   tx: EnableBankingTransaction,
+  aspsp?: { name?: string | null; country?: string | null },
 ): BankSyncTransaction {
   const transactionId = tx.entry_reference || tx.transaction_id || '';
   const bookingDate =
@@ -292,6 +303,10 @@ export function normalizeTransaction(
     payeeName = tx.creditor?.name || '';
   } else {
     payeeName = tx.creditor?.name || tx.debtor?.name || '';
+  }
+
+  if (!payeeName && isIngItaly(aspsp)) {
+    payeeName = extractIngItalyPayee(tx) || '';
   }
 
   const cleanedAll = tx.remittance_information

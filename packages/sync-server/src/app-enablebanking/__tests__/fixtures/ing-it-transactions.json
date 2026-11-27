@@ -1,0 +1,162 @@
+[
+  {
+    "entry_reference": "ref-bonifico-uscita",
+    "transaction_id": "tx-bonifico-uscita-01",
+    "bank_transaction_code": {
+      "description": "Bonifico In Uscita"
+    },
+    "transaction_amount": {
+      "currency": "EUR",
+      "amount": "-150.00"
+    },
+    "creditor": null,
+    "debtor": null,
+    "credit_debit_indicator": "DBIT",
+    "status": "BOOK",
+    "booking_date": "2026-03-01",
+    "value_date": "2026-03-01",
+    "remittance_information": [
+      "Bonifico da voi disposto N. 1000000001 A favore di MARIO ROSSI IBAN beneficiario IT60X0542811101000000123456 Note: Quota spese condominiali"
+    ]
+  },
+  {
+    "entry_reference": "ref-bonifico-istantaneo-entrata",
+    "transaction_id": "tx-bonifico-istantaneo-02",
+    "bank_transaction_code": {
+      "description": "Accredito Bonifico"
+    },
+    "transaction_amount": {
+      "currency": "EUR",
+      "amount": "50.00"
+    },
+    "creditor": null,
+    "debtor": null,
+    "credit_debit_indicator": "CRDT",
+    "status": "BOOK",
+    "booking_date": "2026-03-02",
+    "value_date": "2026-03-02",
+    "remittance_information": [
+      "Bonifico istantaneo N. 1000000002 BIC Ordinante INGITMM1XXX Codifica Ordinante IT02L1234512345000000654321 Anagrafica Ordinante LUCA BIANCHI Note: Regalo compleanno"
+    ]
+  },
+  {
+    "entry_reference": "ref-sdd-core",
+    "transaction_id": "tx-sdd-core-03",
+    "bank_transaction_code": {
+      "description": "Addebito Diretto"
+    },
+    "transaction_amount": {
+      "currency": "EUR",
+      "amount": "-65.40"
+    },
+    "creditor": null,
+    "debtor": null,
+    "credit_debit_indicator": "DBIT",
+    "status": "BOOK",
+    "booking_date": "2026-03-03",
+    "value_date": "2026-03-03",
+    "remittance_information": [
+      "Addebito SDD CORE Scad. 03/03/2026 Imp. 65,40 Creditor id. IT00ABC123456789 ENEL ENERGIA SPA Id Mandato MAND-98765 Debitore MARIO ROSSI Rif. FATT-2026-001"
+    ]
+  },
+  {
+    "entry_reference": "ref-carta-pos",
+    "transaction_id": "tx-carta-pos-04",
+    "bank_transaction_code": {
+      "description": "Pagamento Carta"
+    },
+    "transaction_amount": {
+      "currency": "EUR",
+      "amount": "-18.20"
+    },
+    "creditor": null,
+    "debtor": null,
+    "credit_debit_indicator": "DBIT",
+    "status": "BOOK",
+    "booking_date": "2026-03-04",
+    "value_date": "2026-03-04",
+    "remittance_information": [
+      "Operazione Mastercard del 04/03/2026 alle ore 12:30 con Carta *4321 Div=EUR Importo in divisa=18.20 / Importo in Euro=18.20 presso BAR DEL CORSO - Transazione C-less"
+    ]
+  },
+  {
+    "entry_reference": "ref-carta-online",
+    "transaction_id": "tx-carta-online-05",
+    "bank_transaction_code": {
+      "description": "Pagamento Carta"
+    },
+    "transaction_amount": {
+      "currency": "EUR",
+      "amount": "-29.99"
+    },
+    "creditor": null,
+    "debtor": null,
+    "credit_debit_indicator": "DBIT",
+    "status": "BOOK",
+    "booking_date": "2026-03-05",
+    "value_date": "2026-03-05",
+    "remittance_information": [
+      "Operazione Mastercard del 05/03/2026 alle ore 19:15 con Carta *4321 Div=EUR Importo in divisa=29.99 / Importo in Euro=29.99 presso AMAZON EU SARL"
+    ]
+  },
+  {
+    "entry_reference": "ref-accredito-stipendio",
+    "transaction_id": "tx-accredito-stipendio-06",
+    "bank_transaction_code": {
+      "description": "Accredito Stipendio/Pensione"
+    },
+    "transaction_amount": {
+      "currency": "EUR",
+      "amount": "2200.00"
+    },
+    "creditor": null,
+    "debtor": null,
+    "credit_debit_indicator": "CRDT",
+    "status": "BOOK",
+    "booking_date": "2026-03-06",
+    "value_date": "2026-03-06",
+    "remittance_information": [
+      "Bonifico N. 1000000006 BIC Ordinante UNICREDIT Codifica Ordinante IT99Z987654321000000112233 Anagrafica Ordinante ACME CORP SPA Note: Emolumenti febbraio 2026"
+    ]
+  },
+  {
+    "entry_reference": "ref-carta-spazi-multipli",
+    "transaction_id": "tx-carta-spazi-07",
+    "bank_transaction_code": {
+      "description": "Pagamento Carta"
+    },
+    "transaction_amount": {
+      "currency": "EUR",
+      "amount": "-15.50"
+    },
+    "creditor": null,
+    "debtor": null,
+    "credit_debit_indicator": "DBIT",
+    "status": "BOOK",
+    "booking_date": "2026-03-07",
+    "value_date": "2026-03-07",
+    "remittance_information": [
+      "Operazione Mastercard del 07/03/2026 alle ore 10:15 con Carta *4321 Div=EUR Importo in divisa=15.50 / Importo in Euro=15.50 presso PASTICCERIA   CENTRALE    ROMA           - Transazione C-less"
+    ]
+  },
+  {
+    "entry_reference": "ref-prelievo-carta",
+    "transaction_id": "tx-prelievo-carta-08",
+    "bank_transaction_code": {
+      "description": "Prelievo Carta"
+    },
+    "transaction_amount": {
+      "currency": "EUR",
+      "amount": "-100.00"
+    },
+    "creditor": null,
+    "debtor": null,
+    "credit_debit_indicator": "DBIT",
+    "status": "BOOK",
+    "booking_date": "2026-03-08",
+    "value_date": "2026-03-08",
+    "remittance_information": [
+      "Prelievo carta del 08/03/2026 alle ore 14:00 con Carta *4321 di Abi 02008 Div=EUR Importo in divisa=100 / Importo in Euro=100 presso UNICREDIT BANCA"
+    ]
+  }
+]
