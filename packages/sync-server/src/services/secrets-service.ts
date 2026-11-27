@@ -40,7 +40,7 @@ class SecretsDb {
     return getAccountDb();
   }
 
-  set(name: string, value: string, fileId: string | null = null) {
+  set(name: string, value: string | null, fileId: string | null = null) {
     if (!this.db) {
       this.db = this.open();
     }
@@ -60,7 +60,7 @@ class SecretsDb {
 
     const secretKey = getSecretKey(name, fileId);
     this.debug(`getting secret '${name}'`);
-    return this.db.first<{ value: string }>(
+    return this.db.first<{ value: string | null }>(
       `SELECT value FROM secrets WHERE name = ?`,
       [secretKey],
     );
@@ -101,10 +101,11 @@ export const secretsService = {
   /**
    * Sets the value of a secret by name.
    * @param name - The name of the secret to set.
-   * @param value - The value to set for the secret.
+   * @param value - The value to set for the secret. Older clients clear a
+   *   secret by sending `null`.
    * @param fileId - Budget file ID for this secret.
    */
-  set: (name: string, value: string, fileId: string | null = null) => {
+  set: (name: string, value: string | null, fileId: string | null = null) => {
     return secretsDb.set(name, value, fileId);
   },
 

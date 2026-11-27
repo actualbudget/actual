@@ -63,8 +63,8 @@ const post = (path: string) =>
 
 describe('app-simplefin', () => {
   beforeEach(() => {
-    secretsService.reset(SecretName.simplefin_token);
-    secretsService.reset(SecretName.simplefin_accessKey);
+    secretsService.set(SecretName.simplefin_token, null);
+    secretsService.set(SecretName.simplefin_accessKey, null);
     vi.spyOn(console, 'log').mockImplementation(vi.fn());
   });
 
@@ -478,7 +478,7 @@ describe('per-budget credentials', () => {
     expect(
       (await post('/status').set('X-Actual-File-Id', fileA)).body.data.source,
     ).toBe('per-budget-file');
-    secretsService.reset(SecretName.simplefin_token, fileA);
+    secretsService.set(SecretName.simplefin_token, null, fileA);
     expect(
       (await post('/status').set('X-Actual-File-Id', fileA)).body.data.source,
     ).toBe('global');
