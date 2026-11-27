@@ -91,3 +91,25 @@ it.each(['', 'actual:*', 'actual-sensitive:openid'])(
     }
   },
 );
+
+it('binds browser consent login to its nonce and consumes the OIDC state', async () => {
+  const { hashBrowserNonce } = await import('../util/oauth-browser-session');
+  const nonce = 'test-browser-nonce';
+  const query = '?client_id=test&state=opaque';
+  const start = await loginWithOpenIdSetup('https://actual.example', '', {
+    query,
+    nonceHash: hashBrowserNonce(nonce),
+  });
+  const state = new URL(start.url ?? '').searchParams.get('state');
+  const result = await loginWithOpenIdFinalize(
+    { code: 'code', state },
+    'wrong-browser',
+  );
+  expect(result.error).toBe('invalid-browser-login');
+  expect(provider.callback).not.toHaveBeenCalled();
+  provider.callback.mockRejectedValueOnce(new Error('provider rejected code'));
+  await loginWithOpenIdFinalize({ code: 'code', state }, nonce);
+  expect(provider.callback).toHaveBeenCalledOnce();
+  const replay = await loginWithOpenIdFinalize({ code: 'code', state }, nonce);
+  expect(replay.error).toBe('invalid-or-expired-state');
+});

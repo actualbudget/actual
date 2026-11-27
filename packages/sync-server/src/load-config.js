@@ -7,6 +7,7 @@ import convict from 'convict';
 import createDebug from 'debug';
 
 import { applyFileEnv } from './config-file-env';
+import { validateOAuthClients } from './oauth-clients';
 import { parseAllowedNetwork } from './util/ssrf';
 
 const require = createRequire(import.meta.url);
@@ -74,6 +75,40 @@ convict.addFormat({
       .split(',')
       .map(entry => entry.trim())
       .filter(Boolean),
+});
+
+convict.addFormat({
+  name: 'oauthClients',
+  validate: validateOAuthClients,
+  coerce: value => (typeof value === 'string' ? JSON.parse(value) : value),
+});
+
+convict.addFormat({
+  name: 'oauthIssuer',
+  validate(value) {
+    if (value === '') return;
+    let issuer;
+    try {
+      issuer = new URL(value);
+    } catch {
+      throw new Error('OAuth issuer must be an absolute HTTPS origin');
+    }
+    const localHttp =
+      issuer.protocol === 'http:' &&
+      ['localhost', '127.0.0.1', '[::1]'].includes(issuer.hostname);
+    if (
+      (!localHttp && issuer.protocol !== 'https:') ||
+      issuer.username ||
+      issuer.password ||
+      issuer.pathname !== '/' ||
+      issuer.search ||
+      issuer.hash
+    ) {
+      throw new Error(
+        'OAuth issuer must be an HTTPS origin without a path, query, or fragment',
+      );
+    }
+  },
 });
 
 // Main config schema
@@ -284,6 +319,21 @@ const configSchema = convict({
     format: 'tokenExpiration',
     default: 'never',
     env: 'ACTUAL_TOKEN_EXPIRATION',
+  },
+
+  oauth: {
+    issuer: {
+      doc: 'Public OAuth issuer URL used for authorization server metadata.',
+      format: 'oauthIssuer',
+      default: '',
+      env: 'ACTUAL_OAUTH_ISSUER',
+    },
+    clients: {
+      doc: 'Registered OAuth clients allowed to request budget access.',
+      format: 'oauthClients',
+      default: /** @type {import('./oauth-clients').OAuthClient[]} */ ([]),
+      env: 'ACTUAL_OAUTH_CLIENTS',
+    },
   },
 
   enforceOpenId: {
