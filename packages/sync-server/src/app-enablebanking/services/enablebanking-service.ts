@@ -4,10 +4,7 @@ import createDebug from 'debug';
 import { fetch } from 'undici';
 import type { RequestInit, Response } from 'undici';
 
-import {
-  extractIngItalyPayee,
-  isIngItaly,
-} from '#app-enablebanking/banks/ing-it';
+import { BankFactory } from '#app-enablebanking/bank-factory';
 import {
   EnableBankingError,
   handleEnableBankingError,
@@ -75,7 +72,7 @@ type EnableBankingAuthResponse = {
 
 type PsuType = 'personal' | 'business';
 
-type BankSyncTransaction = EnableBankingTransaction & {
+export type BankSyncTransaction = EnableBankingTransaction & {
   transactionId: string;
   date: string;
   bookingDate: string;
@@ -215,7 +212,7 @@ function stripSepaPrefix(s: string): string {
   return s.replace(SEPA_PREFIX_RE, '').trim();
 }
 
-function cleanRemittanceArray(arr: string[]): string[] {
+export function cleanRemittanceArray(arr: string[]): string[] {
   return arr.map(stripSepaPrefix).filter(Boolean);
 }
 
@@ -290,63 +287,8 @@ export function normalizeTransaction(
   tx: EnableBankingTransaction,
   aspsp?: { name?: string | null; country?: string | null },
 ): BankSyncTransaction {
-  const transactionId = tx.entry_reference || tx.transaction_id || '';
-  const bookingDate =
-    tx.booking_date || tx.value_date || tx.transaction_date || '';
-  const valueDate = tx.value_date;
-
-  let payeeName = '';
-  // With a known direction, the other party is the account holder.
-  if (tx.credit_debit_indicator === 'CRDT') {
-    payeeName = tx.debtor?.name || '';
-  } else if (tx.credit_debit_indicator === 'DBIT') {
-    payeeName = tx.creditor?.name || '';
-  } else {
-    payeeName = tx.creditor?.name || tx.debtor?.name || '';
-  }
-
-  if (!payeeName && isIngItaly(aspsp)) {
-    payeeName = extractIngItalyPayee(tx) || '';
-  }
-
-  const cleanedAll = tx.remittance_information
-    ? cleanRemittanceArray(tx.remittance_information)
-    : [];
-  if (!payeeName) {
-    payeeName = cleanedAll[0] || '';
-  }
-  const remittanceInformationUnstructured =
-    cleanedAll.length > 0 ? cleanedAll.join(' ') : undefined;
-
-  // Normalize amount based on credit/debit indicator.
-  // When indicator is present, strip existing sign and apply the correct one.
-  // When absent, preserve the original sign from the bank.
-  const trimmedAmount = tx.transaction_amount.amount.trim();
-  let signedAmount: string;
-  if (tx.credit_debit_indicator === 'DBIT') {
-    signedAmount = '-' + trimmedAmount.replace(/^[+-]/, '');
-  } else if (tx.credit_debit_indicator === 'CRDT') {
-    signedAmount = trimmedAmount.replace(/^[+-]/, '');
-  } else {
-    signedAmount = trimmedAmount;
-  }
-
-  return {
-    ...tx,
-    transactionId,
-    date: bookingDate,
-    bookingDate,
-    valueDate,
-    transactionAmount: {
-      amount: signedAmount,
-      currency: tx.transaction_amount.currency,
-    },
-    payeeName,
-    notes: remittanceInformationUnstructured,
-    remittanceInformationUnstructured,
-    // Holds and scheduled payments have not moved any money yet.
-    booked: !['PDNG', 'HOLD', 'SCHD'].includes(tx.status ?? ''),
-  };
+  const bank = BankFactory(aspsp);
+  return bank.normalizeTransaction(tx);
 }
 
 const IMPORTABLE_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;

@@ -2,10 +2,12 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import {
+import { BankFactory } from '#app-enablebanking/bank-factory';
+import IngItalyBank, {
   extractIngItalyPayee,
   isIngItaly,
-} from '#app-enablebanking/banks/ing-it';
+} from '#app-enablebanking/banks/ing_it';
+import IntegrationBank from '#app-enablebanking/banks/integration-bank';
 import {
   normalizeTransaction,
   normalizeTransactions,
@@ -228,6 +230,21 @@ describe('ING Italy adapter (ing-it)', () => {
 
       const normalizedNoAspsp = normalizeTransaction(tx);
       expect(normalizedNoAspsp.payeeName).toBe(tx.remittance_information?.[0]);
+    });
+  });
+
+  describe('BankFactory', () => {
+    it('returns IngItalyBank when aspsp matches ING Italy', () => {
+      expect(BankFactory({ name: 'ING', country: 'IT' })).toBe(IngItalyBank);
+      expect(BankFactory({ name: 'ing', country: 'it' })).toBe(IngItalyBank);
+    });
+
+    it('returns IntegrationBank when aspsp is not ING Italy or missing', () => {
+      expect(BankFactory({ name: 'UniCredit', country: 'IT' })).toBe(
+        IntegrationBank,
+      );
+      expect(BankFactory({ name: 'ING', country: 'FR' })).toBe(IntegrationBank);
+      expect(BankFactory(undefined)).toBe(IntegrationBank);
     });
   });
 });

@@ -457,6 +457,7 @@
         "packages/api/migrations/*",
         "packages/loot-core/migrations/*",
         "packages/sync-server/src/app-gocardless/banks/*.ts",
+        "packages/sync-server/src/app-enablebanking/banks/*.ts",
         "*.config.{ts,mts,mjs}"
       ],
       "rules": {

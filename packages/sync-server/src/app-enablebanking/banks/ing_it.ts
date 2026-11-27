@@ -1,29 +1,18 @@
-import type { EnableBankingTransaction } from '#app-enablebanking/types';
+import type {
+  BankSyncTransaction,
+  EnableBankingTransaction,
+} from '#app-enablebanking/services/enablebanking-service';
 
-export function isIngItaly(aspsp?: {
-  name?: string | null;
-  country?: string | null;
-}): boolean {
+import type { EnableBankingAspsp, IEnableBankingBank } from './bank.interface';
+import IntegrationBank from './integration-bank';
+
+export function isIngItaly(aspsp?: EnableBankingAspsp): boolean {
   return (
     aspsp?.country?.toUpperCase() === 'IT' &&
     aspsp?.name?.trim().toUpperCase() === 'ING'
   );
 }
 
-/**
- * Extracts payee name for ING Italy transactions based on transaction type
- * and remittance information placeholder keywords.
- *
- * Each transaction type has the payee following a specific keyword:
- * 1. Card operations (Pagamento Carta, Prelievo Carta, Trasferimento):
- *    Keyword placeholder: "presso <PAYEE>" (terminated by " - Transazione" or end of string)
- * 2. Incoming transfers / salary credits:
- *    Keyword placeholder: "Anagrafica Ordinante <PAYEE>" (terminated by " Note:" or end of string)
- * 3. Outgoing transfers:
- *    Keyword placeholder: "A favore di <PAYEE>" (terminated by " IBAN beneficiario", " Note:" or end of string)
- * 4. Direct debits (SDD CORE):
- *    Keyword placeholder: "Creditor id. <CID> <PAYEE>" (terminated by " Id Mandato", " Debitore", " Rif." or end of string)
- */
 export function extractIngItalyPayee(
   tx: EnableBankingTransaction,
 ): string | null {
@@ -91,3 +80,40 @@ export function extractIngItalyPayee(
 
   return null;
 }
+
+const IngItalyBank: IEnableBankingBank = {
+  ...IntegrationBank,
+
+  matches: isIngItaly,
+
+  normalizeTransaction(
+    tx: EnableBankingTransaction,
+    editedTransaction?: Partial<EnableBankingTransaction>,
+  ): BankSyncTransaction {
+    const normalized = IntegrationBank.normalizeTransaction(
+      tx,
+      editedTransaction,
+    );
+
+    // If standard creditor/debtor fields did not yield a specific payee,
+    // try extracting the payee from ING Italy's remittance information.
+    const hasStructuredPayee = Boolean(
+      tx.credit_debit_indicator === 'CRDT'
+        ? tx.debtor?.name
+        : tx.credit_debit_indicator === 'DBIT'
+          ? tx.creditor?.name
+          : tx.creditor?.name || tx.debtor?.name,
+    );
+
+    if (!hasStructuredPayee) {
+      const ingPayee = extractIngItalyPayee(tx);
+      if (ingPayee) {
+        normalized.payeeName = ingPayee;
+      }
+    }
+
+    return normalized;
+  },
+};
+
+export default IngItalyBank;
