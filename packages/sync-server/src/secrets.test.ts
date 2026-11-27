@@ -216,6 +216,26 @@ describe('secretsService', () => {
       });
     });
 
+    // Clients clear a secret by posting `null` as its value.
+    it('POST with a null value clears the secret', async () => {
+      secretsService.set(testSecretName, testSecretValue);
+
+      const res = await request(app)
+        .post('/')
+        .set('x-actual-token', 'valid-token')
+        .send({ name: testSecretName, value: null });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toEqual({ status: 'ok' });
+      expect(secretsService.get(testSecretName)).toBeNull();
+      expect(secretsService.exists(testSecretName)).toBe(false);
+
+      const check = await request(app)
+        .get(`/${testSecretName}`)
+        .set('x-actual-token', 'valid-token');
+      expect(check.statusCode).toEqual(404);
+    });
+
     it('DELETE resets budget file credentials', async () => {
       secretsService.set(testSecretName, 'global-value');
       secretsService.set(testSecretName, 'file-value', testFileId);
