@@ -95,7 +95,7 @@ async function setupOpenIdClient(configParameter) {
     client_secret: configParameter.client_secret,
     redirect_uri: new URL(
       '/openid/callback',
-      configParameter.server_hostname,
+      resolveServerHostname(configParameter.server_hostname),
     ).toString(),
     validate_id_token: true,
   });
@@ -358,13 +358,44 @@ export function getServerHostname() {
   if (auth && auth.extra_data) {
     try {
       const openIdConfig = JSON.parse(auth.extra_data);
-      return openIdConfig.server_hostname;
+      return resolveServerHostname(openIdConfig.server_hostname);
     } catch (error) {
       console.error('Error parsing OpenID configuration');
       debugSensitive('Error parsing OpenID configuration: %O', error);
     }
   }
   return null;
+}
+
+let hasWarnedAboutServerHostname = false;
+
+// ACTUAL_OPENID_SERVER_HOSTNAME (or openId.server_hostname in config.json)
+// wins over the URL saved when OpenID was set up, so the public URL can still
+// be changed after setting OpenID up from the UI.
+function resolveServerHostname(savedHostname: string | undefined) {
+  const configuredHostname = config.get('openId.server_hostname');
+  if (!configuredHostname) {
+    return savedHostname;
+  }
+  if (isHttpUrl(configuredHostname)) {
+    return configuredHostname;
+  }
+  if (!hasWarnedAboutServerHostname) {
+    hasWarnedAboutServerHostname = true;
+    console.warn(
+      'Ignoring the OpenID server hostname setting (ACTUAL_OPENID_SERVER_HOSTNAME): it must be a full URL such as https://actual.example.com',
+    );
+  }
+  return savedHostname;
+}
+
+function isHttpUrl(value: string) {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === 'http:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
 }
 
 export function isValidRedirectUrl(url: string | undefined): url is string {

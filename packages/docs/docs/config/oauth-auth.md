@@ -145,6 +145,8 @@ The first user to log in with OpenID/OAuth2 will be granted admin permissions an
 - **Purpose:** The public URL of your Actual Server, which the provider redirects to after authentication.
   **Example Value:** `https://<actual.myserver.com>`
 
+  If you set up OpenID from the UI, the URL you used at the time is saved with the settings. This variable takes precedence over the saved URL, so you can use it to change the URL later, for example after moving from `http://localhost:5006` to your own domain. It must start with `https://` or `http://`.
+
 #### `ACTUAL_OPENID_AUTHORIZATION_ENDPOINT`
 
 - **Purpose:** Provider's authorization endpoint (for providers that don't support discovery).
