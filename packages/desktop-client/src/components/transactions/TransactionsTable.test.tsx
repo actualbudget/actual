@@ -196,8 +196,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
   };
 
   const onSave = (transaction: TransactionEntity) => {
-    const { data } = updateTransaction(transactions, transaction);
-    setTransactions(data);
+    setTransactions(trans => updateTransaction(trans, transaction).data);
   };
 
   const onAdd = (newTransactions: TransactionEntity[]) => {
@@ -1950,6 +1949,93 @@ describe('Transactions', () => {
 
     // await userEvent.click(queryField(container, 'delete', '', 1));
     // expect(getTransactions()[0].isParent).toBe(false);
+  });
+
+  test('distributing a new split fills every empty child', async () => {
+    const { container, updateProps } = renderTransactions();
+    updateProps({ isAdding: true });
+
+    const input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '10.00');
+
+    await editNewField(container, 'category');
+    await userEvent.click(screen.getByTestId('split-transaction-button'));
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+    await userEvent.click(screen.getByTestId('add-split-button'));
+
+    await userEvent.click(screen.getByRole('button', { name: 'Distribute' }));
+
+    const debits = [
+      ...container.querySelectorAll(
+        '[data-testid="new-transaction"] [data-testid="debit"]',
+      ),
+    ].map(cell => cell.textContent);
+    expect(debits).toEqual(['10.00', '3.33', '3.33', '3.34']);
+    expect(screen.queryAllByTestId('transaction-error')).toHaveLength(0);
+  });
+
+  test('distributing a new split ignores rule results that arrive after cancel', async () => {
+    let resolveRule: (() => void) | null = null;
+    let deferRules = false;
+    const { container, updateProps } = renderTransactions({
+      onApplyRules: transaction =>
+        deferRules
+          ? new Promise(resolve => {
+              deferRules = false;
+              resolveRule = () => resolve(transaction);
+            })
+          : Promise.resolve(transaction),
+      onCloseAddTransaction: () => updateProps({ isAdding: false }),
+    });
+    updateProps({ isAdding: true });
+
+    let input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '10.00');
+
+    await editNewField(container, 'category');
+    await userEvent.click(screen.getByTestId('split-transaction-button'));
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+
+    deferRules = true;
+    await userEvent.click(screen.getByRole('button', { name: 'Distribute' }));
+    await userEvent.click(screen.getByTestId('cancel-button'));
+    updateProps({ isAdding: true });
+    await act(async () => resolveRule!());
+
+    input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '5.00');
+    expect(input.value).toBe('5.00');
+  });
+
+  test('distributing a split whose children cancel out distributes evenly', async () => {
+    const { container, getTransactions } = renderTransactions();
+
+    await editField(container, 'category', 0);
+    expect(getTransactions()[0].amount).toBe(-2777);
+
+    await userEvent.click(screen.getByTestId('split-transaction-button'));
+    await waitForAutocomplete();
+    await userEvent.click(screen.getByTestId('add-split-button'));
+
+    let input = await editField(container, 'debit', 1);
+    await userEvent.clear(input);
+    await userEvent.type(input, '10.00[tab]');
+    input = await editField(container, 'credit', 2);
+    await userEvent.clear(input);
+    await userEvent.type(input, '10.00[tab]');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Distribute' }));
+
+    const [, ...children] = getTransactions().slice(0, 3);
+    expect(children.map(t => t.amount)).toEqual([-2388, -389]);
+    expect(screen.queryAllByTestId('transaction-error')).toHaveLength(0);
   });
 
   test('transaction with splits shows 0 in correct column', async () => {

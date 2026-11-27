@@ -3796,19 +3796,21 @@ export const TransactionTable = forwardRef(
             );
           }
 
-          const newTrans = latestState.current.newTransactions;
           // Future refactor: we shouldn't need to iterate through the entire
           // transaction list to ungroup, just the new transactions.
-          setNewTransactions(
-            ungroupTransactions(
-              updateTransaction(newTrans, groupedTransaction).data,
-            ),
+          setNewTransactions(newTrans =>
+            // The form may have been cancelled while rules were running
+            newTrans.some(t => t.id === groupedTransaction.id)
+              ? ungroupTransactions(
+                  updateTransaction(newTrans, groupedTransaction).data,
+                )
+              : newTrans,
           );
         } else {
           onSaveProp(groupedTransaction);
         }
       },
-      [latestState, onSaveProp, onApplyRulesProp],
+      [onSaveProp, onApplyRulesProp],
     );
 
     const onDelete = useCallback(
@@ -3984,19 +3986,28 @@ export const TransactionTable = forwardRef(
           return;
         }
 
-        const remainingAmount =
-          parentTransaction.amount -
-          siblingTransactions.reduce((acc, t) => acc + t.amount, 0);
+        const siblingTotal = siblingTransactions.reduce(
+          (acc, t) => acc + t.amount,
+          0,
+        );
+        const remainingAmount = parentTransaction.amount - siblingTotal;
+
+        // Children that cancel out can't be scaled proportionally, so spread
+        // the remainder evenly across all of them instead.
+        const evenTransactions =
+          emptyTransactions.length === 0 && siblingTotal === 0
+            ? siblingTransactions
+            : emptyTransactions;
 
         let amounts: number[] = [];
-        if (emptyTransactions.length > 0) {
+        if (evenTransactions.length > 0) {
           const amountPerTransaction = Math.floor(
-            remainingAmount / emptyTransactions.length,
+            remainingAmount / evenTransactions.length,
           );
           let remainingCents =
-            remainingAmount - amountPerTransaction * emptyTransactions.length;
+            remainingAmount - amountPerTransaction * evenTransactions.length;
 
-          amounts = new Array(emptyTransactions.length).fill(
+          amounts = new Array(evenTransactions.length).fill(
             amountPerTransaction,
           );
 
@@ -4016,20 +4027,13 @@ export const TransactionTable = forwardRef(
           for (const [
             transactionIndex,
             transaction,
-          ] of emptyTransactions.entries()) {
+          ] of evenTransactions.entries()) {
             await onSave({
               ...transaction,
-              amount: amounts[transactionIndex],
+              amount: transaction.amount + amounts[transactionIndex],
             });
           }
-        } else if (
-          emptyTransactions.length === 0 &&
-          siblingTransactions.length > 0
-        ) {
-          const siblingTotal = siblingTransactions.reduce(
-            (acc, t) => acc + t.amount,
-            0,
-          );
+        } else if (siblingTransactions.length > 0) {
           const siblingProportions = siblingTransactions.map(
             t => t.amount / siblingTotal,
           );
