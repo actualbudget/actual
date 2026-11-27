@@ -25,7 +25,13 @@ export const TagEditor = ({ tag, ref }: TagEditorProps) => {
         updateTag({ tag: { ...tag, color: color.toString('hex') } });
       }}
     >
-      <Button variant="bare" className={getTagCSS(tag.tag)} ref={ref}>
+      <Button
+        variant="bare"
+        className={getTagCSS(tag.tag)}
+        ref={ref}
+        // Lets the table outline the color picker when it's the selected cell
+        data-testid="color"
+      >
         {formattedTag}
       </Button>
     </ColorPicker>

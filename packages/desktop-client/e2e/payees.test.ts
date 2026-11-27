@@ -84,11 +84,53 @@ test.describe('Payees', () => {
     await page.keyboard.press('Shift+Tab');
     await expect(selectButton).toBeFocused();
 
+    // Escape leaves the cell selected, where Tab moves across columns; a
+    // second Escape clears the selection so Tab leaves the table
     await page.keyboard.press('Escape');
     await expect(table).toBeFocused();
+    await page.keyboard.press('Escape');
 
     await page.keyboard.press('Tab');
     expect(await isFocusInTable()).toBe(false);
+  });
+
+  test('outlines every selectable column and keeps checked rows highlighted', async () => {
+    await payeesPage.searchFor('Fast Internet');
+    const table = page.getByTestId('table');
+    const row = table.getByTestId('row').first();
+    const isOutlined = (field: string) =>
+      table
+        .locator(`[data-cursor-field="${field}"] [data-testid="${field}"]`)
+        .evaluate(el => getComputedStyle(el).boxShadow.includes('inset'));
+    const rowBackground = () =>
+      row.evaluate(el => getComputedStyle(el).backgroundColor);
+
+    await table.focus();
+    await page.keyboard.press('ArrowDown');
+    expect(await isOutlined('select')).toBe(true);
+    const selectedColor = await rowBackground();
+
+    for (const field of ['name', 'rule-count']) {
+      await page.keyboard.press('Tab');
+      expect(await isOutlined(field)).toBe(true);
+      if (field === 'name') {
+        await expect(row).toMatchThemeScreenshots();
+      }
+    }
+
+    // A checked row keeps its own color while a cell in it is selected
+    await page.keyboard.press('Space');
+    await expect(
+      page.getByTestId('selected-payees-select-button'),
+    ).toBeVisible();
+    expect(await rowBackground()).not.toBe(selectedColor);
+    await expect(row).toMatchThemeScreenshots();
+
+    await page.keyboard.press('Escape');
+    await expect(
+      page.getByTestId('selected-payees-select-button'),
+    ).toBeHidden();
+    expect(await rowBackground()).toBe(selectedColor);
   });
 
   test('filters out unrelated payees', async () => {

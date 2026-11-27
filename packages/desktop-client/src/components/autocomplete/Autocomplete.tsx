@@ -351,6 +351,10 @@ function SingleAutocomplete<T extends AutocompleteItem>({
 
         if (clearOnSelect) {
           setValue('');
+        } else {
+          // The selection is already saved through onSelect, so a later
+          // Escape must revert to it rather than to the value before it
+          setOriginalItem(item);
         }
 
         if (closeOnSelect) {
@@ -614,6 +618,12 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                           open();
                         } else {
                           close();
+                        }
+
+                        // Once the popup is closed, let the owner (e.g. a
+                        // table cell) handle Escape too
+                        if (!isOpen || embedded) {
+                          onKeyDown?.(e);
                         }
                       }
                     },

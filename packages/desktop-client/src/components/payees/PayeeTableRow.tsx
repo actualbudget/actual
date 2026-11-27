@@ -195,6 +195,7 @@ export const PayeeTableRow = memo(
           }
           focused={focusedField === 'select'}
           selected={selected}
+          onEdit={() => payee.transfer_acct == null && onEdit(id, 'select')}
           onSelect={e => {
             if (payee.transfer_acct != null) {
               return;
@@ -231,6 +232,7 @@ export const PayeeTableRow = memo(
           }}
         </CustomCell>
         <InputCell
+          name="name"
           value={(payee.transfer_acct ? t('Transfer: ') : '') + payee.name}
           valueStyle={
             (!selected &&

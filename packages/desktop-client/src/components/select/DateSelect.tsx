@@ -50,6 +50,7 @@ import { addDays, format, isValid, parse, parseISO, subDays } from 'date-fns';
 
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { InputField } from '#components/mobile/MobileForms';
+import type { CellEditSession } from '#components/useCellEditor';
 import { useLanguage } from '#hooks/useLocale';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -314,6 +315,7 @@ type DateSelectProps = {
   onSelect: (selectedDate: string) => void;
   transferDateSyncChecked?: boolean;
   onTransferDateSyncChange?: (checked: boolean) => void;
+  editSession?: CellEditSession<string>;
 };
 
 function DateSelectDesktop({
@@ -332,6 +334,7 @@ function DateSelectDesktop({
   onSelect,
   transferDateSyncChecked,
   onTransferDateSyncChange,
+  editSession,
 }: DateSelectProps) {
   const parsedDefaultValue = useMemo(() => {
     if (defaultValue) {
@@ -358,30 +361,39 @@ function DateSelectDesktop({
 
   useEffect(() => setValue(parsedDefaultValue), [parsedDefaultValue]);
 
-  const onUpdateEffect = useEffectEvent((newValue: string) => {
-    if (getDayMonthRegex(dateFormat).test(newValue)) {
-      // Support only entering the month and day (4/5). This is complex
-      // because of the various date formats - we need to derive
-      // the right day/month format from it
-      const test = parse(newValue, getDayMonthFormat(dateFormat), new Date());
+  function parseDateToISO(inputValue: string): string | null {
+    if (getDayMonthRegex(dateFormat).test(inputValue)) {
+      const test = parse(inputValue, getDayMonthFormat(dateFormat), new Date());
       if (isValid(test)) {
-        onUpdate?.(format(test, 'yyyy-MM-dd'));
-        setSelectedValue(format(test, dateFormat));
+        return format(test, 'yyyy-MM-dd');
       }
-    } else if (getShortYearRegex(dateFormat).test(newValue)) {
-      // Support entering the year as only two digits (4/5/19)
-      const test = parse(newValue, getShortYearFormat(dateFormat), new Date());
+    } else if (getShortYearRegex(dateFormat).test(inputValue)) {
+      const test = parse(
+        inputValue,
+        getShortYearFormat(dateFormat),
+        new Date(),
+      );
       if (isValid(test)) {
-        onUpdate?.(format(test, 'yyyy-MM-dd'));
-        setSelectedValue(format(test, dateFormat));
+        return format(test, 'yyyy-MM-dd');
       }
     } else {
-      const test = parse(newValue, dateFormat, new Date());
+      const test = parse(inputValue, dateFormat, new Date());
       if (isValid(test)) {
-        const date = format(test, 'yyyy-MM-dd');
-        onUpdate?.(date);
-        setSelectedValue(newValue);
+        return format(test, 'yyyy-MM-dd');
       }
+    }
+    return null;
+  }
+
+  const onUpdateEffect = useEffectEvent((newValue: string) => {
+    const iso = parseDateToISO(newValue);
+    if (iso) {
+      if (!editSession) {
+        onUpdate?.(iso);
+      } else {
+        editSession.onUpdateDraft?.(iso);
+      }
+      setSelectedValue(format(parseISO(iso), dateFormat));
     }
   });
 
@@ -409,16 +421,30 @@ function DateSelectDesktop({
           }
 
           setOpen(false);
+        } else if (editSession) {
+          e.stopPropagation();
+          editSession.onCancel();
         }
       } else {
-        setOpen(true);
-        onUpdate?.(defaultValue);
+        setOpen(false);
+        if (editSession) {
+          e.stopPropagation();
+          editSession.onCancel();
+        } else {
+          onUpdate?.(defaultValue);
+          inputProps?.onKeyDown?.(e);
+        }
       }
     } else if (shouldSaveFromKey(e)) {
-      if (selectedValue) {
-        setValue(selectedValue);
-        const date = parse(selectedValue, dateFormat, new Date());
-        onSelect(format(date, 'yyyy-MM-dd'));
+      const targetDate = selectedValue || value;
+      const iso = parseDateToISO(targetDate);
+      if (iso) {
+        setValue(format(parseISO(iso), dateFormat));
+        if (editSession) {
+          editSession.onCommit(iso);
+        } else {
+          onSelect(iso);
+        }
       }
 
       setOpen(false);
@@ -427,6 +453,10 @@ function DateSelectDesktop({
         // This stops the event from propagating up
         e.stopPropagation();
         e.preventDefault();
+      }
+
+      if (editSession) {
+        return;
       }
 
       const { onKeyDown } = inputProps || {};
@@ -498,6 +528,24 @@ function DateSelectDesktop({
           if (!embedded) {
             setOpen(false);
           }
+
+          if (editSession) {
+            // The window losing focus also blurs; the cell keeps its draft
+            if (clearOnBlur && document.hasFocus()) {
+              if (value === '') {
+                editSession.onCommit(defaultValue || '');
+              } else {
+                const targetDate = selectedValue || value;
+                const iso = parseDateToISO(targetDate);
+                if (iso) {
+                  editSession.onCommit(iso);
+                }
+              }
+            }
+            inputProps?.onBlur?.(e);
+            return;
+          }
+
           inputProps?.onBlur?.(e);
 
           if (clearOnBlur) {
@@ -540,11 +588,25 @@ function DateSelectDesktop({
             embedded={embedded}
             onUpdate={date => {
               setSelectedValue(format(date, dateFormat));
-              onUpdate?.(format(date, 'yyyy-MM-dd'));
+              const iso = format(date, 'yyyy-MM-dd');
+              // Reopens a committed session, so the next Enter saves again
+              if (editSession) {
+                editSession.onUpdateDraft?.(iso);
+              } else {
+                onUpdate?.(iso);
+              }
             }}
             onSelect={date => {
+              const formattedISO = format(date, 'yyyy-MM-dd');
               setValue(format(date, dateFormat));
-              onSelect(format(date, 'yyyy-MM-dd'));
+              setSelectedValue(format(date, dateFormat));
+              if (editSession) {
+                // Reopens a session committed by Enter, so the pick saves
+                editSession.onUpdateDraft?.(formattedISO);
+                editSession.onCommit(formattedISO);
+              } else {
+                onSelect(formattedISO);
+              }
               setOpen(false);
             }}
           />

@@ -82,6 +82,17 @@ describe('ManageTags', () => {
     await userEvent.click(within(row).getByTestId('select'));
   }
 
+  function expectNoTagEditor() {
+    expect(document.querySelector('[data-testid="tag"] input')).toBeNull();
+  }
+
+  // The outline is drawn on the cell whose test id matches the selected field
+  function expectOutlinedCell(field: string) {
+    const row = document.querySelector('[data-cursor-field]');
+    expect(row?.getAttribute('data-cursor-field')).toBe(field);
+    expect(row?.querySelector(`[data-testid="${field}"]`)).not.toBeNull();
+  }
+
   async function openSelectionMenu() {
     await userEvent.click(screen.getByTestId('selected-tags-select-button'));
     return screen.getByTestId('selected-tags-select-tooltip');
@@ -147,6 +158,67 @@ describe('ManageTags', () => {
     });
     // No editor is left open anywhere: the navigator would otherwise carry
     // editing on to the next row's tag field
-    expect(screen.queryAllByTestId('tag')).toHaveLength(0);
+    expectNoTagEditor();
+  });
+
+  it('can rename after canceling an earlier edit without saving the canceled draft', async () => {
+    await startRenaming('Reimbursable');
+    const input = screen.getByDisplayValue('Reimbursable');
+    await userEvent.clear(input);
+    await userEvent.type(input, 'Discarded{Escape}');
+    expectNoTagEditor();
+    expect(renameTag).not.toHaveBeenCalled();
+
+    await startRenaming('Reimbursable');
+    const reopenedInput = screen.getByDisplayValue('Reimbursable');
+    await userEvent.clear(reopenedInput);
+    await userEvent.type(reopenedInput, 'ToBeReimbursed{Enter}');
+    expect(renameTag).toHaveBeenCalledExactlyOnceWith({
+      id: 'tag-1',
+      tag: 'ToBeReimbursed',
+    });
+    expectNoTagEditor();
+  });
+
+  it('outlines every column the keyboard can select', async () => {
+    const select = screen
+      .getByText('#Reimbursable')
+      .closest<HTMLElement>('[data-testid="row"]')!
+      .querySelector<HTMLElement>('[data-testid="select"]')!;
+    // The checkbox only renders on hover
+    await userEvent.hover(select);
+    await userEvent.click(within(select).getByTestId('cell-button'));
+    // Leaves the checkbox selected; the check stays until the next Escape
+    await userEvent.keyboard('{Escape}');
+    expectOutlinedCell('select');
+
+    for (const field of ['tag', 'color', 'description']) {
+      await userEvent.keyboard('{Tab}');
+      expectOutlinedCell(field);
+    }
+  });
+
+  it('toggles and clears checks from the selected cell', async () => {
+    const table = screen.getByTestId('table');
+    const rowBackground = (index: number) =>
+      getComputedStyle(within(table).getAllByTestId('row')[index])
+        .backgroundColor;
+    act(() => table.focus());
+    // Selects the first row's checkbox without editing
+    await userEvent.keyboard('{ArrowDown}');
+    expectOutlinedCell('select');
+    const selectedColor = rowBackground(0);
+
+    await userEvent.keyboard(' ');
+    expect(screen.getByTestId('selected-tags-select-button')).toBeVisible();
+    // A checked row keeps its own color under the selection
+    expect(rowBackground(0)).not.toBe(selectedColor);
+
+    await userEvent.keyboard('{Escape}');
+    expect(
+      screen.queryByTestId('selected-tags-select-button'),
+    ).not.toBeInTheDocument();
+    expectOutlinedCell('select');
+    expect(rowBackground(0)).toBe(selectedColor);
   });
 });
