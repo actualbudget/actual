@@ -16,11 +16,12 @@ Start with these. Many of the variables further down follow them, so a theme can
 | `--color-accentSubtle`       | Tinted surface for selected rows and pills.                                              | `#efe7fe` | `#44427c` | `#342553` |
 | `--color-accentSubtleText`   | Accent text on the tinted surface.                                                       | `#8719e0` | `#cbaeff` | `#bb91ff` |
 | `--color-backgroundPage`     | The page behind cards and tables.                                                        | `#e8ecf0` | `#080811` | `#373b4a` |
-| `--color-background`         | Tables and other content surfaces.                                                       | `#ffffff` | `#243b53` | `#141520` |
-| `--color-backgroundRaised`   | Menus and tooltips.                                                                      | `#ffffff` | `#243b53` | `#242733` |
+| `--color-background`         | Tables, cards, inputs and other content surfaces.                                        | `#ffffff` | `#243b53` | `#141520` |
+| `--color-backgroundRaised`   | Menus, tooltips, modals and buttons.                                                     | `#ffffff` | `#243b53` | `#242733` |
 | `--color-backgroundHover`    | A hovered row on a content surface.                                                      | `#f7fafc` | `#334e68` | `#4d5768` |
 | `--color-backgroundSelected` | A selected row on a content surface.                                                     | `#efe7fe` | `#44427c` | `#342553` |
-| `--color-border`             | Lines between table rows.                                                                | `#e8ecf0` | `#486581` | `#373b4a` |
+| `--color-border`             | Lines between rows and around inputs, menus and tooltips.                                | `#e8ecf0` | `#486581` | `#373b4a` |
+| `--color-borderStrong`       | Stronger lines, such as button outlines and dividers.                                    | `#9fb3c8` | `#829ab1` | `#747c8b` |
 | `--color-text`               | Primary text.                                                                            | `#272630` | `#d9e2ec` | `#e8ecf0` |
 | `--color-textSecondary`      | Supporting text such as descriptions and labels.                                         | `#627d98` | `#9fb3c8` | `#bdc5cf` |
 | `--color-textTertiary`       | The least prominent text, such as hints.                                                 | `#9fb3c8` | `#829ab1` | `#98a1ae` |
@@ -40,20 +41,20 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-pageText`                          | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text`                                                                            |
 | `--color-pageTextLight`                     | `#627d98`   | `#9fb3c8`   | `#bdc5cf`   | `--color-textSecondary`                                                                   |
 | `--color-pageTextSubdued`                   | `#9fb3c8`   | `#829ab1`   | `#98a1ae`   | `--color-textTertiary`                                                                    |
-| `--color-pageTextDark`                      | `#243b53`   | `#e8ecf0`   | `#e8ecf0`   |                                                                                           |
+| `--color-pageTextDark`                      | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text`                                                                            |
 | `--color-pageTextPositive`                  | `#8719e0`   | `#cbaeff`   | `#bb91ff`   | `--color-accentText`                                                                      |
 | `--color-pageTextLink`                      | `#8719e0`   | `#cbaeff`   | `#bb91ff`   | `--color-accentText`                                                                      |
 | `--color-pageTextLinkLight`                 | `#8719e0`   | `#cbaeff`   | `#bb91ff`   | `--color-accentText`                                                                      |
-| `--color-cardBackground`                    | `#ffffff`   | `#141520`   | `#141520`   |                                                                                           |
+| `--color-cardBackground`                    | `#ffffff`   | `#243b53`   | `#141520`   | `--color-background`                                                                      |
 | `--color-cardBorder`                        | `#8719e0`   | `#a45aff`   | `#a660ff`   | `--color-accentBorder`                                                                    |
 | `--color-cardShadow`                        | `#334e68`   | `#334e68`   | `#080811`   |                                                                                           |
 | `--color-tableBackground`                   | `#ffffff`   | `#243b53`   | `#141520`   | `--color-background`                                                                      |
 | `--color-tableRowBackgroundAlternate`       | `#ffffff`   | `#243b53`   | `#141520`   | `--color-tableBackground`                                                                 |
 | `--color-tableRowBackgroundHover`           | `#f7fafc`   | `#334e68`   | `#4d5768`   | `--color-backgroundHover`                                                                 |
-| `--color-tableText`                         | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-pageText` in Light, `--color-text` in Dark and Midnight                          |
+| `--color-tableText`                         | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text`                                                                            |
 | `--color-tableTextItemAdded`                | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-tableText`                                                                       |
 | `--color-tableTextLight`                    | `#627d98`   | `#d9e2ec`   | `#e8ecf0`   | `--color-tableText` in Dark and Midnight                                                  |
-| `--color-tableTextSubdued`                  | `#627d98`   | `#9fb3c8`   | `#98a1ae`   |                                                                                           |
+| `--color-tableTextSubdued`                  | `#627d98`   | `#9fb3c8`   | `#bdc5cf`   | `--color-textSecondary`                                                                   |
 | `--color-tableTextSelected`                 | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-tableText`                                                                       |
 | `--color-tableTextInactive`                 | `#627d98`   | `#829ab1`   | `#98a1ae`   |                                                                                           |
 | `--color-tableHeaderText`                   | `#486581`   | `#bcccdc`   | `#bdc5cf`   |                                                                                           |
@@ -61,16 +62,16 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-tableBorder`                       | `#e8ecf0`   | `#486581`   | `#373b4a`   | `--color-border`                                                                          |
 | `--color-tableBorderSelected`               | `#8719e0`   | `#a45aff`   | `#a660ff`   | `--color-accentBorder`                                                                    |
 | `--color-tableBorderHover`                  | `#8719e0`   | `#a45aff`   | `#a660ff`   | `--color-accentBorder`                                                                    |
-| `--color-tableBorderSeparator`              | `#829ab1`   | `#829ab1`   | `#747c8b`   |                                                                                           |
+| `--color-tableBorderSeparator`              | `#9fb3c8`   | `#829ab1`   | `#747c8b`   | `--color-borderStrong`                                                                    |
 | `--color-tableRowBackgroundHighlight`       | `#efe7fe`   | `#44427c`   | `#342553`   | `--color-backgroundSelected`                                                              |
 | `--color-tableRowBackgroundHighlightText`   | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-tableText`                                                                       |
 | `--color-tableRowHeaderBackground`          | `#f7fafc`   | `#334e68`   | `#242733`   |                                                                                           |
-| `--color-tableRowHeaderText`                | `#243b53`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text` in Dark and Midnight                                                       |
+| `--color-tableRowHeaderText`                | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text`                                                                            |
 | `--color-numberPositive`                    | `#147d64`   | `#65d6ad`   | `#65d6ad`   |                                                                                           |
 | `--color-numberNegative`                    | `#e12d39`   | `#ff9b9b`   | `#ff9b9b`   |                                                                                           |
-| `--color-numberNeutral`                     | `#627d98`   | `#9fb3c8`   | `#98a1ae`   |                                                                                           |
+| `--color-numberNeutral`                     | `#627d98`   | `#9fb3c8`   | `#bdc5cf`   | `--color-textSecondary`                                                                   |
 | `--color-budgetNumberNegative`              | `#e12d39`   | `#ff9b9b`   | `#ff9b9b`   | `--color-numberNegative`                                                                  |
-| `--color-budgetNumberZero`                  | `#627d98`   | `#9fb3c8`   | `#98a1ae`   | `--color-tableTextSubdued`                                                                |
+| `--color-budgetNumberZero`                  | `#627d98`   | `#9fb3c8`   | `#bdc5cf`   | `--color-tableTextSubdued`                                                                |
 | `--color-budgetNumberNeutral`               | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-tableText`                                                                       |
 | `--color-budgetNumberPositive`              | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-budgetNumberNeutral`                                                             |
 | `--color-templateNumberFunded`              | `#147d64`   | `#65d6ad`   | `#65d6ad`   | `--color-numberPositive`                                                                  |
@@ -101,7 +102,7 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-settingsCardBackground`            | `#ffffff`   | `#243b53`   | `#141520`   | `--color-tableBackground`                                                                 |
 | `--color-settingsCardBorder`                | `#e8ecf0`   | `#486581`   | `#373b4a`   | `--color-tableBorder`                                                                     |
 | `--color-settingsCardText`                  | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-tableText`                                                                       |
-| `--color-settingsCardTextSubdued`           | `#486581`   | `#9fb3c8`   | `#bdc5cf`   |                                                                                           |
+| `--color-settingsCardTextSubdued`           | `#627d98`   | `#9fb3c8`   | `#bdc5cf`   | `--color-textSecondary`                                                                   |
 | `--color-settingsNavItemText`               | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-pageText`                                                                        |
 | `--color-settingsNavItemBackgroundHover`    | `#27263014` | `#d9e2ec14` | `#e8ecf014` | Mixed from `--color-settingsNavItemText`                                                  |
 | `--color-settingsNavItemAccentSelected`     | `#8719e0`   | `#cbaeff`   | `#bb91ff`   | `--color-accentSubtleText`                                                                |
@@ -109,11 +110,11 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-settingsNavItemBackgroundSelected` | `#efe7fe`   | `#44427c`   | `#342553`   | `--color-accentSubtle`                                                                    |
 | `--color-menuBackground`                    | `#ffffff`   | `#243b53`   | `#242733`   | `--color-backgroundRaised`                                                                |
 | `--color-menuItemBackgroundHover`           | `#e8ecf0`   | `#486581`   | `#4d5768`   |                                                                                           |
-| `--color-menuItemText`                      | `#102a43`   | `#e8ecf0`   | `#e8ecf0`   |                                                                                           |
-| `--color-menuItemTextHover`                 | `#102a43`   | `#f7fafc`   | `#f6f8fa`   | `--color-menuItemText` in Light                                                           |
+| `--color-menuItemText`                      | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text`                                                                            |
+| `--color-menuItemTextHover`                 | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text`                                                                            |
 | `--color-menuItemTextSelected`              | `#8719e0`   | `#cbaeff`   | `#bb91ff`   | `--color-accentText`                                                                      |
 | `--color-menuItemTextHeader`                | `#8719e0`   | `#b98cff`   | `#ac6eff`   | `--color-accent`, readable on `--color-menuBackground`                                    |
-| `--color-menuBorder`                        | `#e8ecf0`   | `#102a43`   | `#141520`   |                                                                                           |
+| `--color-menuBorder`                        | `#e8ecf0`   | `#486581`   | `#373b4a`   | `--color-border`                                                                          |
 | `--color-menuKeybindingText`                | `#8719e0`   | `#b98cff`   | `#ac6eff`   | `--color-accent`, readable on `--color-menuBackground`                                    |
 | `--color-menuAutoCompleteBackground`        | `#102a43`   | `#102a43`   | `#373b4a`   |                                                                                           |
 | `--color-menuAutoCompleteBackgroundHover`   | `#486581`   | `#486581`   | `#4d5768`   |                                                                                           |
@@ -121,16 +122,16 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-menuAutoCompleteTextHover`         | `#c6f7e2`   | `#c6f7e2`   | `#c6f7e2`   |                                                                                           |
 | `--color-menuAutoCompleteTextHeader`        | `#c7a2ff`   | `#c5a3ff`   | `#d9c5ff`   | `--color-accent`, readable on `--color-menuAutoCompleteBackground`                        |
 | `--color-menuAutoCompleteItemTextHover`     | `#ffffff`   | `#f7fafc`   | `#f6f8fa`   | `--color-menuAutoCompleteText` in Light                                                   |
-| `--color-menuAutoCompleteItemText`          | `#ffffff`   | `#e8ecf0`   | `#e8ecf0`   | `--color-menuAutoCompleteText` in Light, `--color-menuItemText` in Dark and Midnight      |
-| `--color-modalBackground`                   | `#ffffff`   | `#141520`   | `#242733`   |                                                                                           |
+| `--color-menuAutoCompleteItemText`          | `#ffffff`   | `#d9e2ec`   | `#e8ecf0`   | `--color-menuAutoCompleteText` in Light, `--color-menuItemText` in Dark and Midnight      |
+| `--color-modalBackground`                   | `#ffffff`   | `#243b53`   | `#242733`   | `--color-backgroundRaised`                                                                |
 | `--color-modalBorder`                       | `#ffffff`   | `#486581`   | `#bdc5cf`   |                                                                                           |
 | `--color-mobileHeaderBackground`            | `#8719e0`   | `#9446ed`   | `#9446ed`   | `--color-accent`                                                                          |
 | `--color-mobileHeaderText`                  | `#ffffff`   | `#ffffff`   | `#ffffff`   | `--color-accentContrast`                                                                  |
 | `--color-mobileHeaderTextSubdued`           | `#ffffffbf` | `#ffffffbf` | `#ffffffbf` | Mixed from `--color-mobileHeaderText`                                                     |
 | `--color-mobileHeaderTextHover`             | `#c8c8c826` | `#c8c8c826` | `#c8c8c826` |                                                                                           |
 | `--color-mobilePageBackground`              | `#f7fafc`   | `#334e68`   | `#080811`   |                                                                                           |
-| `--color-mobileNavBackground`               | `#ffffff`   | `#243b53`   | `#373b4a`   |                                                                                           |
-| `--color-mobileNavItem`                     | `#4d5768`   | `#d9e2ec`   | `#d4dae0`   |                                                                                           |
+| `--color-mobileNavBackground`               | `#ffffff`   | `#243b53`   | `#242733`   | `--color-backgroundRaised`                                                                |
+| `--color-mobileNavItem`                     | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text`                                                                            |
 | `--color-mobileNavItemSelected`             | `#8719e0`   | `#cbaeff`   | `#bb91ff`   | `--color-accentText`                                                                      |
 | `--color-mobileAccountText`                 | `#0b5fa3`   | `#0b5fa3`   | `#0b5fa3`   |                                                                                           |
 | `--color-mobileTransactionSelected`         | `#8719e0`   | `#a45aff`   | `#a660ff`   | `--color-accentBorder`                                                                    |
@@ -158,17 +159,17 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-buttonPrimaryDisabledText`         | `#ffffff`   | `#334e68`   | `#747c8b`   |                                                                                           |
 | `--color-buttonPrimaryDisabledBackground`   | `#9fb3c8`   | `#829ab1`   | `#242733`   |                                                                                           |
 | `--color-buttonPrimaryDisabledBorder`       | `#9fb3c8`   | `#829ab1`   | `#242733`   | `--color-buttonPrimaryDisabledBackground`                                                 |
-| `--color-buttonNormalText`                  | `#102a43`   | `#d9e2ec`   | `#d4dae0`   |                                                                                           |
-| `--color-buttonNormalTextHover`             | `#102a43`   | `#d9e2ec`   | `#d4dae0`   | `--color-buttonNormalText` in Light                                                       |
-| `--color-buttonNormalBackground`            | `#ffffff`   | `#243b53`   | `#373b4a`   |                                                                                           |
-| `--color-buttonNormalBackgroundHover`       | `#ffffff`   | `#486581`   | `#4d5768`   | `--color-buttonNormalBackground` in Light                                                 |
-| `--color-buttonNormalBorder`                | `#d9e2ec`   | `#9fb3c8`   | `#98a1ae`   |                                                                                           |
+| `--color-buttonNormalText`                  | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text`                                                                            |
+| `--color-buttonNormalTextHover`             | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text`                                                                            |
+| `--color-buttonNormalBackground`            | `#ffffff`   | `#243b53`   | `#242733`   | `--color-backgroundRaised`                                                                |
+| `--color-buttonNormalBackgroundHover`       | `#f7fafc`   | `#334e68`   | `#4d5768`   | `--color-backgroundHover`                                                                 |
+| `--color-buttonNormalBorder`                | `#9fb3c8`   | `#829ab1`   | `#747c8b`   | `--color-borderStrong`                                                                    |
 | `--color-buttonNormalShadow`                | `#00000033` | `#00000066` | `#00000066` |                                                                                           |
 | `--color-buttonNormalSelectedText`          | `#ffffff`   | `#ffffff`   | `#ffffff`   | `--color-accentContrast`                                                                  |
 | `--color-buttonNormalSelectedBackground`    | `#8719e0`   | `#9446ed`   | `#9446ed`   | `--color-accent`                                                                          |
 | `--color-buttonNormalDisabledText`          | `#9fb3c8`   | `#627d98`   | `#747c8b`   |                                                                                           |
-| `--color-buttonNormalDisabledBackground`    | `#ffffff`   | `#243b53`   | `#242733`   | `--color-buttonNormalBackground` in Light                                                 |
-| `--color-buttonNormalDisabledBorder`        | `#d9e2ec`   | `#627d98`   | `#4d5768`   | `--color-buttonNormalBorder` in Light                                                     |
+| `--color-buttonNormalDisabledBackground`    | `#ffffff`   | `#243b53`   | `#242733`   | `--color-backgroundRaised`                                                                |
+| `--color-buttonNormalDisabledBorder`        | `#d9e2ec`   | `#627d98`   | `#4d5768`   |                                                                                           |
 | `--color-calendarText`                      | `#f7fafc`   | `#f7fafc`   | `#f6f8fa`   |                                                                                           |
 | `--color-calendarBackground`                | `#102a43`   | `#102a43`   | `#242733`   |                                                                                           |
 | `--color-calendarItemText`                  | `#ffffff`   | `#ffffff`   | `#ffffff`   |                                                                                           |
@@ -204,14 +205,14 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-upcomingText`                      | `#8719e0`   | `#cbaeff`   | `#bb91ff`   | `--color-accentSubtleText`                                                                |
 | `--color-formLabelText`                     | `#8719e0`   | `#cbaeff`   | `#bb91ff`   | `--color-accentText`                                                                      |
 | `--color-formLabelBackground`               | `#ffffff`   | `#243b53`   | `#141520`   | `--color-tableBackground`                                                                 |
-| `--color-formInputBackground`               | `#f7fafc`   | `#243b53`   | `#141520`   |                                                                                           |
+| `--color-formInputBackground`               | `#ffffff`   | `#243b53`   | `#141520`   | `--color-background`                                                                      |
 | `--color-formInputBackgroundSelected`       | `#ffffff`   | `#334e68`   | `#242733`   |                                                                                           |
 | `--color-formInputBackgroundSelection`      | `#8719e0`   | `#9446ed`   | `#9446ed`   | `--color-accent`                                                                          |
-| `--color-formInputBorder`                   | `#d9e2ec`   | `#486581`   | `#373b4a`   |                                                                                           |
+| `--color-formInputBorder`                   | `#e8ecf0`   | `#486581`   | `#373b4a`   | `--color-border`                                                                          |
 | `--color-formInputTextReadOnlySelection`    | `#f7fafc`   | `#243b53`   | `#141520`   |                                                                                           |
 | `--color-formInputBorderSelected`           | `#8719e0`   | `#a45aff`   | `#a660ff`   | `--color-accentBorder`                                                                    |
-| `--color-formInputText`                     | `#102a43`   | `#d9e2ec`   | `#d4dae0`   |                                                                                           |
-| `--color-formInputTextPlaceholder`          | `#9fb3c8`   | `#d9e2ec`   | `#d4dae0`   |                                                                                           |
+| `--color-formInputText`                     | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text`                                                                            |
+| `--color-formInputTextPlaceholder`          | `#9fb3c8`   | `#829ab1`   | `#98a1ae`   | `--color-textTertiary`                                                                    |
 | `--color-formInputTextPlaceholderSelected`  | `#bcccdc`   | `#e8ecf0`   | `#e8ecf0`   |                                                                                           |
 | `--color-formInputShadowSelected`           | `#8719e0`   | `#a45aff`   | `#a660ff`   | `--color-accentBorder`                                                                    |
 | `--color-formInputTextHighlight`            | `#8719e0`   | `#cbaeff`   | `#bb91ff`   | `--color-accentText`                                                                      |
@@ -224,10 +225,10 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-checkboxToggleDisabled`            | `#bdc5cf`   | `#747c8b`   | `#242733`   |                                                                                           |
 | `--color-pillBackground`                    | `#d9e2ec`   | `#243b53`   | `#4d5768`   |                                                                                           |
 | `--color-pillBackgroundLight`               | `#f7fafc`   | `#102a43`   | `#080811`   |                                                                                           |
-| `--color-pillText`                          | `#243b53`   | `#bcccdc`   | `#d4dae0`   |                                                                                           |
+| `--color-pillText`                          | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text`                                                                            |
 | `--color-pillTextHighlighted`               | `#7d00d3`   | `#c5a3ff`   | `#b380ff`   | `--color-accent`, readable on `--color-pillBackgroundLight`                               |
 | `--color-pillBorder`                        | `#d9e2ec`   | `#334e68`   | `#4d5768`   |                                                                                           |
-| `--color-pillBorderDark`                    | `#9fb3c8`   | `#334e68`   | `#4d5768`   | `--color-pillBorder` in Dark and Midnight                                                 |
+| `--color-pillBorderDark`                    | `#9fb3c8`   | `#829ab1`   | `#747c8b`   | `--color-borderStrong`                                                                    |
 | `--color-pillBackgroundSelected`            | `#efe7fe`   | `#44427c`   | `#342553`   | `--color-accentSubtle`                                                                    |
 | `--color-pillTextSelected`                  | `#8719e0`   | `#cbaeff`   | `#bb91ff`   | `--color-accentSubtleText`                                                                |
 | `--color-pillBorderSelected`                | `#8719e0`   | `#a45aff`   | `#a660ff`   | `--color-accentBorder`                                                                    |
@@ -235,11 +236,11 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-reportsBlue`                       | `#40a5f7`   | `#40a5f7`   | `#40a5f7`   |                                                                                           |
 | `--color-reportsGreen`                      | `#3ebd93`   | `#3ebd93`   | `#3ebd93`   |                                                                                           |
 | `--color-reportsGray`                       | `#747c8b`   | `#747c8b`   | `#747c8b`   |                                                                                           |
-| `--color-reportsLabel`                      | `#102a43`   | `#d9e2ec`   | `#e8ecf0`   | `--color-pageText` in Dark and Midnight                                                   |
+| `--color-reportsLabel`                      | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text`                                                                            |
 | `--color-reportsInnerLabel`                 | `#243b53`   | `#243b53`   | `#243b53`   |                                                                                           |
 | `--color-reportsNumberPositive`             | `#147d64`   | `#65d6ad`   | `#65d6ad`   | `--color-numberPositive`                                                                  |
 | `--color-reportsNumberNegative`             | `#e12d39`   | `#ff9b9b`   | `#ff9b9b`   | `--color-numberNegative`                                                                  |
-| `--color-reportsNumberNeutral`              | `#627d98`   | `#9fb3c8`   | `#98a1ae`   | `--color-numberNeutral`                                                                   |
+| `--color-reportsNumberNeutral`              | `#627d98`   | `#9fb3c8`   | `#bdc5cf`   | `--color-numberNeutral`                                                                   |
 | `--color-reportsChartFill`                  | `#147d64`   | `#65d6ad`   | `#65d6ad`   | `--color-reportsNumberPositive`                                                           |
 | `--color-noteTagBackground`                 | `#efe7fe`   | `#44427c`   | `#342553`   | `--color-accentSubtle`                                                                    |
 | `--color-noteTagBackgroundHover`            | `#f7f3ff`   | `#343f68`   | `#241d3a`   | Mixed from `--color-accentSubtle` and `--color-tableBackground`                           |
@@ -251,9 +252,9 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-floatingActionBarBackground`       | `#8719e0`   | `#9446ed`   | `#9446ed`   | `--color-accent`                                                                          |
 | `--color-floatingActionBarBorder`           | `#8719e0`   | `#9446ed`   | `#9446ed`   | `--color-floatingActionBarBackground`                                                     |
 | `--color-floatingActionBarText`             | `#ffffff`   | `#ffffff`   | `#ffffff`   | `--color-accentContrast`                                                                  |
-| `--color-tooltipText`                       | `#102a43`   | `#e8ecf0`   | `#e8ecf0`   |                                                                                           |
+| `--color-tooltipText`                       | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text`                                                                            |
 | `--color-tooltipBackground`                 | `#ffffff`   | `#243b53`   | `#242733`   | `--color-backgroundRaised`                                                                |
-| `--color-tooltipBorder`                     | `#d9e2ec`   | `#334e68`   | `#373b4a`   |                                                                                           |
+| `--color-tooltipBorder`                     | `#e8ecf0`   | `#486581`   | `#373b4a`   | `--color-border`                                                                          |
 | `--color-calendarCellBackground`            | `#e8ecf0`   | `#102a43`   | `#102a43`   |                                                                                           |
 | `--color-overlayBackground`                 | `#0000004d` | `#0000004d` | `#0000004d` |                                                                                           |
 | `--color-chartQual1`                        | `#45b29d`   | `#45b29d`   | `#45b29d`   |                                                                                           |
