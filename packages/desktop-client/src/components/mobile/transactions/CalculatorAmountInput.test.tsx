@@ -68,6 +68,14 @@ describe('CalculatorAmountInput', () => {
     expect(input).toHaveValue('1.50*-2-0.05');
   });
 
+  it('leaves a negative factor as typed when a space precedes its sign', () => {
+    const { input } = setup();
+    for (const value of ['1.50* -', '1.50* -2']) {
+      fireEvent.change(input, { target: { value } });
+    }
+    expect(input).toHaveValue('1.50* -2');
+  });
+
   it('backspaces digit by digit until the number is gone', () => {
     const { input, press } = setup();
     press('123456<');

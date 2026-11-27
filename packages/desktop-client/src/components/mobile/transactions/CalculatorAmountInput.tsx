@@ -322,9 +322,7 @@ function applyAutoDecimals(text: string, caret: number, isDeleting: boolean) {
   const start = text.slice(0, caret).search(NUMBER_BEFORE);
   const end = caret + text.slice(caret).search(NUMBER_END);
   // A minus right after * or / is the factor's sign, not a subtraction
-  const previousChar =
-    text[start - 1] === '-' ? text[start - 2] : text[start - 1];
-  if (previousChar === '*' || previousChar === '/') {
+  if (/[*/]\s*-?\s*$/.test(text.slice(0, start))) {
     return { text, caret };
   }
 
