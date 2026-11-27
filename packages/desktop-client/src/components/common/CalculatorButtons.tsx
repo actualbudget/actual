@@ -51,8 +51,13 @@ export function CalculatorButtons({
       return;
     }
 
-    setNativeInputValue(input, nextExpression);
-    focusInputAt(caretPosition);
+    setNativeInputValue(input, nextExpression, caretPosition);
+    // The input's owner may reformat the value and place the caret itself
+    if (input.value === nextExpression) {
+      focusInputAt(caretPosition);
+    } else {
+      focusInput();
+    }
   };
 
   const insertExpression = (value: string) => {
@@ -346,7 +351,11 @@ function CalculatorButton({
   );
 }
 
-function setNativeInputValue(input: HTMLInputElement, value: string) {
+function setNativeInputValue(
+  input: HTMLInputElement,
+  value: string,
+  caretPosition: number,
+) {
   // Use the native setter so React-controlled inputs receive the change.
   // oxlint-disable-next-line typescript-eslint/unbound-method
   const nativeSetter = Object.getOwnPropertyDescriptor(
@@ -355,5 +364,8 @@ function setNativeInputValue(input: HTMLInputElement, value: string) {
   )?.set;
 
   nativeSetter?.call(input, value);
+  // Setting the value moves the caret to the end; the change handler needs
+  // to see where the edit happened.
+  input.setSelectionRange(caretPosition, caretPosition);
   input.dispatchEvent(new Event('input', { bubbles: true }));
 }
