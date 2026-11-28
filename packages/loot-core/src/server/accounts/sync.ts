@@ -664,12 +664,35 @@ export async function reconcileTransactions(
   const updatedPreview = [];
   const existingPayeeMap = new Map<string, string>();
 
+  // Transactions with the same `imported_id` must never be added more than
+  // once. Only the first occurrence is reconciled; later duplicates are
+  // skipped unless the caller explicitly forces them to be added. Keep the
+  // skipped ones around so the preview can mark them as ignored instead of
+  // silently dropping them.
+  const seenImportedIds = new Set<string>();
+  const duplicateTransactions = [];
+  const transactionsToReconcile = transactions.filter(trans => {
+    if (!trans.imported_id) {
+      return true;
+    }
+
+    const isDuplicate = seenImportedIds.has(trans.imported_id);
+    seenImportedIds.add(trans.imported_id);
+
+    if (isDuplicate && !trans.forceAddTransaction) {
+      duplicateTransactions.push(trans);
+      return false;
+    }
+
+    return true;
+  });
+
   const {
     payeesToCreate,
     transactionsStep1,
     transactionsStep2,
     transactionsStep3,
-  } = await matchTransactions(acctId, transactions, {
+  } = await matchTransactions(acctId, transactionsToReconcile, {
     isBankSyncAccount,
     strictIdChecking,
     reimportDeleted,
@@ -783,6 +806,12 @@ export async function reconcileTransactions(
       } else {
         added.push(finalTransaction);
       }
+    }
+  }
+
+  if (isPreview) {
+    for (const transaction of duplicateTransactions) {
+      updatedPreview.push({ transaction, ignored: true });
     }
   }
 
