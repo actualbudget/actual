@@ -1,15 +1,20 @@
-// @ts-strict-ignore
-export async function incrFetch(
-  runQuery,
-  terms,
-  compare,
-  makeQuery,
-  params = [],
-) {
-  const pageCount = 500;
-  let results = [];
+import type { SqlParam } from '#platform/server/sqlite';
 
-  let fetchedIds = new Set();
+export async function incrFetch<T>(
+  runQuery: (
+    query: string,
+    params: SqlParam[],
+    fetchAll: true,
+  ) => T[] | Promise<T[]>,
+  terms: string[],
+  compare: (id: string) => string,
+  makeQuery: (where: string) => string,
+  params: SqlParam[] = [],
+): Promise<T[]> {
+  const pageCount = 500;
+  let results: T[] = [];
+
+  let fetchedIds = new Set<string>();
 
   for (let i = 0; i < terms.length; i += pageCount) {
     const slice = terms
