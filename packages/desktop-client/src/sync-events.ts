@@ -19,6 +19,7 @@ import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
 import { dashboardQueries, reportQueries } from './reports';
 import { getUserData, signOut } from './users/usersSlice';
+import { getUploadError } from './util/error';
 
 // Tables whose changes can move the budget's month bounds. `preferences`
 // holds the synced budget type.
@@ -311,9 +312,24 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
             button: {
               title: t('Register'),
               action: async () => {
-                await store.dispatch(uploadBudget({}));
-                void store.dispatch(sync());
-                void store.dispatch(loadPrefs());
+                const result = await store.dispatch(uploadBudget({}));
+                if (uploadBudget.rejected.match(result)) {
+                  return;
+                }
+                if (result.payload.error) {
+                  store.dispatch(
+                    addNotification({
+                      notification: {
+                        type: 'error',
+                        message: getUploadError(result.payload.error),
+                      },
+                    }),
+                  );
+                  return;
+                }
+
+                await store.dispatch(loadPrefs());
+                await store.dispatch(sync());
               },
             },
           };

@@ -229,6 +229,7 @@ async function run(msgs) {
   void prefs.loadPrefs();
   void prefs.savePrefs({
     groupId: 'group',
+    cloudFileId: 'file',
     lastSyncedTimestamp: new Timestamp(
       Date.now(),
       0,

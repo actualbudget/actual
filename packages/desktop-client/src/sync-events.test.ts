@@ -1,13 +1,15 @@
 import * as connection from '@actual-app/core/platform/client/connection';
 import type { ServerEvents } from '@actual-app/core/types/server-events';
-import type { QueryClient } from '@tanstack/react-query';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient } from '@tanstack/react-query';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { budgetBoundsQueries } from './budget';
+import { mergeLocalPrefs } from './prefs/prefsSlice';
+import { configureAppStore } from './redux/store';
 import type { AppStore } from './redux/store';
 import { dashboardQueries, reportQueries } from './reports';
 import { listenForSyncEvent } from './sync-events';
-import type * as UsersSlice from './users/usersSlice';
+import * as usersSlice from './users/usersSlice';
 
 const eventListeners = new Map<string, Array<(args: unknown) => void>>();
 
@@ -31,12 +33,6 @@ function publishSyncEvent(event: ServerEvents['sync-event']) {
 type UserData = { offline: boolean } | null;
 
 function setup({ userData = null }: { userData?: UserData } = {}) {
-  vi.spyOn(connection, 'listen').mockImplementation(
-    // The real `listen` is overloaded per event name; the mock only needs
-    // to record the handler
-    mockListen as unknown as typeof connection.listen,
-  );
-
   const invalidateQueries = vi.fn();
   const queryClient = { invalidateQueries } as unknown as QueryClient;
 
@@ -56,13 +52,6 @@ function setup({ userData = null }: { userData?: UserData } = {}) {
   return { invalidateQueries, dispatch };
 }
 
-const getUserDataAction = { type: 'user/getUserData' };
-
-vi.mock('./users/usersSlice', async importOriginal => ({
-  ...(await importOriginal<typeof UsersSlice>()),
-  getUserData: () => getUserDataAction,
-}));
-
 function appliedEvent(tables: string[]): ServerEvents['sync-event'] {
   return { type: 'applied', tables } as ServerEvents['sync-event'];
 }
@@ -70,7 +59,39 @@ function appliedEvent(tables: string[]): ServerEvents['sync-event'] {
 describe('listenForSyncEvent', () => {
   beforeEach(() => {
     eventListeners.clear();
-    vi.clearAllMocks();
+    vi.spyOn(connection, 'listen').mockImplementation(
+      // The real `listen` is overloaded per event name; the mock only needs
+      // to record the handler
+      mockListen as unknown as typeof connection.listen,
+    );
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('shows the upload error and leaves sync pending when registration fails', async () => {
+    const queryClient = new QueryClient();
+    const store = configureAppStore({ queryClient });
+    store.dispatch(mergeLocalPrefs({ id: 'budget-id' }));
+    listenForSyncEvent(store, queryClient);
+    const send = vi.spyOn(connection, 'send').mockResolvedValue({
+      error: { reason: 'network' },
+    });
+
+    publishSyncEvent({ type: 'error', subtype: 'file-not-found' });
+    const register = store
+      .getState()
+      .notifications.notifications.find(
+        notification => notification.id === 'register-file',
+      );
+    await register?.button?.action();
+
+    expect(send).toHaveBeenCalledExactlyOnceWith('upload-budget', {
+      id: undefined,
+    });
+    expect(store.getState().notifications.notifications).toContainEqual(
+      expect.objectContaining({ type: 'error' }),
+    );
   });
 
   it.each([
@@ -144,11 +165,13 @@ describe('listenForSyncEvent', () => {
   ] as const)(
     'refreshes the user data on $type when the status says $userData',
     ({ type, userData }) => {
+      const getUserData = vi.spyOn(usersSlice, 'getUserData');
       const { dispatch } = setup({ userData });
 
       publishSyncEvent({ type, tables: [] } as ServerEvents['sync-event']);
 
-      expect(dispatch).toHaveBeenCalledWith(getUserDataAction);
+      expect(getUserData).toHaveBeenCalledOnce();
+      expect(dispatch).toHaveBeenCalledWith(getUserData.mock.results[0].value);
     },
   );
 
@@ -159,11 +182,12 @@ describe('listenForSyncEvent', () => {
   ] as const)(
     'leaves the user data alone on $type when the status says $userData',
     ({ type, userData }) => {
-      const { dispatch } = setup({ userData });
+      const getUserData = vi.spyOn(usersSlice, 'getUserData');
+      setup({ userData });
 
       publishSyncEvent({ type, tables: [] } as ServerEvents['sync-event']);
 
-      expect(dispatch).not.toHaveBeenCalledWith(getUserDataAction);
+      expect(getUserData).not.toHaveBeenCalled();
     },
   );
 });
