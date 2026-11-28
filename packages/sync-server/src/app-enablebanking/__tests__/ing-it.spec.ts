@@ -217,6 +217,15 @@ describe('ING Italy adapter (ing-it)', () => {
       expect(normalized.payeeName).toBe('STRUCTURED CREDITOR NAME');
     });
 
+    it('respects structured counterparty provided via editedTransaction', () => {
+      const tx = typedFixtureTransactions[0]; // remittance is "A favore di MARIO ROSSI..."
+      const normalized = IngItalyBank.normalizeTransaction(tx, {
+        creditor: { name: 'OVERRIDDEN CREDITOR' },
+      });
+
+      expect(normalized.payeeName).toBe('OVERRIDDEN CREDITOR');
+    });
+
     it('falls back to raw remittance line when aspsp is not ING Italy', () => {
       const tx = typedFixtureTransactions[0];
       const normalizedOtherBank = normalizeTransaction(tx, {

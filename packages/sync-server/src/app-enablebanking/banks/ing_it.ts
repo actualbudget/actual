@@ -90,6 +90,10 @@ const IngItalyBank: IEnableBankingBank = {
     tx: EnableBankingTransaction,
     editedTransaction?: Partial<EnableBankingTransaction>,
   ): BankSyncTransaction {
+    const effectiveTx = editedTransaction
+      ? { ...tx, ...editedTransaction }
+      : tx;
+
     const normalized = IntegrationBank.normalizeTransaction(
       tx,
       editedTransaction,
@@ -98,15 +102,15 @@ const IngItalyBank: IEnableBankingBank = {
     // If standard creditor/debtor fields did not yield a specific payee,
     // try extracting the payee from ING Italy's remittance information.
     const hasStructuredPayee = Boolean(
-      tx.credit_debit_indicator === 'CRDT'
-        ? tx.debtor?.name
-        : tx.credit_debit_indicator === 'DBIT'
-          ? tx.creditor?.name
-          : tx.creditor?.name || tx.debtor?.name,
+      effectiveTx.credit_debit_indicator === 'CRDT'
+        ? effectiveTx.debtor?.name
+        : effectiveTx.credit_debit_indicator === 'DBIT'
+          ? effectiveTx.creditor?.name
+          : effectiveTx.creditor?.name || effectiveTx.debtor?.name,
     );
 
     if (!hasStructuredPayee) {
-      const ingPayee = extractIngItalyPayee(tx);
+      const ingPayee = extractIngItalyPayee(effectiveTx);
       if (ingPayee) {
         normalized.payeeName = ingPayee;
       }
