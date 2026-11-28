@@ -1,5 +1,9 @@
 # Enabling SharedArrayBuffer Access
 
+:::note
+Actual no longer needs `SharedArrayBuffer` unless you switched back to the previous storage engine. See [Browser Storage](./browser-storage.md). This page stays for that case and for older versions.
+:::
+
 Actual requires access to a web technology called [`SharedArrayBuffer`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer) in order to function. Because of security vulnerabilities in modern CPUs, this feature is disabled until certain conditions are met. Actual will not be able to run unless your server meets these conditions.
 
 ## HTTPS

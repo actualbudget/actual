@@ -107,11 +107,11 @@ jobs:
           retention-days: 1
           overwrite: true
 
-  # The same suite on the sqlite-wasm browser storage (opt-in while it is
-  # being tried out, the default once it ships). Kept out of the Depot
-  # report so the two runs are not merged.
-  functional-new-storage:
-    name: Functional, new storage (shard ${{ matrix.shard }}/${{ vars.E2E_SHARD_TOTAL || '3' }})
+  # The same suite on the previous storage engine (absurd-sql), which stays
+  # reachable for one release through `?storage=legacy`. Kept out of the
+  # Depot report so the two runs are not merged.
+  functional-legacy-storage:
+    name: Functional, previous storage (shard ${{ matrix.shard }}/${{ vars.E2E_SHARD_TOTAL || '3' }})
     runs-on: depot-ubuntu-latest-4
     needs: build-web
     strategy:
@@ -122,7 +122,7 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.61.1-jammy
     env:
       E2E_USE_BUILD: '1'
-      E2E_STORAGE_BACKEND: opfs
+      E2E_STORAGE_BACKEND: legacy
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -149,7 +149,7 @@ jobs:
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ failure() && matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
         with:
-          name: desktop-client-test-results-new-storage-shard-${{ matrix.shard }}
+          name: desktop-client-test-results-legacy-storage-shard-${{ matrix.shard }}
           path: packages/desktop-client/test-results/
           retention-days: 30
           overwrite: true
