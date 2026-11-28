@@ -7,6 +7,8 @@ export type ServerHandlers = {
   'make-filters-from-conditions': (arg: {
     conditions: unknown;
     applySpecialCases?: boolean;
+    /** Field compared by amount conditions (a foreign schedule's native). */
+    amountField?: 'amount' | 'transaction_amount';
   }) => Promise<{ filters: unknown[] }>;
 
   // oxlint-disable-next-line typescript/no-explicit-any

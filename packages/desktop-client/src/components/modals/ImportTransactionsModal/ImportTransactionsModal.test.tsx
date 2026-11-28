@@ -30,8 +30,22 @@ vi.mock('#hooks/useDateFormat', () => ({
 }));
 
 vi.mock('#accounts', () => ({
+  // The dialog reads its account for the account's currency.
+  accountQueries: {
+    list: () => ({
+      queryKey: ['accounts', 'lists'],
+      queryFn: vi.fn().mockResolvedValue([]),
+    }),
+  },
   useImportPreviewTransactionsMutation: () => ({
-    mutate: vi.fn((_args, { onSuccess }) => onSuccess?.([])),
+    mutate: vi.fn((_args, { onSuccess }) =>
+      onSuccess?.({
+        updatedPreview: [],
+        previewBases: [],
+        missingRateDates: [],
+        missingRates: [],
+      }),
+    ),
     mutateAsync: vi.fn().mockResolvedValue({ added: [], updated: [] }),
   }),
   useImportTransactionsMutation: () => ({

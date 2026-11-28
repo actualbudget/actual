@@ -1,4 +1,7 @@
-import { amountToInteger } from '#app-gocardless/utils';
+import {
+  subtractDecimalAmounts,
+  sumDecimalAmounts,
+} from '#app-gocardless/utils';
 
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
@@ -29,19 +32,15 @@ export default {
     if (sortedTransactions.length) {
       const oldestTransaction =
         sortedTransactions[sortedTransactions.length - 1];
-      const oldestKnownBalance = amountToInteger(
-        oldestTransaction.balanceAfterTransaction?.balanceAmount.amount || 0,
+      return subtractDecimalAmounts(
+        oldestTransaction.balanceAfterTransaction?.balanceAmount.amount ?? '0',
+        [oldestTransaction.transactionAmount.amount],
       );
-      const oldestTransactionAmount = amountToInteger(
-        oldestTransaction.transactionAmount.amount,
-      );
-
-      return oldestKnownBalance - oldestTransactionAmount;
     } else {
-      return amountToInteger(
+      return sumDecimalAmounts([
         balances.find(balance => 'interimBooked' === balance.balanceType)
-          ?.balanceAmount.amount || 0,
-      );
+          ?.balanceAmount.amount ?? '0',
+      ]);
     }
   },
 } satisfies IBank;

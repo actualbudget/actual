@@ -96,6 +96,7 @@ export type ParseFileResult = {
 };
 
 export type ParseFileOptions = {
+  amountPrecision?: number;
   hasHeaderRow?: boolean;
   delimiter?: string;
   fallbackMissingPayeeToMemo?: boolean;
@@ -202,6 +203,9 @@ async function parseQIF(
   filepath: string,
   options: ParseFileOptions = {},
 ): Promise<ParseFileResult> {
+  if (options.amountPrecision === undefined) {
+    throw new Error('parseQIF: amount precision is required');
+  }
   const errors = Array<ParseError>();
   const contents = await fs.readFile(filepath);
 
@@ -228,7 +232,9 @@ async function parseQIF(
 
         return {
           amount:
-            trans.amount != null ? looselyParseAmount(trans.amount) : null,
+            trans.amount != null
+              ? looselyParseAmount(trans.amount, options.amountPrecision)
+              : null,
           date: trans.date,
           payee_name: payeeSource || (fallbackUsed ? memoSource : null),
           imported_payee: payeeSource || (fallbackUsed ? memoSource : null),

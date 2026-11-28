@@ -39,6 +39,7 @@ describe('SandboxfinanceSfin0000', () => {
         .toMatchInlineSnapshot(`
         {
           "account_id": "99a0bfe2-0bef-46df-bff2-e9ae0c6c5838",
+          "currency": "EUR",
           "iban": "GL0865354374424724",
           "institution": {
             "bic": "SFIN0000",
@@ -106,7 +107,7 @@ describe('SandboxfinanceSfin0000', () => {
         balances,
       );
 
-      expect(startingBalance).toEqual(107500);
+      expect(startingBalance).toEqual('1075.00');
     });
 
     it('returns the same balance amount when no transactions', () => {
@@ -114,7 +115,7 @@ describe('SandboxfinanceSfin0000', () => {
 
       expect(
         SandboxfinanceSfin0000.calculateStartingBalance(transactions, balances),
-      ).toEqual(100000);
+      ).toEqual('1000.00');
     });
 
     it('returns the balance minus the available transactions', () => {
@@ -129,7 +130,7 @@ describe('SandboxfinanceSfin0000', () => {
 
       expect(
         SandboxfinanceSfin0000.calculateStartingBalance(transactions, balances),
-      ).toEqual(49950);
+      ).toEqual('499.50');
     });
   });
 });

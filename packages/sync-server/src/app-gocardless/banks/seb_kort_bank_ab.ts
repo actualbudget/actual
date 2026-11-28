@@ -1,4 +1,4 @@
-import { amountToInteger } from '#app-gocardless/utils';
+import { subtractDecimalAmounts } from '#app-gocardless/utils';
 
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
@@ -43,7 +43,9 @@ export default {
     editedTrans.creditorName = transaction.additionalInformation;
     transaction.transactionAmount = {
       // Flip transaction amount sign
-      amount: (-parseFloat(transaction.transactionAmount.amount)).toString(),
+      amount: subtractDecimalAmounts('0', [
+        transaction.transactionAmount.amount,
+      ]),
       currency: transaction.transactionAmount.currency,
     };
 
@@ -68,12 +70,9 @@ export default {
       balance => 'nonInvoiced' === balance.balanceType,
     );
 
-    return sortedTransactions.reduce(
-      (total, trans) => {
-        return total - amountToInteger(trans.transactionAmount.amount);
-      },
-      -amountToInteger(currentBalance?.balanceAmount.amount || 0) +
-        amountToInteger(nonInvoiced?.balanceAmount.amount || 0),
-    );
+    return subtractDecimalAmounts(nonInvoiced?.balanceAmount.amount ?? '0', [
+      currentBalance?.balanceAmount.amount ?? '0',
+      ...sortedTransactions.map(trans => trans.transactionAmount.amount),
+    ]);
   },
 } satisfies IBank;

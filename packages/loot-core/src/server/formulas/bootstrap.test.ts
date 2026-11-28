@@ -67,6 +67,32 @@ describe('formula preference bootstrap', () => {
     expect(preferences.decimalPlaces).toBe(0);
   });
 
+  it('uses recorded precision when currency metadata differs', async () => {
+    await db.update('preferences', {
+      id: 'amountEncoding',
+      value: JSON.stringify({ version: 1, currencyCode: 'RSD', precision: 0 }),
+    });
+    await db.update('preferences', {
+      id: 'defaultCurrencyCode',
+      value: 'RSD',
+    });
+    const preferences = await loadUserPreferencesForFormulas();
+    expect(preferences.decimalPlaces).toBe(0);
+  });
+
+  it('formats with the saved currency only while Currency support is on', async () => {
+    await db.update('preferences', { id: 'defaultCurrencyCode', value: 'JPY' });
+    await ensureFormulaPreferencesLoaded();
+    expect(executeFormula('=FORMATCURRENCY(1500)')).toBe('1,500.00');
+
+    await runHandler(handlers['preferences/save'], {
+      id: 'flags.currency',
+      value: 'true',
+    });
+    await ensureFormulaPreferencesLoaded();
+    expect(executeFormula('=FORMATCURRENCY(1500)')).toContain('¥');
+  });
+
   it('loads formula preferences with one preferences query', async () => {
     const aqlQuerySpy = vi.spyOn(aql, 'aqlQuery');
 

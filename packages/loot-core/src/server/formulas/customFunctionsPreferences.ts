@@ -1,5 +1,6 @@
 import * as asyncStorage from '#platform/server/asyncStorage';
 import { aqlQuery } from '#server/aql';
+import { parseAmountEncoding } from '#shared/amount-encoding';
 import { getCurrency } from '#shared/currencies';
 import type { Currency } from '#shared/currencies';
 import type { UserPreferences } from '#shared/formulas/customFunctions';
@@ -19,6 +20,7 @@ const LOCALE_NUMBER_FORMAT_SAMPLE = 1_000_000.23;
 type FormulaPreferenceId =
   | 'flags.currency'
   | 'defaultCurrencyCode'
+  | 'amountEncoding'
   | 'numberFormat'
   | 'hideFraction'
   | 'currencySymbolPosition'
@@ -27,6 +29,7 @@ type FormulaPreferenceId =
 const FORMULA_PREFERENCE_IDS: FormulaPreferenceId[] = [
   'flags.currency',
   'defaultCurrencyCode',
+  'amountEncoding',
   'numberFormat',
   'hideFraction',
   'currencySymbolPosition',
@@ -119,15 +122,19 @@ export async function loadUserPreferencesForFormulas({
       preferences[preference.id as FormulaPreferenceId] = preference.value;
     }
 
-    const isCurrencyFeatureEnabled = preferences['flags.currency'] === 'true';
-    const currencyCode = preferences.defaultCurrencyCode ?? null;
-    const currencyFromPreference = isCurrencyFeatureEnabled
-      ? getCurrencyFromPreference(currencyCode)
-      : null;
+    // Without Currency support a saved currency is ignored, as in the app.
+    const currencyCode =
+      preferences['flags.currency'] === 'true'
+        ? (preferences.defaultCurrencyCode ?? null)
+        : null;
+    const currencyFromPreference = getCurrencyFromPreference(currencyCode);
 
     const numberFormatValue =
       (preferences.numberFormat as NumberFormats | undefined) ?? null;
     const hideFraction = preferences.hideFraction === 'true';
+    const recordedPrecision =
+      parseAmountEncoding(preferences.amountEncoding ?? undefined)?.precision ??
+      2;
 
     const locale =
       normalizeLocale(selectedLocale) ??
@@ -135,7 +142,9 @@ export async function loadUserPreferencesForFormulas({
       normalizeLocale(browserLocale) ??
       'en-US';
 
-    const currency = currencyFromPreference ?? DEFAULT_CURRENCY;
+    const currency =
+      currencyFromPreference ??
+      (preferences.defaultCurrencyCode ? getCurrency('') : DEFAULT_CURRENCY);
     const symbolPositionValue = preferences.currencySymbolPosition ?? null;
     const spaceEnabledValue =
       preferences.currencySpaceBetweenAmountAndSymbol ?? null;
@@ -157,7 +166,7 @@ export async function loadUserPreferencesForFormulas({
     return {
       currency,
       numberFormat,
-      decimalPlaces: hideFraction ? 0 : currency.decimalPlaces,
+      decimalPlaces: hideFraction ? 0 : recordedPrecision,
       thousandsSeparator:
         numberFormatSettings.thousandsSeparator ||
         localeDefaults.thousandsSeparator,

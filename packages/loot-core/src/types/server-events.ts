@@ -1,6 +1,7 @@
 import type { MigrationPhase } from '#platform/server/sqlite/storage/types';
 import type { Backup } from '#server/budgetfiles/backups';
 import type { UndoState } from '#server/undo';
+import type { MissingRatesProgress } from '#types/models/exchange-rate-history';
 
 type SyncSubtype =
   | 'out-of-sync'
@@ -39,6 +40,9 @@ type SyncEvent = {
     }
   | {
       type: 'start';
+    }
+  | {
+      type: 'pending-transition';
     }
   | {
       type: 'unauthorized';
@@ -109,6 +113,17 @@ type PrefsUpdatedEvent = undefined;
 // IndexedDB blocks into the sqlite-wasm storage
 type StorageMigrationEvent = { phase: MigrationPhase; percent?: number };
 type SchedulesOfflineEvent = undefined;
+/** Foreign schedule occurrences left unposted for want of a rate. */
+export type SchedulesRateUnavailableEvent = {
+  schedules: Array<{
+    name: string | null;
+    date: string;
+    /** Currencies without a rate, comma separated. */
+    currency: string;
+    /** An exchange whose estimate rounds to zero, with every rate saved. */
+    estimateUnusable?: boolean;
+  }>;
+};
 type ServerErrorEvent = undefined;
 type ShowBudgetsEvent = undefined;
 type StartImportEvent = { budgetName: string };
@@ -116,6 +131,8 @@ type StartLoadEvent = undefined;
 type ApiFetchRedirectedEvent = undefined;
 
 export type ServerEvents = {
+  'fx-provider-context': { context: string };
+  'exchange-rates-update': MissingRatesProgress;
   'backups-updated': BackupUpdatedEvent;
   'cells-changed': CellsChangedEvent;
   'fallback-write-error': FallbackWriteErrorEvent;
@@ -128,6 +145,7 @@ export type ServerEvents = {
   'orphaned-payees': OrphanedPayeesEvent;
   'prefs-updated': PrefsUpdatedEvent;
   'schedules-offline': SchedulesOfflineEvent;
+  'schedules-rate-unavailable': SchedulesRateUnavailableEvent;
   'server-error': ServerErrorEvent;
   'show-budgets': ShowBudgetsEvent;
   'start-import': StartImportEvent;

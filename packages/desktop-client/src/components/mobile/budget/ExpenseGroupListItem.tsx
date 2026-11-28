@@ -19,6 +19,7 @@ import type {
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
+import { usePocketGroupTotals } from '#components/budget/pocketDisplay';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CellValue } from '#components/spreadsheet/CellValue';
 import { useFormat } from '#hooks/useFormat';
@@ -27,6 +28,7 @@ import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { ExpenseCategoryList } from './ExpenseCategoryList';
+import { PocketGroupCells } from './PocketRows';
 
 type ExpenseGroupListItemProps = ComponentPropsWithoutRef<
   typeof GridListItem<CategoryGroupEntity>
@@ -162,6 +164,7 @@ export function ExpenseGroupHeader({
       />
       <ExpenseGroupCells
         group={categoryGroup}
+        month={month}
         show3Columns={show3Columns}
         showBudgetedColumn={showBudgetedColumn}
       />
@@ -270,17 +273,21 @@ function ExpenseGroupName({
 
 type ExpenseGroupCellsProps = {
   group: CategoryGroupEntity;
+  month: string;
   show3Columns: boolean;
   showBudgetedColumn: boolean;
 };
 
 function ExpenseGroupCells({
   group,
+  month,
   show3Columns,
   showBudgetedColumn,
 }: ExpenseGroupCellsProps) {
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const format = useFormat();
+  // A group with pocket categories shows the sum of what they display.
+  const pocketTotals = usePocketGroupTotals(group, month);
 
   const columnWidth = getColumnWidth({ show3Columns });
 
@@ -307,6 +314,17 @@ function ExpenseGroupCells({
     budgetType === 'tracking'
       ? trackingBudget.groupBalance(group.id)
       : envelopeBudget.groupBalance(group.id);
+
+  if (pocketTotals) {
+    return (
+      <PocketGroupCells
+        group={group}
+        totals={pocketTotals}
+        show3Columns={show3Columns}
+        showBudgetedColumn={showBudgetedColumn}
+      />
+    );
+  }
 
   return (
     <View

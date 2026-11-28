@@ -70,13 +70,18 @@ export function useAccountPreviewTransactions({
     [accountId, getTransferAccountByPayee],
   );
 
+  // A foreign register's previews are native, so their running balances
+  // start from the native balance.
+  const account = accountId ? accountsById[accountId] : undefined;
   const accountBalanceValue = useSheetValue<
     'account',
-    'balance' | 'accounts-balance'
+    'balance' | 'nativeBalance' | 'accounts-balance'
   >(
-    accountId
-      ? bindings.accountBalance(accountId)
-      : bindings.allAccountBalance(),
+    account
+      ? bindings.accountDisplayBalance(account)
+      : accountId
+        ? bindings.accountBalance(accountId)
+        : bindings.allAccountBalance(),
   );
 
   const [showBalances] = useSyncedPref(`show-balances-${accountId}`);
@@ -88,6 +93,7 @@ export function useAccountPreviewTransactions({
     error,
   } = usePreviewTransactions({
     filter: accountSchedulesFilter,
+    foreignAccountId: accountId,
     options: {
       calculateRunningBalances: showBalances === 'true',
       startingBalance: accountBalanceValue ?? 0,
@@ -227,6 +233,10 @@ function inverseTransferForAccount({
     ...standaloneTransaction,
     inversed: true,
     amount: -transaction.amount,
+    // A same-encoding foreign transfer's native amount flips with it.
+    ...(transaction.transaction_amount != null && {
+      transaction_amount: -transaction.transaction_amount,
+    }),
     payee: getPayeeByTransferAccount(transaction.account)?.id || '',
     account: accountId || '',
     ...(previewStatus != null && { category: previewStatus }),

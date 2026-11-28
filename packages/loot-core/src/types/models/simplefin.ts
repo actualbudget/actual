@@ -19,6 +19,8 @@ export type SimpleFinBatchSyncResponse = {
 };
 
 export type SyncServerSimpleFinAccount = {
+  /** ISO 4217 currency of the provider account, or null when unknown. */
+  currency?: string | null;
   balance: number;
   account_id: string;
   institution?: string;

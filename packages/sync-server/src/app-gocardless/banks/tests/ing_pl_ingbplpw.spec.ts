@@ -50,6 +50,7 @@ describe('IngPlIngbplpw', () => {
       expect(normalizedAccount).toMatchInlineSnapshot(`
         {
           "account_id": "d3eccc94-9536-48d3-98be-813f79199ee3",
+          "currency": "PLN",
           "iban": "PL00000000000000000987654321",
           "institution": {
             "bic": "INGBPLPW",
@@ -183,7 +184,7 @@ describe('IngPlIngbplpw', () => {
         balances,
       );
 
-      expect(startingBalance).toEqual(50000);
+      expect(startingBalance).toEqual('500.00');
     });
 
     it('returns the same balance amount when no transactions', () => {
@@ -197,7 +198,7 @@ describe('IngPlIngbplpw', () => {
       ];
       expect(
         IngPlIngbplpw.calculateStartingBalance(transactions, balances),
-      ).toEqual(50000);
+      ).toEqual('500.00');
     });
   });
 });

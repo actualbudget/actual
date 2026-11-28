@@ -58,6 +58,38 @@ describe('Deferred sync messages (newer schema)', () => {
     expect(getPending().length).toBe(1);
   });
 
+  it('defers rate messages when exchange_rates is missing, keeping the batch', async () => {
+    // Code newer than the schema: coupled-cell derivation must not fail on
+    // the absent table and roll back the rest of the batch
+    db.execQuery('DROP TABLE exchange_rates');
+    await db.insertAccount({ id: 'acct', name: 'Checking' });
+    await applyMessages(
+      [
+        {
+          dataset: 'exchange_rates',
+          row: 'r1',
+          column: 'spec',
+          value: '{"rate":"150","kind":"standing"}',
+          timestamp: sendTimestamp(),
+        },
+        {
+          dataset: 'accounts',
+          row: 'acct',
+          column: 'name',
+          value: 'Savings',
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
+    expect(getPending().map(m => m.dataset)).toEqual(['exchange_rates']);
+    expect(
+      db.firstSync('SELECT name FROM accounts WHERE id = ?', ['acct']),
+    ).toEqual({
+      name: 'Savings',
+    });
+  });
+
   it('defers messages for unknown columns without failing the batch', async () => {
     await applyMessages(
       [

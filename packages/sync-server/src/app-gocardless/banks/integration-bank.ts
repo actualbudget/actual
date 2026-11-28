@@ -1,15 +1,15 @@
 import * as d from 'date-fns';
 
 import {
-  amountToInteger,
   printIban,
   sortByBookingDateOrValueDate,
+  startingBalanceFromTransactions,
 } from '#app-gocardless/utils';
 import { formatPayeeName } from '#util/payee-name';
 
 import type { IBank } from './bank.interface';
 
-const SORTED_BALANCE_TYPE_LIST = [
+export const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',
   'expected',
   'forwardAvailable',
@@ -37,6 +37,7 @@ export default {
         .join(' '),
       official_name: account.product ?? `integration-${account.institution_id}`,
       type: 'checking',
+      currency: account.currency ?? null,
     };
   },
 
@@ -88,11 +89,9 @@ export default {
           SORTED_BALANCE_TYPE_LIST.indexOf(a.balanceType) -
           SORTED_BALANCE_TYPE_LIST.indexOf(b.balanceType),
       )[0];
-    return sortedTransactions.reduce(
-      (total, trans) => {
-        return total - amountToInteger(trans.transactionAmount.amount);
-      },
-      amountToInteger(currentBalance?.balanceAmount.amount || 0),
+    return startingBalanceFromTransactions(
+      currentBalance?.balanceAmount.amount ?? '0',
+      sortedTransactions,
     );
   },
 } satisfies IBank;

@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useContext, useMemo, useState } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -11,13 +11,17 @@ import type {
 import { DropHighlightPosContext } from '#components/sort';
 import type { DragState, OnDropCallback } from '#components/sort';
 import { Row } from '#components/table';
+import { usePocketSlots } from '#hooks/useCategoryPockets';
+import type { PocketSlot } from '#hooks/useCategoryPockets';
 import { useLocalPref } from '#hooks/useLocalPref';
 
+import { BaseSlotRow, PocketSlotRow, slotRows } from './envelope/PocketRows';
 import { ExpenseCategory } from './ExpenseCategory';
 import { ExpenseGroup } from './ExpenseGroup';
 import { IncomeCategory } from './IncomeCategory';
 import { IncomeGroup } from './IncomeGroup';
 import { IncomeHeader } from './IncomeHeader';
+import { MonthsContext } from './MonthsContext';
 import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
 import { separateGroups } from './util';
@@ -31,6 +35,8 @@ type BudgetItem =
       value: CategoryEntity;
       group: CategoryGroupEntity;
     }
+  | { type: 'base-slot'; value: CategoryEntity }
+  | { type: 'pocket-slot'; value: CategoryEntity; slot: PocketSlot }
   | { type: 'income-separator' }
   | { type: 'income-group'; value: CategoryGroupEntity }
   | { type: 'income-category'; value: CategoryEntity };
@@ -80,6 +86,8 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
       useLocalPref('budget.collapsed');
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
+    const { months } = useContext(MonthsContext);
+    const pocketSlots = usePocketSlots(months);
     function onCollapse(value: Array<CategoryGroupEntity['id']>) {
       setCollapsedGroupIdsPref(value);
     }
@@ -115,11 +123,12 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
             ...(collapsedGroupIds.includes(group.id)
               ? []
               : groupCategories || []
-            ).map((cat): BudgetItem => ({
-              type: 'expense-category',
-              value: cat,
-              group,
-            })),
+            ).flatMap((cat): BudgetItem[] => [
+              { type: 'expense-category', value: cat, group },
+              ...slotRows(pocketSlots.get(cat.id), !!showHiddenCategories).map(
+                row => ({ ...row, value: cat }),
+              ),
+            ]),
           ];
         }),
       );
@@ -160,6 +169,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
       newCategoryForGroup,
       isAddingGroup,
       showHiddenCategories,
+      pocketSlots,
     ]);
 
     const [dragState, setDragState] = useState<LocalDragState>(null);
@@ -321,7 +331,24 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   onReorder={onReorderCategory}
                   onBudgetAction={onBudgetAction}
                   onShowActivity={onShowActivity}
+                  hasPockets={pocketSlots.has(item.value.id)}
                 />
+              );
+              break;
+            case 'base-slot':
+              content = (
+                <BaseSlotRow
+                  category={item.value}
+                  editingCell={editingCell}
+                  onEditMonth={onEditMonth}
+                  onBudgetAction={onBudgetAction}
+                  onShowActivity={onShowActivity}
+                />
+              );
+              break;
+            case 'pocket-slot':
+              content = (
+                <PocketSlotRow category={item.value} slot={item.slot} />
               );
               break;
             case 'income-separator':
@@ -378,11 +405,15 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
           return (
             <DropHighlightPosContext.Provider
               key={
-                'value' in item
-                  ? item.value.id
-                  : item.type === 'income-separator'
-                    ? 'separator'
-                    : idx
+                item.type === 'pocket-slot'
+                  ? `${item.value.id}-${item.slot.id}`
+                  : item.type === 'base-slot'
+                    ? `${item.value.id}-base`
+                    : 'value' in item
+                      ? item.value.id
+                      : item.type === 'income-separator'
+                        ? 'separator'
+                        : idx
               }
               value={pos}
             >

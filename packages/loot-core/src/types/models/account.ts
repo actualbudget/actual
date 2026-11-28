@@ -10,6 +10,10 @@ export type AccountEntity = {
   last_reconciled: string | null;
   tombstone: 0 | 1;
   account_group_id: AccountGroupEntity['id'] | null;
+  /** NULL inherits the budget currency. */
+  currency: string | null;
+  /** Recorded native precision for an explicit currency; NULL when inherited. */
+  currency_precision: number | null;
 
   // Sync fields
   account_id: string | null;

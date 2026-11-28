@@ -17,7 +17,11 @@ export function validForMergeExplanation(
   if (transactionA.account !== transactionB.account) {
     return 'Cannot merge transactions from different accounts';
   }
-  if (transactionA.amount !== transactionB.amount) {
+  // An imported row can confirm a scheduled transfer's estimated amount
+  // (MC-4.4); the server accepts that only for a scheduled exchange leg.
+  const confirmsTransfer =
+    !transactionA.transfer_id !== !transactionB.transfer_id;
+  if (transactionA.amount !== transactionB.amount && !confirmsTransfer) {
     return 'Cannot merge transactions with different amounts';
   }
   // if both transfers, they should both be transferring to the same account to be eligible for merge.

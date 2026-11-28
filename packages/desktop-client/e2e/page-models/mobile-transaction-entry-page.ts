@@ -54,6 +54,8 @@ export class MobileTransactionEntryPage {
 
   async createTransaction() {
     await this.addTransactionButton.click();
+    // The form closes only after the save finishes.
+    await this.transactionForm.waitFor({ state: 'detached' });
 
     return new MobileAccountPage(this.page);
   }

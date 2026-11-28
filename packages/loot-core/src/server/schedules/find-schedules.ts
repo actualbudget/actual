@@ -37,7 +37,12 @@ async function getTransactions(date, account) {
       .select('*')
       .options({ splits: 'none' }),
   );
-  return data;
+  // A foreign account's schedules are native: compare native amounts.
+  return data.map(trans =>
+    trans.transaction_amount != null
+      ? { ...trans, amount: trans.transaction_amount }
+      : trans,
+  );
 }
 
 function getRank(day1, day2) {
@@ -240,7 +245,10 @@ async function monthly2ndor4th(startDate, accountId) {
   );
 }
 
-async function findStartDate(schedule) {
+async function findStartDate(
+  schedule,
+  amountField: 'amount' | 'transaction_amount',
+) {
   const conditions = schedule._conditions;
   const dateCond = conditions.find(c => c.field === 'date');
   let currentConfig = dateCond.value;
@@ -285,6 +293,7 @@ async function findStartDate(schedule) {
 
     const { filters, errors } = conditionsToAQL(newConditions, {
       recurDateBounds: 1,
+      amountField,
     });
     if (errors.length > 0) {
       // Somehow we generated an invalid config. Abort the whole
@@ -330,6 +339,9 @@ export async function findSchedules() {
   const { data: accounts } = await aqlQuery(
     q('accounts').filter({ closed: false }).select('*'),
   );
+  const foreignAccountIds = new Set(
+    accounts.filter(account => account.currency).map(account => account.id),
+  );
 
   let allSchedules = [];
 
@@ -353,39 +365,53 @@ export async function findSchedules() {
     }
   }
 
-  const schedules = [...groupBy(allSchedules, 'payee').entries()].map(
-    ([, schedules]) => {
-      schedules.sort((s1, s2) => s2.rank - s1.rank);
-      const winner = schedules[0];
-
-      // Convert to schedule and return it
-      return {
-        id: uuidv4(),
-        account: winner.account,
-        payee: winner.payee,
-        date: winner.date,
-        amount: winner.amount,
-        _conditions: [
-          { op: 'is', field: 'account', value: winner.account },
-          { op: 'is', field: 'payee', value: winner.payee },
-          {
-            op: winner.exactDate ? 'is' : 'isapprox',
-            field: 'date',
-            value: winner.date,
-          },
-          {
-            op: winner.exactAmount ? 'is' : 'isapprox',
-            field: 'amount',
-            value: winner.amount,
-          },
-        ],
-      };
-    },
+  // One winner per account and payee, so a payee paid in two currencies
+  // yields a schedule in each.
+  const byAccountAndPayee = groupBy(
+    allSchedules.map(schedule => ({
+      ...schedule,
+      key: `${schedule.account}:${schedule.payee}`,
+    })),
+    'key',
   );
+  const schedules = [...byAccountAndPayee.entries()].map(([, schedules]) => {
+    schedules.sort((s1, s2) => s2.rank - s1.rank);
+    const winner = schedules[0];
+
+    // Convert to schedule and return it
+    return {
+      id: uuidv4(),
+      account: winner.account,
+      payee: winner.payee,
+      date: winner.date,
+      amount: winner.amount,
+      _conditions: [
+        { op: 'is', field: 'account', value: winner.account },
+        { op: 'is', field: 'payee', value: winner.payee },
+        {
+          op: winner.exactDate ? 'is' : 'isapprox',
+          field: 'date',
+          value: winner.date,
+        },
+        {
+          op: winner.exactAmount ? 'is' : 'isapprox',
+          field: 'amount',
+          value: winner.amount,
+        },
+      ],
+    };
+  });
 
   const finalized: Awaited<ReturnType<typeof findStartDate>> = [];
   for (const schedule of schedules) {
-    finalized.push(await findStartDate(schedule));
+    finalized.push(
+      await findStartDate(
+        schedule,
+        foreignAccountIds.has(schedule.account)
+          ? 'transaction_amount'
+          : 'amount',
+      ),
+    );
   }
   return finalized;
 }

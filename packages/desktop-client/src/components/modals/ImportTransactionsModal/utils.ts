@@ -1,5 +1,8 @@
 import { format as formatDate_ } from '@actual-app/core/shared/months';
-import { looselyParseAmount } from '@actual-app/core/shared/util';
+import {
+  amountToInteger,
+  looselyParseAmount,
+} from '@actual-app/core/shared/util';
 import * as d from 'date-fns';
 
 export type DateFormat =
@@ -137,6 +140,8 @@ export type ImportTransaction = {
   notes?: string;
   category?: string;
   date?: string;
+  /** For a foreign account: the base amount the preview resolved. */
+  base_amount?: number;
 } & Record<string, string | number | boolean>;
 
 type ImportCategory = {
@@ -188,13 +193,14 @@ export function applyFieldMappings(
 function parseAmount(
   amount: number | string | undefined | null,
   mapper: (parsed: number) => number,
+  precision = 2,
 ) {
   if (amount == null) {
     return null;
   }
 
   const parsed =
-    typeof amount === 'string' ? looselyParseAmount(amount) : amount;
+    typeof amount === 'string' ? looselyParseAmount(amount, precision) : amount;
 
   if (parsed === null) {
     return null;
@@ -204,12 +210,18 @@ function parseAmount(
 }
 
 export function parseAmountFields(
-  trans: Partial<ImportTransaction>,
+  trans: {
+    amount?: number | string;
+    outflow?: number | string;
+    inflow?: number | string;
+    inOut?: string;
+  },
   splitMode: boolean,
   inOutMode: boolean,
   outValue: string,
   flipAmount: boolean,
   multiplierAmount: string,
+  precision = 2,
 ) {
   const multiplier = parseFloat(multiplierAmount) || 1.0;
 
@@ -228,12 +240,13 @@ export function parseAmountFields(
     // Split mode is a little weird; first we look for an outflow and
     // if that has a value, we never want to show a number in the
     // inflow. Same for `amount`; we choose outflow first and then inflow
-    value.outflow = parseAmount(trans.outflow, n => -Math.abs(n)) || 0;
+    value.outflow =
+      parseAmount(trans.outflow, n => -Math.abs(n), precision) || 0;
     value.inflow = value.outflow
       ? 0
-      : parseAmount(trans.inflow, n => Math.abs(n)) || 0;
+      : parseAmount(trans.inflow, n => Math.abs(n), precision) || 0;
   } else {
-    const amount = parseAmount(trans.amount, n => n) || 0;
+    const amount = parseAmount(trans.amount, n => n, precision) || 0;
     if (amount >= 0) value.inflow = amount;
     else value.outflow = amount;
   }
@@ -278,6 +291,49 @@ export function parseAmountFields(
   }
 }
 
+export function parseImportAmount(
+  trans: {
+    amount?: number | string;
+    outflow?: number | string;
+    inflow?: number | string;
+    inOut?: string;
+  },
+  splitMode: boolean,
+  inOutMode: boolean,
+  outValue: string,
+  flipAmount: boolean,
+  multiplierAmount: string,
+  precision: number,
+): number | null {
+  const fields =
+    splitMode && !inOutMode ? [trans.outflow, trans.inflow] : [trans.amount];
+  if (
+    fields.every(field => field == null || field === '') ||
+    fields.some(
+      field =>
+        field != null &&
+        field !== '' &&
+        (typeof field === 'number'
+          ? !Number.isFinite(field)
+          : looselyParseAmount(field, precision) == null),
+    )
+  ) {
+    return null;
+  }
+
+  const { amount } = parseAmountFields(
+    trans,
+    splitMode,
+    inOutMode,
+    outValue,
+    flipAmount,
+    multiplierAmount,
+    precision,
+  );
+  const encoded = amountToInteger(amount, precision);
+  return Number.isSafeInteger(encoded) ? encoded : null;
+}
+
 export function filterByStartDate(
   transactions: ImportTransaction[],
   startDate: string,
@@ -312,4 +368,39 @@ export function stripCsvImportTransaction(transaction: ImportTransaction) {
   } = transaction;
 
   return trans;
+}
+
+/** The select's placeholder value: no column chosen. */
+const NO_FIELD = 'choose-field';
+
+/** A saved or chosen currency column: null when none is chosen. */
+export function currencyColumnOf(value: unknown): string | null {
+  return typeof value === 'string' && value !== '' && value !== NO_FIELD
+    ? value
+    : null;
+}
+
+/**
+ * Splits CSV rows by their currency cell (MC-7.5): rows whose cell names
+ * another currency than the account's are left out, never converted. A
+ * missing, empty or blank cell means the account's currency.
+ */
+export function splitByCurrency<T extends object>(
+  rows: T[],
+  column: string | null,
+  accountCode: string,
+): { kept: T[]; rejected: Array<{ row: T; value: string }> } {
+  if (column === null) return { kept: rows, rejected: [] };
+  const kept: T[] = [];
+  const rejected: Array<{ row: T; value: string }> = [];
+  for (const row of rows) {
+    const cell = (row as Record<string, unknown>)[column];
+    const value = cell == null ? '' : String(cell).trim();
+    if (value === '' || value.toUpperCase() === accountCode.toUpperCase()) {
+      kept.push(row);
+    } else {
+      rejected.push({ row, value });
+    }
+  }
+  return { kept, rejected };
 }

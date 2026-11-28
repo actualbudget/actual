@@ -5,6 +5,7 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
+  | 'multicurrency'
   | 'balanceForecastReport'
   | 'customThemes'
   | 'budgetAnalysisReport'
@@ -27,6 +28,9 @@ export type SyncedPrefs = Partial<
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
     | 'defaultCurrencyCode'
+    | 'amountEncoding'
+    | 'multicurrencyBaseCurrency'
+    | 'exchange-rates-auto-update'
     | `show-account-${string}-net-worth-chart`
     | `side-nav.show-balance-history-${string}`
     // @deprecated: superseded by `transaction-table-columns-${string}`; only
@@ -50,6 +54,7 @@ export type SyncedPrefs = Partial<
     | `parse-date-${string}-${'csv' | 'qif'}`
     | `import-reimport-deleted-${string}`
     | `csv-mappings-${string}`
+    | `csv-currency-column-${string}`
     | `csv-delimiter-${string}`
     | `csv-skip-start-lines-${string}`
     | `csv-skip-end-lines-${string}`
@@ -89,6 +94,16 @@ export type MetadataPrefs = Partial<{
   resetClock: boolean;
   lastScheduleRun: string;
   userId: string; // TODO: delete this (unused)
+  amountEncoding: string;
+  amountEncodingTransition: {
+    id: string;
+    sourceGroupId: string;
+    sourceEncoding: string | null;
+    targetEncoding: string | null;
+    targetCurrencyCode: string;
+  };
+  /** Settled exchange-rate gaps for this device; never synced. */
+  exchangeRateGaps: string[];
 }>;
 
 /**

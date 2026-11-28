@@ -1,4 +1,3 @@
-import React from 'react';
 import type { ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -6,9 +5,11 @@ import { Menu } from '@actual-app/components/menu';
 import type { MenuItemObject } from '@actual-app/components/menu';
 
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { useFxSummary } from '#hooks/useFxSummary';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 export type ToBudgetMenuActions = {
+  onFxDetails?: () => void;
   onTransfer: () => void;
   onCover: () => void;
   onHoldBuffer: () => void;
@@ -18,6 +19,7 @@ export type ToBudgetMenuActions = {
 };
 
 export function useToBudgetMenu({
+  onFxDetails,
   onTransfer,
   onCover,
   onHoldBuffer,
@@ -26,6 +28,7 @@ export function useToBudgetMenu({
   month,
 }: ToBudgetMenuActions) {
   const { t } = useTranslation();
+  const fx = useFxSummary();
 
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
   const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth) ?? 0;
@@ -34,6 +37,9 @@ export function useToBudgetMenu({
   const autoBuffered = useEnvelopeSheetValue(envelopeBudget.autoBuffered) ?? 0;
 
   const availableItems: MenuItemObject<string>[] = [
+    ...(fx.visible && onFxDetails
+      ? [{ name: 'fx-details', text: t('FX details') }]
+      : []),
     ...(toBudget > 0
       ? [
           {
@@ -89,6 +95,9 @@ export function useToBudgetMenu({
 
   const onMenuSelect = (name: string) => {
     switch (name) {
+      case 'fx-details':
+        onFxDetails?.();
+        break;
       case 'transfer':
         onTransfer?.();
         break;
@@ -120,6 +129,7 @@ type ToBudgetMenuProps = Omit<
   ToBudgetMenuActions;
 
 export function ToBudgetMenu({
+  onFxDetails,
   onTransfer,
   onCover,
   onHoldBuffer,
@@ -129,6 +139,7 @@ export function ToBudgetMenu({
   ...props
 }: ToBudgetMenuProps) {
   const { items, onMenuSelect } = useToBudgetMenu({
+    onFxDetails,
     onTransfer,
     onCover,
     onHoldBuffer,

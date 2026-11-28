@@ -249,10 +249,10 @@ In the [browser build](#using-the-api-in-a-browser), `shutdown` fails when the l
 
 <Method name="utils.amountToInteger" args={[{ name: 'amount', type: 'number' }]} returns="number" />
 
-Convert a currency amount (such as `123.45`) represented as a floating point number to the integer format Actual uses internally (i.e. `12345`).
+Convert a currency amount (such as `123.45`) represented as a floating point number to the integer format Actual uses internally (i.e. `12345`). An optional second argument sets the decimal precision or currency code, and defaults to 2.
 
 #### `utils.integerToAmount`
 
 <Method name="utils.integerToAmount" args={[{ name: 'amount', type: 'number' }]} returns="number" />
 
-Convert an integer amount as used internally by Actual (such as `12345`) to the traditional floating point (i.e. `123.45`).
+Convert an integer amount as used internally by Actual (such as `12345`) to the traditional floating point (i.e. `123.45`). An optional second argument sets the decimal precision or currency code, and defaults to 2.

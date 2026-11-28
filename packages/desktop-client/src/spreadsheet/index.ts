@@ -16,6 +16,10 @@ export type Spreadsheets = {
     [key: `account-group-balance-${string}`]: number;
     balanceCleared: number;
     balanceUncleared: number;
+    // Account-native sums for foreign-currency accounts
+    nativeBalance: number;
+    nativeBalanceCleared: number;
+    nativeBalanceUncleared: number;
     lastReconciled: string | null;
   };
   category: {
@@ -34,6 +38,10 @@ export type Spreadsheets = {
 
     // Envelope budget fields
     'available-funds': number;
+    'fx-changes': number;
+    'fx-incomplete': boolean;
+    'reservation-changes': number;
+    'reservation-incomplete': boolean;
     'last-month-overspent': number;
     buffered: number;
     'buffered-auto': number;

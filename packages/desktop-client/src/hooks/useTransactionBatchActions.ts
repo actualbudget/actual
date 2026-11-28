@@ -20,13 +20,16 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 
+import { useAccounts } from '#hooks/useAccounts';
 import { pushModal } from '#modals/modalsSlice';
 import type {
   ConfirmTransactionEditReason,
   Modal as ModalType,
 } from '#modals/modalsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
+import { incompatibleAccountIds } from '#util/account-encoding';
 
 type BatchReconciledReason = Extract<
   ConfirmTransactionEditReason,
@@ -78,6 +81,7 @@ type BatchUnlinkScheduleProps = {
 export function useTransactionBatchActions() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const { data: accounts = [] } = useAccounts();
 
   const onBatchEdit = async ({ name, ids, onSuccess }: BatchEditProps) => {
     const { data } = await aqlQuery(
@@ -87,6 +91,24 @@ export function useTransactionBatchActions() {
         .options({ splits: 'grouped' }),
     );
     const transactions = ungroupTransactions(data as TransactionEntity[]);
+    const accountsById = new Map(
+      accounts.map(account => [account.id, account]),
+    );
+    if (
+      name === 'amount' &&
+      transactions.some(trans => accountsById.get(trans.account)?.currency)
+    ) {
+      // Foreign amounts are edited one row at a time, through their dialogs.
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('Edit foreign amounts one transaction at a time.'),
+          },
+        }),
+      );
+      return;
+    }
 
     const onChange = async (
       name: keyof TransactionEntity,
@@ -203,6 +225,10 @@ export function useTransactionBatchActions() {
             name: 'account-autocomplete',
             options: {
               onSelect: accountId => onChange(name, accountId),
+              hiddenAccounts: incompatibleAccountIds(
+                accounts,
+                transactions.map(trans => accountsById.get(trans.account)),
+              ),
             },
           },
         }),
@@ -530,7 +556,7 @@ export function useTransactionBatchActions() {
       );
       const [fromTrans, toTrans] = transactions;
 
-      if (transactions.length === 2 && validForTransfer(fromTrans, toTrans)) {
+      if (transactions.length === 2) {
         const fromPayee = payees.find(
           p => p.transfer_acct === fromTrans.account,
         );
@@ -542,19 +568,28 @@ export function useTransactionBatchActions() {
         // between an on-budget and an off-budget account represents money
         // entering/leaving the budget, so the category must be preserved.
         // This matches the server-side logic in clearCategory (transfer.ts).
-        const { data: accounts } = await aqlQuery(
-          q('accounts')
-            .filter({ id: { $oneof: [fromTrans.account, toTrans.account] } })
-            .select(['id', 'offbudget']),
-        );
-        const fromAccount = accounts.find(
-          (a: { id: string; offbudget?: boolean }) =>
-            a.id === fromTrans.account,
-        );
-        const toAccount = accounts.find(
-          (a: { id: string; offbudget?: boolean }) => a.id === toTrans.account,
-        );
-        const clearCategory = fromAccount?.offbudget === toAccount?.offbudget;
+        const {
+          data: accounts,
+        }: { data: Pick<AccountEntity, 'id' | 'offbudget' | 'currency'>[] } =
+          await aqlQuery(
+            q('accounts')
+              .filter({ id: { $oneof: [fromTrans.account, toTrans.account] } })
+              .select(['id', 'offbudget', 'currency']),
+          );
+        const fromAccount = accounts.find(a => a.id === fromTrans.account);
+        const toAccount = accounts.find(a => a.id === toTrans.account);
+        if (
+          !fromAccount ||
+          !toAccount ||
+          !validForTransfer(
+            fromTrans,
+            toTrans,
+            fromAccount.currency !== toAccount.currency,
+          )
+        ) {
+          return;
+        }
+        const clearCategory = fromAccount.offbudget === toAccount.offbudget;
 
         const changes = {
           updated: [

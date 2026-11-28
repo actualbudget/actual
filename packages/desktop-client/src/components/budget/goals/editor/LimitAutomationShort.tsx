@@ -13,7 +13,10 @@ export const LimitAutomationShort = ({
   template,
 }: LimitAutomationShortProps) => {
   const format = useFormat();
-  const amount = format(amountToInteger(template.amount), 'financial');
+  const amount = format(
+    amountToInteger(template.amount, format.precision),
+    'financial',
+  );
 
   switch (template.period) {
     case 'daily':

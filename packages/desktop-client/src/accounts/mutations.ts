@@ -6,6 +6,7 @@ import type {
   AccountEntity,
   AccountGroupEntity,
   CategoryEntity,
+  OperationRate,
   SyncServerAkahuAccount,
   SyncServerEnableBankingAccount,
   SyncServerGoCardlessAccount,
@@ -15,10 +16,12 @@ import type {
 } from '@actual-app/core/types/models';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
+import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import { sync } from '#app/appSlice';
 import { useAccounts } from '#hooks/useAccounts';
+import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { payeeQueries } from '#payees';
 import { useDispatch, useStore } from '#redux';
@@ -60,6 +63,9 @@ type CreateAccountPayload = {
   name: string;
   balance: number;
   offBudget: boolean;
+  currency?: string | null;
+  /** Base amount for a foreign starting balance when no rate applies. */
+  startingBalanceBase?: number;
 };
 
 export function useCreateAccountMutation() {
@@ -68,11 +74,19 @@ export function useCreateAccountMutation() {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async ({ name, balance, offBudget }: CreateAccountPayload) => {
+    mutationFn: async ({
+      name,
+      balance,
+      offBudget,
+      currency,
+      startingBalanceBase,
+    }: CreateAccountPayload) => {
       const id = await send('account-create', {
         name,
         balance,
         offBudget,
+        currency,
+        startingBalanceBase,
       });
       return id;
     },
@@ -211,11 +225,43 @@ export function useMoveAccountMutation() {
   });
 }
 
+/** Import rows; a foreign account's rows may omit the base `amount`. */
+export type ImportRow = Omit<TransactionEntity, 'amount'> & { amount?: number };
+
 type ImportPreviewTransactionsPayload = {
   accountId: string;
-  transactions: TransactionEntity[];
+  transactions: ImportRow[];
   reimportDeleted?: boolean;
+  /** Rates entered for this import only. */
+  operationRates?: OperationRate[];
 };
+
+/** Explains import errors that name a reason code. */
+function importErrorMessage(message: string) {
+  if (message.startsWith('rate-unavailable')) {
+    const dates = message.slice('rate-unavailable:'.length).trim();
+    return t(
+      'No exchange rate is saved for {{dates}}. Add a rate for this currency, then import again.',
+      { dates },
+    );
+  }
+  switch (message) {
+    case 'foreign-pair-required':
+      return t(
+        'Amounts for this account must be in its own currency. Nothing was imported.',
+      );
+    case 'foreign-split-unavailable':
+      return t(
+        'Split transactions cannot be imported into accounts in other currencies yet.',
+      );
+    case 'rule-account-incompatible':
+      return t(
+        'A rule would move a transaction to an account in another currency, so nothing was imported.',
+      );
+    default:
+      return message;
+  }
+}
 
 export function useImportPreviewTransactionsMutation() {
   const queryClient = useQueryClient();
@@ -227,29 +273,55 @@ export function useImportPreviewTransactionsMutation() {
       accountId,
       transactions,
       reimportDeleted,
+      operationRates,
     }: ImportPreviewTransactionsPayload) => {
-      const { errors = [], updatedPreview } = await send(
-        'transactions-import',
-        {
-          accountId,
-          transactions,
-          isPreview: true,
-          opts: reimportDeleted !== undefined ? { reimportDeleted } : undefined,
-        },
-      );
-
-      errors.forEach(error => {
-        dispatch(
-          addNotification({
-            notification: {
-              type: 'error',
-              message: error.message,
-            },
-          }),
-        );
+      const {
+        errors = [],
+        updatedPreview,
+        previewBases = [],
+        missingRates = [],
+      } = await send('transactions-import', {
+        accountId,
+        transactions,
+        isPreview: true,
+        opts: reimportDeleted !== undefined ? { reimportDeleted } : undefined,
+        operationRates,
       });
 
-      return updatedPreview;
+      // Missing rates are resolved in the import dialog itself.
+      const missingRateDates = errors
+        .filter(error => error.message.startsWith('rate-unavailable'))
+        .flatMap(error =>
+          error.message
+            .slice('rate-unavailable:'.length)
+            .split(',')
+            .map(date => date.trim())
+            .filter(Boolean),
+        );
+      errors
+        .filter(error => !error.message.startsWith('rate-unavailable'))
+        .forEach(error => {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: importErrorMessage(error.message),
+              },
+            }),
+          );
+        });
+
+      return {
+        updatedPreview,
+        previewBases,
+        missingRateDates,
+        // Rows needing a rate, keyed by the dialog's row id, at their final
+        // dates after rules.
+        missingRates: missingRates.map(({ transaction, date }) => ({
+          trxId: 'trx_id' in transaction ? String(transaction.trx_id) : null,
+          date,
+        })),
+      };
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -267,9 +339,11 @@ export function useImportPreviewTransactionsMutation() {
 
 type ImportTransactionsPayload = {
   accountId: string;
-  transactions: TransactionEntity[];
+  transactions: ImportRow[];
   reconcile: boolean;
   reimportDeleted?: boolean;
+  /** Rates entered for this import only. */
+  operationRates?: OperationRate[];
 };
 
 export function useImportTransactionsMutation() {
@@ -283,8 +357,13 @@ export function useImportTransactionsMutation() {
       transactions,
       reconcile,
       reimportDeleted,
+      operationRates,
     }: ImportTransactionsPayload) => {
-      if (!reconcile) {
+      // Rows in another currency are converted by the import path.
+      const isForeign = transactions.some(
+        trans => trans.transaction_amount != null,
+      );
+      if (!reconcile && !isForeign) {
         await send('api/transactions-add', {
           accountId,
           transactions,
@@ -302,14 +381,29 @@ export function useImportTransactionsMutation() {
         transactions,
         isPreview: false,
         opts: reimportDeleted !== undefined ? { reimportDeleted } : undefined,
+        operationRates,
       });
+
+      // A rejected import wrote nothing; missing rates go back to the dialog.
+      const missingRateDates = errors
+        .filter(error => error.message.startsWith('rate-unavailable'))
+        .flatMap(error =>
+          error.message
+            .slice('rate-unavailable:'.length)
+            .split(',')
+            .map(date => date.trim())
+            .filter(Boolean),
+        );
+      if (missingRateDates.length > 0) {
+        return { rejected: true, missingRateDates } as const;
+      }
 
       errors.forEach(error => {
         dispatch(
           addNotification({
             notification: {
               type: 'error',
-              message: error.message,
+              message: importErrorMessage(error.message),
             },
           }),
         );
@@ -328,6 +422,9 @@ export function useImportTransactionsMutation() {
         }),
       );
 
+      if (errors.length > 0) {
+        return { rejected: true, missingRateDates: [] } as const;
+      }
       return added.length > 0 || updated.length > 0;
     },
     onSuccess: () => invalidateQueries(queryClient),
@@ -378,6 +475,8 @@ type LinkAccountBasePayload = {
   offBudget?: boolean;
   startingDate?: string;
   startingBalance?: number;
+  /** Rates this link attempt needs; never saved as daily rates. */
+  operationRates?: OperationRate[];
 };
 
 type LinkAccountPayload = LinkAccountBasePayload & {
@@ -398,14 +497,16 @@ export function useLinkAccountMutation() {
       offBudget,
       startingDate,
       startingBalance,
+      operationRates,
     }: LinkAccountPayload) => {
-      await send('gocardless-accounts-link', {
+      return send('gocardless-accounts-link', {
         requisitionId,
         account,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
+        operationRates,
       });
     },
     onSuccess: () => {
@@ -439,13 +540,15 @@ export function useLinkAccountSimpleFinMutation() {
       offBudget,
       startingDate,
       startingBalance,
+      operationRates,
     }: LinkAccountSimpleFinPayload) => {
-      await send('simplefin-accounts-link', {
+      return send('simplefin-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
+        operationRates,
       });
     },
     onSuccess: () => {
@@ -481,13 +584,15 @@ export function useLinkAccountPluggyAiMutation() {
       offBudget,
       startingDate,
       startingBalance,
+      operationRates,
     }: LinkAccountPluggyAiPayload) => {
-      await send('pluggyai-accounts-link', {
+      return send('pluggyai-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
+        operationRates,
       });
     },
     onSuccess: () => {
@@ -523,13 +628,15 @@ export function useLinkAccountAkahuMutation() {
       offBudget,
       startingDate,
       startingBalance,
+      operationRates,
     }: LinkAccountAkahuPayload) => {
-      await send('akahu-accounts-link', {
+      return send('akahu-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
+        operationRates,
       });
     },
     onSuccess: () => {
@@ -563,13 +670,15 @@ export function useLinkAccountEnableBankingMutation() {
       offBudget,
       startingDate,
       startingBalance,
+      operationRates,
     }: LinkAccountEnableBankingPayload) => {
-      await send('enablebanking-accounts-link', {
+      return send('enablebanking-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
+        operationRates,
       });
     },
     onSuccess: () => {
@@ -591,6 +700,8 @@ export function useLinkAccountEnableBankingMutation() {
 
 type SyncAccountsPayload = {
   id?: AccountEntity['id'] | undefined;
+  /** Rates one account's retried sync needs; never saved as daily rates. */
+  operationRates?: OperationRate[];
 };
 
 export function useSyncAccountsMutation() {
@@ -602,7 +713,7 @@ export function useSyncAccountsMutation() {
   const store = useStore();
 
   return useMutation({
-    mutationFn: async ({ id }: SyncAccountsPayload) => {
+    mutationFn: async ({ id, operationRates }: SyncAccountsPayload) => {
       const {
         account: { accountsSyncing = [] },
       } = store.getState();
@@ -646,11 +757,14 @@ export function useSyncAccountsMutation() {
 
       dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
 
-      const simpleFinAccounts = accounts.filter(
-        a =>
-          a.account_sync_source === 'simpleFin' &&
-          accountIdsToSync.includes(a.id),
-      );
+      // A retry with its own rates syncs that one account directly.
+      const simpleFinAccounts = operationRates
+        ? []
+        : accounts.filter(
+            a =>
+              a.account_sync_source === 'simpleFin' &&
+              accountIdsToSync.includes(a.id),
+          );
 
       let isSyncSuccess = false;
       const newTransactions: Array<TransactionEntity['id']> = [];
@@ -691,6 +805,7 @@ export function useSyncAccountsMutation() {
         // Perform sync operation
         const res = await send('accounts-bank-sync', {
           ids: [accountId],
+          ...(operationRates && { operationRates }),
         });
 
         const success = handleSyncResponse(
@@ -752,7 +867,16 @@ function handleSyncResponse(
   if (error) {
     // We only want to mark the account as having problem if it
     // was a real syncing error.
-    if ('type' in error && error.type === 'SyncError') {
+    if ('type' in error && error.type === 'rate-unavailable') {
+      dispatch(
+        markAccountFailed({
+          id: accountId,
+          errorType: 'RATE_UNAVAILABLE',
+          errorCode: 'RATE_UNAVAILABLE',
+          rate: { currencyCode: error.currency, dates: error.dates },
+        }),
+      );
+    } else if ('type' in error && error.type === 'SyncError') {
       dispatch(
         markAccountFailed({
           id: accountId,
@@ -767,7 +891,33 @@ function handleSyncResponse(
 
   // Dispatch errors (if any)
   errors.forEach(error => {
-    if ('type' in error && error.type === 'SyncError') {
+    if ('type' in error && error.type === 'rate-unavailable') {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: error.message,
+            button: {
+              title: t('Add exchange rate'),
+              action: () => {
+                dispatch(
+                  pushModal({
+                    modal: {
+                      name: 'add-exchange-rate',
+                      options: {
+                        accountId,
+                        currencyCode: error.currency,
+                        dates: error.dates,
+                      },
+                    },
+                  }),
+                );
+              },
+            },
+          },
+        }),
+      );
+    } else if ('type' in error && error.type === 'SyncError') {
       dispatch(
         addNotification({
           notification: {
@@ -789,6 +939,20 @@ function handleSyncResponse(
     }
   });
 
+  if (res.currencyMismatches) {
+    dispatch(
+      addNotification({
+        notification: {
+          type: 'warning',
+          message: t(
+            '{{count}} downloaded transactions were in another currency and were skipped.',
+            { count: res.currencyMismatches },
+          ),
+        },
+      }),
+    );
+  }
+
   resNewTransactions.push(...newTransactions);
   resMatchedTransactions.push(...matchedTransactions);
   resUpdatedAccounts.push(...updatedAccounts);
@@ -800,6 +964,7 @@ function handleSyncResponse(
 
 type SyncAndDownloadPayload = {
   id?: AccountEntity['id'];
+  operationRates?: OperationRate[];
 };
 
 export function useSyncAndDownloadMutation() {
@@ -810,7 +975,7 @@ export function useSyncAndDownloadMutation() {
   const syncAccounts = useSyncAccountsMutation();
 
   return useMutation({
-    mutationFn: async ({ id }: SyncAndDownloadPayload) => {
+    mutationFn: async ({ id, operationRates }: SyncAndDownloadPayload) => {
       // It is *critical* that we sync first because of transaction
       // reconciliation. We want to get all transactions that other
       // clients have already made, so that imported transactions can be
@@ -821,7 +986,10 @@ export function useSyncAndDownloadMutation() {
         return { error: syncState.error };
       }
 
-      const hasDownloaded = await syncAccounts.mutateAsync({ id });
+      const hasDownloaded = await syncAccounts.mutateAsync({
+        id,
+        operationRates,
+      });
 
       if (hasDownloaded) {
         // Sync again afterwards if new transactions were created

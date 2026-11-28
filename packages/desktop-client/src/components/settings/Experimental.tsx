@@ -165,6 +165,10 @@ export function ExperimentalFeatures() {
     'flags.goalTemplatesUIEnabled',
   );
 
+  const currencyEnabled = useFeatureFlag('currency');
+  const multicurrencyEnabled = useFeatureFlag('multicurrency');
+  const [budgetCurrency] = useSyncedPref('defaultCurrencyCode');
+
   const showServerPrefs =
     localStorage.getItem('devEnableServerPrefs') === 'true';
   // Only the web app has a choice of storage engine
@@ -215,6 +219,27 @@ export function ExperimentalFeatures() {
       <FeatureToggle
         flag="currency"
         feedbackLink="https://github.com/actualbudget/actual/issues/5191"
+        subFeatures={
+          currencyEnabled && (
+            <FeatureToggle
+              flag="multicurrency"
+              // Turning it off stays possible without a budget currency.
+              disableToggle={!budgetCurrency && !multicurrencyEnabled}
+              error={
+                <Trans>
+                  Choose a default currency under Currency first. It is set to
+                  None.
+                </Trans>
+              }
+              note={
+                <Trans>Experimental preview. Requires a budget currency.</Trans>
+              }
+              isSubFeature
+            >
+              <Trans>Multiple currencies</Trans>
+            </FeatureToggle>
+          )
+        }
       >
         <Trans>Currency support</Trans>
       </FeatureToggle>

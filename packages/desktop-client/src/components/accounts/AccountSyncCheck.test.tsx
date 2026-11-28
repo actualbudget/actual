@@ -103,16 +103,19 @@ describe('AccountSyncCheck', () => {
 
     // Clicking Configure opens gocardless-init modal
     await userEvent.click(configureButton);
-    expect(mockDispatch).toHaveBeenCalledWith(
-      pushModal({
+    // Each pushed modal gets its own id, so compare everything else.
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: pushModal.type,
+      payload: {
+        id: expect.any(String),
         modal: {
           name: 'gocardless-init',
           options: {
             onSuccess: expect.any(Function),
           },
         },
-      }),
-    );
+      },
+    });
   });
 
   it('renders Reauthorize button for expired authentication', async () => {
@@ -252,15 +255,18 @@ describe('AccountSyncCheck', () => {
     expect(screen.getByRole('button', { name: 'Unlink' })).toBeInTheDocument();
 
     await userEvent.click(configureButton);
-    expect(mockDispatch).toHaveBeenCalledWith(
-      pushModal({
+    // Each pushed modal gets its own id, so compare everything else.
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: pushModal.type,
+      payload: {
+        id: expect.any(String),
         modal: {
           name: 'gocardless-init',
           options: {
             onSuccess: expect.any(Function),
           },
         },
-      }),
-    );
+      },
+    });
   });
 });

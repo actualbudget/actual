@@ -23,6 +23,7 @@ describe('IntegrationBank', () => {
         name: 'account-example-one (XXX 4321) PLN',
         official_name: 'Savings Account for Individuals (Retail)',
         type: 'checking',
+        currency: 'PLN',
       });
     });
 
@@ -39,6 +40,7 @@ describe('IntegrationBank', () => {
         name: 'account-example-one PLN',
         official_name: 'Savings Account for Individuals (Retail)',
         type: 'checking',
+        currency: 'PLN',
       });
     });
   });
@@ -109,7 +111,7 @@ describe('IntegrationBank', () => {
 
     it('should return 0 when no transactions or balances are provided', () => {
       const startingBalance = IntegrationBank.calculateStartingBalance([], []);
-      expect(startingBalance).toEqual(0);
+      expect(startingBalance).toEqual('0');
     });
 
     it('should return 70000 when transactions and balances are provided', () => {
@@ -117,7 +119,7 @@ describe('IntegrationBank', () => {
         transactions,
         balances,
       );
-      expect(startingBalance).toEqual(70000);
+      expect(startingBalance).toEqual('700.00');
     });
   });
 });

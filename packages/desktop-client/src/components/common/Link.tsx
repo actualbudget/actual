@@ -28,12 +28,14 @@ type ButtonLinkProps = Omit<
 };
 
 type InternalLinkProps = {
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
   to?: string;
   style?: CSSProperties;
   activeStyle?: CSSProperties;
   children?: ReactNode;
   isDisabled?: boolean;
   isExactPathMatch?: boolean;
+  'aria-describedby'?: string;
 };
 
 const externalLinkColors = {
@@ -120,12 +122,14 @@ const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
 };
 
 const InternalLink = ({
+  onClick,
   to,
   style,
   activeStyle,
   children,
   isDisabled,
   isExactPathMatch = false,
+  'aria-describedby': ariaDescribedBy,
 }: InternalLinkProps) => {
   const path = to ?? '';
   const match = useMatch({ path, end: isExactPathMatch });
@@ -133,10 +137,13 @@ const InternalLink = ({
   return (
     <NavLink
       to={path}
+      aria-describedby={ariaDescribedBy}
       className={css([styles.smallText, style, match ? activeStyle : null])}
       onClick={e => {
         if (isDisabled) {
           e.preventDefault();
+        } else {
+          onClick?.(e);
         }
       }}
     >

@@ -6,9 +6,12 @@ import { describe, expect, it } from 'vitest';
 
 import {
   computeInitialLinkState,
-  externalBalanceToInteger,
   getDefaultStartingSettings,
   getSelectableAccountOptions,
+  isLinkCompatible,
+  newAccountCurrency,
+  previewBalance,
+  reencodeStartingSettings,
   resolveStartingSettings,
 } from './SelectLinkedAccountsModal';
 
@@ -35,6 +38,8 @@ function makeLocalAccount(
     last_sync: null,
     bank_sync_status: null,
     account_group_id: null,
+    currency: null,
+    currency_precision: null,
     ...overrides,
   };
 }
@@ -207,24 +212,106 @@ describe('getDefaultStartingSettings', () => {
   });
 });
 
-describe('externalBalanceToInteger', () => {
+describe('previewBalance', () => {
+  it('encodes decimal balances and hides values the budget cannot store', () => {
+    expect(previewBalance('12.345', 3)).toBe(12345);
+    expect(previewBalance('12.34', 0)).toBe(12);
+    // Numeric balances (Pluggy.ai, Akahu) are major units too.
+    expect(previewBalance(12.34, 2)).toBe(1234);
+    expect(previewBalance(2500, 3)).toBe(2500000);
+    expect(previewBalance('9'.repeat(30), 2)).toBeNull();
+  });
+
   it.each([
     [27903.6 + 55807.2, 8371080],
     [1234.5, 123450],
     ['-100', -10000],
     [0, 0],
   ])('converts %s to integer cents', (balance, expected) => {
-    expect(externalBalanceToInteger(balance, 'pluggyai')).toBe(expected);
-  });
-
-  it('keeps Enable Banking balances, which are already in cents', () => {
-    expect(externalBalanceToInteger(123456, 'enableBanking')).toBe(123456);
+    expect(previewBalance(balance, 2)).toBe(expected);
   });
 
   it.each([null, undefined, '   ', NaN, 'abc', 1e14])(
     'returns unknown for a missing or invalid balance (%s)',
     balance => {
-      expect(externalBalanceToInteger(balance, 'pluggyai')).toBeNull();
+      expect(previewBalance(balance, 2)).toBeNull();
     },
   );
+});
+
+describe('linking provider accounts by currency', () => {
+  const multicurrency = { multicurrency: true, budgetCurrency: 'USD' };
+  const legacy = { multicurrency: false, budgetCurrency: 'USD' };
+
+  it('creates accounts in the provider currency when multicurrency is on', () => {
+    expect(newAccountCurrency('JPY', multicurrency)).toBe('JPY');
+    expect(newAccountCurrency('USD', multicurrency)).toBeNull();
+    expect(newAccountCurrency(null, multicurrency)).toBeNull();
+    // A currency no account can hold offers no new account.
+    expect(newAccountCurrency('XAU', multicurrency)).toBeUndefined();
+    expect(newAccountCurrency('JPY', legacy)).toBeNull();
+  });
+
+  it('offers only local accounts in the provider currency', () => {
+    const yen = makeLocalAccount({ id: 'yen', currency: 'JPY' });
+    const base = makeLocalAccount({ id: 'base' });
+    expect(isLinkCompatible(yen, 'JPY', multicurrency)).toBe(true);
+    expect(isLinkCompatible(base, 'JPY', multicurrency)).toBe(false);
+    expect(isLinkCompatible(base, 'USD', multicurrency)).toBe(true);
+    expect(isLinkCompatible(yen, null, multicurrency)).toBe(false);
+    expect(isLinkCompatible(base, null, multicurrency)).toBe(true);
+    expect(isLinkCompatible(base, 'JPY', legacy)).toBe(true);
+
+    const options = (providerCurrency: string) =>
+      getSelectableAccountOptions({
+        localAccounts: [yen, base],
+        selectedLocalAccountIds: new Set(),
+        chosenAccount: undefined,
+        syncSource: 'simpleFin',
+        addOnBudgetAccountOption,
+        addOffBudgetAccountOption,
+        providerCurrency,
+        currencyContext: multicurrency,
+      }).map(option => option.id);
+    expect(options('JPY')).toEqual(['yen', 'new-on', 'new-off']);
+    expect(options('XAU')).toEqual([]);
+  });
+});
+
+describe('reencodeStartingSettings', () => {
+  it('moves a typed balance to the destination precision or drops it', () => {
+    const typed = { date: '2026-03-01', amount: 100, precision: 0 };
+    expect(reencodeStartingSettings(typed, 2)).toEqual({
+      date: '2026-03-01',
+      amount: 10000,
+      precision: 2,
+    });
+    expect(
+      reencodeStartingSettings(
+        { date: '2026-03-01', amount: 150, precision: 2 },
+        0,
+      ),
+    ).toEqual({ date: '2026-03-01' });
+    expect(reencodeStartingSettings(typed, 0)).toBe(typed);
+  });
+});
+
+describe('computeInitialLinkState with currencies', () => {
+  it('does not preselect an upgrading account in another currency', () => {
+    const yen = makeLocalAccount({ id: 'yen', currency: 'JPY' });
+    const external = { ...makeExternalAccount('remote'), currency: 'USD' };
+    const context = { multicurrency: true, budgetCurrency: 'USD' };
+    expect(
+      computeInitialLinkState([yen], [external], 'yen', context)
+        .initiallyChosenAccounts,
+    ).toEqual({});
+    expect(
+      computeInitialLinkState(
+        [yen],
+        [{ ...external, currency: 'JPY' }],
+        'yen',
+        context,
+      ).initiallyChosenAccounts,
+    ).toEqual({ remote: 'yen' });
+  });
 });

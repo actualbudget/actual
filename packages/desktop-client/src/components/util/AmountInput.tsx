@@ -18,8 +18,11 @@ import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import { css, cx } from '@emotion/css';
 
+import { useCurrencyFormatOverride } from '#hooks/currencyFormatContext';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useFormat } from '#hooks/useFormat';
 import { useMergedRefs } from '#hooks/useMergedRefs';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 type AmountInputProps = {
   id?: string;
@@ -62,7 +65,10 @@ export function AmountInput({
   autoDecimals = false,
 }: AmountInputProps) {
   const { t } = useTranslation();
-  const format = useFormat();
+  const precision = useAmountPrecision();
+  const [encoding] = useSyncedPref('amountEncoding');
+  const override = useCurrencyFormatOverride();
+  const format = useFormat(encoding || override ? precision : undefined);
   const [symbol, setSymbol] = useState<'+' | '-'>(() => {
     if (sign) return sign;
     return initialValue === 0 ? zeroSign : initialValue > 0 ? '+' : '-';
@@ -110,8 +116,9 @@ export function AmountInput({
       const absValue = Math.abs(exactAmount.current);
       return symbol === '-' ? -absValue : absValue;
     }
+    if (value.trim() === '') return 0;
     const signedValued = symbol === '-' ? symbol + value : value;
-    return format.fromEdit(signedValued, 0);
+    return format.fromEdit(signedValued);
   }, [symbol, value, format]);
 
   useEffect(() => {
@@ -120,9 +127,9 @@ export function AmountInput({
         innerRef.current as HTMLInputElement & {
           getCurrentAmount?: () => number;
         }
-      ).getCurrentAmount = () => getAmount();
+      ).getCurrentAmount = () => getAmount() ?? initialValue;
     }
-  }, [getAmount]);
+  }, [getAmount, initialValue]);
 
   function onSwitch() {
     if (sign) {
@@ -130,6 +137,7 @@ export function AmountInput({
     }
 
     const amount = getAmount();
+    if (amount === null) return;
     if (amount === 0) {
       setSymbol(symbol === '+' ? '-' : '+');
     }
@@ -146,9 +154,9 @@ export function AmountInput({
         // Typed digits are in the currency's smallest unit (cents, whole yen)
         const amount = integerToAmount(
           parseInt(digits, 10),
-          format.currency.decimalPlaces,
+          encoding || override ? precision : format.currency.decimalPlaces,
         );
-        newText = format.forEdit(amountToInteger(amount));
+        newText = format.forEdit(amountToInteger(amount, precision));
       }
     }
 
@@ -158,6 +166,10 @@ export function AmountInput({
   }
 
   function fireUpdate(amount) {
+    if (amount === null) {
+      setValue(getDisplayValue(initialValue, false));
+      return;
+    }
     onUpdate?.(amount);
     exactAmount.current = amount;
 
@@ -244,7 +256,7 @@ export function AmountInput({
         onEnter={(_, e) => {
           const amount = getAmount();
           fireUpdate(amount);
-          onEnter?.(e, amount);
+          if (amount !== null) onEnter?.(e, amount);
         }}
         onChangeValue={onInputTextChange}
       />

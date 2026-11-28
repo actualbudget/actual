@@ -15,8 +15,12 @@ import {
   StorageMigrationError,
   StorageUnavailableError,
 } from '#platform/server/sqlite';
+import { recoverLocalEncoding } from '#server/amount-encoding/files';
 import { createApp } from '#server/app';
 import * as budget from '#server/budget/base';
+import { syncBaseSlots } from '#server/budget/base-slots';
+import { stopFxDayWatch } from '#server/budget/fx-valuation';
+import { rebuildSlotResolution } from '#server/budget/pockets';
 import * as cloudStorage from '#server/cloud-storage';
 import * as db from '#server/db';
 import * as mappings from '#server/db/mappings';
@@ -24,7 +28,7 @@ import { resetFormulaPreferencesCache } from '#server/formulas/bootstrap';
 import { handleBudgetImport } from '#server/importers';
 import type { ImportableBudgetType } from '#server/importers';
 import { app as mainApp } from '#server/main-app';
-import { mutator } from '#server/mutators';
+import { mutator, notifyBudgetClosing } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import { getServer } from '#server/server-config';
 import * as sheet from '#server/sheet';
@@ -35,6 +39,7 @@ import {
   setSyncingMode,
   stopFullSync,
 } from '#server/sync';
+import { deriveCoupledCellsForLoad } from '#server/sync/coupled-cells';
 import * as syncMigrations from '#server/sync/migrate';
 import { replayPendingMessages } from '#server/sync/replay';
 import * as rules from '#server/transactions/transaction-rules';
@@ -45,6 +50,7 @@ import {
   uniqueBudgetName,
   validateBudgetName,
 } from '#server/util/budget-name';
+import { initializeImportedAmountEncoding } from '#server/util/currency';
 import * as Platform from '#shared/platform';
 import type { Budget } from '#types/budget';
 
@@ -173,6 +179,8 @@ async function resetBudgetCache() {
     spreadsheet.startTransaction();
     try {
       await sheet.loadUserBudgets(db);
+      // Base slots with retired or later-generation lanes (MC-10).
+      syncBaseSlots();
 
       // Seeding the spend totals from a single grouped query keeps the
       // recompute from running a `SELECT SUM(amount)` per category per month.
@@ -328,6 +336,8 @@ async function createDemoBudget() {
 }
 
 async function closeBudget() {
+  // Cancels exchange-rate work first, so closing does not wait on it.
+  notifyBudgetClosing();
   await stopFullSync();
   try {
     return await unloadBudget();
@@ -340,6 +350,7 @@ async function unloadBudget() {
   captureBreadcrumb({ message: 'Closing budget' });
   resetFormulaPreferencesCache();
 
+  stopFxDayWatch();
   // The spreadsheet may be running, wait for it to complete
   await sheet.waitOnSpreadsheet();
   sheet.unloadSpreadsheet();
@@ -537,6 +548,8 @@ async function createBudget({
     return { error };
   }
 
+  await initializeImportedAmountEncoding('');
+
   if (!avoidUpload && !testMode) {
     try {
       await cloudStorage.upload();
@@ -713,6 +726,11 @@ async function _loadBudget(id: Budget['id']): Promise<{
 
   try {
     await updateVersion();
+    // The preferences table exists after schema migration. Its encoding and
+    // recovery state commit atomically with the amounts in SQLite.
+    const database = db.getDatabase();
+    if (!database) throw new Error('amount-encoding-budget-not-open');
+    await prefs.savePrefs(recoverLocalEncoding(database), { avoidSync: true });
   } catch (e) {
     logger.warn('Error updating', e);
     let result;
@@ -743,6 +761,13 @@ async function _loadBudget(id: Budget['id']): Promise<{
     // Failing to replay shouldn't block loading the budget; the
     // messages stay pending
     captureException(e);
+  }
+  // Rows written by an older client or a crash mid-load are made coherent
+  // before the spreadsheet reads them.
+  deriveCoupledCellsForLoad();
+  // Lanes resolved differently than the cached spend totals assumed.
+  if (rebuildSlotResolution().size > 0) {
+    db.runQuery('DELETE FROM kvcache_key');
   }
 
   await db.loadClock();

@@ -3,6 +3,10 @@ import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { mutator } from '#server/mutators';
 import { undoable } from '#server/undo';
+import {
+  getAccountCurrency,
+  getRecordedAmountPrecision,
+} from '#server/util/currency';
 import { q, Query } from '#shared/query';
 import type { QueryState } from '#shared/query';
 import type {
@@ -12,9 +16,19 @@ import type {
   TransactionEntity,
 } from '#types/models';
 
+import { postExchangeTransfer } from './exchange-transfer';
 import { exportQueryToCSV, exportToCSV } from './export/export-to-csv';
+import { moveForeignEntry, updateForeignEntry } from './foreign-edit';
+import { postForeignEntry } from './foreign-entry';
 import { parseFile } from './import/parse-file';
 import type { ParseFileOptions } from './import/parse-file';
+import {
+  collapseForeignSplit,
+  getExchangeFamily,
+  saveForeignSplit,
+  updateExchangeTransfer,
+  updateForeignTransfer,
+} from './linked-edit';
 import { mergeTransactions } from './merge';
 
 import { batchUpdateTransactions } from '.';
@@ -31,6 +45,15 @@ export type TransactionHandlers = {
   'transactions-merge': typeof mergeTransactions;
   'get-earliest-transaction': typeof getEarliestTransaction;
   'get-latest-transaction': typeof getLatestTransaction;
+  'transactions/post-foreign-entry': typeof postForeignEntry;
+  'transactions/post-exchange-transfer': typeof postExchangeTransfer;
+  'transactions/update-foreign-entry': typeof updateForeignEntry;
+  'transactions/move-foreign-entry': typeof moveForeignEntry;
+  'transactions/save-foreign-split': typeof saveForeignSplit;
+  'transactions/collapse-foreign-split': typeof collapseForeignSplit;
+  'transactions/update-foreign-transfer': typeof updateForeignTransfer;
+  'transactions/update-exchange-transfer': typeof updateExchangeTransfer;
+  'transactions/get-exchange-family': typeof getExchangeFamily;
 };
 
 async function handleBatchUpdateTransactions({
@@ -99,11 +122,19 @@ async function moveTransaction({
 async function parseTransactionsFile({
   filepath,
   options,
+  accountId,
 }: {
   filepath: string;
   options: ParseFileOptions;
+  /** Amounts are parsed at this account's recorded precision. */
+  accountId?: AccountEntity['id'];
 }) {
-  return parseFile(filepath, options);
+  return parseFile(filepath, {
+    ...options,
+    amountPrecision: accountId
+      ? (await getAccountCurrency(accountId)).precision
+      : getRecordedAmountPrecision(),
+  });
 }
 
 async function exportTransactions({
@@ -156,6 +187,28 @@ app.method(
   'transactions-batch-update',
   mutator(undoable(handleBatchUpdateTransactions)),
 );
+// Undo is recorded around the final writes only, inside the handler.
+app.method('transactions/post-foreign-entry', mutator(postForeignEntry));
+app.method(
+  'transactions/post-exchange-transfer',
+  mutator(postExchangeTransfer),
+);
+app.method('transactions/update-foreign-entry', mutator(updateForeignEntry));
+app.method('transactions/move-foreign-entry', mutator(moveForeignEntry));
+app.method('transactions/save-foreign-split', mutator(saveForeignSplit));
+app.method(
+  'transactions/collapse-foreign-split',
+  mutator(collapseForeignSplit),
+);
+app.method(
+  'transactions/update-foreign-transfer',
+  mutator(updateForeignTransfer),
+);
+app.method(
+  'transactions/update-exchange-transfer',
+  mutator(updateExchangeTransfer),
+);
+app.method('transactions/get-exchange-family', getExchangeFamily);
 app.method('transactions-merge', mutator(undoable(mergeTransactions)));
 
 app.method('transaction-add', mutator(addTransaction));

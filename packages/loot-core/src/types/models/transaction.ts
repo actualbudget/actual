@@ -12,7 +12,10 @@ export type TransactionEntity = {
   parent_id?: TransactionEntity['id'];
   account: AccountEntity['id'];
   category?: CategoryEntity['id'];
+  /** Budget-base integer. */
   amount: IntegerAmount;
+  /** Account-native integer, present only for foreign-currency accounts. */
+  transaction_amount?: IntegerAmount | null;
   payee?: PayeeEntity['id'] | null;
   notes?: string;
   date: string;
@@ -28,6 +31,8 @@ export type TransactionEntity = {
   schedule?: ScheduleEntity['id'];
   subtransactions?: TransactionEntity[];
   _unmatched?: boolean;
+  /** View-only: stored base amount while a foreign register shows native. */
+  _baseAmount?: IntegerAmount;
   _deleted?: boolean;
   error?: {
     type: 'SplitTransactionError';
