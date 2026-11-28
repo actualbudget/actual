@@ -85,6 +85,12 @@ export const contrastPairs: ContrastPair[] = [
 
   text('sidebarItemText', 'sidebarBackground'),
   text('sidebarItemText', 'sidebarItemBackgroundHover', 'sidebarBackground'),
+  text('sidebarItemTextSubdued', 'sidebarBackground'),
+  text(
+    'sidebarItemTextSubdued',
+    'sidebarItemBackgroundHover',
+    'sidebarBackground',
+  ),
   text('sidebarItemTextSelected', 'sidebarBackground'),
   text(
     'sidebarItemTextSelected',

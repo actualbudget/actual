@@ -51,7 +51,12 @@ export function SideGroup({
   const { t } = useTranslation();
 
   return (
-    <View style={{ marginTop: spacing.xxs }}>
+    <View
+      style={{
+        marginTop: spacing.xxs,
+        marginBottom: isOpen ? spacing.sm : 0,
+      }}
+    >
       <View
         style={{
           flexDirection: 'row',

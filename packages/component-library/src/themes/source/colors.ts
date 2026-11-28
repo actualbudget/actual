@@ -231,6 +231,11 @@ export const colors = {
     },
   },
   sidebarItemText: { light: 'navy150', dark: 'navy150', midnight: 'gray100' },
+  sidebarItemTextSubdued: {
+    all: {
+      raw: 'color-mix(in srgb, var(--color-sidebarItemText) 88%, var(--color-sidebarBackground))',
+    },
+  },
   sidebarItemTextUpdated: { all: { ref: 'sidebarItemText' } },
   sidebarItemTextSelected: { all: { ref: 'sidebarItemAccentSelected' } },
   sidebarBudgetName: { light: 'navy150', dark: 'navy300', midnight: 'gray300' },

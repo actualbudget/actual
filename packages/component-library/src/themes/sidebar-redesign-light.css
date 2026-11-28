@@ -38,6 +38,11 @@
   --color-sidebarHeaderText: var(--color-sidebarRedesignHeaderText);
   --color-sidebarTextSubdued: var(--color-sidebarRedesignTextSubdued);
   --color-sidebarTextMuted: var(--color-sidebarRedesignTextMuted);
+  --color-sidebarItemTextSubdued: color-mix(
+    in srgb,
+    var(--color-sidebarItemText) 80%,
+    var(--color-sidebarBackground)
+  );
   --color-sidebarItemTextUpdated: var(--color-sidebarItemText);
   --color-sidebarTextFailed: var(--color-sidebarItemBackgroundFailed);
   --color-sidebarBackgroundFailedSubtle: color-mix(

@@ -91,6 +91,7 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-sidebarItemAccentSelected`         | `#c7a2ff`   | `#c5a3ff`   | `#b380ff`   | `--color-accent`, readable on `--color-sidebarBackground`                                 |
 | `--color-sidebarItemBackgroundSelected`     | `#c7a2ff38` | `#c5a3ff38` | `#b380ff38` | Mixed from `--color-sidebarItemAccentSelected`                                            |
 | `--color-sidebarItemText`                   | `#d9e2ec`   | `#d9e2ec`   | `#e8ecf0`   |                                                                                           |
+| `--color-sidebarItemTextSubdued`            | `#c1ccd8`   | `#c1ccd8`   | `#cdd1d5`   | Mixed from `--color-sidebarItemText` and `--color-sidebarBackground`                      |
 | `--color-sidebarItemTextUpdated`            | `#d9e2ec`   | `#d9e2ec`   | `#e8ecf0`   | `--color-sidebarItemText`                                                                 |
 | `--color-sidebarItemTextSelected`           | `#c7a2ff`   | `#c5a3ff`   | `#b380ff`   | `--color-sidebarItemAccentSelected`                                                       |
 | `--color-sidebarBudgetName`                 | `#d9e2ec`   | `#9fb3c8`   | `#98a1ae`   |                                                                                           |

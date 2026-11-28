@@ -1,4 +1,5 @@
 import type { ComponentType, SVGProps } from 'react';
+import { useMatch } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -17,6 +18,8 @@ type NavRowProps = {
 };
 
 export function NavRow({ title, Icon, to }: NavRowProps) {
+  const isActive = useMatch({ path: to, end: false }) !== null;
+
   return (
     <View style={{ flexShrink: 0 }}>
       <Link
@@ -42,7 +45,14 @@ export function NavRow({ title, Icon, to }: NavRowProps) {
           fontWeight: 600,
         }}
       >
-        <Icon width={15} height={15} style={{ flexShrink: 0 }} />
+        <Icon
+          width={15}
+          height={15}
+          style={{
+            flexShrink: 0,
+            color: isActive ? 'inherit' : theme.sidebarItemTextSubdued,
+          }}
+        />
         <Text style={styles.ellipsisText}>{title}</Text>
       </Link>
     </View>
