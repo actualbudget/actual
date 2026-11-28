@@ -47,6 +47,7 @@ import { EnvelopeBalanceMenuModal } from './modals/EnvelopeBalanceMenuModal';
 import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
+import { EnvelopeGroupBudgetMenuModal } from './modals/EnvelopeGroupBudgetMenuModal';
 import { EnvelopeIncomeBalanceMenuModal } from './modals/EnvelopeIncomeBalanceMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
@@ -83,6 +84,7 @@ import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
 import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuModal';
 import { TrackingBudgetSummaryModal } from './modals/TrackingBudgetSummaryModal';
+import { TrackingGroupBudgetMenuModal } from './modals/TrackingGroupBudgetMenuModal';
 import { TransactionTableColumnsModal } from './modals/TransactionTableColumnsModal';
 import { TransferModal } from './modals/TransferModal';
 import { TransferOwnership } from './modals/TransferOwnership';
@@ -327,6 +329,12 @@ export function Modals() {
 
         case 'tag-color':
           return <TagColorModal key={key} {...modal.options} />;
+
+        case 'envelope-group-budget-menu':
+          return <EnvelopeGroupBudgetMenuModal key={key} {...modal.options} />;
+
+        case 'tracking-group-budget-menu':
+          return <TrackingGroupBudgetMenuModal key={key} {...modal.options} />;
 
         case 'notes':
           return <NotesModal key={key} {...modal.options} />;

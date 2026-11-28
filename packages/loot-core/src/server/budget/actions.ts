@@ -262,6 +262,76 @@ export async function copySinglePreviousMonth({
   });
 }
 
+function getGroupCategories(
+  group: string,
+): Promise<db.DbViewCategoryWithGroupHidden[]> {
+  return db.all<db.DbViewCategoryWithGroupHidden>(
+    `
+  SELECT c.*
+  FROM categories c
+  LEFT JOIN category_groups g ON c.cat_group = g.id
+  WHERE c.cat_group = ? AND c.tombstone = 0 AND c.hidden = 0 AND g.hidden = 0
+  `,
+    [group],
+  );
+}
+
+export async function copyGroupPreviousMonth({
+  month,
+  group,
+}: {
+  month: string;
+  group: string;
+}): Promise<void> {
+  const categories = await getGroupCategories(group);
+
+  await batchMessages(async () => {
+    for (const cat of categories) {
+      if (cat.is_income === 1 && !isTrackingBudget()) {
+        continue;
+      }
+      await copySinglePreviousMonth({ month, category: cat.id });
+    }
+  });
+}
+
+export async function setGroupNMonthAvg({
+  month,
+  N,
+  group,
+}: {
+  month: string;
+  N: number;
+  group: string;
+}): Promise<void> {
+  const categories = await getGroupCategories(group);
+
+  await batchMessages(async () => {
+    for (const cat of categories) {
+      if (cat.is_income === 1 && !isTrackingBudget()) {
+        continue;
+      }
+      await setNMonthAvg({ month, N, category: cat.id });
+    }
+  });
+}
+
+export async function copyGroupUntilYearEnd({
+  month,
+  group,
+}: {
+  month: string;
+  group: string;
+}): Promise<void> {
+  const categories = await getGroupCategories(group);
+
+  await batchMessages(async () => {
+    for (const cat of categories) {
+      await copyUntilYearEnd({ month, category: cat.id });
+    }
+  });
+}
+
 export async function setZero({ month }: { month: string }): Promise<void> {
   const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',

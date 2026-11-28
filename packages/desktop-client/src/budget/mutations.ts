@@ -764,6 +764,41 @@ type ApplyBudgetActionPayload =
       };
     }
   | {
+      type: 'set-group-3-avg';
+      month: string;
+      args: {
+        group: CategoryGroupEntity['id'];
+      };
+    }
+  | {
+      type: 'set-group-6-avg';
+      month: string;
+      args: {
+        group: CategoryGroupEntity['id'];
+      };
+    }
+  | {
+      type: 'set-group-12-avg';
+      month: string;
+      args: {
+        group: CategoryGroupEntity['id'];
+      };
+    }
+  | {
+      type: 'copy-group-last';
+      month: string;
+      args: {
+        group: CategoryGroupEntity['id'];
+      };
+    }
+  | {
+      type: 'copy-group-until-year-end';
+      month: string;
+      args: {
+        group: CategoryGroupEntity['id'];
+      };
+    }
+  | {
       type: 'copy-until-year-end';
       month: string;
       args: {
@@ -896,6 +931,39 @@ export function useBudgetActions() {
           await send('budget/copy-single-month', {
             month,
             category: args.category,
+          });
+          return null;
+        case 'set-group-3-avg':
+          await send('budget/set-group-n-month-avg', {
+            month,
+            N: 3,
+            group: args.group,
+          });
+          return null;
+        case 'set-group-6-avg':
+          await send('budget/set-group-n-month-avg', {
+            month,
+            N: 6,
+            group: args.group,
+          });
+          return null;
+        case 'set-group-12-avg':
+          await send('budget/set-group-n-month-avg', {
+            month,
+            N: 12,
+            group: args.group,
+          });
+          return null;
+        case 'copy-group-last':
+          await send('budget/copy-group-previous-month', {
+            month,
+            group: args.group,
+          });
+          return null;
+        case 'copy-group-until-year-end':
+          await send('budget/copy-group-until-year-end', {
+            month,
+            group: args.group,
           });
           return null;
         case 'copy-until-year-end':

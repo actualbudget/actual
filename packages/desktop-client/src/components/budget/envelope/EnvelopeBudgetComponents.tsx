@@ -141,8 +141,39 @@ export function IncomeHeaderMonth() {
 export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   month,
   group,
+  onBudgetAction,
 }: CategoryGroupMonthProps) {
+  const { t } = useTranslation();
   const { id } = group;
+  const canOpenBudgetMenu = !!onBudgetAction && !group.hidden;
+
+  const budgetMenuTriggerRef = useRef(null);
+  const [budgetMenuOpen, setBudgetMenuOpen] = useState(false);
+  const [budgetPosition, setBudgetPosition] = useState({
+    crossOffset: 0,
+    offset: 0,
+  });
+  const resetBudgetPosition = (crossOffset = 0, offset = 0) =>
+    setBudgetPosition({ crossOffset, offset });
+
+  const handleBudgetContextMenu = (e: MouseEvent) => {
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setBudgetPosition({
+      crossOffset: e.clientX - rect.left,
+      offset: e.clientY - rect.bottom,
+    });
+    setBudgetMenuOpen(true);
+  };
+
+  const onMenuAction = (
+    ...args: Parameters<NonNullable<typeof onBudgetAction>>
+  ) => {
+    onBudgetAction?.(...args);
+    setBudgetMenuOpen(false);
+  };
+
+  const { showUndoNotification } = useUndo();
 
   return (
     <View
@@ -152,18 +183,123 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetHeaderCurrentMonth
           : theme.budgetHeaderOtherMonth,
+        '& .hover-visible': {
+          opacity: 0,
+          transition: 'opacity .25s',
+        },
+        '&:hover .hover-visible, & .force-visible .hover-visible': {
+          opacity: 1,
+        },
+        '& .hover-expand': {
+          maxWidth: 0,
+          overflow: 'hidden',
+          transition: 'max-width 0s .25s',
+        },
+        '&:hover .hover-expand, & .hover-expand.force-visible': {
+          maxWidth: '300px',
+          overflow: 'visible',
+          transition: 'max-width 0s linear 0s',
+        },
       }}
     >
-      <EnvelopeSheetCell
-        name="budgeted"
-        width="flex"
-        textAlign="right"
-        style={{ fontWeight: 600, ...styles.tnum }}
-        valueProps={{
-          binding: envelopeBudget.groupBudgeted(id),
-          type: 'financial',
+      <View
+        ref={budgetMenuTriggerRef}
+        style={{ flex: 1, flexDirection: 'row' }}
+        onContextMenu={e => {
+          if (!canOpenBudgetMenu) return;
+          handleBudgetContextMenu(e);
         }}
-      />
+      >
+        {canOpenBudgetMenu && (
+          <View
+            className={`hover-expand ${budgetMenuOpen ? 'force-visible' : ''}`}
+            style={{
+              flexDirection: 'row',
+              flexShrink: 1,
+              paddingLeft: 3,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderTopWidth: 1,
+              borderBottomWidth: 1,
+              borderColor: theme.tableBorder,
+            }}
+          >
+            <Button
+              variant="bare"
+              onPress={() => {
+                resetBudgetPosition(2, -4);
+                setBudgetMenuOpen(true);
+              }}
+              style={{
+                padding: 3,
+              }}
+            >
+              <SvgCheveronDown
+                width={14}
+                height={14}
+                className="hover-visible"
+              />
+            </Button>
+            <Popover
+              triggerRef={budgetMenuTriggerRef}
+              placement="bottom left"
+              isOpen={budgetMenuOpen}
+              onOpenChange={() => setBudgetMenuOpen(false)}
+              style={{ width: 200 }}
+              isNonModal
+              {...budgetPosition}
+            >
+              <BudgetMenu
+                onCopyLastMonthAverage={() => {
+                  onMenuAction(month, 'copy-group-last', { group: id });
+                  showUndoNotification({
+                    message: t(`Budget set to last month's budget.`),
+                  });
+                }}
+                onSetMonthsAverage={numberOfMonths => {
+                  if (
+                    numberOfMonths !== 3 &&
+                    numberOfMonths !== 6 &&
+                    numberOfMonths !== 12
+                  ) {
+                    return;
+                  }
+
+                  onMenuAction(month, `set-group-${numberOfMonths}-avg`, {
+                    group: id,
+                  });
+                  showUndoNotification({
+                    message: t(
+                      'Budget set to {{numberOfMonths}}-month average.',
+                      { numberOfMonths },
+                    ),
+                  });
+                }}
+                onApplyBudgetTemplate={() => {
+                  onMenuAction(month, 'apply-multiple-templates', {
+                    categories: (group.categories ?? [])
+                      .filter(c => !c.hidden)
+                      .map(c => c.id),
+                  });
+                  showUndoNotification({
+                    message: t(`Budget template applied.`),
+                  });
+                }}
+              />
+            </Popover>
+          </View>
+        )}
+        <EnvelopeSheetCell
+          name="budgeted"
+          width="flex"
+          textAlign="right"
+          style={{ fontWeight: 600, ...styles.tnum }}
+          valueProps={{
+            binding: envelopeBudget.groupBudgeted(id),
+            type: 'financial',
+          }}
+        />
+      </View>
       <EnvelopeSheetCell
         name="spent"
         width="flex"

@@ -22,6 +22,7 @@ import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
 
 import { useBudgetComponents } from '.';
+import type { CategoryGroupMonthProps } from '.';
 
 type ExpenseGroupProps = {
   group: ComponentProps<typeof SidebarGroup>['group'];
@@ -42,6 +43,7 @@ type ExpenseGroupProps = {
   onReorderCategory: OnDropCallback;
   onToggleCollapse?: ComponentProps<typeof SidebarGroup>['onToggleCollapse'];
   onShowNewCategory?: ComponentProps<typeof SidebarGroup>['onShowNewCategory'];
+  onBudgetAction?: CategoryGroupMonthProps['onBudgetAction'];
 };
 
 export function ExpenseGroup({
@@ -59,6 +61,7 @@ export function ExpenseGroup({
   onReorderCategory,
   onToggleCollapse,
   onShowNewCategory,
+  onBudgetAction,
 }: ExpenseGroupProps) {
   const dragging = dragState && dragState.item === group;
 
@@ -144,7 +147,13 @@ export function ExpenseGroup({
           onShowNewCategory={onShowNewCategory}
         />
         <RenderMonths>
-          {({ month }) => <MonthComponent month={month} group={group} />}
+          {({ month }) => (
+            <MonthComponent
+              month={month}
+              group={group}
+              onBudgetAction={onBudgetAction}
+            />
+          )}
         </RenderMonths>
       </View>
     </Row>
