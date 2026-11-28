@@ -840,6 +840,57 @@ export function compareFuzzyMatchCandidates(
   return aDistance - bDistance || aHasImportedId - bHasImportedId;
 }
 
+type FuzzyMatchCandidate = Pick<
+  db.DbViewTransaction,
+  | 'id'
+  | 'is_parent'
+  | 'parent_id'
+  | 'date'
+  | 'imported_id'
+  | 'payee'
+  | 'imported_payee'
+  | 'category'
+  | 'notes'
+  | 'reconciled'
+  | 'cleared'
+  | 'amount'
+>;
+
+// Finds the first transaction in `table` for each imported id, as
+// `SELECT * FROM table WHERE imported_id = ? AND account = ?` would, but
+// with one query per chunk of ids. Every string id in `importedIds` is
+// a key of the result, with `null` when nothing matched.
+async function getTransactionsByImportedId(
+  table: 'v_transactions' | 'v_transactions_internal',
+  acctId: string,
+  importedIds: unknown[],
+): Promise<Map<unknown, db.DbViewTransactionInternal | null>> {
+  const ids = [
+    ...new Set(
+      importedIds.filter((id): id is string => typeof id === 'string' && !!id),
+    ),
+  ];
+  const result = new Map<unknown, db.DbViewTransactionInternal | null>(
+    ids.map(id => [id, null]),
+  );
+
+  const chunkSize = 500;
+  for (let i = 0; i < ids.length; i += chunkSize) {
+    const chunk = ids.slice(i, i + chunkSize);
+    const rows = await db.all<db.DbViewTransactionInternal>(
+      `SELECT * FROM ${table} WHERE imported_id IN (${chunk.map(() => '?').join(', ')}) AND account = ?`,
+      [...chunk, acctId],
+    );
+    for (const row of rows) {
+      if (result.get(row.imported_id) === null) {
+        result.set(row.imported_id, row);
+      }
+    }
+  }
+
+  return result;
+}
+
 export async function matchTransactions(
   acctId,
   transactions,
@@ -874,7 +925,19 @@ export async function matchTransactions(
   const accounts: db.DbAccount[] = await db.getAccounts();
   const accountsMap = new Map(accounts.map(account => [account.id, account]));
 
+  // Look up the imported ids of all transactions up front, instead of
+  // one query per transaction.
+  const importedIdTable = reimportDeleted
+    ? 'v_transactions'
+    : 'v_transactions_internal';
+  const importedIdMatches = await getTransactionsByImportedId(
+    importedIdTable,
+    acctId,
+    normalized.map(({ trans }) => trans.imported_id),
+  );
+
   const transactionsStep1 = [];
+  const fuzzyWindows: Array<{ start: number; end: number } | null> = [];
   for (const {
     payee_name,
     trans: originalTrans,
@@ -884,19 +947,17 @@ export async function matchTransactions(
     const trans = await runRules(originalTrans, accountsMap);
 
     let match = null;
-    let fuzzyDataset = null;
 
     // First, match with an existing transaction's imported_id. This
     // is the highest fidelity match and should always be attempted
     // first.
     if (trans.imported_id) {
-      const table = reimportDeleted
-        ? 'v_transactions'
-        : 'v_transactions_internal';
-      match = await db.first<db.DbTransaction>(
-        `SELECT * FROM ${table} WHERE imported_id = ? AND account = ?`,
-        [trans.imported_id, acctId],
-      );
+      match = importedIdMatches.has(trans.imported_id)
+        ? importedIdMatches.get(trans.imported_id)
+        : await db.first<db.DbTransaction>(
+            `SELECT * FROM ${importedIdTable} WHERE imported_id = ? AND account = ?`,
+            [trans.imported_id, acctId],
+          );
 
       if (match) {
         hasMatched.add(match.id);
@@ -907,91 +968,85 @@ export async function matchTransactions(
       }
     }
 
-    // If it didn't match, query data needed for fuzzy matching
-    if (!match) {
-      // Fuzzy matching looks 7 days ahead and 7 days back. This
-      // needs to select all fields that need to be read from the
-      // matched transaction. See the final pass below for the needed
-      // fields.
-      const sevenDaysBefore = db.toDateRepr(monthUtils.subDays(trans.date, 7));
-      const sevenDaysAfter = db.toDateRepr(monthUtils.addDays(trans.date, 7));
-      // strictIdChecking has the added behaviour of only matching on transactions with no import ID
-      // if the transaction being imported has an import ID.
-      if (strictIdChecking) {
-        fuzzyDataset = await db.all<
-          Pick<
-            db.DbViewTransaction,
-            | 'id'
-            | 'is_parent'
-            | 'parent_id'
-            | 'date'
-            | 'imported_id'
-            | 'payee'
-            | 'imported_payee'
-            | 'category'
-            | 'notes'
-            | 'reconciled'
-            | 'cleared'
-            | 'amount'
-          >
-        >(
-          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
-          FROM v_transactions
-          WHERE
-            -- If both ids are set, and we didn't match earlier then skip dedup
-            (imported_id IS NULL OR ? IS NULL)
-            AND date >= ? AND date <= ? AND amount = ?
-            AND account = ?`,
-          [
-            trans.imported_id || null,
-            sevenDaysBefore,
-            sevenDaysAfter,
-            trans.amount || 0,
-            acctId,
-          ],
-        );
-      } else {
-        fuzzyDataset = await db.all<
-          Pick<
-            db.DbViewTransaction,
-            | 'id'
-            | 'is_parent'
-            | 'parent_id'
-            | 'date'
-            | 'imported_id'
-            | 'payee'
-            | 'imported_payee'
-            | 'category'
-            | 'notes'
-            | 'reconciled'
-            | 'cleared'
-            | 'amount'
-          >
-        >(
-          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
-          FROM v_transactions
-          WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
-          [sevenDaysBefore, sevenDaysAfter, trans.amount || 0, acctId],
-        );
-      }
-
-      // Sort the matched transactions according to the distance from the original
-      // transactions date. i.e. if the original transaction is in 21-02-2024 and
-      // the matched transactions are: 20-02-2024, 21-02-2024, 29-02-2024 then
-      // the resulting data-set should be: 21-02-2024, 20-02-2024, 29-02-2024.
-      fuzzyDataset = fuzzyDataset.sort((a, b) =>
-        compareFuzzyMatchCandidates(trans.date, a, b),
-      );
-    }
+    // If it didn't match, fuzzy matching looks 7 days ahead and 7
+    // days back. The candidates are loaded below, for all transactions
+    // at once.
+    fuzzyWindows.push(
+      match
+        ? null
+        : {
+            start: db.toDateRepr(monthUtils.subDays(trans.date, 7)),
+            end: db.toDateRepr(monthUtils.addDays(trans.date, 7)),
+          },
+    );
 
     transactionsStep1.push({
       payee_name,
       trans,
       subtransactions: trans.subtransactions || subtransactions,
       match,
-      fuzzyDataset,
+      fuzzyDataset: null,
     });
   }
+
+  // Query the data needed for fuzzy matching. One query covers the
+  // date range of every transaction that didn't match above, instead
+  // of one query per transaction, which scanned the whole account each
+  // time. This needs to select all fields that need to be read from
+  // the matched transaction. See the final pass below for the needed
+  // fields.
+  let rangeStart = Infinity;
+  let rangeEnd = -Infinity;
+  for (const fuzzyWindow of fuzzyWindows) {
+    if (fuzzyWindow) {
+      rangeStart = Math.min(rangeStart, fuzzyWindow.start);
+      rangeEnd = Math.max(rangeEnd, fuzzyWindow.end);
+    }
+  }
+
+  const candidatesByAmount = new Map<number, FuzzyMatchCandidate[]>();
+  if (rangeStart <= rangeEnd) {
+    const candidates = await db.all<FuzzyMatchCandidate>(
+      `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
+      FROM v_transactions
+      WHERE date >= ? AND date <= ? AND account = ?`,
+      [rangeStart, rangeEnd, acctId],
+    );
+    for (const row of candidates) {
+      const rows = candidatesByAmount.get(row.amount);
+      if (rows) {
+        rows.push(row);
+      } else {
+        candidatesByAmount.set(row.amount, [row]);
+      }
+    }
+  }
+
+  transactionsStep1.forEach((data, i) => {
+    const fuzzyWindow = fuzzyWindows[i];
+    if (!fuzzyWindow) {
+      return;
+    }
+
+    const { trans } = data;
+    const candidates = candidatesByAmount.get(trans.amount || 0) ?? [];
+    data.fuzzyDataset = candidates
+      .filter(
+        row =>
+          row.date >= fuzzyWindow.start &&
+          row.date <= fuzzyWindow.end &&
+          // strictIdChecking has the added behaviour of only matching on
+          // transactions with no import ID if the transaction being
+          // imported has an import ID. If both ids are set, and we didn't
+          // match earlier then skip dedup.
+          (!strictIdChecking || row.imported_id == null || !trans.imported_id),
+      )
+      // Sort the matched transactions according to the distance from the original
+      // transactions date. i.e. if the original transaction is in 21-02-2024 and
+      // the matched transactions are: 20-02-2024, 21-02-2024, 29-02-2024 then
+      // the resulting data-set should be: 21-02-2024, 20-02-2024, 29-02-2024.
+      .sort((a, b) => compareFuzzyMatchCandidates(trans.date, a, b));
+  });
 
   // Next, do the fuzzy matching. This first pass matches based on the
   // payee id. We do this in multiple passes so that higher fidelity
