@@ -68,6 +68,7 @@ Content contained on external links is not managed or maintained by the Actual B
 
 :::
 
+- [Cottage](https://cottage.host/catalog/actual-budget) - managed hosting of the official Docker image, with nightly backups and updates installed for you.
 - [Google Cloud always free tier](https://github.com/eatonc/actual-gcp)
 - [Google Cloud Run (serverless)](https://github.com/daniefdz/actual-run)
 - [Home Assistant](https://github.com/sztupy/hassio-actualbudget/blob/main/README.md)
