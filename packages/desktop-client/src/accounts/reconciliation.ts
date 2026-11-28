@@ -93,41 +93,56 @@ export async function finishReconciliation(
   return false;
 }
 
+// Accounts with an adjustment still being saved. Kept here, not in a
+// component, so it also covers a reconcile bar that was closed and reopened.
+const accountsCreatingAdjustment = new Set<AccountEntity['id']>();
+
 export async function createReconciliationTransaction(
   accountId: AccountEntity['id'],
   targetBalance: number,
   onRealized?: (transactions: TransactionEntity[]) => void,
 ) {
-  // Work out the difference from the saved balance, not from what the
-  // reconcile bar shows: the bar updates a moment after a save, so a quick
-  // second press would otherwise add the same adjustment again.
-  const diff = targetBalance - (await getClearedBalance(accountId));
-  if (diff === 0) {
+  // Until the first adjustment is saved, a second call would read the same
+  // balance and add the same adjustment again.
+  if (accountsCreatingAdjustment.has(accountId)) {
     return;
   }
+  accountsCreatingAdjustment.add(accountId);
 
-  const reconciliationTransactions = realizeTempTransactions([
-    {
-      id: 'temp',
-      account: accountId,
-      cleared: true,
-      reconciled: false,
-      amount: diff,
-      date: currentDay(),
-      notes: t('Reconciliation balance adjustment'),
-    },
-  ]);
+  try {
+    // Work out the difference from the saved balance, not from what the
+    // reconcile bar shows: the bar updates a moment after a save, so a quick
+    // second press would otherwise add the same adjustment again.
+    const diff = targetBalance - (await getClearedBalance(accountId));
+    if (diff === 0) {
+      return;
+    }
 
-  onRealized?.(reconciliationTransactions);
+    const reconciliationTransactions = realizeTempTransactions([
+      {
+        id: 'temp',
+        account: accountId,
+        cleared: true,
+        reconciled: false,
+        amount: diff,
+        date: currentDay(),
+        notes: t('Reconciliation balance adjustment'),
+      },
+    ]);
 
-  const ruledTransactions = await Promise.all(
-    reconciliationTransactions.map(transaction =>
-      send('rules-run', { transaction }),
-    ),
-  );
+    onRealized?.(reconciliationTransactions);
 
-  await send('transactions-batch-update', {
-    added: ruledTransactions.filter(trans => !trans.tombstone),
-    deleted: ruledTransactions.filter(trans => trans.tombstone),
-  });
+    const ruledTransactions = await Promise.all(
+      reconciliationTransactions.map(transaction =>
+        send('rules-run', { transaction }),
+      ),
+    );
+
+    await send('transactions-batch-update', {
+      added: ruledTransactions.filter(trans => !trans.tombstone),
+      deleted: ruledTransactions.filter(trans => trans.tombstone),
+    });
+  } finally {
+    accountsCreatingAdjustment.delete(accountId);
+  }
 }

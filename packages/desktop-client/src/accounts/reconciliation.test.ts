@@ -107,4 +107,39 @@ describe('createReconciliationTransaction', () => {
 
     expect(savedBatches()).toHaveLength(1);
   });
+
+  test('adds only one adjustment when called again before the first is saved', async () => {
+    // Both calls would read the balance from before either adjustment
+    vi.mocked(aqlQuery).mockResolvedValue({ data: 3000, dependencies: [] });
+
+    await Promise.all([
+      createReconciliationTransaction('account-1', 10000),
+      createReconciliationTransaction('account-1', 10000),
+    ]);
+
+    expect(savedBatches()).toHaveLength(1);
+  });
+
+  test('does not hold back a different account', async () => {
+    vi.mocked(aqlQuery).mockResolvedValue({ data: 3000, dependencies: [] });
+
+    await Promise.all([
+      createReconciliationTransaction('account-1', 10000),
+      createReconciliationTransaction('account-2', 10000),
+    ]);
+
+    expect(savedBatches()).toHaveLength(2);
+  });
+
+  test('can add an adjustment again after a save fails', async () => {
+    vi.mocked(aqlQuery).mockResolvedValue({ data: 3000, dependencies: [] });
+    vi.mocked(send).mockRejectedValueOnce(new Error('save failed'));
+
+    await expect(
+      createReconciliationTransaction('account-1', 10000),
+    ).rejects.toThrow('save failed');
+    await createReconciliationTransaction('account-1', 10000);
+
+    expect(savedBatches()).toHaveLength(1);
+  });
 });

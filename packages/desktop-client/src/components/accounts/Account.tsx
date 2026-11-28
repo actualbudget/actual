@@ -1208,10 +1208,15 @@ class AccountInternal extends PureComponent<
       accountId,
       reconcileAmount,
       // Optimistic UI: update the transaction list before sending the data to the database
-      reconciliationTransactions =>
+      reconciliationTransactions => {
+        // The balance is read first, so another account may be open by now
+        if (this.props.accountId !== accountId) {
+          return;
+        }
         this.setState(state => ({
           transactions: [...reconciliationTransactions, ...state.transactions],
-        })),
+        }));
+      },
     );
     await this.refetchTransactions();
   };
