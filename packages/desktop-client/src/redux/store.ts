@@ -19,6 +19,10 @@ import {
   reducer as budgetfilesSliceReducer,
 } from '#budgetfiles/budgetfilesSlice';
 import {
+  name as commandBarSliceName,
+  reducer as commandBarSliceReducer,
+} from '#commandbar/commandBarSlice';
+import {
   name as contextMenuSliceName,
   reducer as contextMenuSliceReducer,
 } from '#contextmenu/contextMenuSlice';
@@ -48,6 +52,7 @@ const rootReducer = combineReducers({
   [accountsSliceName]: accountsSliceReducer,
   [appSliceName]: appSliceReducer,
   [budgetfilesSliceName]: budgetfilesSliceReducer,
+  [commandBarSliceName]: commandBarSliceReducer,
   [contextMenuSliceName]: contextMenuSliceReducer,
   [modalsSliceName]: modalsSliceReducer,
   [notificationsSliceName]: notificationsSliceReducer,
