@@ -27,6 +27,7 @@ type ScheduleTemplateTarget = {
   perOccurrenceAmount: number;
   next_date_string: string;
   storedNextDate: string | null;
+  movedFrom: string | null;
   scheduleId: string;
   target_interval: number;
   target_frequency: string | undefined;
@@ -51,22 +52,33 @@ export async function createScheduleList(
     // Prefer scheduleId so renames don't break the lookup; fall back to name
     // for notes-source templates (and legacy ui-source data) that only carry
     // the name.
-    // next_date mirrors the v_schedules view's computed column.
+    // next_date mirrors the v_schedules view's computed column. moved_from is
+    // set when a skip or a payment moved next_date on (the local date is in
+    // effect and differs from the base one): it is the base date, which
+    // creating the schedule or resetting it (changing its account or date)
+    // computed from the day it happened.
     const {
       id: sid,
       name: scheduleName,
       completed,
       next_date: storedNextDateRepr,
+      moved_from: movedFromRepr,
     } = await db.first<
       Pick<db.DbSchedule, 'id' | 'name' | 'completed'> & {
         next_date: number | null;
+        moved_from: number | null;
       }
     >(
       `SELECT s.id, s.name, s.completed,
          CASE
            WHEN nd.local_next_date_ts = nd.base_next_date_ts THEN nd.local_next_date
            ELSE nd.base_next_date
-         END AS next_date
+         END AS next_date,
+         CASE
+           WHEN nd.local_next_date_ts = nd.base_next_date_ts
+             AND nd.local_next_date != nd.base_next_date
+           THEN nd.base_next_date
+         END AS moved_from
        FROM schedules s
        LEFT JOIN schedules_next_date nd ON nd.schedule_id = s.id
        WHERE ${template.scheduleId ? 's.id = ?' : 'TRIM(s.name) = ?'} AND s.tombstone = 0`,
@@ -76,6 +88,8 @@ export async function createScheduleList(
       typeof storedNextDateRepr === 'number'
         ? fromDateRepr(storedNextDateRepr)
         : null;
+    const movedFrom =
+      typeof movedFromRepr === 'number' ? fromDateRepr(movedFromRepr) : null;
     const rule = await getRuleForSchedule(sid);
     const conditions = rule.serialize().conditions;
     const { date: dateConditions, amount: amountCondition } =
@@ -185,6 +199,7 @@ export async function createScheduleList(
       perOccurrenceAmount: target,
       next_date_string,
       storedNextDate,
+      movedFrom,
       scheduleId: sid,
       target_interval,
       target_frequency,
@@ -560,13 +575,80 @@ export async function buildMonthlyOutflow(
     }
   }
 
+  // next_date moves past an occurrence when that occurrence is skipped or
+  // a payment is linked to it. So an occurrence before next_date with no
+  // linked payment anywhere was skipped, and nothing is due for it. From
+  // today on that always holds. An occurrence earlier this month counts as
+  // skipped too, even once its date has passed, but only if a skip or a
+  // payment moved next_date past it: creating the schedule or changing its
+  // account or date moves next_date on from today without settling the
+  // occurrences it passes. A payment linked late also moves next_date on
+  // from the day it's seen, past the other occurrences missed before it,
+  // yet pays only one: so an occurrence before today with a linked payment
+  // on or after it doesn't count as skipped. Earlier months aren't read
+  // this way.
+  const skipFromFor = (entry: ScheduleTemplateTarget) =>
+    isBudgetingAhead || !entry.movedFrom || entry.movedFrom >= today
+      ? today
+      : entry.movedFrom > currentMonthStart
+        ? entry.movedFrom
+        : currentMonthStart;
+  const skippingEntries = smoothEntries.filter(
+    entry => entry.storedNextDate && entry.storedNextDate > skipFromFor(entry),
+  );
+  let linkedAnywhere: PostedTransaction[] = [];
+  if (skippingEntries.length > 0) {
+    const searchFrom = skippingEntries
+      .map(skipFromFor)
+      .reduce((earliest, date) => (date < earliest ? date : earliest));
+    ({ data: linkedAnywhere } = await aqlQuery(
+      // A split payment carries the schedule link on its parent.
+      q('transactions')
+        .options({ splits: 'all' })
+        .filter({
+          schedule: {
+            $oneof: skippingEntries.map(entry => entry.scheduleId),
+          },
+          date: { $gte: linkedSearchStart(searchFrom) },
+        })
+        .select(['date', 'schedule']),
+    ));
+  }
+  const skippedOccurrences = (
+    entry: ScheduleTemplateTarget,
+    occurrencesBetween: OccurrencesBetween,
+  ) => {
+    if (!skippingEntries.includes(entry)) return new Set<string>();
+    const skipFrom = skipFromFor(entry);
+    const paid = settledOccurrences(
+      entry,
+      linkedAnywhere,
+      skipFrom,
+      entry.storedNextDate,
+      occurrencesBetween,
+    );
+    const lastPayment = linkedAnywhere
+      .filter(transaction => transaction.schedule === entry.scheduleId)
+      .reduce(
+        (latest, transaction) =>
+          transaction.date > latest ? transaction.date : latest,
+        '',
+      );
+    return new Set(
+      occurrencesBetween(skipFrom, entry.storedNextDate).filter(
+        date => !paid.has(date) && (date >= today || date > lastPayment),
+      ),
+    );
+  };
+
   let dueByToday = 0;
   for (const entry of smoothEntries) {
     const occurrencesBetween = lookups.get(entry);
+    const skipped = skippedOccurrences(entry, occurrencesBetween);
     const occurrences = withinCutoff(
       entry,
       occurrencesBetween(windowStart, windowEnd),
-    );
+    ).filter(date => !skipped.has(date));
     const settledEarly = settledOccurrences(
       entry,
       linkedBeforeWindow,
