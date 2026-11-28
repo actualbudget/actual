@@ -1,5 +1,7 @@
-// @ts-strict-ignore
-export function unresolveName(name) {
+export function unresolveName(name: string): {
+  sheet: string | null;
+  name: string;
+} {
   const idx = name.indexOf('!');
   if (idx !== -1) {
     return {
