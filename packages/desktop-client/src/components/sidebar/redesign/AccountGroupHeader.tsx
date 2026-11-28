@@ -179,7 +179,11 @@ export function AccountGroupHeader({
                     group.id,
                     side === 'off',
                   )}
-                  style={{ fontSize: 11, color: groupLabelStyle.color }}
+                  style={{
+                    fontSize: 11,
+                    fontWeight: groupLabelStyle.fontWeight,
+                    color: groupLabelStyle.color,
+                  }}
                 />
               </>
             )}

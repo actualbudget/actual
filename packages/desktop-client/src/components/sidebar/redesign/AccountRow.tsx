@@ -146,7 +146,7 @@ export function AccountRow({
       })}
     >
       <TreeItemContent>
-        {({ level }) => (
+        {({ level, isHovered, isFocusVisible }) => (
           <AccountHoverCard
             account={account}
             isDisabled={isContextMenuOpen || isEditing}
@@ -201,7 +201,14 @@ export function AccountRow({
                 binding={bindings.accountBalance(account.id)}
                 style={{
                   fontSize: 12,
-                  color: 'inherit',
+                  color:
+                    isClosed ||
+                    isUpdated ||
+                    isActive ||
+                    isHovered ||
+                    isFocusVisible
+                      ? 'inherit'
+                      : theme.sidebarItemTextSubdued,
                   marginLeft: spacing.xs,
                 }}
               />
