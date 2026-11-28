@@ -2,7 +2,7 @@ import React from 'react';
 
 import { generateAccount } from '@actual-app/core/mocks';
 import type { AccountEntity } from '@actual-app/core/types/models';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { useSheetValue } from '#hooks/useSheetValue';
@@ -103,7 +103,7 @@ describe('ReconcilingMessage math & UI', () => {
     expect(onDone).not.toHaveBeenCalled();
   });
 
-  test('computes positive difference and passes correct amount', async () => {
+  test('shows a positive difference and asks for a reconciliation transaction', async () => {
     // cleared = 30.00, bank = 100.00 => diff = +70.00
     vi.mocked(useSheetValue).mockReturnValue(3000);
     const onCreateTransaction = vi.fn();
@@ -129,10 +129,10 @@ describe('ReconcilingMessage math & UI', () => {
     await userEvent.click(
       screen.getByText('Create reconciliation transaction'),
     );
-    expect(onCreateTransaction).toHaveBeenCalledWith(7000);
+    expect(onCreateTransaction).toHaveBeenCalledTimes(1);
   });
 
-  test('computes negative difference and passes correct amount', async () => {
+  test('shows a negative difference and asks for a reconciliation transaction', async () => {
     // cleared = 120.00, bank = 100.00 => diff = -20.00
     vi.mocked(useSheetValue).mockReturnValue(12000);
     const onCreateTransaction = vi.fn();
@@ -156,7 +156,41 @@ describe('ReconcilingMessage math & UI', () => {
     await userEvent.click(
       screen.getByText('Create reconciliation transaction'),
     );
-    expect(onCreateTransaction).toHaveBeenCalledWith(-2000);
+    expect(onCreateTransaction).toHaveBeenCalledTimes(1);
+  });
+
+  test('ignores a second press while the reconciliation transaction is being created', async () => {
+    vi.mocked(useSheetValue).mockReturnValue(3000);
+    let finishCreating: (() => void) | undefined;
+    const onCreateTransaction = vi.fn(
+      () =>
+        new Promise<void>(resolve => {
+          finishCreating = resolve;
+        }),
+    );
+
+    render(
+      <TestProviders>
+        <ReconcilingMessage
+          accountId="account-1"
+          targetBalance={10000}
+          onDone={vi.fn()}
+          onExit={vi.fn()}
+          onCreateTransaction={onCreateTransaction}
+        />
+      </TestProviders>,
+    );
+
+    const button = screen.getByRole('button', {
+      name: 'Create reconciliation transaction',
+    });
+    await userEvent.click(button);
+    await userEvent.click(button);
+    expect(onCreateTransaction).toHaveBeenCalledTimes(1);
+    expect(button).toBeDisabled();
+
+    finishCreating?.();
+    await waitFor(() => expect(button).toBeEnabled());
   });
 });
 

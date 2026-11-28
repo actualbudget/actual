@@ -261,15 +261,16 @@ function TransactionListWithPreviews({
     onExitReconciling();
   }, [account, onExitReconciling, reconcileAmount, updateAccount]);
 
-  const onCreateReconciliationTransaction = useCallback(
-    async (targetDiff: number) => {
-      await reconciliation.createReconciliationTransaction(
-        account.id,
-        targetDiff,
-      );
-    },
-    [account.id],
-  );
+  const onCreateReconciliationTransaction = useCallback(async () => {
+    if (reconcileAmount == null) {
+      return;
+    }
+
+    await reconciliation.createReconciliationTransaction(
+      account.id,
+      reconcileAmount,
+    );
+  }, [account.id, reconcileAmount]);
 
   const onToggleTransactionCleared = useCallback(
     (transaction: TransactionEntity) => {
