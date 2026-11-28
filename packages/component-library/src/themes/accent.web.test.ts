@@ -248,16 +248,16 @@ describe('deriveAccentCss', () => {
   });
 
   it('resolves a reference to a built-in token', () => {
-    const noticeBackground = declarations(darkThemeCss).noticeBackground;
-    expect(noticeBackground).toBe('var(--palette-green800)');
+    const noticeTextMenu = declarations(darkThemeCss).noticeTextMenu;
+    expect(noticeTextMenu).toBe('var(--palette-green500)');
 
     expect(
       deriveAccentCss(
         'dark',
-        ':root { --color-accent: var(--color-noticeBackground); }',
+        ':root { --color-accent: var(--color-noticeTextMenu); }',
       ),
     ).toBe(
-      deriveAccentCss('dark', `:root { --color-accent: ${palette.green800}; }`),
+      deriveAccentCss('dark', `:root { --color-accent: ${palette.green500}; }`),
     );
   });
 
@@ -352,6 +352,79 @@ describe('deriveAccentCss', () => {
     expect(layered).toBe(
       deriveAccentCss('light', ':root { --color-accent: #b3261e; }'),
     );
+  });
+
+  it('works out the status colors from a status color the theme sets', () => {
+    const derived = declarations(
+      deriveAccentCss('light', ':root { --color-error: #b3005e; }'),
+    );
+
+    expect(Object.keys(derived)).toEqual([
+      'errorBackground',
+      'errorText',
+      'errorTextDark',
+    ]);
+    expect(
+      wcagContrast(derived.errorText, derived.errorBackground),
+    ).toBeGreaterThanOrEqual(4.5);
+    expect(wcagContrast(derived.errorText, '#ffffff')).toBeGreaterThanOrEqual(
+      4.5,
+    );
+  });
+
+  it('works out the info colors from an info color the theme sets', () => {
+    const derived = declarations(
+      deriveAccentCss('light', ':root { --color-info: #0a7d5a; }'),
+    );
+
+    expect(Object.keys(derived)).toEqual(['infoBackground', 'infoText']);
+    expect(
+      wcagContrast(derived.infoText, derived.infoBackground),
+    ).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('keeps the status colors a theme sets itself', () => {
+    const partly = declarations(
+      deriveAccentCss(
+        'light',
+        ':root { --color-error: #b3005e; --color-errorText: #123456; }',
+      ),
+    );
+    const fully = deriveAccentCss(
+      'light',
+      ':root { --color-error: #b3005e; --color-errorBackground: #fde; --color-errorText: #123456; --color-errorTextDark: #000; }',
+    );
+
+    expect(partly.errorText).toBeUndefined();
+    expect(partly.errorBackground).toBeDefined();
+    expect(fully).toBe(null);
+  });
+
+  it('works out status text against the surfaces a theme sets', () => {
+    const builtIn = declarations(lightThemeCss);
+    const derived = declarations(
+      deriveAccentCss(
+        'light',
+        ':root { --color-tableBackground: #101418; --color-pageBackground: #000000; --color-mobilePageBackground: #101418; }',
+      ),
+    );
+
+    expect(derived.errorText).not.toBe(builtIn.errorText);
+    expect(wcagContrast(derived.errorText, '#101418')).toBeGreaterThanOrEqual(
+      4.5,
+    );
+    expect(
+      wcagContrast(derived.errorText, derived.errorBackground),
+    ).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('treats a see-through status color as it appears over the table', () => {
+    expect(
+      deriveAccentCss(
+        'light',
+        ':root { --color-error: rgba(179, 0, 94, 0.5); }',
+      ),
+    ).toBe(deriveAccentCss('light', ':root { --color-error: #d980af; }'));
   });
 
   it('reads minified css', () => {

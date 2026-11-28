@@ -13,6 +13,7 @@ def capacitor_pods
   pod 'CapacitorCordova', :path => '../../../../node_modules/@capacitor/ios'
   pod 'CapacitorApp', :path => '../../../../node_modules/@capacitor/app'
   pod 'CapacitorFilesystem', :path => '../../../../node_modules/@capacitor/filesystem'
+  pod 'CapacitorGeolocation', :path => '../../../../node_modules/@capacitor/geolocation'
   pod 'CapacitorHaptics', :path => '../../../../node_modules/@capacitor/haptics'
   pod 'CapacitorShare', :path => '../../../../node_modules/@capacitor/share'
   pod 'CapacitorSplashScreen', :path => '../../../../node_modules/@capacitor/splash-screen'

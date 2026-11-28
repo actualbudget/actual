@@ -92,6 +92,7 @@
       "ignoreDependencies": [
         "@capacitor/app",
         "@capacitor/filesystem",
+        "@capacitor/geolocation",
         "@capacitor/haptics",
         "@capacitor/share",
         "@capacitor/splash-screen",

@@ -20,6 +20,10 @@
     "#accounts": "./src/accounts/index.ts",
     "#budget": "./src/budget/index.ts",
     "#payees": "./src/payees/index.ts",
+    "#payees/location-platform": {
+      "mobile": "./src/payees/location-platform.mobile.ts",
+      "default": "./src/payees/location-platform.ts"
+    },
     "#queries": "./src/queries/index.ts",
     "#redux": "./src/redux/index.ts",
     "#reports": "./src/reports/index.ts",
@@ -157,6 +161,7 @@
     "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.4.2",
     "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/geolocation": "^8.2.5",
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/share": "^8.0.3",
     "@codemirror/autocomplete": "^6.20.3",

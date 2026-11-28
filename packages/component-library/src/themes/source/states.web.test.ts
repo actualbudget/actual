@@ -19,9 +19,7 @@ const statePairs: Array<[TokenName, TokenName]> = [
   ['accentSubtle', 'background'],
 ];
 
-const knownSame = new Set<string>([
-  'light: buttonNormalBackgroundHover on buttonNormalBackground',
-]);
+const knownSame = new Set<string>([]);
 
 const cases = themeNames.flatMap(theme =>
   statePairs.map(([state, resting]) => ({

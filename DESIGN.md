@@ -112,7 +112,7 @@ All hex values in this file (frontmatter included) are the light-theme palette m
 - **Positive Green** (#147d64): Positive amounts and funded budgets.
 - **Negative Red** (#e12d39): Negative amounts, overspending, failures.
 - **Warning Gold** (#b88115): Underfunded templates, pending states.
-- **Message text**: Error and warning messages use darker steps of the same hues (#cf1124 and #87540d) so they pass contrast as text.
+- **Message text**: Error and warning messages use darker steps of the same hues (#d1162c and #816700), worked out from the error and warning colors so they pass contrast as text.
 
 ### Named Rules
 
@@ -192,7 +192,7 @@ Spacing comes from the `spacing` scale in `packages/component-library/src/tokens
 
 - **Shape:** Gently rounded (4px radius), compact padding (5px 10px)
 - **Primary:** Actual Purple background, white text; hover deepens to Deep Purple with a soft shadow transition (`box-shadow .25s`)
-- **Normal:** White background, Navy Ink text, 1px navy border
+- **Normal:** White background, Page Ink text, 1px navy border
 - **Bare:** Transparent, 5px padding; background tint on hover/press. The workhorse for in-table actions
 
 ### Inputs / Fields

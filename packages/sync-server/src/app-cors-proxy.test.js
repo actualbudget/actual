@@ -652,6 +652,11 @@ describe('app-cors-proxy', () => {
 
       expect(res.statusCode).toBe(403);
       expect(console.warn).toHaveBeenCalledWith(
+        'Invalid repository URL in allowlist:',
+        'invalid-url',
+        'Invalid URL',
+      );
+      expect(console.warn).toHaveBeenCalledWith(
         'Blocked request to unauthorized URL',
       );
     });

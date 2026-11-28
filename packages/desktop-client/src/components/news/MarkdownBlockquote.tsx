@@ -31,8 +31,8 @@ const admonitionStyles: Record<AdmonitionType, ComponentProps<typeof Alert>> = {
   },
   info: {
     icon: SvgInformationOutline,
-    color: theme.pillTextSelected,
-    backgroundColor: theme.pillBackgroundSelected,
+    color: theme.infoText,
+    backgroundColor: theme.infoBackground,
   },
   warning: {
     icon: SvgExclamationOutline,

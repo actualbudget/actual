@@ -31,8 +31,8 @@ describe('theme variable reference', () => {
     expect(followsCell(reference, 'tableTextLight')).toBe(
       '`--color-tableText` in Dark and Midnight',
     );
-    expect(followsCell(reference, 'tableText')).toBe(
-      '`--color-pageText` in Light, `--color-text` in Dark and Midnight',
+    expect(followsCell(reference, 'buttonBareDisabledText')).toBe(
+      '`--color-pageTextSubdued` in Light',
     );
   });
 
@@ -44,6 +44,17 @@ describe('theme variable reference', () => {
     );
     expect(followsCell(reference, 'calendarSelectedText')).toBe(
       'Black or white on `--color-calendarSelectedBackground` over `--color-calendarBackground`',
+    );
+  });
+
+  it('names the status color a message color is worked out from', () => {
+    const reference = buildThemeReference();
+
+    expect(followsCell(reference, 'noticeBackground')).toBe(
+      '`--color-success`, as a fill',
+    );
+    expect(followsCell(reference, 'errorText')).toBe(
+      '`--color-error`, readable as text',
     );
   });
 

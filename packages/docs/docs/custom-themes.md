@@ -89,11 +89,28 @@ You can set any of these yourself. Actual keeps your value and only works out th
 
 Accent text that sits on its own background, such as the selected sidebar item on `--color-sidebarBackground`, is worked out against that background. The text on the selected day in the date picker, `--color-calendarSelectedText`, is white when white is readable on `--color-calendarSelectedBackground` and black when it is not. A partly transparent `--color-calendarSelectedBackground` is measured as it appears over `--color-calendarBackground`.
 
+### Changing the Status Colors
+
+Success, warning, error and information messages each take their colors from one variable:
+
+```css
+:root {
+  --color-success: #2e9e6b;
+  --color-warning: #d99a1c;
+  --color-error: #c6283b;
+  --color-info: #2f7fd6;
+}
+```
+
+Actual works out the fill and the text for each kind of message from that color and from your theme's table and page backgrounds, so messages stay readable. The border uses the color as it is. A mid-tone works best, because the same color has to make a pale or deep fill and readable text.
+
+You can still set any of the individual variables, such as `--color-errorText`, `--color-noticeBackground` or `--color-infoBackground`. Actual keeps your value and only works out the ones you leave out.
+
 ### Available CSS Variables
 
 Custom themes can override any of the CSS variables in Actual's built-in themes. The [Theme Variable Reference](./custom-themes-variables.md) lists every one, with its color in each built-in theme and the variable it follows.
 
-Start with the accent and base colors at the top of that page. Many other variables follow them, so setting a few of them restyles most of the app. Others keep their own colors, including most cards and buttons, modals and form inputs, so a theme needs to set those itself.
+Start with the accent and base colors at the top of that page. Many other variables follow them, so setting a few of them restyles most of the app. Others keep their own colors, including the sidebar, the date picker, status messages and some buttons, so a theme needs to set those itself.
 
 Do not point a base color at a variable that follows it, such as `--color-background: var(--color-tableBackground)`. The two would refer to each other and neither would work.
 

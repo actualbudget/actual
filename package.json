@@ -68,7 +68,8 @@
     "typecheck": "tsgo -p tsconfig.root.json --noEmit && lage typecheck",
     "check:tsconfig-references": "workspaces-to-typescript-project-references --check",
     "sync:tsconfig-references": "workspaces-to-typescript-project-references",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "lage cache --prune 14 || true"
   },
   "devDependencies": {
     "@monorepo-utils/workspaces-to-typescript-project-references": "^2.11.0",
@@ -128,5 +129,5 @@
     "node": ">=22.18.0",
     "yarn": "^4.9.1"
   },
-  "packageManager": "yarn@4.17.1"
+  "packageManager": "yarn@4.19.0"
 }

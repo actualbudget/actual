@@ -1,10 +1,9 @@
-import {
-  BrowserGeolocationAdapter,
-  SendApiLocationClient,
-} from './location-adapters';
+import { geolocationAdapter } from '#payees/location-platform';
+
+import { SendApiLocationClient } from './location-adapters';
 import { LocationService } from './location-service';
 
 export const locationService = new LocationService(
-  new BrowserGeolocationAdapter(),
+  geolocationAdapter,
   new SendApiLocationClient(),
 );
