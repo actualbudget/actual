@@ -65,13 +65,14 @@ export const colors = {
     light: 'navy100',
     dark: 'navy600',
     midnight: 'gray600',
-    description: 'Lines between rows and around inputs, menus and tooltips.',
+    description: 'Lines between rows and around menus and tooltips.',
   },
   borderStrong: {
     light: 'navy300',
     dark: 'navy400',
     midnight: 'gray400',
-    description: 'Stronger lines, such as button outlines and dividers.',
+    description:
+      'Stronger lines, such as button and input outlines and dividers.',
   },
   text: {
     light: { raw: '#272630' },
@@ -489,7 +490,7 @@ export const colors = {
     midnight: 'gray700',
   },
   formInputBackgroundSelection: { all: { ref: 'accent' } },
-  formInputBorder: { all: { ref: 'border' } },
+  formInputBorder: { all: { ref: 'borderStrong' } },
   formInputTextReadOnlySelection: {
     light: 'navy50',
     dark: 'navy800',

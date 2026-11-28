@@ -20,8 +20,8 @@ Start with these. Many of the variables further down follow them, so a theme can
 | `--color-backgroundRaised`   | Menus, tooltips, modals and buttons.                                                     | `#ffffff` | `#243b53` | `#242733` |
 | `--color-backgroundHover`    | A hovered row on a content surface.                                                      | `#f7fafc` | `#334e68` | `#4d5768` |
 | `--color-backgroundSelected` | A selected row on a content surface.                                                     | `#efe7fe` | `#44427c` | `#342553` |
-| `--color-border`             | Lines between rows and around inputs, menus and tooltips.                                | `#e8ecf0` | `#486581` | `#373b4a` |
-| `--color-borderStrong`       | Stronger lines, such as button outlines and dividers.                                    | `#9fb3c8` | `#829ab1` | `#747c8b` |
+| `--color-border`             | Lines between rows and around menus and tooltips.                                        | `#e8ecf0` | `#486581` | `#373b4a` |
+| `--color-borderStrong`       | Stronger lines, such as button and input outlines and dividers.                          | `#9fb3c8` | `#829ab1` | `#747c8b` |
 | `--color-text`               | Primary text.                                                                            | `#272630` | `#d9e2ec` | `#e8ecf0` |
 | `--color-textSecondary`      | Supporting text such as descriptions and labels.                                         | `#627d98` | `#9fb3c8` | `#bdc5cf` |
 | `--color-textTertiary`       | The least prominent text, such as hints.                                                 | `#9fb3c8` | `#829ab1` | `#98a1ae` |
@@ -214,7 +214,7 @@ The **Follows** column names the variable a color is taken from, or worked out f
 | `--color-formInputBackground`               | `#ffffff`   | `#243b53`   | `#141520`   | `--color-background`                                                                      |
 | `--color-formInputBackgroundSelected`       | `#ffffff`   | `#334e68`   | `#242733`   |                                                                                           |
 | `--color-formInputBackgroundSelection`      | `#8719e0`   | `#9446ed`   | `#9446ed`   | `--color-accent`                                                                          |
-| `--color-formInputBorder`                   | `#e8ecf0`   | `#486581`   | `#373b4a`   | `--color-border`                                                                          |
+| `--color-formInputBorder`                   | `#9fb3c8`   | `#829ab1`   | `#747c8b`   | `--color-borderStrong`                                                                    |
 | `--color-formInputTextReadOnlySelection`    | `#f7fafc`   | `#243b53`   | `#141520`   |                                                                                           |
 | `--color-formInputBorderSelected`           | `#8719e0`   | `#a45aff`   | `#a660ff`   | `--color-accentBorder`                                                                    |
 | `--color-formInputText`                     | `#272630`   | `#d9e2ec`   | `#e8ecf0`   | `--color-text`                                                                            |
