@@ -90,6 +90,15 @@ export async function bootstrap(loginSettings, forced = false) {
   const passEnabled = 'password' in loginSettings;
   const openIdEnabled = 'openId' in loginSettings;
 
+  // `enforceOpenId` makes OpenID the only allowed login method, so a
+  // password must never be able to bootstrap the server. Checking here
+  // keeps a failed OpenID setup - for example an unreachable discovery
+  // URL - from silently downgrading the instance to password
+  // authentication.
+  if (passEnabled && config.get('enforceOpenId')) {
+    return { error: 'openid-enforced' };
+  }
+
   const accountDb = getAccountDb();
 
   let passwordHash;

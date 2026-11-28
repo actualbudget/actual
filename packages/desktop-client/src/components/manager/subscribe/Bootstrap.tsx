@@ -41,6 +41,10 @@ export function Bootstrap() {
         return t('Client ID cannot be empty');
       case 'missing-client-secret':
         return t('Client secret cannot be empty');
+      case 'openid-enforced':
+        return t(
+          'This server only allows OpenID login, so a password cannot be set',
+        );
       default:
         return t(`An unknown error occurred: {{error}}`, { error });
     }
