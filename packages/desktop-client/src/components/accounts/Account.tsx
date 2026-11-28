@@ -1111,7 +1111,7 @@ class AccountInternal extends PureComponent<
   getBalanceQuery(id?: string) {
     return {
       name: `balance-query-${id}`,
-      query: this.makeRootTransactionsQuery().calculate({ $sum: '$amount' }),
+      query: queries.accountBalanceQuery(id),
     } as const;
   }
 

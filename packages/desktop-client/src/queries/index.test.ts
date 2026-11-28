@@ -1,6 +1,6 @@
 import { q } from '@actual-app/core/shared/query';
 
-import { transactionsSearch } from './index';
+import { accountBalanceQuery, transactionsSearch } from './index';
 
 describe('transactionsSearch', () => {
   it.each(['XF 35mm', '12kr34'])(
@@ -47,5 +47,27 @@ describe('transactionsSearch', () => {
         },
       },
     ]);
+  });
+});
+
+describe('accountBalanceQuery', () => {
+  it('excludes closed accounts from All Accounts balance', () => {
+    const query = accountBalanceQuery(undefined);
+
+    expect(query.serialize().filterExpressions).toContainEqual({
+      'account.closed': false,
+    });
+  });
+
+  it('filters transactions by accountId', () => {
+    const query = accountBalanceQuery('account-123');
+
+    expect(query.serialize().filterExpressions).toContainEqual({
+      account: 'account-123',
+    });
+
+    expect(query.serialize().filterExpressions).not.toContainEqual({
+      'account.closed': false,
+    });
   });
 });
