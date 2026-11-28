@@ -101,6 +101,7 @@ type DonutGraphProps = {
   viewLabels: boolean;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showUncategorized?: boolean;
   showTooltip?: boolean;
 };
 
@@ -113,6 +114,7 @@ export function DonutGraph({
   viewLabels,
   showHiddenCategories,
   showOffBudget,
+  showUncategorized,
   showTooltip = true,
 }: DonutGraphProps) {
   const animationProps = useRechartsAnimation({ animationDuration: 500 });
@@ -267,6 +269,7 @@ export function DonutGraph({
                           filters,
                           showHiddenCategories,
                           showOffBudget,
+                          showUncategorized,
                           type: 'totals',
                           startDate: data.startDate,
                           endDate: data.endDate,
@@ -350,6 +353,7 @@ export function DonutGraph({
                           filters,
                           showHiddenCategories,
                           showOffBudget,
+                          showUncategorized,
                           type: 'totals',
                           startDate: data.startDate,
                           endDate: data.endDate,
@@ -459,6 +463,7 @@ export function DonutGraph({
                         filters,
                         showHiddenCategories,
                         showOffBudget,
+                        showUncategorized,
                         type: 'totals',
                         ...drilldown,
                         bucketTagNames: item.bucketTagNames,

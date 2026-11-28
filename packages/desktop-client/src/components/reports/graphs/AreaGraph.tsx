@@ -198,6 +198,7 @@ type AreaGraphProps = {
   viewLabels: boolean;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showUncategorized?: boolean;
   showTooltip?: boolean;
 };
 
@@ -210,6 +211,7 @@ export function AreaGraph({
   viewLabels,
   showHiddenCategories = false,
   showOffBudget = false,
+  showUncategorized = false,
   showTooltip = true,
 }: AreaGraphProps) {
   const format = useFormat();
@@ -380,6 +382,7 @@ export function AreaGraph({
                         filters,
                         showHiddenCategories,
                         showOffBudget,
+                        showUncategorized,
                         type: 'totals',
                         startDate,
                         endDate: intervalItem?.intervalEndDate ?? data.endDate,

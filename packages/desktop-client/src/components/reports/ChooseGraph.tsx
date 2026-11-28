@@ -30,6 +30,7 @@ type ChooseGraphProps = {
   style?: CSSProperties;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showUncategorized?: boolean;
   showTrendLines?: boolean;
   showTooltip?: boolean;
   intervalsCount: number;
@@ -49,6 +50,7 @@ export function ChooseGraph({
   style,
   showHiddenCategories = false,
   showOffBudget = false,
+  showUncategorized = false,
   showTrendLines = false,
   showTooltip = true,
   intervalsCount,
@@ -110,6 +112,7 @@ export function ChooseGraph({
         viewLabels={viewLabels}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+        showUncategorized={showUncategorized}
         showTooltip={showTooltip}
       />
     );
@@ -126,6 +129,7 @@ export function ChooseGraph({
         viewLabels={viewLabels}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+        showUncategorized={showUncategorized}
         showTooltip={showTooltip}
       />
     );
@@ -151,6 +155,7 @@ export function ChooseGraph({
         viewLabels={viewLabels}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+        showUncategorized={showUncategorized}
         showTooltip={showTooltip}
       />
     );
@@ -166,6 +171,7 @@ export function ChooseGraph({
         balanceTypeOp={balanceTypeOp}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+        showUncategorized={showUncategorized}
         showTrendLines={showTrendLines}
         showTooltip={showTooltip}
         interval={interval}
@@ -184,6 +190,7 @@ export function ChooseGraph({
         groupBy={groupBy}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+        showUncategorized={showUncategorized}
         showTooltip={showTooltip}
         interval={interval}
       />
@@ -209,6 +216,7 @@ export function ChooseGraph({
         compactStyle={compactStyle}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+        showUncategorized={showUncategorized}
       />
     );
   }

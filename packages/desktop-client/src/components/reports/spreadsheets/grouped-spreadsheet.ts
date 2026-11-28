@@ -1,4 +1,3 @@
-import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { GroupedEntity } from '@actual-app/core/types/models';
 
@@ -9,6 +8,7 @@ import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import type { createCustomSpreadsheetProps } from './custom-spreadsheet';
 import { fetchSpreadsheetQueryData } from './fetchSpreadsheetQueryData';
 import { filterEmptyRows } from './filterEmptyRows';
+import { makeCustomReportFilters } from './makeCustomReportFilters';
 import { recalculate } from './recalculate';
 import { reportCategoryLists } from './reportCategoryLists';
 import { sortData } from './sortData';
@@ -52,9 +52,7 @@ export function createGroupedSpreadsheet({
       return;
     }
 
-    const { filters } = await send('make-filters-from-conditions', {
-      conditions: conditions.filter(cond => !cond.customName),
-    });
+    const filters = await makeCustomReportFilters(conditions);
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     let assets: QueryDataEntity[];

@@ -238,6 +238,7 @@ type BarGraphProps = {
   viewLabels: boolean;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showUncategorized?: boolean;
   showTooltip?: boolean;
 };
 
@@ -251,6 +252,7 @@ export function BarGraph({
   viewLabels,
   showHiddenCategories,
   showOffBudget,
+  showUncategorized,
   showTooltip = true,
 }: BarGraphProps) {
   const animationProps = useRechartsAnimation();
@@ -425,6 +427,7 @@ export function BarGraph({
                     filters,
                     showHiddenCategories,
                     showOffBudget,
+                    showUncategorized,
                     type: 'totals',
                     ...drilldown,
                     bucketTagNames: item.payload.bucketTagNames,
