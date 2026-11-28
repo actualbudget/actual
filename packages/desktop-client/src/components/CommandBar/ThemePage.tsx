@@ -14,7 +14,7 @@ import { View } from '@actual-app/components/view';
 import type { Theme } from '@actual-app/core/types/prefs';
 import { Command } from 'cmdk';
 
-import { useThemeCatalog } from '#hooks/useThemeCatalog';
+import { isCatalogTheme, useThemeCatalog } from '#hooks/useThemeCatalog';
 import { themeOptions } from '#style';
 import {
   extractRepoOwner,
@@ -202,11 +202,13 @@ export function ThemePage({
   const matchingBuiltins = translatedBuiltins.filter(row =>
     row.name.toLowerCase().includes(query),
   );
-  const matchingCatalog = (catalog ?? []).filter(
-    item =>
-      item.name.toLowerCase().includes(query) ||
-      extractRepoOwner(item.repo).toLowerCase().includes(query),
-  );
+  const matchingCatalog = (catalog ?? [])
+    .filter(isCatalogTheme)
+    .filter(
+      item =>
+        item.name.toLowerCase().includes(query) ||
+        extractRepoOwner(item.repo).toLowerCase().includes(query),
+    );
 
   return (
     <>
@@ -292,6 +294,21 @@ export function ThemePage({
             <ModeBadge mode={item.mode} />
           </Command.Item>
         ))}
+        {!isLoading &&
+          error == null &&
+          matchingBuiltins.length === 0 &&
+          matchingCatalog.length === 0 && (
+            <Text
+              style={{
+                display: 'block',
+                padding: '7px 10px',
+                fontSize: 13,
+                color: theme.pageTextSubdued,
+              }}
+            >
+              <Trans>No matching themes</Trans>
+            </Text>
+          )}
       </Command.Group>
     </>
   );

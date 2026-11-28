@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentType, SVGProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -167,10 +167,11 @@ export function CommandBar() {
   const isPrivacyEnabled = String(isPrivacyEnabledPref) === 'true';
 
   const [currentTheme, switchTheme] = useTheme();
+  const themeSelectionVersion = useRef(0);
   const [installedLightThemeJson, setInstalledLightThemeJson] = useGlobalPref(
     'installedCustomLightTheme',
   );
-  const [, setInstalledDarkThemeJson] = useGlobalPref(
+  const [installedDarkThemeJson, setInstalledDarkThemeJson] = useGlobalPref(
     'installedCustomDarkTheme',
   );
   const installedCustomLightTheme = parseInstalledTheme(
@@ -182,6 +183,15 @@ export function CommandBar() {
     currentTheme !== 'auto' && installedCustomLightTheme
       ? installedCustomLightTheme.id
       : null;
+
+  useEffect(() => {
+    // Also invalidate downloads when settings change outside this palette,
+    // or when this CommandBar unmounts.
+    themeSelectionVersion.current += 1;
+    return () => {
+      themeSelectionVersion.current += 1;
+    };
+  }, [currentTheme, installedLightThemeJson, installedDarkThemeJson]);
 
   // Only the *transition* between pages should animate — not the dialog's
   // initial open (which would otherwise replay the slide-in on every ⌘K).
@@ -195,6 +205,7 @@ export function CommandBar() {
 
   const applyBuiltinTheme = useCallback(
     (themeKey: Theme) => {
+      themeSelectionVersion.current += 1;
       // matches ThemeSettings.handleThemeChange: picking a built-in clears
       // any installed custom theme
       setInstalledLightThemeJson(serializeInstalledTheme(null));
@@ -212,6 +223,7 @@ export function CommandBar() {
 
   const applyCatalogTheme = useCallback(
     (catalogTheme: CatalogTheme) => {
+      const selectionVersion = ++themeSelectionVersion.current;
       // close immediately; the theme flips once the download finishes
       dispatch(closeCommandBar());
       void (async () => {
@@ -226,12 +238,14 @@ export function CommandBar() {
             cssContent: validateThemeCss(cssWithFonts),
             baseTheme: catalogTheme.mode === 'dark' ? 'dark' : 'light',
           };
+          if (selectionVersion !== themeSelectionVersion.current) return;
           setInstalledLightThemeJson(serializeInstalledTheme(newTheme));
           // leaving auto makes the newly installed theme visible immediately
           if (currentTheme === 'auto') {
             switchTheme(newTheme.baseTheme ?? 'light');
           }
         } catch {
+          if (selectionVersion !== themeSelectionVersion.current) return;
           dispatch(
             addNotification({
               notification: {
@@ -247,9 +261,7 @@ export function CommandBar() {
   );
 
   const exportBudget = useCallback(async () => {
-    const response = await send('export-budget');
-    if ('error' in response && response.error) {
-      console.log('Export error code:', response.error);
+    const notifyExportError = () => {
       dispatch(
         addNotification({
           notification: {
@@ -261,34 +273,31 @@ export function CommandBar() {
           },
         }),
       );
-      return;
-    }
-    if (response.data) {
+    };
+    try {
+      const response = await send('export-budget');
+      if ('error' in response && response.error) {
+        console.log('Export error code:', response.error);
+        notifyExportError();
+        return;
+      }
+      if (!response.data) {
+        notifyExportError();
+        return;
+      }
       for (const notification of getExportWarningNotifications(
         response.warnings ?? [],
         t,
       )) {
         dispatch(addNotification({ notification }));
       }
-      try {
-        await window.Actual.saveFile(
-          response.data,
-          `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}.zip`,
-          t('Export budget'),
-        );
-      } catch {
-        dispatch(
-          addNotification({
-            notification: {
-              ...getExportErrorNotification(
-                t(
-                  'An unknown error occurred while exporting. Please report this as a new issue on GitHub.',
-                ),
-              ),
-            },
-          }),
-        );
-      }
+      await window.Actual.saveFile(
+        response.data,
+        `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}.zip`,
+        t('Export budget'),
+      );
+    } catch {
+      notifyExportError();
     }
   }, [budgetName, dispatch, t]);
 
@@ -382,7 +391,30 @@ export function CommandBar() {
       id: 'sync-accounts',
       name: t('Sync all accounts'),
       Icon: SvgArrowsSynchronize,
-      run: () => syncAndDownload.mutate({}),
+      run: () =>
+        syncAndDownload.mutate(
+          {},
+          {
+            onSuccess: result => {
+              if (
+                typeof result === 'object' &&
+                'error' in result &&
+                result.error
+              ) {
+                dispatch(
+                  addNotification({
+                    notification: {
+                      type: 'error',
+                      message: t(
+                        'There was an error syncing accounts. Please try again.',
+                      ),
+                    },
+                  }),
+                );
+              }
+            },
+          },
+        ),
     },
     {
       id: 'new-schedule',
@@ -742,7 +774,9 @@ export function CommandBar() {
       >
         <FooterHint keys={['↑', '↓']}>{t('navigate')}</FooterHint>
         <FooterHint keys={['↵']}>{t('select')}</FooterHint>
-        <FooterHint keys={['esc']}>{t('close')}</FooterHint>
+        <FooterHint keys={['esc']}>
+          {page === 'themes' ? t('back') : t('close')}
+        </FooterHint>
       </View>
     </Command.Dialog>
   );

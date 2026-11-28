@@ -4,6 +4,24 @@ import type { CatalogTheme } from '#style/customThemes';
 
 const CATALOG_URL = `https://raw.githubusercontent.com/actualbudget/actual/${import.meta.env.REACT_APP_BRANCH || 'master'}/packages/desktop-client/src/data/customThemeCatalog.json`;
 
+export function isCatalogTheme(value: unknown): value is CatalogTheme {
+  if (value == null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  return (
+    'name' in value &&
+    typeof value.name === 'string' &&
+    'repo' in value &&
+    typeof value.repo === 'string' &&
+    'mode' in value &&
+    (value.mode === 'dark' || value.mode === 'light') &&
+    (!('colors' in value) ||
+      value.colors === undefined ||
+      (Array.isArray(value.colors) &&
+        value.colors.every(color => typeof color === 'string')))
+  );
+}
+
 /**
  * Custom hook to fetch and manage the theme catalog from GitHub.
  */
@@ -31,7 +49,7 @@ export function useThemeCatalog() {
           throw new Error('Invalid catalog format: expected an array');
         }
 
-        setData(data);
+        setData(data.filter(isCatalogTheme));
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'Failed to load theme catalog',

@@ -6,14 +6,25 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
+import { usePrivacyMode } from '#hooks/usePrivacyMode';
 import type { Binding, SheetFields, SheetNames } from '#spreadsheet';
 
 /** Emphasize the part of `text` that matches the current search. */
 export function Highlight({ text, query }: { text: string; query: string }) {
   const q = query.trim().toLowerCase();
-  const start = q ? text.toLowerCase().indexOf(q) : -1;
-  if (start === -1) return text;
-  const end = start + q.length;
+  if (!q) return text;
+  const match = text.toLowerCase().indexOf(q);
+  if (match === -1) return text;
+  const offsets: Array<{ start: number; end: number }> = [];
+  let i = 0;
+  for (const original of text) {
+    const end = i + original.length;
+    const foldedLength = original.toLowerCase().length;
+    for (let j = 0; j < foldedLength; j++) offsets.push({ start: i, end });
+    i = end;
+  }
+  const start = offsets[match].start;
+  const end = offsets[match + q.length - 1].end;
   return (
     <>
       {text.slice(0, start)}
@@ -81,6 +92,7 @@ export function BalanceRow<
   binding: Binding<SheetName, FieldName>;
   query: string;
 }) {
+  const privacyMode = usePrivacyMode();
   return (
     <View
       style={{
@@ -111,7 +123,9 @@ export function BalanceRow<
               flexShrink: 0,
               fontSize: 12.5,
               color:
-                typeof props.value === 'number' && props.value < 0
+                !privacyMode &&
+                typeof props.value === 'number' &&
+                props.value < 0
                   ? theme.errorText
                   : theme.pageTextSubdued,
             }}
