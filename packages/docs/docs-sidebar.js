@@ -219,6 +219,7 @@ const sidebars = {
             'experimental/monte-carlo-analysis',
             'experimental/sankey-report',
             'experimental/redesigned-sidebar',
+            'experimental/transfer-detection',
           ],
         },
       ],

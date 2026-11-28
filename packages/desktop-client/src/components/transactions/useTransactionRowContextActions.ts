@@ -12,6 +12,7 @@ import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import type { ContextMenuItem } from '#contextmenu/types';
 import { useContextMenu } from '#hooks/useContextMenu';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
@@ -25,6 +26,7 @@ type TransactionRowContextMenuProps = {
   onDelete: (ids: string[]) => void;
   onLinkSchedule: (ids: string[]) => void;
   onUnlinkSchedule: (ids: string[]) => void;
+  onUnlinkTransfer?: (id: string) => void;
   onCreateRule: (ids: string[]) => void;
   onScheduleAction: (
     name: 'skip' | 'post-transaction' | 'post-transaction-today' | 'complete',
@@ -41,6 +43,7 @@ export function useTransactionRowContextActions({
   onDelete,
   onLinkSchedule,
   onUnlinkSchedule,
+  onUnlinkTransfer,
   onCreateRule,
   onScheduleAction,
   onMakeAsNonSplitTransactions,
@@ -48,6 +51,7 @@ export function useTransactionRowContextActions({
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
+  const isTransferDetectionEnabled = useFeatureFlag('transferDetection');
 
   const selectedIds = useMemo(() => {
     const ids =
@@ -214,6 +218,16 @@ export function useTransactionRowContextActions({
       text: t('Link schedule'),
       onClick: () => onLinkSchedule(selectedIds),
       hidden: linked,
+    },
+    {
+      name: 'unlink-transfer',
+      text: t('Unlink transfer'),
+      onClick: () => onUnlinkTransfer?.(selectedIds[0]),
+      hidden:
+        !onUnlinkTransfer ||
+        !isTransferDetectionEnabled ||
+        selectedIds.length !== 1 ||
+        !getTransaction(selectedIds[0])?.transfer_id,
     },
     {
       name: 'create-rule',

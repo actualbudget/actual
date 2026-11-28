@@ -150,6 +150,46 @@ describe('Account sync', () => {
     expect(transactions[0].imported_payee).toBe('Nintendo Store New York Ny');
   });
 
+  test('transactions-import links a transfer to another account when transfer detection is on', async () => {
+    const { id } = await prepareDatabase();
+    await db.insertAccount({ id: 'two', name: 'two' });
+    await db.insertPayee({
+      id: 'transfer-two',
+      name: '',
+      transfer_acct: 'two',
+    });
+    const existing = await db.insertTransaction({
+      account: 'two',
+      amount: -4133,
+      date: '2020-01-01',
+    });
+    await db.update('preferences', {
+      id: 'flags.transferDetection',
+      value: 'true',
+    });
+
+    const result = await accountsApp.handlers['transactions-import']({
+      accountId: id,
+      transactions: [
+        {
+          account: id,
+          date: '2020-01-02',
+          payee_name: 'From two',
+          amount: 4133,
+        },
+      ],
+      isPreview: false,
+    });
+
+    expect(result.updated).toEqual([existing]);
+    const imported = await db.getTransaction(result.added[0]);
+    expect(imported).toMatchObject({
+      payee: 'transfer-two',
+      transfer_id: existing,
+      imported_payee: 'From Two',
+    });
+  });
+
   test("transactions-import keeps the payee name with payeeNameNormalization 'original'", async () => {
     const { id } = await prepareDatabase();
 
@@ -1347,6 +1387,170 @@ describe('SimpleFin batch sync', () => {
       [acctId],
     );
     expect(account!.bank_sync_status).toBe('not-configured');
+  });
+
+  describe('transfer detection', () => {
+    function simpleFinDownload(transactions) {
+      return {
+        transactions: {
+          all: transactions.map(transaction => ({
+            booked: true,
+            ...transaction,
+          })),
+          booked: [],
+          pending: [],
+        },
+        balances: [],
+        startingBalance: 0,
+      };
+    }
+
+    async function insertSimpleFinAccount(id) {
+      await db.insertAccount({
+        id,
+        account_id: 'sf-' + id,
+        name: id,
+        account_sync_source: 'simpleFin',
+      });
+      await db.insertPayee({
+        id: 'transfer-' + id,
+        name: '',
+        transfer_acct: id,
+      });
+    }
+
+    function syncBothAccounts() {
+      return accountsApp.handlers['simplefin-batch-sync']({
+        ids: ['checking', 'savings'],
+      });
+    }
+
+    function findTransaction(transactions, importedId) {
+      return transactions.find(
+        transaction => transaction.imported_id === importedId,
+      );
+    }
+
+    beforeEach(async () => {
+      await insertSimpleFinAccount('checking');
+      await insertSimpleFinAccount('savings');
+
+      mockSimpleFinTransactions({
+        'sf-checking': simpleFinDownload([
+          {
+            date: '2017-10-02',
+            payeeName: 'Transfer to savings',
+            transactionAmount: { amount: '-50.00' },
+            transactionId: 'checking-out',
+          },
+          {
+            date: '2017-10-02',
+            payeeName: 'Coffee Shop',
+            transactionAmount: { amount: '-12.34' },
+            transactionId: 'checking-coffee',
+          },
+        ]),
+        'sf-savings': simpleFinDownload([
+          {
+            date: '2017-10-03',
+            payeeName: 'Transfer from checking',
+            transactionAmount: { amount: '50.00' },
+            transactionId: 'savings-in',
+          },
+        ]),
+        errors: {},
+      });
+    });
+
+    test('links both sides of a transfer when the feature is enabled', async () => {
+      await db.update('preferences', {
+        id: 'flags.transferDetection',
+        value: 'true',
+      });
+
+      const results = await syncBothAccounts();
+      expect(results.flatMap(result => result.res.errors)).toEqual([]);
+
+      let transactions = await getAllTransactions();
+      const outgoing = findTransaction(transactions, 'checking-out');
+      const incoming = findTransaction(transactions, 'savings-in');
+      expect(outgoing).toMatchObject({
+        amount: -5000,
+        payee: 'transfer-savings',
+        transfer_id: incoming.id,
+        imported_payee: 'Transfer to savings',
+      });
+      expect(incoming).toMatchObject({
+        amount: 5000,
+        payee: 'transfer-checking',
+        transfer_id: outgoing.id,
+        imported_payee: 'Transfer from checking',
+      });
+      expect(
+        findTransaction(transactions, 'checking-coffee').transfer_id,
+      ).toBeNull();
+
+      // The side that was already there is reported as matched
+      const matched = results.flatMap(result => result.res.matchedTransactions);
+      expect(matched).toHaveLength(1);
+      expect([outgoing.id, incoming.id]).toContain(matched[0]);
+
+      // Syncing again later links new transactions without adding duplicates
+      mockSimpleFinTransactions({
+        'sf-checking': simpleFinDownload([
+          {
+            date: '2017-10-09',
+            payeeName: 'Transfer to savings',
+            transactionAmount: { amount: '-75.00' },
+            transactionId: 'checking-out-2',
+          },
+        ]),
+        'sf-savings': simpleFinDownload([
+          {
+            date: '2017-10-09',
+            payeeName: 'Transfer from checking',
+            transactionAmount: { amount: '75.00' },
+            transactionId: 'savings-in-2',
+          },
+          {
+            date: '2017-10-03',
+            payeeName: 'Transfer from checking',
+            transactionAmount: { amount: '50.00' },
+            transactionId: 'savings-in',
+          },
+        ]),
+        errors: {},
+      });
+      const countBefore = transactions.length;
+      await syncBothAccounts();
+
+      transactions = await getAllTransactions();
+      expect(transactions).toHaveLength(countBefore + 2);
+      expect(findTransaction(transactions, 'checking-out-2')).toMatchObject({
+        payee: 'transfer-savings',
+        transfer_id: findTransaction(transactions, 'savings-in-2').id,
+      });
+      expect(findTransaction(transactions, 'savings-in-2')).toMatchObject({
+        payee: 'transfer-checking',
+        transfer_id: findTransaction(transactions, 'checking-out-2').id,
+      });
+      expect(findTransaction(transactions, 'checking-out')).toMatchObject({
+        payee: 'transfer-savings',
+        transfer_id: incoming.id,
+      });
+    });
+
+    test('leaves transactions unlinked when the feature is disabled', async () => {
+      const results = await syncBothAccounts();
+      expect(results.flatMap(result => result.res.errors)).toEqual([]);
+
+      const transactions = await getAllTransactions();
+      for (const importedId of ['checking-out', 'savings-in']) {
+        const transaction = findTransaction(transactions, importedId);
+        expect(transaction.transfer_id).toBeNull();
+        expect(transaction.payee).not.toMatch(/^transfer-/);
+      }
+    });
   });
 });
 

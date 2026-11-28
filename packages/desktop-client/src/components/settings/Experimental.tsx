@@ -254,6 +254,12 @@ export function ExperimentalFeatures() {
       >
         <Trans>Monte Carlo Analysis Report</Trans>
       </FeatureToggle>
+      <FeatureToggle
+        flag="transferDetection"
+        feedbackLink="https://github.com/actualbudget/actual/issues/1628"
+      >
+        <Trans>Transfer detection for imported transactions</Trans>
+      </FeatureToggle>
       {showServerPrefs && (
         <ServerFeatureToggle
           prefName="flags.plugins"

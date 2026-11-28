@@ -44,10 +44,14 @@ export async function batchUpdateTransactions({
   learnCategories = false,
   detectOrphanPayees = true,
   runTransfers = true,
+  transferMatches = {},
 }: Partial<Diff<TransactionEntity>> & {
   learnCategories?: boolean;
   detectOrphanPayees?: boolean;
   runTransfers?: boolean;
+  // For a transaction that becomes a transfer, an existing transaction to
+  // link as the other side instead of creating a new one
+  transferMatches?: Record<TransactionEntity['id'], TransactionEntity['id']>;
 }) {
   // Track the ids of each type of transaction change (see below for why)
   let addedIds = [];
@@ -160,11 +164,15 @@ export async function batchUpdateTransactions({
 
   if (runTransfers) {
     await batchMessages(async () => {
-      await Promise.all(allAdded.map(t => transfer.onInsert(t)));
+      await Promise.all(
+        allAdded.map(t => transfer.onInsert(t, transferMatches[t.id])),
+      );
 
       // Return any updates from here
       transfersUpdated = (
-        await Promise.all(allUpdated.map(t => transfer.onUpdate(t)))
+        await Promise.all(
+          allUpdated.map(t => transfer.onUpdate(t, transferMatches[t.id])),
+        )
       ).filter(Boolean);
 
       await Promise.all(allDeleted.map(t => transfer.onDelete(t)));
