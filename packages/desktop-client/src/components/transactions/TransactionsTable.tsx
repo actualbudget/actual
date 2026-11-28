@@ -28,6 +28,7 @@ import {
   SvgArrowDown,
   SvgArrowUp,
   SvgCheveronDown,
+  SvgInformationOutline,
 } from '@actual-app/components/icons/v1';
 import {
   SvgAlertTriangle,
@@ -64,6 +65,7 @@ import {
 } from '@actual-app/core/shared/transactions';
 import {
   amountToCurrency,
+  amountToInteger,
   currencyToAmount,
   integerToCurrency,
   titleFirst,
@@ -87,6 +89,7 @@ import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocompl
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
 import { TransferDirectionIcon } from '#components/common/TransferDirectionIcon';
+import { TransferRateDetails } from '#components/currency/TransferRateDetails';
 import { getStatusProps } from '#components/schedules/StatusBadge';
 import type { StatusTypes } from '#components/schedules/StatusBadge';
 import { DateSelect } from '#components/select/DateSelect';
@@ -108,10 +111,12 @@ import type {
   TableNavigator,
   TableProps,
 } from '#components/table';
+import { useAccount } from '#hooks/useAccount';
 import {
   SchedulesProvider,
   useCachedSchedules,
 } from '#hooks/useCachedSchedules';
+import { useCurrencyFormatter } from '#hooks/useCurrencyFormatter';
 import { DisplayPayeeProvider, useDisplayPayee } from '#hooks/useDisplayPayee';
 import {
   DropHighlight,
@@ -126,6 +131,10 @@ import type {
 } from '#hooks/useDragDrop';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMergedRefs } from '#hooks/useMergedRefs';
+import {
+  useForeignCurrencyCode,
+  useMultiCurrency,
+} from '#hooks/useMultiCurrency';
 import { usePrevious } from '#hooks/usePrevious';
 import { useProperFocus } from '#hooks/useProperFocus';
 import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
@@ -201,12 +210,21 @@ function measureAmountColumnWidth(values: string[], minWidth: number) {
 export function useAmountColumnWidths(
   transactions: TransactionEntity[],
   balances: Record<TransactionEntity['id'], IntegerAmount> | null,
+  // Overrides for amounts that are shown differently, e.g. with a currency
+  formatters?: {
+    amount: (transaction: TransactionEntity) => string | null;
+    balance: (id: TransactionEntity['id'], balance: IntegerAmount) => string;
+  },
 ): AmountColumnWidths {
-  const debitCreditValues = transactions.map(t =>
-    integerToCurrency(Math.abs(t.amount ?? 0)),
+  const debitCreditValues = transactions.map(
+    t => formatters?.amount(t) ?? integerToCurrency(Math.abs(t.amount ?? 0)),
   );
   const balanceValues = balances
-    ? Object.values(balances).map(balance => integerToCurrency(balance))
+    ? Object.entries(balances).map(([id, balance]) =>
+        formatters
+          ? formatters.balance(id, balance)
+          : integerToCurrency(balance),
+      )
     : [];
 
   return {
@@ -230,6 +248,8 @@ type TransactionHeaderProps = {
   ascDesc: 'asc' | 'desc';
   field: string;
   amountColumnWidths: AmountColumnWidths;
+  // Set when every amount in the table is in this non-default currency
+  amountCurrencyCode?: string;
 };
 
 const TransactionHeader = memo(
@@ -242,10 +262,18 @@ const TransactionHeader = memo(
     field,
     showSelection,
     amountColumnWidths,
+    amountCurrencyCode,
   }: TransactionHeaderProps) => {
     const dispatchSelected = useSelectedDispatch();
     const { t } = useTranslation();
     const columnLabels = useTransactionTableColumnLabels();
+    const withCurrency = (label: string) =>
+      amountCurrencyCode
+        ? t('{{column}} ({{currency}})', {
+            column: label,
+            currency: amountCurrencyCode,
+          })
+        : label;
 
     useHotkeys(
       'ctrl+a, cmd+a, meta+a',
@@ -307,21 +335,21 @@ const TransactionHeader = memo(
         sortDirection: 'asc',
       },
       payment: {
-        value: columnLabels.payment,
+        value: withCurrency(columnLabels.payment),
         width: amountColumnWidths.amount,
         alignItems: 'flex-end',
         marginRight: -5,
         sortDirection: 'asc',
       },
       deposit: {
-        value: columnLabels.deposit,
+        value: withCurrency(columnLabels.deposit),
         width: amountColumnWidths.amount,
         alignItems: 'flex-end',
         marginRight: -5,
         sortDirection: 'desc',
       },
       balance: {
-        value: t('Balance'),
+        value: withCurrency(t('Balance')),
         width: amountColumnWidths.balance,
         alignItems: 'flex-end',
         marginRight: -5,
@@ -985,7 +1013,65 @@ function PayeeIcons({
           />
         </Button>
       )}
+      {transferAccount && (
+        <CrossCurrencyTransferInfo
+          transaction={transaction}
+          transferAccount={transferAccount}
+        />
+      )}
     </>
+  );
+}
+
+type CrossCurrencyTransferInfoProps = {
+  transaction: TransactionEntity;
+  transferAccount: AccountEntity;
+};
+
+// A transfer between two currencies keeps its own amount on each side;
+// hovering shows what arrived or left there and the rate it amounts to.
+// Only rendered for transfers, so other rows don't look up their account.
+function CrossCurrencyTransferInfo({
+  transaction,
+  transferAccount,
+}: CrossCurrencyTransferInfoProps) {
+  const { t } = useTranslation();
+  const account = useAccount(transaction.account);
+  const { isEnabled, getAccountCurrency } = useMultiCurrency();
+
+  if (!isEnabled || !account) {
+    return null;
+  }
+  const fromCurrency = getAccountCurrency(account);
+  const toCurrency = getAccountCurrency(transferAccount);
+  if (fromCurrency === toCurrency) {
+    return null;
+  }
+
+  return (
+    <Tooltip
+      content={
+        <TransferRateDetails
+          transaction={transaction}
+          account={account}
+          transferAccount={transferAccount}
+        />
+      }
+      placement="bottom start"
+    >
+      <SvgInformationOutline
+        aria-label={t('Transfer between {{from}} and {{to}}', {
+          from: fromCurrency,
+          to: toCurrency,
+        })}
+        style={{
+          ...transferIconStyle,
+          color: theme.pageTextLight,
+          marginRight: 4,
+          flexShrink: 0,
+        }}
+      />
+    </Tooltip>
   );
 }
 
@@ -1125,22 +1211,46 @@ const Transaction = memo(function Transaction({
   const dispatchSelected = useSelectedDispatch();
   const triggerRef = useRef(null);
 
+  const { formatAmount, formatAccountAmount } = useCurrencyFormatter();
+  const rowAccount =
+    accounts && originalTransaction.account
+      ? getAccountsById(accounts)[originalTransaction.account]
+      : undefined;
+  // Amounts in another currency are shown and typed with its decimal
+  // places; all others, including an account set to the default currency,
+  // follow the budget's format
+  const foreignCurrencyCode = useForeignCurrencyCode(rowAccount?.currency);
+
   const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
+  // The amount is shown with the decimal places of its currency, which
+  // is only known once the accounts are loaded
+  const [prevForeignCurrencyCode, setPrevForeignCurrencyCode] =
+    useState(foreignCurrencyCode);
   const [transaction, setTransaction] = useState(() =>
-    serializeTransaction(originalTransaction, showZeroInDeposit),
+    serializeTransaction(
+      originalTransaction,
+      showZeroInDeposit,
+      foreignCurrencyCode,
+    ),
   );
   const isPreview = isPreviewId(transaction.id);
 
   if (
     originalTransaction !== prevTransaction ||
-    showZeroInDeposit !== prevShowZero
+    showZeroInDeposit !== prevShowZero ||
+    foreignCurrencyCode !== prevForeignCurrencyCode
   ) {
     setTransaction(
-      serializeTransaction(originalTransaction, showZeroInDeposit),
+      serializeTransaction(
+        originalTransaction,
+        showZeroInDeposit,
+        foreignCurrencyCode,
+      ),
     );
     setPrevTransaction(originalTransaction);
     setPrevShowZero(showZeroInDeposit);
+    setPrevForeignCurrencyCode(foreignCurrencyCode);
   }
 
   const [showReconciliationWarning, setShowReconciliationWarning] =
@@ -1293,7 +1403,13 @@ const Transaction = memo(function Transaction({
       );
       // Run the transaction through the formatting so that we know
       // it's always showing the formatted result
-      setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
+      setTransaction(
+        serializeTransaction(
+          deserialized,
+          showZeroInDeposit,
+          foreignCurrencyCode,
+        ),
+      );
 
       const deserializedName = ['credit', 'debit'].includes(name)
         ? 'amount'
@@ -1393,6 +1509,26 @@ const Transaction = memo(function Transaction({
   const amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
   const runningBalance = !isTemporaryId(id) ? balance : balance + amount;
+
+  // Amounts of accounts in another currency carry its code, e.g. USD$7.60,
+  // and show their converted value on hover
+  const formatEnteredAmount = (value: string) => {
+    const enteredAmount = currencyToAmount(value) || 0;
+    if (foreignCurrencyCode === undefined) {
+      return amountToCurrency(enteredAmount);
+    }
+    return formatAmount(amountToInteger(enteredAmount), foreignCurrencyCode);
+  };
+  const getAmountTitle = (value: string) => {
+    if (foreignCurrencyCode === undefined || !value) {
+      return value;
+    }
+    return formatAmount(
+      amountToInteger(currencyToAmount(value) || 0),
+      foreignCurrencyCode,
+      { mode: 'both', date },
+    );
+  };
 
   // Ok this entire logic is a dirty, dirty hack.. but let me explain.
   // Problem: the split-error Popover (which has the buttons to distribute/add split)
@@ -2011,11 +2147,11 @@ const Transaction = memo(function Transaction({
             value={debit === '' && credit === '' ? amountToCurrency(0) : debit}
             formatter={value =>
               // reformat value so since we might have kept decimals
-              value ? amountToCurrency(currencyToAmount(value) || 0) : ''
+              value ? formatEnteredAmount(value) : ''
             }
             valueStyle={valueStyle}
             textAlign="right"
-            title={debit}
+            title={getAmountTitle(debit)}
             onExpose={name => !isPreview && onEdit(id, name)}
             style={{
               ...(isParent && { fontStyle: 'italic' }),
@@ -2046,11 +2182,11 @@ const Transaction = memo(function Transaction({
             value={credit}
             formatter={value =>
               // reformat value so since we might have kept decimals
-              value ? amountToCurrency(currencyToAmount(value) || 0) : ''
+              value ? formatEnteredAmount(value) : ''
             }
             valueStyle={valueStyle}
             textAlign="right"
-            title={credit}
+            title={getAmountTitle(credit)}
             onExpose={name => !isPreview && onEdit(id, name)}
             style={{
               ...(isParent && { fontStyle: 'italic' }),
@@ -2076,7 +2212,9 @@ const Transaction = memo(function Transaction({
             value={
               runningBalance == null || isChild || isTemporaryId(id)
                 ? ''
-                : integerToCurrency(runningBalance)
+                : foreignCurrencyCode !== undefined && rowAccount
+                  ? formatAccountAmount(runningBalance, rowAccount, { date })
+                  : integerToCurrency(runningBalance)
             }
             valueStyle={{
               color:
@@ -2258,7 +2396,9 @@ const Transaction = memo(function Transaction({
                 textAlign: 'right',
               }}
             >
-              {integerToCurrency(amount)}
+              {foreignCurrencyCode === undefined
+                ? integerToCurrency(amount)
+                : formatAmount(amount, foreignCurrencyCode)}
             </Text>
           </View>
         )}
@@ -2380,6 +2520,8 @@ function NotesCell({
 type TransactionErrorProps = {
   error: NonNullable<TransactionEntity['error']>;
   isDeposit: boolean;
+  // The account of the transaction, whose currency the amount left is in
+  account?: AccountEntity;
   onAddSplit: () => void;
   onDistributeRemainder: () => void;
   style?: CSSProperties;
@@ -2388,10 +2530,20 @@ type TransactionErrorProps = {
 function TransactionError({
   error,
   isDeposit,
+  account,
   onAddSplit,
   onDistributeRemainder,
   style,
 }: TransactionErrorProps) {
+  const { formatAmount } = useCurrencyFormatter();
+  const foreignCurrencyCode = useForeignCurrencyCode(account?.currency);
+  // In another currency, the amount left carries its code, like the amounts
+  // of the transaction
+  const formatAmountLeft = (amount: IntegerAmount) =>
+    foreignCurrencyCode !== undefined
+      ? formatAmount(amount, foreignCurrencyCode)
+      : integerToCurrency(amount);
+
   switch (error.type) {
     case 'SplitTransactionError':
       if (error.version === 1) {
@@ -2409,7 +2561,7 @@ function TransactionError({
             <Text style={{ whiteSpace: 'nowrap' }}>
               <Trans>Amount left:</Trans>{' '}
               <Text style={{ fontWeight: 500 }}>
-                {integerToCurrency(
+                {formatAmountLeft(
                   isDeposit ? error.difference : -error.difference,
                 )}
               </Text>
@@ -2612,6 +2764,7 @@ function NewTransaction({
           <TransactionError
             error={error}
             isDeposit={isDeposit}
+            account={getAccountsById(accounts)[transactions[0].account]}
             onAddSplit={() => onAddSplit(transactions[0].id)}
             onDistributeRemainder={() =>
               onDistributeRemainder(transactions[0].id)
@@ -2787,9 +2940,42 @@ function TransactionTableInner({
     [props.transactions, props.showReconciled],
   );
 
+  const {
+    isEnabled: isMultiCurrencyEnabled,
+    isForeignCurrency,
+    getAccountCurrency,
+    formatAmount,
+    formatAccountAmount,
+  } = useCurrencyFormatter();
+  const accountsById = getAccountsById(props.accounts);
+  const currentAccount = props.currentAccountId
+    ? accountsById[props.currentAccountId]
+    : undefined;
+  const currentAccountForeignCode = useForeignCurrencyCode(
+    currentAccount?.currency,
+  );
+  const dateById = new Map(transactionsToRender.map(t => [t.id, t.date]));
+
   const amountColumnWidths = useAmountColumnWidths(
     transactionsToRender,
     props.balances,
+    isMultiCurrencyEnabled
+      ? {
+          amount: t => {
+            const account = accountsById[t.account];
+            const currency = account ? getAccountCurrency(account) : null;
+            return currency && isForeignCurrency(currency)
+              ? formatAmount(Math.abs(t.amount ?? 0), currency)
+              : null;
+          },
+          balance: (id, balance) =>
+            currentAccount
+              ? formatAccountAmount(balance, currentAccount, {
+                  date: dateById.get(id),
+                })
+              : integerToCurrency(balance),
+        }
+      : undefined,
   );
 
   const renderRow: TableProps<TransactionEntity>['renderItem'] = ({
@@ -2919,6 +3105,7 @@ function TransactionTableInner({
             <TransactionError
               error={error}
               isDeposit={!!isChildDeposit}
+              account={accountsById[trans.account]}
               onAddSplit={() => props.onAddSplit(trans.id)}
               onDistributeRemainder={() =>
                 props.onDistributeRemainder(trans.id)
@@ -2966,6 +3153,7 @@ function TransactionTableInner({
           field={props.sortField}
           showSelection={props.showSelection}
           amountColumnWidths={amountColumnWidths}
+          amountCurrencyCode={currentAccountForeignCode}
         />
 
         {props.isAdding && (

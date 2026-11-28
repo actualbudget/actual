@@ -11,7 +11,10 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { tsToRelativeTime } from '@actual-app/core/shared/util';
+import {
+  integerToCurrencyForEdit,
+  tsToRelativeTime,
+} from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { AccountEntity } from '@actual-app/core/types/models';
 import type { TransObjectLiteral } from '@actual-app/core/types/util';
@@ -21,12 +24,15 @@ import { t } from 'i18next';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
+import { useForeignCurrencyCode } from '#hooks/useMultiCurrency';
 import { useSheetValue } from '#hooks/useSheetValue';
 import * as bindings from '#spreadsheet/bindings';
 
 type ReconcilingMessageProps = {
   accountId: AccountEntity['id'];
   targetBalance: number;
+  // The currency of the account, when it has one of its own
+  currencyCode?: string | null;
   onDone: () => void;
   onExit: () => void;
   onCreateTransaction: (targetDiff: number) => void;
@@ -35,6 +41,7 @@ type ReconcilingMessageProps = {
 export function ReconcilingMessage({
   accountId,
   targetBalance,
+  currencyCode,
   onDone,
   onExit,
   onCreateTransaction,
@@ -44,12 +51,16 @@ export function ReconcilingMessage({
       bindings.accountBalanceCleared(accountId),
     ) ?? 0;
   const format = useFormat();
+  const foreignCurrencyCode = useForeignCurrencyCode(currencyCode);
+  // Balances in another currency carry its code and decimal places
+  const formatOptions = { currencyCode: foreignCurrencyCode };
   const targetDiff = targetBalance - cleared;
 
-  const clearedBalance = format(cleared, 'financial');
-  const bankBalance = format(targetBalance, 'financial');
+  const clearedBalance = format(cleared, 'financial', formatOptions);
+  const bankBalance = format(targetBalance, 'financial', formatOptions);
   const difference =
-    (targetDiff > 0 ? '+' : '') + format(targetDiff, 'financial');
+    (targetDiff > 0 ? '+' : '') +
+    format(targetDiff, 'financial', formatOptions);
 
   return (
     <View
@@ -123,6 +134,19 @@ export function ReconcilingMessage({
   );
 }
 
+// A balance as it is entered: one in another currency than the default
+// keeps all of its decimals, even ones that currency doesn't show, so
+// reconciling never rounds it
+function formatEditBalance(
+  format: ReturnType<typeof useFormat>,
+  balance: IntegerAmount,
+  foreignCurrencyCode: string | undefined,
+) {
+  return foreignCurrencyCode === undefined
+    ? format(balance, 'financial')
+    : integerToCurrencyForEdit(balance, foreignCurrencyCode);
+}
+
 type ReconcileMenuProps = {
   account: AccountEntity;
   onReconcile: (amount: number | null) => void;
@@ -142,6 +166,7 @@ export function ReconcileMenu({
   });
   const lastSyncedBalance = account.balance_current;
   const format = useFormat();
+  const foreignCurrencyCode = useForeignCurrencyCode(account.currency);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
 
@@ -154,9 +179,11 @@ export function ReconcileMenu({
   useEffect(() => {
     if (clearedBalance != null) {
       exactAmount.current = clearedBalance;
-      setInputValue(format(clearedBalance, 'financial'));
+      setInputValue(
+        formatEditBalance(format, clearedBalance, foreignCurrencyCode),
+      );
     }
-  }, [clearedBalance, format]);
+  }, [clearedBalance, format, foreignCurrencyCode]);
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -199,12 +226,20 @@ export function ReconcileMenu({
           <View>
             <Text style={{ margin: '0 6px 8px 0', textAlign: 'right' }}>
               <Trans>Last Balance from Bank: </Trans>
-              {format(lastSyncedBalance, 'financial')}
+              {format(lastSyncedBalance, 'financial', {
+                currencyCode: foreignCurrencyCode,
+              })}
             </Text>
             <Button
               onPress={() => {
                 exactAmount.current = lastSyncedBalance;
-                setInputValue(format(lastSyncedBalance, 'financial'));
+                setInputValue(
+                  formatEditBalance(
+                    format,
+                    lastSyncedBalance,
+                    foreignCurrencyCode,
+                  ),
+                );
               }}
               style={{ marginBottom: 7 }}
             >

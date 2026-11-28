@@ -25,6 +25,7 @@ import { DocumentDirError, withErrorCode } from './errors';
 import { app as filtersApp } from './filters/app';
 import { app as forecastApp } from './forecast/app';
 import { app as formulasApp } from './formulas/app';
+import { app as fxApp } from './fx/app';
 import { app } from './main-app';
 import { mutator, runHandler } from './mutators';
 import { app as notesApp } from './notes/app';
@@ -148,6 +149,7 @@ app.combine(
   transactionsApp,
   accountsApp,
   accountGroupsApp,
+  fxApp,
   payeesApp,
   spreadsheetApp,
   syncApp,

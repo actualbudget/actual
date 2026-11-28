@@ -23,9 +23,11 @@ import {
   ModalHeader,
   ModalTitle,
 } from '#components/common/Modal';
+import { CurrencySelect } from '#components/currency/CurrencySelect';
 import { Checkbox } from '#components/forms';
 import { validateAccountName } from '#components/util/accountValidation';
 import { useAccounts } from '#hooks/useAccounts';
+import { useMultiCurrency } from '#hooks/useMultiCurrency';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { closeModal } from '#modals/modalsSlice';
@@ -40,6 +42,9 @@ export function CreateLocalAccountModal() {
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
+  const { isEnabled: isMultiCurrencyEnabled, defaultCurrencyCode } =
+    useMultiCurrency();
+  const [currency, setCurrency] = useState<string | null>(null);
 
   const [nameError, setNameError] = useState(null);
   const [balanceError, setBalanceError] = useState(false);
@@ -72,6 +77,7 @@ export function CreateLocalAccountModal() {
           name,
           balance: toRelaxedNumber(balance),
           offBudget: offbudget,
+          currency: isMultiCurrencyEnabled ? currency : null,
         },
         {
           onSuccess: id => {
@@ -201,6 +207,17 @@ export function CreateLocalAccountModal() {
                   </div>
                 </View>
               </View>
+
+              {isMultiCurrencyEnabled && (
+                <InlineField label={t('Currency')} width="100%">
+                  <CurrencySelect
+                    value={currency}
+                    defaultCurrencyCode={defaultCurrencyCode}
+                    onChange={setCurrency}
+                    style={{ flex: 1 }}
+                  />
+                </InlineField>
+              )}
 
               <InlineField label={t('Balance')} width="100%">
                 <Input
