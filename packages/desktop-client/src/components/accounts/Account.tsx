@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useMemo,
 } from 'react';
-import type { ReactElement, RefObject } from 'react';
+import type { ComponentProps, ReactElement, RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Trans } from 'react-i18next';
 import { Navigate, useLocation, useParams } from 'react-router';
@@ -275,6 +275,10 @@ type AccountInternalState = {
   filterConditions: ConditionEntity[];
   filterId?: SavedFilter | undefined;
   filterConditionsOp: 'and' | 'or';
+  outgoingColumns?: Pick<
+    ComponentProps<typeof TransactionList>,
+    'showCleared' | 'showGroup' | 'showAccount' | 'columnOrder'
+  >;
   loading: boolean;
   workingHard: boolean;
   reconcileAmount: null | number;
@@ -522,6 +526,7 @@ class AccountInternal extends PureComponent<
           startTransition(() => {
             this.setState({
               transactions: transactionsSnapshot,
+              outgoingColumns: undefined,
               ...balances,
             });
           });
@@ -546,9 +551,11 @@ class AccountInternal extends PureComponent<
 
         const balances = await this.calculateBalances();
         const filteredAmount = await this.getFilteredAmount();
+        if (paged !== this.paged) return;
         this.setState(
           {
             transactions: data,
+            outgoingColumns: undefined,
             transactionsFiltered: isFiltered,
             loading: false,
             workingHard: false,
@@ -584,11 +591,12 @@ class AccountInternal extends PureComponent<
       this.setState(
         {
           loading: true,
+          outgoingColumns:
+            this.state.outgoingColumns ?? this.getRegisterColumns(),
           focusedTransactionId: null,
           search: '',
           showBalances: nextProps.showBalances,
-          balances: null,
-          balancesTotal: null,
+          // Keep balances with the outgoing rows until onData replaces both.
           showCleared: nextProps.showCleared,
           showReconciled: nextProps.showReconciled,
           reconcileAmount: null,
@@ -983,6 +991,13 @@ class AccountInternal extends PureComponent<
       default:
     }
   };
+
+  getRegisterColumns = () => ({
+    showCleared: !!this.state.showCleared,
+    showGroup: this.props.showGroup,
+    showAccount: this.showAccountColumn(),
+    columnOrder: this.props.columnOrder,
+  });
 
   showAccountColumn = () => {
     const accountId = this.props.accountId;
@@ -1883,7 +1898,6 @@ class AccountInternal extends PureComponent<
       showBalances,
       balances,
       balancesTotal,
-      showCleared,
       showReconciled,
       filteredAmount,
     } = this.state;
@@ -2023,10 +2037,7 @@ class AccountInternal extends PureComponent<
                   balances={allBalances}
                   showBalances={!!allBalances}
                   showReconciled={showReconciled}
-                  showCleared={!!showCleared}
-                  showGroup={this.props.showGroup}
-                  showAccount={this.showAccountColumn()}
-                  columnOrder={this.props.columnOrder}
+                  {...(this.state.outgoingColumns ?? this.getRegisterColumns())}
                   allowReorder={
                     !!accountId &&
                     accountId !== 'offbudget' &&
