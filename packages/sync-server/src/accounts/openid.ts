@@ -79,6 +79,22 @@ export async function bootstrapOpenId(configParameter: ConfigParameter) {
   return {};
 }
 
+// openid-client expects RS256 unless the client says otherwise, so a provider
+// that signs ID tokens with another algorithm (ES256, EdDSA, ...) is rejected.
+// Keep RS256 whenever the provider offers it, so existing setups do not change,
+// and otherwise use the first algorithm it advertises.
+export function pickIdTokenSignedResponseAlg(issuer: Issuer): string {
+  const supported = issuer.metadata.id_token_signing_alg_values_supported;
+  if (!Array.isArray(supported)) {
+    return 'RS256';
+  }
+  const signed = supported.filter(alg => alg !== 'none');
+  if (signed.length === 0 || signed.includes('RS256')) {
+    return 'RS256';
+  }
+  return signed[0];
+}
+
 async function setupOpenIdClient(configParameter) {
   const issuer =
     typeof configParameter.issuer === 'string'
@@ -98,6 +114,9 @@ async function setupOpenIdClient(configParameter) {
       configParameter.server_hostname,
     ).toString(),
     validate_id_token: true,
+    id_token_signed_response_alg:
+      configParameter.id_token_signed_response_alg ||
+      pickIdTokenSignedResponseAlg(issuer),
   });
 
   return client;

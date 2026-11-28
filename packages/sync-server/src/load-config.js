@@ -271,6 +271,12 @@ const configSchema = convict({
       default: '',
       env: 'ACTUAL_OPENID_SERVER_HOSTNAME',
     },
+    id_token_signed_response_alg: {
+      doc: 'Algorithm the provider signs ID tokens with. Empty means read it from the provider discovery document.',
+      format: String,
+      default: '',
+      env: 'ACTUAL_OPENID_ID_TOKEN_SIGNED_RESPONSE_ALG',
+    },
     authMethod: {
       doc: 'OpenID authentication method.',
       format: ['openid', 'oauth2'],
