@@ -15,8 +15,8 @@ export function flatten2<T>(arr: T[][]): T[] {
   return Array.prototype.concat.apply([], arr);
 }
 
-export function unflatten2<T>(arr: T[]): Array<[T, T]> {
-  const res: Array<[T, T]> = [];
+export function unflatten2<T>(arr: T[]): Array<[T, T | undefined]> {
+  const res: Array<[T, T | undefined]> = [];
   for (let i = 0; i < arr.length; i += 2) {
     res.push([arr[i], arr[i + 1]]);
   }
