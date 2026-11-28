@@ -1637,17 +1637,25 @@ class AccountInternal extends PureComponent<
     ids: TransactionEntity['id'][],
   ) => {
     const scheduleIds = ids.map(id => id.split('/')[1]);
+    // Preview ids are `preview/<schedule_id>/<date>`
+    const occurrences = ids.map(id => {
+      const [, scheduleId, date] = id.split('/');
+      return { id: scheduleId, date };
+    });
 
     switch (name) {
       case 'post-transaction':
-        for (const id of scheduleIds) {
-          await send('schedule/post-transaction', { id });
+        for (const occurrence of occurrences) {
+          await send('schedule/post-transaction', occurrence);
         }
         void this.refetchTransactions();
         break;
       case 'post-transaction-today':
-        for (const id of scheduleIds) {
-          await send('schedule/post-transaction', { id, today: true });
+        for (const occurrence of occurrences) {
+          await send('schedule/post-transaction', {
+            ...occurrence,
+            today: true,
+          });
         }
         void this.refetchTransactions();
         break;

@@ -170,6 +170,8 @@ The utility company decided to withdraw the funds on the 10th of this month.
 
 If you post the bill from the schedule menu or from the upcoming transaction in the account, Actual treats it as the payment for the 15th. **Post transaction** dates the transaction on the scheduled date (the 15th). **Post transaction today** dates it today (the 10th), so it matches your bank statement. The schedule moves on to the 15th of next month, and no upcoming transaction shows for this month. A one-time schedule is marked as completed.
 
+If your upcoming length shows more than one date of a schedule, you can post any of them. Actual treats the transaction as the payment for the date you selected. If an earlier date is not paid yet, the transaction pays that earlier date instead, so a missed payment is never skipped.
+
 If you enter the transaction yourself instead, it is outside the 2-day window and does not match the schedule.
 You'll see your bill in the Actual account ledger, but you'll also see an upcoming transaction for the power bill on the 15th. To remove it, select the upcoming scheduled transaction and choose "Skip Scheduled Date" from the menu options.
 

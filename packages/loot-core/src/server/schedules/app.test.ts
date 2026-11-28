@@ -1041,6 +1041,182 @@ describe('schedule app', () => {
         expect(transactions.map(t => t.date)).toEqual(['2017-01-09']);
         expect(schedule.next_date).toBe('2017-02-10');
       });
+
+      describe('a later upcoming occurrence', () => {
+        async function postOccurrences(
+          start: string,
+          posts: Array<{ date?: string; today?: boolean }>,
+          // Dates of transactions linked to the schedule before the posts
+          linkedDates: string[] = [],
+        ) {
+          const accountId = await db.insertAccount({ name: 'Checking' });
+          const id = await createSchedule({
+            conditions: [
+              { op: 'is', field: 'account', value: accountId },
+              { op: 'is', field: 'amount', value: -10000 },
+              {
+                op: 'is',
+                field: 'date',
+                value: { start, frequency: 'weekly', patterns: [] },
+              },
+            ],
+          });
+
+          for (const date of linkedDates) {
+            await db.insertTransaction({
+              account: accountId,
+              amount: -10000,
+              date,
+              schedule: id,
+            });
+          }
+          for (const post of posts) {
+            await postTransactionForSchedule({ id, ...post });
+          }
+
+          const { data: transactions } = await aqlQuery(
+            q('transactions')
+              .filter({ schedule: id })
+              .orderBy('date')
+              .select(['date']),
+          );
+          const {
+            data: [schedule],
+          } = await aqlQuery(
+            q('schedules').filter({ id }).select(['next_date']),
+          );
+
+          return {
+            dates: transactions.map(t => t.date),
+            nextDate: schedule.next_date,
+          };
+        }
+
+        it('posts on its own date and moves past it when the earlier one is paid', async () => {
+          expect(
+            await postOccurrences('2017-01-01', [{}, { date: '2017-01-08' }]),
+          ).toEqual({
+            dates: ['2017-01-01', '2017-01-08'],
+            nextDate: '2017-01-15',
+          });
+        });
+
+        it('posts today and moves past it when the earlier one is paid', async () => {
+          expect(
+            await postOccurrences('2017-01-01', [
+              {},
+              { date: '2017-01-08', today: true },
+            ]),
+          ).toEqual({
+            dates: ['2017-01-01', '2017-01-01'],
+            nextDate: '2017-01-15',
+          });
+        });
+
+        it('pays an earlier unpaid occurrence first', async () => {
+          expect(
+            await postOccurrences('2017-01-05', [{ date: '2017-01-12' }]),
+          ).toEqual({
+            dates: ['2017-01-05'],
+            nextDate: '2017-01-12',
+          });
+        });
+
+        it('pays an earlier unpaid occurrence first when posted today', async () => {
+          expect(
+            await postOccurrences('2017-01-05', [
+              { date: '2017-01-12', today: true },
+            ]),
+          ).toEqual({
+            dates: ['2017-01-01'],
+            nextDate: '2017-01-12',
+          });
+        });
+
+        it('pays the first unpaid occurrence before the selected one', async () => {
+          expect(
+            await postOccurrences('2017-01-01', [{}, { date: '2017-01-15' }]),
+          ).toEqual({
+            dates: ['2017-01-01', '2017-01-08'],
+            nextDate: '2017-01-15',
+          });
+        });
+
+        it('counts a late payment of `next_date` as paid, like its status', async () => {
+          expect(
+            await postOccurrences(
+              '2017-01-01',
+              [{ date: '2017-01-08' }],
+              ['2017-01-03'],
+            ),
+          ).toEqual({
+            dates: ['2017-01-03', '2017-01-08'],
+            nextDate: '2017-01-15',
+          });
+        });
+
+        it('posts nothing when the selected occurrence is already paid', async () => {
+          expect(
+            await postOccurrences(
+              '2017-01-05',
+              [{ date: '2017-01-12' }],
+              ['2017-01-05', '2017-01-12'],
+            ),
+          ).toEqual({
+            dates: ['2017-01-05', '2017-01-12'],
+            nextDate: '2017-01-05',
+          });
+        });
+
+        it('posts nothing when the same occurrence is posted again', async () => {
+          expect(
+            await postOccurrences('2017-01-05', [
+              { date: '2017-01-05' },
+              { date: '2017-01-05' },
+            ]),
+          ).toEqual({
+            dates: ['2017-01-05'],
+            nextDate: '2017-01-12',
+          });
+        });
+
+        it('skips a later occurrence paid on its date when posting early', async () => {
+          expect(
+            await postOccurrences('2017-01-05', [{}], ['2017-01-12']),
+          ).toEqual({
+            dates: ['2017-01-05', '2017-01-12'],
+            nextDate: '2017-01-19',
+          });
+        });
+
+        it('moves a daily schedule with an approximate date by one day', async () => {
+          const accountId = await db.insertAccount({ name: 'Checking' });
+          const id = await createSchedule({
+            conditions: [
+              { op: 'is', field: 'account', value: accountId },
+              { op: 'is', field: 'amount', value: -10000 },
+              {
+                op: 'isapprox',
+                field: 'date',
+                value: {
+                  start: '2017-01-05',
+                  frequency: 'daily',
+                  patterns: [],
+                },
+              },
+            ],
+          });
+
+          await postTransactionForSchedule({ id });
+
+          const {
+            data: [schedule],
+          } = await aqlQuery(
+            q('schedules').filter({ id }).select(['next_date']),
+          );
+          expect(schedule.next_date).toBe('2017-01-06');
+        });
+      });
     });
 
     it('auto-posts every missed recurring occurrence while catching up', async () => {
