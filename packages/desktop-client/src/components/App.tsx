@@ -1,4 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ErrorBoundary, useErrorBoundary } from 'react-error-boundary';
@@ -46,7 +51,22 @@ import { Modals } from './Modals';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
 
+function subscribeToViewport(callback: () => void) {
+  window.addEventListener('resize', callback);
+  return () => window.removeEventListener('resize', callback);
+}
+
 function AppInner() {
+  const viewportReady = useSyncExternalStore(
+    subscribeToViewport,
+    () => window.innerWidth > 0,
+    () => false,
+  );
+
+  return viewportReady ? <AppReady /> : <AppBackground />;
+}
+
+function AppReady() {
   const [budgetId] = useMetadataPref('id');
   const [cloudFileId] = useMetadataPref('cloudFileId');
   const { t } = useTranslation();
