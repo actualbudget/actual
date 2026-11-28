@@ -3,22 +3,25 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Text } from '@actual-app/components/text';
-import darkThemeCss from '@actual-app/components/themes/dark.css?inline';
-import lightThemeCss from '@actual-app/components/themes/light.css?inline';
-import midnightThemeCss from '@actual-app/components/themes/midnight.css?inline';
-import paletteCss from '@actual-app/components/themes/palette.css?inline';
+import { theme } from '@actual-app/components/theme';
+import {
+  darkThemeCss,
+  lightThemeCss,
+  midnightThemeCss,
+  paletteCss,
+} from '@actual-app/components/themes';
 import { View } from '@actual-app/components/view';
 import type { Theme } from '@actual-app/core/types/prefs';
 import { Command } from 'cmdk';
 
 import { useThemeCatalog } from '#hooks/useThemeCatalog';
 import { themeOptions } from '#style';
-import type { CatalogTheme } from '#style/customThemes';
 import {
   extractRepoOwner,
   generateThemeId,
   normalizeGitHubRepo,
 } from '#style/customThemes';
+import type { CatalogTheme } from '#style/customThemes';
 
 import { Highlight, KeyChip } from './primitives';
 import { paletteGroupClassName, paletteItemClassName } from './styles';
@@ -33,13 +36,24 @@ for (const match of paletteCss.matchAll(/(--palette-[\w-]+):\s*([^;]+);/g)) {
   PALETTE_VALUES.set(match[1], match[2].trim());
 }
 
+function resolveColor(
+  value: string,
+  colors: Map<string, string>,
+): string | null {
+  const varRef = value.match(/^var\((--(?:palette|color)-[\w-]+)\)$/);
+  if (!varRef) return value;
+  const resolved = colors.get(varRef[1]);
+  return resolved ? resolveColor(resolved, colors) : null;
+}
+
 /** Resolve a `--color-*` token from raw theme CSS to a concrete color. */
 function resolveThemeColor(themeCss: string, token: string): string | null {
-  const match = themeCss.match(new RegExp(`--color-${token}:\\s*([^;]+);`));
-  if (!match) return null;
-  const value = match[1].trim();
-  const varRef = value.match(/^var\((--palette-[\w-]+)\)$/);
-  return varRef ? (PALETTE_VALUES.get(varRef[1]) ?? null) : value;
+  const colors = new Map(PALETTE_VALUES);
+  for (const match of themeCss.matchAll(/(--color-[\w-]+):\s*([^;]+);/g)) {
+    colors.set(match[1], match[2].trim());
+  }
+  const value = colors.get(`--color-${token}`);
+  return value ? resolveColor(value, colors) : null;
 }
 
 // mirrors the 6-color previews that community themes ship in the catalog
@@ -126,7 +140,7 @@ function ThemeSwatches({ colors }: { colors: string[] }) {
             height: SWATCH_SIZE,
             borderRadius: '50%',
             backgroundColor: color,
-            border: '1.5px solid var(--color-modalBackground)',
+            border: `1.5px solid ${theme.modalBackground}`,
             // later circles sit on top of earlier ones
             zIndex: idx,
           }}
@@ -149,7 +163,7 @@ function CurrentBadge() {
       style={{
         flexShrink: 0,
         fontSize: 11.5,
-        color: 'var(--color-pageTextPositive)',
+        color: theme.pageTextPositive,
       }}
     >
       <Trans>Current</Trans>
@@ -230,7 +244,7 @@ export function ThemePage({
               alignItems: 'center',
               gap: 8,
               padding: '7px 10px',
-              color: 'var(--color-pageTextSubdued)',
+              color: theme.pageTextSubdued,
             }}
           >
             <AnimatedLoading style={{ width: 14, height: 14 }} />
@@ -245,7 +259,7 @@ export function ThemePage({
               display: 'block',
               padding: '7px 10px',
               fontSize: 13,
-              color: 'var(--color-pageTextSubdued)',
+              color: theme.pageTextSubdued,
             }}
           >
             <Trans>Could not load the community theme catalog.</Trans>
@@ -266,7 +280,7 @@ export function ThemePage({
               style={{
                 flexShrink: 0,
                 fontSize: 11.5,
-                color: 'var(--color-pageTextSubdued)',
+                color: theme.pageTextSubdued,
               }}
             >
               {t('by {{creator}}', { creator: extractRepoOwner(item.repo) })}

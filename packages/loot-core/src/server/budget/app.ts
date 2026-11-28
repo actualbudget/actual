@@ -334,14 +334,33 @@ async function updateCategory(category: CategoryEntity): Promise<void> {
     // The API types `fields` as a Partial, and db.update() only writes the
     // keys it is given, so a partial that omits `name` must stay omitted
     // rather than being trimmed into a TypeError (#8857).
+    if (category.group !== undefined) {
+      if (!category.group) {
+        throw APIError('Updating a category: groupId is required');
+      }
+
+      const existingGroup = await db.first<{ id: string }>(
+        `SELECT id FROM category_groups
+       WHERE id = ? AND tombstone = 0`,
+        [category.group],
+      );
+
+      if (!existingGroup) {
+        throw APIError('Updating a category: category group does not exist');
+      }
+    }
+
     const payload = {
       ...category,
-      ...(category.name !== undefined && { name: category.name.trim() }),
+      ...(category.name !== undefined && {
+        name: category.name.trim(),
+      }),
     };
-    // Convert first so ignored/underscore fields are dropped before we decide
-    // whether anything writable remains (e.g. `{ id, _ignored: true }` → `{ id }`).
+
     const update = categoryModel.toDb(payload, { update: true });
+
     const hasWritableField = Object.keys(update).some(key => key !== 'id');
+
     if (!hasWritableField) {
       throw APIError('No fields to update');
     }

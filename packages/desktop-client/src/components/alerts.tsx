@@ -37,9 +37,6 @@ export const Alert = ({
         backgroundColor,
         padding: 10,
         flexDirection: 'row',
-        '& a, & a:active, & a:visited': {
-          color: theme.formLabelText,
-        },
         ...style,
       }}
     >

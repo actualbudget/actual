@@ -34,14 +34,15 @@
     "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
     "start:storybook": "yarn workspace @actual-app/components start:storybook",
     "build": "lage build",
-    "start:ios": "yarn build:browser && yarn workspace mobile-client start:ios",
-    "start:android": "yarn build:browser && yarn workspace mobile-client start:android",
+    "start:ios": "yarn build:browser --mobile && yarn workspace mobile-client start:ios",
+    "start:android": "yarn build:browser --mobile && yarn workspace mobile-client start:android",
     "build:server": "yarn build:browser && yarn workspace @actual-app/sync-server build",
     "build:browser": "./bin/package-browser",
     "build:desktop": "./bin/package-electron",
     "build:plugins-service": "yarn workspace plugins-service build",
     "build:api": "yarn build --scope=@actual-app/api",
     "build:mobile": "yarn build --scope=mobile-client",
+    "release:android": "yarn build:browser --mobile && yarn workspace mobile-client release:android",
     "build:cli": "yarn build --scope=@actual-app/cli",
     "build:docs": "yarn workspace docs build",
     "build:storybook": "yarn workspace @actual-app/components build:storybook",
@@ -49,6 +50,7 @@
     "generate:i18n": "yarn workspace @actual-app/web generate:i18n",
     "generate:release-notes": "node ./bin/release-note-generator.mts",
     "generate:news-feed": "yarn workspace @actual-app/ci-actions tsx bin/generate-news-feed.ts",
+    "generate:theme-reference": "yarn workspace @actual-app/ci-actions tsx bin/generate-theme-reference.ts && oxfmt packages/docs/docs/custom-themes-variables.md",
     "test": "lage test --continue",
     "test:debug": "lage test --no-cache --continue",
     "e2e": "yarn workspace @actual-app/web run e2e",
@@ -66,7 +68,8 @@
     "typecheck": "tsgo -p tsconfig.root.json --noEmit && lage typecheck",
     "check:tsconfig-references": "workspaces-to-typescript-project-references --check",
     "sync:tsconfig-references": "workspaces-to-typescript-project-references",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "lage cache --prune 14 || true"
   },
   "devDependencies": {
     "@monorepo-utils/workspaces-to-typescript-project-references": "^2.11.0",
@@ -84,11 +87,11 @@
     "minimatch": "^10.2.6",
     "nano-staged": "^1.0.2",
     "npm-run-all": "^4.1.5",
-    "oxfmt": "^0.73.0",
-    "oxlint": "^1.88.0",
-    "oxlint-tsgolint": "^7.0.2004",
+    "oxfmt": "^0.80.0",
+    "oxlint": "^1.95.0",
     "p-limit": "^7.3.3",
     "prompts": "^2.4.2",
+    "tsrs": "^7.1.0-beta.tsrs3",
     "typescript": "^6.0.3",
     "vitest": "^5.0.4"
   },
@@ -116,11 +119,7 @@
     "glob-hasher-linux-arm64-gnu": "1.4.2"
   },
   "resolutions": {
-    "minimatch@3.1.2": "3.1.5",
-    "serialize-javascript": "^7.0.5",
-    "socks": ">=2.8.3",
-    "vite-plugin-node-polyfills": "patch:vite-plugin-node-polyfills@npm%3A0.28.0#~/.yarn/patches/vite-plugin-node-polyfills-npm-0.28.0-bac39616ee.patch",
-    "webpackbar": "^7.0.0"
+    "serialize-javascript": "^7.0.5"
   },
   "browserslist": [
     "electron >= 35.0",
@@ -130,5 +129,5 @@
     "node": ">=22.18.0",
     "yarn": "^4.9.1"
   },
-  "packageManager": "yarn@4.17.1"
+  "packageManager": "yarn@4.19.0"
 }

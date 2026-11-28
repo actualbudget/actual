@@ -53,10 +53,10 @@ export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
             fontSize: 11,
             fontWeight: 600,
             textTransform: 'uppercase',
-            color: isRelease ? theme.noticeText : theme.pillTextSelected,
+            color: isRelease ? theme.noticeText : theme.infoText,
             backgroundColor: isRelease
               ? theme.noticeBackground
-              : theme.pillBackgroundSelected,
+              : theme.infoBackground,
           }}
         >
           {isRelease ? (
@@ -76,6 +76,7 @@ export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
                 width: 8,
                 height: 8,
                 borderRadius: 4,
+                // oxlint-disable-next-line actual/theme-token-roles
                 backgroundColor: theme.pageTextPositive,
               }}
             />

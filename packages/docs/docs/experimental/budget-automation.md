@@ -65,6 +65,8 @@ The projected amount to be budgeted will be shown in the top right of the automa
 
 Don't forget to **Save** your work when you are finished adding and editing automations.
 
+Saving also sets the category's goal for the month the projected amount is shown for (the month furthest to the left in your budget view, or the month you are viewing on mobile), so the [budget indicator](#budget-indicator) and goal status appear right away, and **Fund goal from To Budget** can be used without running the automations first. Saving never changes how much is budgeted. Other months get their goal when you apply automations to them.
+
 :::
 
 ### Priorities {#priorities}
@@ -170,6 +172,7 @@ Choose a mode (A) and the number of months back (B). This is another automation 
 
 - **Copy a previous month.** This will copy the **budget** from a previous month.
 - **Average of previous months.** This will average the **spending** from the previous number of months you choose. The average is calculated from completed months only, to ensure the amount accurately reflects actual spending behavior.
+- **Average of previous weeks.** This will average the weekly **spending** over the number of weeks you choose, then budget that amount once for every occurrence of the chosen weekday in the month. A month with five Fridays gets five weeks' worth. The weeks are the complete 7-day weeks ending the day before the month starts (or yesterday, for future months). Adjustments apply to the weekly amount.
 
 ### % of Income {#percentage}
 
@@ -298,11 +301,11 @@ There are 3 Fridays in July, but the Balance cap holds our grocery budget at 600
 
 ### Budget Indicator {#budget-indicator}
 
-After automations run, each category’s budget indicator appears as the color of its balance text. Click a balance to see its goal status at the top of the balance menu.
+After automations run, each category’s budget indicator appears as the color of its balance text. Categories whose projected budget is not yet met also show a small ring beside the balance, which fills as the category is funded. On desktop, hover over the ring to see how much of the goal is funded, or click a balance to see its goal status at the top of the balance menu.
 
-The example below shows these states: normal (no automation), empty (no automation), projected budget met (green), projected budget not met (orange), and negative balance (red).
+The example below shows these states: normal (no automation), empty (no automation), projected budget met (green), projected budget not met (yellow, with a partly filled ring), and negative balance (red).
 
-<img width="724" alt="Category balances in the normal, empty, green, orange and red states" src="/img/experimental/budget-automation-indicators@2x.webp" />
+<img width="724" alt="Category balances in the normal, empty, green, yellow with a partly filled ring, and red states" src="/img/experimental/budget-automation-indicators@2x.webp" />
 
 The goal status gives you more information about your budget and balance, including a progress bar:
 
@@ -312,16 +315,16 @@ The goal status gives you more information about your budget and balance, includ
 
 ### Long-term Goal {#long-term-goal}
 
-Long-term goals change how the budget indicator works. Instead of being based on the budgeted amount, the balance coloring will indicate how much progress you have made toward a desired target. Importantly, if you have met your projected budget for the month but are shy of your long-term goal the balance will remain orange.
+Long-term goals change how the budget indicator works. Instead of being based on the budgeted amount, the balance coloring and ring will indicate how much progress you have made toward a desired target. Importantly, if you have met your projected budget for the month but are shy of your long-term goal the balance will remain yellow.
 
-Once you hit your goal, the balance will turn green. Note that if you remove funds and fall short, it will turn orange again.
+Once you hit your goal, the balance will turn green and the ring disappears. Note that if you remove funds and fall short, it will turn yellow again.
 
 <img width="960" alt="The long-term goal form with a target of 1,500.00" src="/img/experimental/budget-automation-long-term@2x.webp" />
 
 :::tip
 
 - The long-term goal does not automatically add funds or stop funds from being added after the goal has been hit. To stop automated funds from being added after you reach the goal, add a _Balance cap_ to the category.
-- You can have a long-term goal without any other automations and budget manually toward your goal. You will still need to run the automations on the category to see the indicator and goal status.
+- You can have a long-term goal without any other automations and budget manually toward your goal. Saving the long-term goal shows the indicator and goal status for the month the automations editor is showing; for other months, you will still need to run the automations on the category.
 :::
 
 The goal status shows your progress:

@@ -1,4 +1,11 @@
-const BUILD_OUTPUT_GLOBS = ['lib-dist/**', 'dist/**', 'build/**', '@types/**'];
+const CONCURRENCY = 2;
+const BUILD_OUTPUT_GLOBS = [
+  'lib-dist/**',
+  'dist/**',
+  'build/**',
+  '@types/**',
+  'app/stats.json',
+];
 
 /** @type {import('lage').ConfigOptions} */
 module.exports = {
@@ -9,21 +16,13 @@ module.exports = {
     },
     test: {
       type: 'npmScript',
-      options: {
-        outputGlob: [
-          'coverage/**',
-          '**/test-results/**',
-          '**/playwright-report/**',
-        ],
-      },
+      outputs: ['coverage/**', '**/test-results/**', '**/playwright-report/**'],
     },
     build: {
       type: 'npmScript',
       dependsOn: ['^build'],
       cache: true,
-      options: {
-        outputGlob: BUILD_OUTPUT_GLOBS,
-      },
+      outputs: BUILD_OUTPUT_GLOBS,
     },
     // Not cached: the script stages files into public/ and build-stats/ that
     // fall outside BUILD_OUTPUT_GLOBS, so a cache hit would skip the side
@@ -33,13 +32,25 @@ module.exports = {
       dependsOn: ['^build'],
       cache: false,
     },
+    'build:mobile': {
+      type: 'npmScript',
+      dependsOn: ['^build'],
+      cache: false,
+      weight: CONCURRENCY,
+    },
+    'mobile-client#build': {
+      type: 'npmScript',
+      dependsOn: ['^build', '@actual-app/web#build:mobile'],
+      cache: true,
+      outputs: BUILD_OUTPUT_GLOBS,
+    },
   },
   cacheOptions: {
     cacheStorageConfig: {
       provider: 'local',
-      outputGlob: BUILD_OUTPUT_GLOBS,
     },
+    outputGlob: BUILD_OUTPUT_GLOBS,
   },
   npmClient: 'yarn',
-  concurrency: 2,
+  concurrency: CONCURRENCY,
 };

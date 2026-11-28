@@ -17,6 +17,7 @@ describe('syncStatus', () => {
     expect(isAccountFailedSync(makeAccount('reauth-required'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('rate-limit-exceeded'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('timed-out'))).toBe(true);
+    expect(isAccountFailedSync(makeAccount('server-down'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('account-missing'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('not-configured'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('pending'))).toBe(false);
@@ -47,6 +48,10 @@ describe('syncStatus', () => {
     expect(getFailedSyncError(makeAccount('timed-out'))).toEqual({
       type: 'TIMED_OUT',
       code: 'TIMED_OUT',
+    });
+    expect(getFailedSyncError(makeAccount('server-down'))).toEqual({
+      type: 'SERVER_DOWN',
+      code: 'SERVER_DOWN',
     });
     expect(getFailedSyncError(makeAccount('account-missing'))).toEqual({
       type: 'ACCOUNT_MISSING',

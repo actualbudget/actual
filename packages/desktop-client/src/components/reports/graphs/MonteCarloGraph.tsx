@@ -12,13 +12,13 @@ import {
 
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
-import type {
-  FanChartDataPoint,
-  MonteCarloGraphView,
-} from '#components/reports/graphs/MonteCarloGraphTooltip';
 import {
   MonteCarloGraphTooltip,
   VIEW_DATA_KEYS,
+} from '#components/reports/graphs/MonteCarloGraphTooltip';
+import type {
+  FanChartDataPoint,
+  MonteCarloGraphView,
 } from '#components/reports/graphs/MonteCarloGraphTooltip';
 import { computePadding } from '#components/reports/graphs/util/computePadding';
 import { useMonteCarloTickFormatter } from '#components/reports/graphs/util/useMonteCarloTickFormatter';

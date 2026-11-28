@@ -164,7 +164,10 @@ export async function enableOpenID(loginSettings) {
     return { error };
   }
 
-  getAccountDb().mutate('DELETE FROM sessions');
+  getAccountDb().transaction(() => {
+    getAccountDb().mutate('DELETE FROM sessions');
+    getAccountDb().mutate('DELETE FROM api_keys');
+  });
 }
 
 export async function disableOpenID(loginSettings) {
@@ -200,6 +203,7 @@ export async function disableOpenID(loginSettings) {
   try {
     accountDb.transaction(() => {
       accountDb.mutate('DELETE FROM sessions');
+      accountDb.mutate('DELETE FROM api_keys');
       accountDb.mutate(
         `DELETE FROM user_access
                               WHERE user_access.user_id IN (

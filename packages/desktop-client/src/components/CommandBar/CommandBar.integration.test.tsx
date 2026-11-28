@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { send } from '@actual-app/core/platform/client/connection';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CommandBar } from './CommandBar';
@@ -8,6 +9,10 @@ const mutate = vi.fn();
 const startTour = vi.fn();
 let modalStack: unknown[] = [];
 let open = true;
+
+vi.mock('@actual-app/core/platform/client/connection', () => ({
+  send: vi.fn(),
+}));
 
 vi.mock('#redux', () => ({
   useDispatch: () => dispatch,
@@ -102,6 +107,41 @@ describe('CommandBar integration', () => {
     fireEvent.click(screen.getByText('Take a tour of Actual'));
 
     expect(startTour).toHaveBeenCalledTimes(1);
+  });
+
+  it('saves the export and surfaces upstream backup safety warnings', async () => {
+    vi.mocked(send).mockResolvedValueOnce({
+      data: new Uint8Array([1, 2, 3]),
+      warnings: ['exceeds-import-size-limit', 'may-exceed-available-memory'],
+    });
+    const saveFile = vi.fn().mockResolvedValue(undefined);
+    window.Actual.saveFile = saveFile;
+    render(<CommandBar />);
+    fireEvent.click(screen.getByText('Export budget data'));
+
+    await waitFor(() => expect(saveFile).toHaveBeenCalledTimes(1));
+    expect(send).toHaveBeenCalledWith('export-budget');
+    expect(saveFile).toHaveBeenCalledWith(
+      new Uint8Array([1, 2, 3]),
+      expect.stringMatching(/-Budget\.zip$/),
+      'Export budget',
+    );
+    for (const id of [
+      'export-exceeds-import-size-limit',
+      'export-may-exceed-available-memory',
+    ]) {
+      expect(dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payload: {
+            notification: expect.objectContaining({
+              id,
+              type: 'warning',
+              sticky: true,
+            }),
+          },
+        }),
+      );
+    }
   });
 
   it('returns from themes on Escape without closing the palette', () => {

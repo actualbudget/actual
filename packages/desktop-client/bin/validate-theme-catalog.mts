@@ -2,11 +2,11 @@ import { appendFileSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import type { CatalogTheme } from '../src/style/customThemes.ts';
 import {
   embedThemeFonts,
   validateThemeCss,
 } from '../src/style/customThemes.ts';
+import type { CatalogTheme } from '../src/style/customThemes.ts';
 
 const MAX_CSS_BYTES = 512 * 1024;
 const FETCH_TIMEOUT_MS = 15_000;

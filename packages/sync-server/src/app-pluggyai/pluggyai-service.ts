@@ -1,0 +1,168 @@
+import createDebug from 'debug';
+import { PluggyClient } from 'pluggy-sdk';
+
+import { SecretName, secretsService } from '#services/secrets-service';
+
+const debugSensitive = createDebug('actual-sensitive:pluggy');
+
+const pluggyClients = new Map<string, PluggyClient>();
+
+function hasCredentials(fileId: string | null = null) {
+  return !!(
+    secretsService.get(SecretName.pluggyai_clientId, fileId) &&
+    secretsService.get(SecretName.pluggyai_clientSecret, fileId) &&
+    secretsService.get(SecretName.pluggyai_itemIds, fileId)
+  );
+}
+
+function getCredentialSource(fileId?: string | null, allowGlobal = true) {
+  if (!!fileId && hasCredentials(fileId)) {
+    return 'per-budget-file';
+  }
+
+  if (allowGlobal && hasCredentials()) {
+    return 'global';
+  }
+
+  return null;
+}
+
+function getCredentialsCacheEntry(credentialFileId?: string | null) {
+  const clientId = secretsService.get(
+    SecretName.pluggyai_clientId,
+    credentialFileId,
+  );
+  const clientSecret = secretsService.get(
+    SecretName.pluggyai_clientSecret,
+    credentialFileId,
+  );
+
+  return {
+    cacheKey: JSON.stringify({
+      fileId: credentialFileId,
+      [SecretName.pluggyai_clientId]: clientId,
+      [SecretName.pluggyai_clientSecret]: clientSecret,
+    }),
+    clientId,
+    clientSecret,
+  };
+}
+
+function getPluggyClient(fileId?: string | null, allowGlobal?: boolean) {
+  const credentialSource = getCredentialSource(fileId, allowGlobal);
+  if (!credentialSource) {
+    throw new Error('Pluggy credentials are not configured');
+  }
+
+  const credentialFileId =
+    credentialSource === 'per-budget-file' ? fileId : null;
+  const { cacheKey, clientId, clientSecret } =
+    getCredentialsCacheEntry(credentialFileId);
+  if (!clientId || !clientSecret) {
+    throw new Error('Pluggy credentials are not configured');
+  }
+
+  let pluggyClient = pluggyClients.get(cacheKey);
+  if (!pluggyClient) {
+    pluggyClient = new PluggyClient({
+      clientId,
+      clientSecret,
+    });
+    pluggyClients.set(cacheKey, pluggyClient);
+  }
+
+  return pluggyClient;
+}
+
+export const pluggyaiService = {
+  isConfigured: (fileId?: string | null) => getCredentialSource(fileId) != null,
+
+  getCredentialSource,
+
+  getAccountsByItemId: async (
+    itemId: string,
+    fileId?: string | null,
+    allowGlobal = true,
+  ) => {
+    try {
+      const client = getPluggyClient(fileId, allowGlobal);
+      const { results, total, ...rest } = await client.fetchAccounts(itemId);
+      return {
+        results,
+        total,
+        ...rest,
+        hasError: false,
+        errors: {},
+      };
+    } catch (error) {
+      console.error('Error fetching accounts');
+      debugSensitive('Error fetching accounts: %O', error);
+      throw error;
+    }
+  },
+  getAccountById: async (
+    accountId: string,
+    fileId?: string | null,
+    allowGlobal = true,
+  ) => {
+    try {
+      const client = getPluggyClient(fileId, allowGlobal);
+      const account = await client.fetchAccount(accountId);
+      return {
+        ...account,
+        hasError: false,
+        errors: {},
+      };
+    } catch (error) {
+      console.error('Error fetching account');
+      debugSensitive('Error fetching account: %O', error);
+      throw error;
+    }
+  },
+
+  getTransactionsByAccountId: async (
+    accountId: string,
+    startDate: string,
+    fileId?: string | null,
+    allowGlobal = true,
+  ) => {
+    try {
+      const client = getPluggyClient(fileId, allowGlobal);
+
+      const account = await pluggyaiService.getAccountById(
+        accountId,
+        fileId,
+        allowGlobal,
+      );
+
+      // the sandbox data doesn't move the dates automatically so the
+      // transactions are often older than 90 days. The owner on one of the
+      // sandbox accounts is set to John Doe so in these cases we'll ignore
+      // the start date.
+      const sandboxAccount = account.owner === 'John Doe';
+
+      if (sandboxAccount) startDate = '2000-01-01';
+
+      let transactions = await client.fetchAllTransactions(accountId, {
+        dateFrom: startDate,
+      });
+
+      if (sandboxAccount) {
+        transactions = transactions.map(t => ({
+          ...t,
+          sandbox: true,
+        }));
+      }
+
+      return {
+        ...transactions,
+        hasError: false,
+        errors: {},
+      };
+    } catch (error) {
+      console.error('Error fetching transactions');
+      debugSensitive('Error fetching transactions: %O', error);
+      throw error;
+    }
+  },
+};

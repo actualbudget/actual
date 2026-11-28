@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
@@ -16,7 +17,7 @@ export function Highlight({ text, query }: { text: string; query: string }) {
   return (
     <>
       {text.slice(0, start)}
-      <Text style={{ color: 'var(--color-pageTextPositive)', fontWeight: 700 }}>
+      <Text style={{ color: theme.pageTextPositive, fontWeight: 700 }}>
         {text.slice(start, end)}
       </Text>
       {text.slice(end)}
@@ -30,12 +31,12 @@ export function KeyChip({ children }: { children: ReactNode }) {
       style={{
         flexShrink: 0,
         padding: '2px 6px',
-        backgroundColor: 'var(--color-pillBackground)',
+        backgroundColor: theme.pillBackground,
         borderRadius: 5,
         fontSize: 10.5,
         fontWeight: 600,
         letterSpacing: 0.2,
-        color: 'var(--color-pillTextSubdued)',
+        color: theme.pillText,
       }}
     >
       {children}
@@ -61,7 +62,7 @@ export function FooterHint({
       {keys.map(key => (
         <KeyChip key={key}>{key}</KeyChip>
       ))}
-      <Text style={{ fontSize: 11.5, color: 'var(--color-pageTextSubdued)' }}>
+      <Text style={{ fontSize: 11.5, color: theme.pageTextSubdued }}>
         {children}
       </Text>
     </View>
@@ -111,8 +112,8 @@ export function BalanceRow<
               fontSize: 12.5,
               color:
                 typeof props.value === 'number' && props.value < 0
-                  ? 'var(--color-errorText)'
-                  : 'var(--color-pageTextSubdued)',
+                  ? theme.errorText
+                  : theme.pageTextSubdued,
             }}
           />
         )}

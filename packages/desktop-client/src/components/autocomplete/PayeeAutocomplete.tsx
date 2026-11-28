@@ -188,7 +188,6 @@ function PayeeList({
 
   const { newPayee, suggestedPayees, payees, transferPayees, nearbyPayees } =
     useMemo(() => {
-      let currentIndex = 0;
       const result = items.reduce(
         (acc, item) => {
           if (item.id === 'new') {
@@ -214,29 +213,35 @@ function PayeeList({
       );
 
       // assign indexes in render order
+      function withIndex(
+        list: Array<PayeeAutocompleteItem>,
+        startIndex: number,
+      ) {
+        return list.map((item, index) => ({
+          ...item,
+          highlightedIndex: startIndex + index,
+        }));
+      }
+
       const newPayeeWithIndex = result.newPayee
-        ? { ...result.newPayee, highlightedIndex: currentIndex++ }
+        ? { ...result.newPayee, highlightedIndex: 0 }
         : null;
 
-      const nearbyPayeesWithIndex = result.nearbyPayees.map(item => ({
-        ...item,
-        highlightedIndex: currentIndex++,
-      }));
+      const nearbyStart = result.newPayee ? 1 : 0;
+      const suggestedStart = nearbyStart + result.nearbyPayees.length;
+      const payeesStart = suggestedStart + result.suggestedPayees.length;
+      const transferStart = payeesStart + result.payees.length;
 
-      const suggestedPayeesWithIndex = result.suggestedPayees.map(item => ({
-        ...item,
-        highlightedIndex: currentIndex++,
-      }));
-
-      const payeesWithIndex = result.payees.map(item => ({
-        ...item,
-        highlightedIndex: currentIndex++,
-      }));
-
-      const transferPayeesWithIndex = result.transferPayees.map(item => ({
-        ...item,
-        highlightedIndex: currentIndex++,
-      }));
+      const nearbyPayeesWithIndex = withIndex(result.nearbyPayees, nearbyStart);
+      const suggestedPayeesWithIndex = withIndex(
+        result.suggestedPayees,
+        suggestedStart,
+      );
+      const payeesWithIndex = withIndex(result.payees, payeesStart);
+      const transferPayeesWithIndex = withIndex(
+        result.transferPayees,
+        transferStart,
+      );
 
       return {
         newPayee: newPayeeWithIndex,
@@ -672,6 +677,7 @@ export function CreatePayeeButton({
           ? theme.menuAutoCompleteBackgroundHover
           : 'transparent',
         ':active': {
+          // oxlint-disable-next-line actual/no-color-literals
           backgroundColor: 'rgba(100, 100, 100, .25)',
         },
         ...narrowStyle,

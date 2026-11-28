@@ -29,7 +29,9 @@ export function BankSyncStatus() {
     <View
       style={{
         position: 'absolute',
-        top: 0,
+        // Keep the pill below the status bar / notch (non-zero only in the
+        // native mobile app, where the web view covers the whole screen).
+        top: 'env(safe-area-inset-top)',
         left: 0,
         right: 0,
         marginTop: 5,
@@ -44,8 +46,8 @@ export function BankSyncStatus() {
               <View
                 style={{
                   borderRadius: 4,
-                  backgroundColor: theme.pillBackgroundSelected,
-                  color: theme.pillTextSelected,
+                  backgroundColor: theme.infoBackground,
+                  color: theme.infoText,
                   padding: '5px 13px',
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -54,7 +56,7 @@ export function BankSyncStatus() {
               >
                 <AnimatedRefresh
                   animating
-                  iconStyle={{ color: theme.pillTextSelected }}
+                  iconStyle={{ color: theme.infoText }}
                 />
                 <Text style={{ marginLeft: 5 }}>
                   <Trans count={accountsSyncingCount}>

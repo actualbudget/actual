@@ -1,4 +1,5 @@
 import createDebug from 'debug';
+import { fetch } from 'undici';
 
 import type {
   GoCardlessAccountDetails,
@@ -221,7 +222,7 @@ export class GoCardlessApi {
   }: {
     redirectUrl: string;
     institutionId: GoCardlessInstitutionId;
-    agreement: GoCardlessAgreementId;
+    agreement?: GoCardlessAgreementId;
     userLanguage: string;
     reference: string | null;
     ssn: string | null;
@@ -327,6 +328,7 @@ export class GoCardlessApi {
     ssn = null,
     redirectImmediate = false,
     accountSelection = false,
+    skipEndUserAgreement = false,
   }: {
     redirectUrl: string;
     institutionId: GoCardlessInstitutionId;
@@ -337,17 +339,20 @@ export class GoCardlessApi {
     ssn?: string | null;
     redirectImmediate?: boolean;
     accountSelection?: boolean;
+    skipEndUserAgreement?: boolean;
   }): Promise<Requisition> {
-    const agreement = await this.createAgreement({
-      institutionId,
-      maxHistoricalDays: Number(maxHistoricalDays),
-      accessValidForDays: Number(accessValidForDays),
-    });
+    const agreement = skipEndUserAgreement
+      ? undefined
+      : await this.createAgreement({
+          institutionId,
+          maxHistoricalDays: Number(maxHistoricalDays),
+          accessValidForDays: Number(accessValidForDays),
+        });
 
     return this.createRequisition({
       redirectUrl,
       institutionId,
-      agreement: agreement.id,
+      agreement: agreement?.id,
       userLanguage,
       reference: referenceId,
       ssn,

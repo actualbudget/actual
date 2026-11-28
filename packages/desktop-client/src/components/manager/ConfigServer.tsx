@@ -10,6 +10,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { isElectron } from '@actual-app/core/shared/environment';
+import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
 
 import { Link } from '#components/common/Link';
@@ -20,6 +21,11 @@ import { useNavigate } from '#hooks/useNavigate';
 import { saveGlobalPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 import { loggedIn, signOut } from '#users/usersSlice';
+import {
+  canReloadFromServer,
+  isAppOrigin,
+  reloadFromServer,
+} from '#util/reloadFromServer';
 
 import { Title } from './subscribe/common';
 
@@ -311,7 +317,7 @@ export function ConfigServer() {
     switch (error) {
       case 'network-failure':
         return t(
-          'Connection failed. If you use a self-signed certificate or were recently offline, try refreshing the page. Otherwise ensure you have HTTPS set up properly.',
+          'Connection failed. If you use a self-signed certificate or were recently offline, try reloading from the server. Otherwise ensure you have HTTPS set up properly.',
         );
       default:
         return t(
@@ -431,7 +437,7 @@ export function ConfigServer() {
               </Trans>
             )}
           </Text>
-          {!currentUrl && (
+          {!currentUrl && !Platform.isNativeMobileApp && (
             <Text
               style={{
                 fontSize: 16,
@@ -466,6 +472,16 @@ export function ConfigServer() {
               >
                 {getErrorMessage(error)}
               </Text>
+              {error === 'network-failure' &&
+                isAppOrigin(url) &&
+                canReloadFromServer() && (
+                  <Button
+                    onPress={reloadFromServer}
+                    style={{ marginTop: 20, alignSelf: 'flex-start' }}
+                  >
+                    <Trans>Reload from server</Trans>
+                  </Button>
+                )}
               {isElectron() && (
                 <View
                   style={{
@@ -534,7 +550,7 @@ export function ConfigServer() {
               </Button>
             ) : (
               <>
-                {!isElectron() && (
+                {!isElectron() && !Platform.isNativeMobileApp && (
                   <Button
                     variant="bare"
                     style={{ color: theme.pageTextLink }}

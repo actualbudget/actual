@@ -1,13 +1,18 @@
 import React from 'react';
 
 import { generateAccount } from '@actual-app/core/mocks';
-import { q } from '@actual-app/core/shared/query';
 import type { AccountEntity } from '@actual-app/core/types/models';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { useSheetValue } from '#hooks/useSheetValue';
-import { TestProviders } from '#mocks';
+import {
+  configureTestAppStore,
+  createTestQueryClient,
+  TestProviders,
+} from '#mocks';
+import { mergeSyncedPrefs } from '#prefs/prefsSlice';
+import * as bindings from '#spreadsheet/bindings';
 
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
@@ -25,25 +30,40 @@ describe('ReconcilingMessage math & UI', () => {
     vi.clearAllMocks();
   });
 
-  function makeBalanceQuery() {
-    return {
-      name: 'balance-query-test' as const,
-      query: q('transactions'),
-    };
-  }
+  test('reads the cleared balance that the lock step checks', () => {
+    vi.mocked(useSheetValue).mockReturnValue(5000);
+
+    render(
+      <TestProviders>
+        <ReconcilingMessage
+          accountId="account-1"
+          targetBalance={5000}
+          onDone={vi.fn()}
+          onExit={vi.fn()}
+          onCreateTransaction={vi.fn()}
+        />
+      </TestProviders>,
+    );
+
+    expect(useSheetValue).toHaveBeenCalledWith(
+      bindings.accountBalanceCleared('account-1'),
+    );
+  });
 
   test('shows "All reconciled!" when target matches cleared', async () => {
     vi.mocked(useSheetValue).mockReturnValue(5000);
 
     const onDone = vi.fn();
+    const onExit = vi.fn();
     const onCreateTransaction = vi.fn();
 
     render(
       <TestProviders>
         <ReconcilingMessage
-          balanceQuery={makeBalanceQuery()}
+          accountId="account-1"
           targetBalance={5000}
           onDone={onDone}
+          onExit={onExit}
           onCreateTransaction={onCreateTransaction}
         />
       </TestProviders>,
@@ -58,6 +78,29 @@ describe('ReconcilingMessage math & UI', () => {
     // Done button triggers callback
     await userEvent.click(screen.getByText('Lock transactions'));
     expect(onDone).toHaveBeenCalledTimes(1);
+    expect(onExit).not.toHaveBeenCalled();
+  });
+
+  test('calls onExit without calling onDone when exiting an unbalanced reconciliation', async () => {
+    vi.mocked(useSheetValue).mockReturnValue(3000);
+    const onDone = vi.fn();
+    const onExit = vi.fn();
+
+    render(
+      <TestProviders>
+        <ReconcilingMessage
+          accountId="account-1"
+          targetBalance={10000}
+          onDone={onDone}
+          onExit={onExit}
+          onCreateTransaction={vi.fn()}
+        />
+      </TestProviders>,
+    );
+
+    await userEvent.click(screen.getByText('Exit reconciliation'));
+    expect(onExit).toHaveBeenCalledTimes(1);
+    expect(onDone).not.toHaveBeenCalled();
   });
 
   test('computes positive difference and passes correct amount', async () => {
@@ -68,9 +111,10 @@ describe('ReconcilingMessage math & UI', () => {
     render(
       <TestProviders>
         <ReconcilingMessage
-          balanceQuery={makeBalanceQuery()}
+          accountId="account-1"
           targetBalance={10000}
           onDone={vi.fn()}
+          onExit={vi.fn()}
           onCreateTransaction={onCreateTransaction}
         />
       </TestProviders>,
@@ -96,9 +140,10 @@ describe('ReconcilingMessage math & UI', () => {
     render(
       <TestProviders>
         <ReconcilingMessage
-          balanceQuery={makeBalanceQuery()}
+          accountId="account-1"
           targetBalance={10000}
           onDone={vi.fn()}
+          onExit={vi.fn()}
           onCreateTransaction={onCreateTransaction}
         />
       </TestProviders>,
@@ -214,6 +259,66 @@ describe('ReconcileMenu arithmetic evaluation', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Reconcile' }));
     expect(onReconcile).toHaveBeenCalledWith(4321);
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  describe('with decimal places hidden', () => {
+    function renderMenu(account: AccountEntity) {
+      const queryClient = createTestQueryClient();
+      const store = configureTestAppStore({ queryClient });
+      store.dispatch(mergeSyncedPrefs({ hideFraction: 'true' }));
+      const onReconcile = vi.fn();
+      render(
+        <TestProviders queryClient={queryClient} store={store}>
+          <ReconcileMenu
+            account={account}
+            onReconcile={onReconcile}
+            onClose={vi.fn()}
+          />
+        </TestProviders>,
+      );
+      return onReconcile;
+    }
+
+    test('submits the exact cleared balance when the rounded text is unchanged', async () => {
+      // clearedBalance = 2,997.24, shown as "2,997"
+      vi.mocked(useSheetValue).mockReturnValue(299724);
+      const onReconcile = renderMenu(baseAccount);
+
+      expect(screen.getByRole('textbox')).toHaveValue('2,997');
+      await userEvent.click(screen.getByRole('button', { name: 'Reconcile' }));
+
+      expect(onReconcile).toHaveBeenCalledWith(299724);
+    });
+
+    test('submits the exact last synced total when the rounded text is unchanged', async () => {
+      vi.mocked(useSheetValue).mockReturnValue(1000);
+      const connectedAccount = generateAccount(
+        'Checking',
+        true,
+        false,
+      ) as AccountEntity;
+      // 3,014.32, shown as "3,014"
+      connectedAccount.balance_current = 301432;
+      const onReconcile = renderMenu(connectedAccount);
+
+      await userEvent.click(screen.getByText('Use last synced total'));
+      expect(screen.getByRole('textbox')).toHaveValue('3,014');
+      await userEvent.click(screen.getByRole('button', { name: 'Reconcile' }));
+
+      expect(onReconcile).toHaveBeenCalledWith(301432);
+    });
+
+    test('submits the typed amount once the text is edited', async () => {
+      vi.mocked(useSheetValue).mockReturnValue(299724);
+      const onReconcile = renderMenu(baseAccount);
+
+      const input = screen.getByRole('textbox');
+      await userEvent.clear(input);
+      await userEvent.type(input, '2,997');
+      await userEvent.click(screen.getByRole('button', { name: 'Reconcile' }));
+
+      expect(onReconcile).toHaveBeenCalledWith(299700);
+    });
   });
 
   test('submitting with empty input does not reconcile', async () => {

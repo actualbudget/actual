@@ -26,6 +26,31 @@ test.describe('Rules', () => {
     await page?.close();
   });
 
+  test('deletes the selected rules', async () => {
+    const editRuleModal = await rulesPage.createNewRule();
+    await editRuleModal.fill({
+      conditions: [{ field: 'payee', op: 'is', value: 'Kroger' }],
+      actions: [{ field: 'category', value: 'General' }],
+    });
+    await editRuleModal.save();
+
+    const rows = page.getByTestId('table').getByTestId('row');
+    const rule = rulesPage.getNthRule(0);
+    await expect(rule.conditions).toHaveText(['payee is Kroger']);
+    const count = await rows.count();
+
+    const selectButton = page.getByTestId('selected-rules-select-button');
+    await expect(async () => {
+      await rows.nth(0).getByTestId('select').click();
+      await expect(selectButton).toBeVisible({ timeout: 1000 });
+    }).toPass();
+    await selectButton.click();
+    await page.getByRole('button', { name: 'Delete', exact: true }).click();
+
+    await expect(rows).toHaveCount(count - 1);
+    await expect(page.getByText('payee is Kroger')).toHaveCount(0);
+  });
+
   test('checks the page visuals', async () => {
     await rulesPage.searchFor('Dominion');
     await expect(page).toMatchThemeScreenshots();
@@ -68,6 +93,37 @@ test.describe('Rules', () => {
     await expect(transaction.category).toHaveText('General');
     await expect(transaction.debit).toHaveText('12.34');
     await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('creates a rule with a date range condition', async () => {
+    const editRuleModal = await rulesPage.createNewRule();
+
+    const row = await editRuleModal.getRow(editRuleModal.conditionList, 0);
+    await editRuleModal.selectField(row, 'date');
+    await editRuleModal.selectOp(row, 'is between');
+
+    // Each bound is committed on blur
+    const bounds = row.getByRole('textbox');
+    await bounds.nth(0).fill('01/01/2020');
+    await bounds.nth(0).blur();
+    await bounds.nth(1).fill('01/31/2020');
+    await bounds.nth(1).blur();
+
+    await editRuleModal.fill({
+      actions: [
+        {
+          field: 'category',
+          value: 'General',
+        },
+      ],
+    });
+    await editRuleModal.save();
+
+    const rule = rulesPage.getNthRule(0);
+    await expect(rule.conditions).toHaveText([
+      'date is between 01/01/2020 and 01/31/2020',
+    ]);
+    await expect(rule.actions).toHaveText(['set category to General']);
   });
 
   test('creates a split transaction rule and makes sure it is applied when creating a transaction', async () => {

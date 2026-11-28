@@ -128,6 +128,7 @@ const pickerStyles: CSSProperties = {
     },
     '&[data-selected]': {
       backgroundColor: theme.calendarSelectedBackground,
+      color: theme.calendarSelectedText,
       borderRadius: 4,
     },
     '&[data-disabled]': {
@@ -490,6 +491,7 @@ function DateSelectDesktop({
             e.relatedTarget instanceof Element &&
             e.relatedTarget.closest('[data-date-picker]')
           ) {
+            e.stopPropagation();
             innerRef.current?.focus();
             return;
           }

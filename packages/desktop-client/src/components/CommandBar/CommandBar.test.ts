@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   getCommandItemValue,
   getExportErrorNotification,
+  getExportWarningNotifications,
   getTourCommandLabel,
   runSyncAndDownload,
   shouldSuppressCommandBarShortcut,
@@ -41,6 +42,31 @@ describe('CommandBar foundation behavior', () => {
       type: 'error',
       message: 'Export failed',
     });
+  });
+
+  it('surfaces both upstream export safety warnings with translated copy', () => {
+    const notifications = getExportWarningNotifications(
+      ['exceeds-import-size-limit', 'may-exceed-available-memory'],
+      key => `translated:${key}`,
+    );
+    expect(notifications).toEqual([
+      {
+        id: 'export-exceeds-import-size-limit',
+        type: 'warning',
+        sticky: true,
+        message:
+          'translated:This export is larger than Actual can safely re-import. You may not be able to restore this backup.',
+      },
+      {
+        id: 'export-may-exceed-available-memory',
+        type: 'warning',
+        sticky: true,
+        message:
+          'translated:This export is larger than the memory available on this device. Restoring it here may fail.',
+      },
+    ]);
+    expect(getExportWarningNotifications([], key => key)).toEqual([]);
+    expect(getExportWarningNotifications(['unknown'], key => key)).toEqual([]);
   });
 
   it('keeps configurable sidebar order and hidden paths compatible', async () => {

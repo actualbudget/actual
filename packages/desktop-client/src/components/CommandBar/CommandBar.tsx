@@ -24,6 +24,7 @@ import {
   SvgViewShow,
 } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import type { Theme } from '@actual-app/core/types/prefs';
@@ -63,7 +64,6 @@ import {
   onBudgetAccountBalance,
 } from '#spreadsheet/bindings';
 import { useTheme } from '#style';
-import type { CatalogTheme, InstalledTheme } from '#style/customThemes';
 import {
   embedThemeFonts,
   fetchThemeCss,
@@ -73,6 +73,7 @@ import {
   serializeInstalledTheme,
   validateThemeCss,
 } from '#style/customThemes';
+import type { CatalogTheme, InstalledTheme } from '#style/customThemes';
 
 import { BalanceRow, FooterHint, Highlight, KeyChip } from './primitives';
 import {
@@ -118,6 +119,28 @@ export const EXPORT_ERROR_NOTIFICATION_ID = 'export-error';
 
 export function getExportErrorNotification(message: string) {
   return { id: EXPORT_ERROR_NOTIFICATION_ID, type: 'error' as const, message };
+}
+
+export function getExportWarningNotifications(
+  warnings: readonly string[],
+  translate: (key: string) => string,
+) {
+  const messages = {
+    'exceeds-import-size-limit': translate(
+      'This export is larger than Actual can safely re-import. You may not be able to restore this backup.',
+    ),
+    'may-exceed-available-memory': translate(
+      'This export is larger than the memory available on this device. Restoring it here may fail.',
+    ),
+  };
+  return Object.entries(messages)
+    .filter(([warning]) => warnings.includes(warning))
+    .map(([warning, message]) => ({
+      id: `export-${warning}`,
+      type: 'warning' as const,
+      sticky: true,
+      message,
+    }));
 }
 
 function getNavigationId(id: SidebarMenuItemId) {
@@ -241,6 +264,12 @@ export function CommandBar() {
       return;
     }
     if (response.data) {
+      for (const notification of getExportWarningNotifications(
+        response.warnings ?? [],
+        t,
+      )) {
+        dispatch(addNotification({ notification }));
+      }
       try {
         await window.Actual.saveFile(
           response.data,
@@ -530,6 +559,7 @@ export function CommandBar() {
         position: 'fixed',
         inset: 0,
         zIndex: 3000,
+        // oxlint-disable-next-line actual/no-color-literals
         backgroundColor: 'rgba(1, 4, 9, 0.45)',
         backdropFilter: 'blur(2px)',
         '@media (prefers-reduced-motion: no-preference)': {
@@ -545,11 +575,12 @@ export function CommandBar() {
         flexDirection: 'column',
         width: 'min(600px, calc(100vw - 48px))',
         maxHeight: 'min(440px, 68vh)',
-        backgroundColor: 'var(--color-modalBackground)',
-        border: '1px solid var(--color-modalBorder)',
-        color: 'var(--color-pageText)',
+        backgroundColor: theme.modalBackground,
+        border: `1px solid ${theme.modalBorder}`,
+        color: theme.pageText,
         borderRadius: 14,
         boxShadow:
+          // oxlint-disable-next-line actual/no-color-literals
           '0 0 0 1px rgba(0, 0, 0, 0.08), 0 24px 64px rgba(0, 0, 0, 0.35)',
         overflow: 'hidden',
         zIndex: 3001,
@@ -565,7 +596,7 @@ export function CommandBar() {
           gap: 10,
           flexShrink: 0,
           padding: '13px 15px',
-          borderBottom: '1px solid var(--color-tableBorder)',
+          borderBottom: `1px solid ${theme.tableBorder}`,
         }}
       >
         {page === 'themes' ? (
@@ -581,7 +612,7 @@ export function CommandBar() {
           <SvgSearchAlternate
             width={15}
             height={15}
-            style={{ flexShrink: 0, color: 'var(--color-pageTextSubdued)' }}
+            style={{ flexShrink: 0, color: theme.pageTextSubdued }}
           />
         )}
         <Command.Input
@@ -605,10 +636,10 @@ export function CommandBar() {
             fontSize: 16,
             border: 'none',
             backgroundColor: 'transparent',
-            color: 'var(--color-pageText)',
+            color: theme.pageText,
             outline: 'none',
             '&::placeholder': {
-              color: 'var(--color-pageTextSubdued)',
+              color: theme.pageTextSubdued,
             },
           })}
         />
@@ -689,7 +720,7 @@ export function CommandBar() {
                   padding: '28px 0 32px',
                   textAlign: 'center',
                   fontSize: 13,
-                  color: 'var(--color-pageTextSubdued)',
+                  color: theme.pageTextSubdued,
                 })}
               >
                 <Trans>No results found</Trans>
@@ -705,8 +736,8 @@ export function CommandBar() {
           gap: 14,
           flexShrink: 0,
           padding: '9px 15px',
-          borderTop: '1px solid var(--color-tableBorder)',
-          backgroundColor: 'var(--color-pillBackgroundLight)',
+          borderTop: `1px solid ${theme.tableBorder}`,
+          backgroundColor: theme.pillBackgroundLight,
         }}
       >
         <FooterHint keys={['↑', '↓']}>{t('navigate')}</FooterHint>

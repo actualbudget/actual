@@ -1,7 +1,7 @@
 import {
   getDefaultSidebarMenuItems,
   getSidebarMenuItemPath,
-  isInMobileSettingsNav,
+  isSettingsSectionOnMobile,
   moveSidebarMenuItem,
   parseSidebarMenuItems,
   parseSidebarStartPage,
@@ -77,7 +77,7 @@ describe('parseSidebarMenuItems', () => {
     expect(items.find(item => item.id === 'payees')?.hidden).toBe(true);
   });
 
-  it('always keeps budget and reports in the sidebar', () => {
+  it('always keeps budget in the sidebar', () => {
     const items = parseSidebarMenuItems(
       JSON.stringify(
         getDefaultSidebarMenuItems().map(item => ({ ...item, hidden: true })),
@@ -86,8 +86,8 @@ describe('parseSidebarMenuItems', () => {
 
     expect(items.filter(item => !item.hidden)).toEqual([
       { id: 'budget', hidden: false },
-      { id: 'reports', hidden: false },
     ]);
+    expect(items.find(item => item.id === 'reports')?.hidden).toBe(true);
   });
 });
 
@@ -137,12 +137,12 @@ describe('moveSidebarMenuItem', () => {
   });
 });
 
-describe('isInMobileSettingsNav', () => {
-  it('leaves schedules and tags out of the mobile settings menu', () => {
-    expect(isInMobileSettingsNav('schedules')).toBe(false);
-    expect(isInMobileSettingsNav('tags')).toBe(false);
-    expect(isInMobileSettingsNav('payees')).toBe(true);
-    expect(isInMobileSettingsNav('bank-sync')).toBe(true);
+describe('isSettingsSectionOnMobile', () => {
+  it('leaves schedules out of the mobile settings menu', () => {
+    expect(isSettingsSectionOnMobile('schedules')).toBe(false);
+    expect(isSettingsSectionOnMobile('tags')).toBe(true);
+    expect(isSettingsSectionOnMobile('payees')).toBe(true);
+    expect(isSettingsSectionOnMobile('bank-sync')).toBe(true);
   });
 });
 

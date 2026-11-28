@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -210,7 +210,7 @@ export function ReportSidebar({
         setGroupBy('Category');
         defaultItems('Category');
       }
-      // Budgeted only supports Monthly and Yearly intervals
+      // Budgeted only supports Monthly, Quarterly and Yearly intervals
       if (
         customReportItems.interval === 'Daily' ||
         customReportItems.interval === 'Weekly'
@@ -226,6 +226,42 @@ export function ReportSidebar({
           onSelectRange(defaultsList.intervalRange.get('Monthly') || '');
         }
       }
+    }
+  };
+
+  const onChangeInterval = (cond: string) => {
+    setSessionReport('interval', cond);
+    setInterval(cond);
+    onReportChange({ type: 'modify' });
+    const isRangeUnsupported = ReportOptions.dateRange
+      .filter(d => !d[cond as keyof dateRangeProps])
+      .map(int => int.key)
+      .includes(customReportItems.dateRange);
+
+    if (cond === 'Weekly' && customReportItems.isDateStatic) {
+      if (isRangeUnsupported) {
+        // Keep the live range valid without replacing the static dates.
+        const range = defaultsList.intervalRange.get(cond) || '';
+        setSessionReport('dateRange', range);
+        setDateRange(range);
+      }
+      // Widen static dates to whole weeks so the range matches the weeks
+      // shown in From and To, bounded the same way as picking a To week.
+      onChangeDates(
+        ...validateEnd(
+          earliestTransaction,
+          latestTransaction,
+          monthUtils.weekFromDate(
+            customReportItems.startDate,
+            firstDayOfWeekIdx,
+          ),
+          customReportItems.endDate,
+          cond,
+          firstDayOfWeekIdx,
+        ),
+      );
+    } else if (isRangeUnsupported) {
+      onSelectRange(defaultsList.intervalRange.get(cond) || '');
     }
   };
 
@@ -256,6 +292,28 @@ export function ReportSidebar({
         ?.graphs.find(g => g.description === customReportItems.graphType)
         ?.disableSort ??
         false));
+
+  // A weekly end date is the last day of its week, but the options list the
+  // first day of each week.
+  const endIntervalValue =
+    customReportItems.interval === 'Weekly'
+      ? monthUtils.weekFromDate(customReportItems.endDate, firstDayOfWeekIdx)
+      : customReportItems.endDate;
+
+  const isIncludeCurrentDisabled =
+    customReportItems.isDateStatic ||
+    Boolean(disabledList.currentInterval.get(customReportItems.dateRange));
+
+  useEffect(() => {
+    if (isIncludeCurrentDisabled && customReportItems.includeCurrentInterval) {
+      setSessionReport('includeCurrentInterval', false);
+      setIncludeCurrentInterval(false);
+    }
+  }, [
+    isIncludeCurrentDisabled,
+    customReportItems.includeCurrentInterval,
+    setIncludeCurrentInterval,
+  ]);
 
   return (
     <View
@@ -379,19 +437,7 @@ export function ReportSidebar({
           </Text>
           <Select
             value={customReportItems.interval}
-            onChange={e => {
-              setSessionReport('interval', e);
-              setInterval(e);
-              onReportChange({ type: 'modify' });
-              if (
-                ReportOptions.dateRange
-                  .filter(d => !d[e as keyof dateRangeProps])
-                  .map(int => int.key)
-                  .includes(customReportItems.dateRange)
-              ) {
-                onSelectRange(defaultsList.intervalRange.get(e) || '');
-              }
-            }}
+            onChange={onChangeInterval}
             options={ReportOptions.interval.map(option => [
               option.key,
               option.description,
@@ -508,11 +554,7 @@ export function ReportSidebar({
                   text: includeCurrentIntervalText,
                   tooltip: includeCurrentIntervalTooltip,
                   toggle: customReportItems.includeCurrentInterval,
-                  disabled:
-                    customReportItems.isDateStatic ||
-                    disabledList.currentInterval.get(
-                      customReportItems.dateRange,
-                    ),
+                  disabled: isIncludeCurrentDisabled,
                 },
                 {
                   name: 'show-hidden-categories',
@@ -619,7 +661,7 @@ export function ReportSidebar({
               onChange={onSelectRange}
               options={rangeOptions}
             />
-            {!disabledList.currentInterval.get(customReportItems.dateRange) &&
+            {!isIncludeCurrentDisabled &&
               customReportItems.includeCurrentInterval && (
                 <Tooltip
                   placement="bottom start"
@@ -696,9 +738,9 @@ export function ReportSidebar({
                     ),
                   )
                 }
-                value={customReportItems.endDate}
+                value={endIntervalValue}
                 defaultLabel={monthUtils.format(
-                  customReportItems.endDate,
+                  endIntervalValue,
                   getIntervalFormat(customReportItems.interval, dateFormat),
                   locale,
                 )}

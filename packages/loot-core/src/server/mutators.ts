@@ -4,6 +4,7 @@ import { sequential } from '#shared/async';
 import type { HandlerFunctions, Handlers } from '#types/handlers';
 
 const runningMethods = new Set();
+const runningMutators = new Set<Promise<unknown>>();
 
 let currentContext = null;
 const mutatingMethods = new WeakMap();
@@ -41,7 +42,15 @@ function wait(time) {
 export async function runHandler<T extends Handlers[keyof Handlers]>(
   handler: T,
   args?: Parameters<T>[0],
-  { undoTag, name }: { undoTag?; name? } = {},
+  {
+    undoTag,
+    name,
+    requestId,
+  }: {
+    undoTag?;
+    name?;
+    requestId?: string;
+  } = {},
 ): Promise<ReturnType<T>> {
   // For debug reasons, track the latest handlers that have been
   // called
@@ -51,7 +60,7 @@ export async function runHandler<T extends Handlers[keyof Handlers]>(
   }
 
   if (mutatingMethods.has(handler)) {
-    return runMutator(() => handler(args), { undoTag }) as Promise<
+    return runMutator(() => handler(args), { undoTag, requestId }) as Promise<
       ReturnType<T>
     >;
   }
@@ -95,7 +104,26 @@ function _runMutator<T extends () => Promise<unknown>>(
   }) as Promise<Awaited<ReturnType<T>>>;
 }
 // Type cast needed as TS looses types over nested generic returns
-export const runMutator = sequential(_runMutator) as typeof _runMutator;
+const runMutatorSequential = sequential(_runMutator) as typeof _runMutator;
+
+export function runMutator<T extends () => Promise<unknown>>(
+  func: T,
+  initialContext = {},
+): Promise<Awaited<ReturnType<T>>> {
+  const promise = runMutatorSequential(func, initialContext);
+  runningMutators.add(promise);
+  const remove = () => runningMutators.delete(promise);
+  void promise.then(remove, remove);
+  return promise;
+}
+
+export async function flushRunningMutators(): Promise<void> {
+  // A settling mutator can queue another, e.g. a sync error queues a
+  // schedule run, so wait until none are left
+  while (runningMutators.size > 0) {
+    await Promise.allSettled([...runningMutators]);
+  }
+}
 
 export function withMutatorContext<T>(
   context: { undoListening: boolean; undoTag?: unknown },
@@ -115,6 +143,10 @@ export function withMutatorContext<T>(
   return func().finally(() => {
     currentContext = prevContext;
   });
+}
+
+export function getCurrentMutatorRequestId(): string | undefined {
+  return currentContext?.requestId;
 }
 
 export function getMutatorContext() {

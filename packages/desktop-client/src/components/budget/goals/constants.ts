@@ -10,6 +10,7 @@ import type {
   RemainderTemplate,
   ScheduleTemplate,
   SpendTemplate,
+  WeeklyAverageTemplate,
 } from '@actual-app/core/types/models/templates';
 
 export const displayTemplateTypes = [
@@ -48,7 +49,7 @@ export type ReducerState =
       displayType: 'percentage';
     }
   | {
-      template: CopyTemplate | AverageTemplate;
+      template: CopyTemplate | AverageTemplate | WeeklyAverageTemplate;
       displayType: 'historical';
     }
   | {

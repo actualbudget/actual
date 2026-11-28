@@ -173,6 +173,7 @@ export function useAccountTreeDragAndDrop({
             marginBlock: -1.5,
             marginInline: spacing.xxs,
             borderRadius: 3,
+            // oxlint-disable-next-line actual/theme-token-roles
             backgroundColor: theme.pageTextLink,
           },
         })}

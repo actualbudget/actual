@@ -1,34 +1,116 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { WorkerBridge } from './worker-bridge';
+import { releaseBackendStorage, startBrowserBackend } from './start';
+import { releaseStorageThenTerminate, WorkerBridge } from './worker-bridge';
+import type { TerminatableWorker } from './worker-bridge';
+
+type FakeWorker = TerminatableWorker & {
+  posted: unknown[];
+  reply: (message: unknown) => void;
+};
+
+function fakeWorker(): FakeWorker {
+  const listeners: Array<(event: MessageEvent) => void> = [];
+  const worker: FakeWorker = {
+    onmessage: () => {
+      // Replaced by the bridge before the worker is released
+    },
+    posted: [],
+    postMessage: message => worker.posted.push(message),
+    addEventListener: (_type, handler) => listeners.push(handler),
+    terminate: vi.fn<() => void>(),
+    reply: message => {
+      for (const listener of listeners) {
+        listener({ data: message } as MessageEvent);
+      }
+    },
+  };
+  return worker;
+}
+
+beforeEach(() => {
+  vi.useFakeTimers();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+describe('releaseStorageThenTerminate', () => {
+  it('asks the backend to release its storage and terminates on the reply', () => {
+    const worker = fakeWorker();
+    releaseStorageThenTerminate(worker, 300);
+
+    expect(worker.onmessage).toBeNull();
+    expect(worker.posted).toEqual([
+      expect.objectContaining({ name: 'storage-release' }),
+    ]);
+    expect(worker.terminate).not.toHaveBeenCalled();
+
+    const request = worker.posted[0] as { id: string };
+    worker.reply({ type: 'reply', id: request.id, result: 'ok' });
+    expect(worker.terminate).toHaveBeenCalledTimes(1);
+
+    // The timeout must not terminate a second time
+    vi.advanceTimersByTime(1000);
+    expect(worker.terminate).toHaveBeenCalledTimes(1);
+  });
+
+  it('terminates anyway when the backend does not answer in time', () => {
+    const worker = fakeWorker();
+    releaseStorageThenTerminate(worker, 300);
+
+    vi.advanceTimersByTime(299);
+    expect(worker.terminate).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
+    expect(worker.terminate).toHaveBeenCalledTimes(1);
+
+    // A late reply changes nothing
+    const request = worker.posted[0] as { id: string };
+    worker.reply({ type: 'reply', id: request.id, result: 'ok' });
+    expect(worker.terminate).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores unrelated messages while waiting', () => {
+    const worker = fakeWorker();
+    releaseStorageThenTerminate(worker, 300);
+    worker.reply({ type: 'push', name: 'sync-event' });
+    worker.reply({ type: 'reply', id: 'something-else' });
+    expect(worker.terminate).not.toHaveBeenCalled();
+  });
+});
+
+class FakeBackendWorker {
+  static created: FakeBackendWorker[] = [];
+  posted: unknown[] = [];
+  onmessage: ((event: MessageEvent) => void) | null = null;
+  constructor() {
+    FakeBackendWorker.created.push(this);
+  }
+  postMessage(message: unknown) {
+    this.posted.push(message);
+  }
+  addEventListener() {
+    // absurd-sql's main-thread helper listens here; nothing to do
+  }
+  terminate() {
+    // Nothing to release in the fake
+  }
+}
+
+function fakeSharedPort() {
+  return {
+    postMessage: vi.fn(),
+    start: vi.fn(),
+    addEventListener: vi.fn(),
+  };
+}
 
 describe('WorkerBridge takeover', () => {
-  class FakeBackendWorker {
-    static created: FakeBackendWorker[] = [];
-    posted: unknown[] = [];
-    onmessage: ((event: MessageEvent) => void) | null = null;
-    constructor() {
-      FakeBackendWorker.created.push(this);
-    }
-    postMessage(message: unknown) {
-      this.posted.push(message);
-    }
-    addEventListener() {
-      // absurd-sql's main-thread helper listens here; nothing to do
-    }
-    terminate() {
-      // Nothing to release in the fake
-    }
-  }
-
   function createBridge() {
     FakeBackendWorker.created = [];
     vi.stubGlobal('Worker', FakeBackendWorker);
-    const sharedPort = {
-      postMessage: vi.fn(),
-      start: vi.fn(),
-      addEventListener: vi.fn(),
-    };
+    const sharedPort = fakeSharedPort();
     const bridge = new WorkerBridge(
       sharedPort as unknown as MessagePort,
       new URL('http://localhost/worker.js'),
@@ -76,7 +158,56 @@ describe('WorkerBridge takeover', () => {
     expect(worker.posted[3]).toEqual({ id: 'q2', name: 'query' });
   });
 
-  it('forwards requests at once when there is nothing to restore', () => {
+  it('keeps holding when the backend repeats its connect message during a restore', () => {
+    const { fromCoordinator } = createBridge();
+    fromCoordinator({
+      type: '__become-leader',
+      initMsg: { type: 'init' },
+      budgetToRestore: 'budget-1',
+      pendingMsg: null,
+    });
+    const worker = FakeBackendWorker.created[0];
+    fromCoordinator({ type: '__to-worker', msg: { id: 'q1', name: 'query' } });
+
+    // The backend repeats it until a client answers, which none does
+    // before the restore is over
+    worker.onmessage?.({ data: { type: 'connect' } } as MessageEvent);
+    worker.onmessage?.({ data: { type: 'connect' } } as MessageEvent);
+
+    expect(worker.posted).toEqual([
+      { type: 'init' },
+      expect.objectContaining({ id: '__restore-budget' }),
+    ]);
+  });
+
+  it('holds forwarded requests until the backend has connected', () => {
+    const { fromCoordinator } = createBridge();
+    fromCoordinator({
+      type: '__become-leader',
+      initMsg: { type: 'init' },
+      budgetToRestore: null,
+      pendingMsg: { id: 'own', name: 'load-budget' },
+    });
+    const worker = FakeBackendWorker.created[0];
+
+    // Another tab's request arrives while the backend is still starting,
+    // when it would not hear it
+    fromCoordinator({ type: '__to-worker', msg: { id: 'q1', name: 'query' } });
+    expect(worker.posted).toEqual([{ type: 'init' }]);
+
+    worker.onmessage?.({ data: { type: 'connect' } } as MessageEvent);
+    expect(worker.posted).toEqual([
+      { type: 'init' },
+      { id: 'own', name: 'load-budget' },
+      { id: 'q1', name: 'query' },
+    ]);
+
+    // Later requests go straight through
+    fromCoordinator({ type: '__to-worker', msg: { id: 'q2', name: 'query' } });
+    expect(worker.posted[3]).toEqual({ id: 'q2', name: 'query' });
+  });
+
+  it('lets the init failure acknowledgement through to a backend that never connects', () => {
     const { fromCoordinator } = createBridge();
     fromCoordinator({
       type: '__become-leader',
@@ -85,10 +216,74 @@ describe('WorkerBridge takeover', () => {
       pendingMsg: null,
     });
     const worker = FakeBackendWorker.created[0];
-    fromCoordinator({ type: '__to-worker', msg: { id: 'q1', name: 'query' } });
+    fromCoordinator({
+      type: '__to-worker',
+      msg: { name: '__app-init-failure-acknowledged' },
+    });
     expect(worker.posted).toEqual([
       { type: 'init' },
-      { id: 'q1', name: 'query' },
+      { name: '__app-init-failure-acknowledged' },
     ]);
+  });
+});
+
+describe('releaseBackendStorage', () => {
+  const options = {
+    backendWorkerUrl: new URL('http://localhost/worker.js'),
+    initPayload: { version: 'test', isDev: false },
+  };
+
+  beforeEach(() => {
+    FakeBackendWorker.created = [];
+    vi.stubGlobal('Worker', FakeBackendWorker);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('asks the direct worker of the page to let go of its storage', () => {
+    const handle = startBrowserBackend({ ...options, forceDirectWorker: true });
+    expect(handle).toBe(FakeBackendWorker.created[0]);
+
+    releaseBackendStorage();
+    expect(FakeBackendWorker.created[0].posted).toEqual([
+      expect.objectContaining({ type: 'init' }),
+      expect.objectContaining({ name: 'storage-release' }),
+    ]);
+  });
+
+  it('asks the worker a leader runs, and never the coordinator', () => {
+    vi.stubGlobal('SharedWorker', class {});
+    const sharedPort = fakeSharedPort();
+    startBrowserBackend({
+      ...options,
+      createSharedWorker: () =>
+        ({ port: sharedPort }) as unknown as SharedWorker,
+    });
+    const postedToCoordinator = sharedPort.postMessage.mock.calls.length;
+
+    // A follower runs no worker, so there is nothing to release
+    releaseBackendStorage();
+    expect(FakeBackendWorker.created).toEqual([]);
+
+    const onSharedMessage = sharedPort.addEventListener.mock.calls[0][1] as (
+      event: MessageEvent,
+    ) => void;
+    onSharedMessage({
+      data: {
+        type: '__become-leader',
+        initMsg: { type: 'init' },
+        budgetToRestore: null,
+        pendingMsg: null,
+      },
+    } as MessageEvent);
+
+    releaseBackendStorage();
+    expect(FakeBackendWorker.created[0].posted).toEqual([
+      { type: 'init' },
+      expect.objectContaining({ name: 'storage-release' }),
+    ]);
+    expect(sharedPort.postMessage).toHaveBeenCalledTimes(postedToCoordinator);
   });
 });

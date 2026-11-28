@@ -143,6 +143,23 @@ export class BudgetPage {
     });
   }
 
+  /**
+   * The month picker strikes out the months outside the budget range, and
+   * "Next month" is ignored while the following month is one of them.
+   */
+  async expectNextMonthInRange(isInRange: boolean) {
+    const nextMonth = expect(
+      this.selectedMonthButton.last().locator('xpath=following-sibling::*[1]'),
+      `Expected the next month to be ${isInRange ? 'inside' : 'outside'} the budget range.`,
+    );
+
+    if (isInRange) {
+      await nextMonth.not.toHaveCSS('text-decoration-line', 'line-through');
+    } else {
+      await nextMonth.toHaveCSS('text-decoration-line', 'line-through');
+    }
+  }
+
   async getBalanceForRow(idx: number) {
     const balanceText = await this.budgetTable
       .getByTestId('row')

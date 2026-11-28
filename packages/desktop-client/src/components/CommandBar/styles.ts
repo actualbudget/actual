@@ -1,3 +1,4 @@
+import { theme } from '@actual-app/components/theme';
 import { css, keyframes } from '@emotion/css';
 
 export const overlayEnter = keyframes({
@@ -28,7 +29,7 @@ export const paletteGroupClassName = css({
     fontWeight: 700,
     letterSpacing: 0.7,
     textTransform: 'uppercase',
-    color: 'var(--color-pageTextSubdued)',
+    color: theme.pageTextSubdued,
   },
 });
 
@@ -43,15 +44,14 @@ export const paletteItemClassName = css({
   cursor: 'pointer',
   '& > svg': {
     flexShrink: 0,
-    color: 'var(--color-pageTextSubdued)',
+    color: theme.pageTextSubdued,
   },
   // Selection follows keyboard and pointer (cmdk selects on pointer move),
   // so no separate :hover style to fight it.
   "&[data-selected='true']": {
-    backgroundColor:
-      'color-mix(in srgb, var(--color-buttonPrimaryBackground) 15%, transparent)',
+    backgroundColor: `color-mix(in srgb, ${theme.buttonPrimaryBackground} 15%, transparent)`,
   },
   "&[data-selected='true'] > svg": {
-    color: 'var(--color-pageText)',
+    color: theme.pageText,
   },
 });

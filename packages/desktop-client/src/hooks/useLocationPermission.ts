@@ -2,7 +2,13 @@ import { useEffect, useState } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
-import { locationService } from '#payees/location';
+import {
+  refreshLocationPermission,
+  requestLocationPermission,
+  watchLocationPermission,
+} from '#payees/location-platform';
+
+import { useOnVisible } from './useOnVisible';
 
 export type LocationPermission = {
   isGranted: boolean;
@@ -22,83 +28,22 @@ export function useLocationPermission(): LocationPermission {
   const { isNarrowWidth } = useResponsive();
   const [state, setState] = useState<PermissionState | null>(null);
 
+  // Pick up a permission change made in the device settings when the app
+  // comes back.
+  useOnVisible(() => refreshLocationPermission(), {
+    isEnabled: isNarrowWidth,
+  });
+
   useEffect(() => {
     if (!isNarrowWidth) {
       setState(null);
       return;
     }
-
-    let permissionStatus: PermissionStatus | null = null;
-    let handleChange: (() => void) | null = null;
-    let isMounted = true;
-
-    // Check if Permissions API is available
-    if (
-      !navigator.permissions ||
-      typeof navigator.permissions.query !== 'function'
-    ) {
-      setState(null);
-      return;
-    }
-
-    try {
-      navigator.permissions
-        .query({ name: 'geolocation' })
-        .then(status => {
-          if (!isMounted) {
-            return;
-          }
-
-          permissionStatus = status;
-          // Set initial state
-          setState(status.state);
-
-          // Listen for permission changes
-          handleChange = () => {
-            setState(status.state);
-          };
-
-          status.addEventListener('change', handleChange);
-        })
-        .catch(() => {
-          if (!isMounted) {
-            return;
-          }
-          // Permission API not supported, assume no access
-          setState(null);
-        });
-    } catch {
-      if (!isMounted) {
-        return;
-      }
-      // Synchronous error (e.g., TypeError), assume no access
-      setState(null);
-    }
-
-    // Cleanup function
-    return () => {
-      isMounted = false;
-      if (permissionStatus && handleChange) {
-        permissionStatus.removeEventListener('change', handleChange);
-      }
-    };
+    return watchLocationPermission(setState);
   }, [isNarrowWidth]);
 
   const requestPermission = async () => {
-    try {
-      await locationService.getCurrentPosition();
-      setState('granted');
-    } catch {
-      // Re-query permissions state just in case
-      try {
-        const status = await navigator.permissions.query({
-          name: 'geolocation',
-        });
-        setState(status.state);
-      } catch {
-        setState('denied');
-      }
-    }
+    setState(await requestLocationPermission());
   };
 
   return {

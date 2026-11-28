@@ -431,6 +431,7 @@ describe('unparse/parse round-trip', () => {
     // average
     '#template average 6 months',
     '#template-5 average 12 months',
+    '#template-2 average 4 weeks on friday [increase 10%]',
     // copy
     '#template copy from 3 months ago',
     '#template copy from 6 months ago',
@@ -444,6 +445,22 @@ describe('unparse/parse round-trip', () => {
     const reparsed: Template = parse(serialized);
 
     expect(parsed).toEqual(reparsed);
+  });
+});
+
+describe('negative amounts', () => {
+  it.each([
+    '#template -100 by 2026-12',
+    '#template -100 by 2026-12 repeat every month',
+    '#template -100 by 2026-12 spend from 2026-10',
+  ])('rejects a negative `by` or `spend` target: %s', line => {
+    expect(() => parse(line)).toThrow();
+  });
+
+  it('still allows a negative periodic template', () => {
+    expect(
+      parse('#template -100 repeat every 2 months starting 2026-01-01'),
+    ).toMatchObject({ type: 'periodic', amount: -100 });
   });
 });
 

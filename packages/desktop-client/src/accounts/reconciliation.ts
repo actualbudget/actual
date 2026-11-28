@@ -14,6 +14,7 @@ import type {
 import { t } from 'i18next';
 
 import { aqlQuery } from '#queries/aqlQuery';
+import * as bindings from '#spreadsheet/bindings';
 
 export async function lockTransactions(accountId: AccountEntity['id']) {
   const { data } = await aqlQuery(
@@ -70,10 +71,7 @@ export async function unlockTransaction(
 
 export async function getClearedBalance(accountId: AccountEntity['id']) {
   const { data } = await aqlQuery(
-    q('transactions')
-      .filter({ cleared: true, account: accountId })
-      .options({ splits: 'none' })
-      .calculate({ $sum: '$amount' }),
+    bindings.accountBalanceCleared(accountId).query,
   );
 
   return data ?? 0;
@@ -83,13 +81,16 @@ export async function finishReconciliation(
   accountId: AccountEntity['id'],
   reconcileAmount: number | null,
   lock: () => Promise<void> = () => lockTransactions(accountId),
-) {
+): Promise<boolean> {
   const cleared = await getClearedBalance(accountId);
   const targetDiff = (reconcileAmount ?? 0) - cleared;
 
   if (targetDiff === 0) {
     await lock();
+    return true;
   }
+
+  return false;
 }
 
 export async function createReconciliationTransaction(

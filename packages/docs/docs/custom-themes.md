@@ -66,59 +66,53 @@ Example using variables:
 }
 ```
 
+### Changing the Accent Color
+
+The accent is the color of primary buttons, links, checkboxes, the outline of a focused input, selected rows and the selected item in the sidebar. You can change all of them by setting one variable:
+
+```css
+:root {
+  --color-accent: #0a7d5a;
+}
+```
+
+Actual works out the related colors from the accent and from your theme's table and page backgrounds, so text and buttons stay readable on them:
+
+- `--color-accentContrast` - Text and icons on an accent fill
+- `--color-accentHover` - Hovered accent fill
+- `--color-accentText` - The accent used as text, such as links
+- `--color-accentBorder` - Selected outlines and focus rings
+- `--color-accentSubtle` - Tinted background for selected rows and pills
+- `--color-accentSubtleText` - Accent text on the tinted background
+
+You can set any of these yourself. Actual keeps your value and only works out the ones you leave out. The tinted background and its text are a pair, so if you set `--color-accentSubtle`, also set `--color-accentSubtleText` to a color that is readable on it. A more specific variable, such as `--color-buttonPrimaryBackground`, still takes priority over the accent for the thing it styles.
+
+Accent text that sits on its own background, such as the selected sidebar item on `--color-sidebarBackground`, is worked out against that background. The text on the selected day in the date picker, `--color-calendarSelectedText`, is white when white is readable on `--color-calendarSelectedBackground` and black when it is not. A partly transparent `--color-calendarSelectedBackground` is measured as it appears over `--color-calendarBackground`.
+
+### Changing the Status Colors
+
+Success, warning, error and information messages each take their colors from one variable:
+
+```css
+:root {
+  --color-success: #2e9e6b;
+  --color-warning: #d99a1c;
+  --color-error: #c6283b;
+  --color-info: #2f7fd6;
+}
+```
+
+Actual works out the fill and the text for each kind of message from that color and from your theme's table and page backgrounds, so messages stay readable. The border uses the color as it is. A mid-tone works best, because the same color has to make a pale or deep fill and readable text.
+
+You can still set any of the individual variables, such as `--color-errorText`, `--color-noticeBackground` or `--color-infoBackground`. Actual keeps your value and only works out the ones you leave out.
+
 ### Available CSS Variables
 
-Custom themes can override any of the CSS variables defined in Actual's base themes. These variables correspond to the theme color keys found in the theme files:
+Custom themes can override any of the CSS variables in Actual's built-in themes. The [Theme Variable Reference](./custom-themes-variables.md) lists every one, with its color in each built-in theme and the variable it follows.
 
-- `packages/desktop-client/src/style/themes/light.ts`
-- `packages/desktop-client/src/style/themes/dark.ts`
-- `packages/desktop-client/src/style/themes/midnight.ts`
+Start with the accent and base colors at the top of that page. Many other variables follow them, so setting a few of them restyles most of the app. Others keep their own colors, including the sidebar, the date picker, status messages and some buttons, so a theme needs to set those itself.
 
-Common variables include:
-
-**Page Colors:**
-
-- `--color-pageBackground` - Main page background
-- `--color-pageText` - Primary text color
-- `--color-pageTextSubdued` - Secondary/subdued text
-- `--color-pageTextPositive` - Positive/action text color
-- `--color-pageTextLink` - Link text color
-
-**Table Colors:**
-
-- `--color-tableBackground` - Table background
-- `--color-tableText` - Table text
-- `--color-tableBorder` - Table borders
-- `--color-tableRowBackgroundHover` - Row hover background
-
-**Button Colors:**
-
-- `--color-buttonPrimaryBackground` - Primary button background
-- `--color-buttonPrimaryText` - Primary button text
-- `--color-buttonNormalBackground` - Normal button background
-- `--color-buttonNormalText` - Normal button text
-
-**Sidebar Colors:**
-
-- `--color-sidebarBackground` - Sidebar background
-- `--color-sidebarItemText` - Sidebar item text
-- `--color-sidebarItemTextSelected` - Selected sidebar item text
-
-**Graph Colors:**
-
-These color palette impact custom report series colors in all variations - bar, line, donut, etc...
-
-- `--color-chartQual1`
-- `--color-chartQual2`
-- `--color-chartQual3`
-- `--color-chartQual4`
-- `--color-chartQual5`
-- `--color-chartQual6`
-- `--color-chartQual7`
-- `--color-chartQual8`
-- `--color-chartQual9`
-
-And many more! To see all available variables, check the theme files in the source code or look at an existing theme.
+Do not point a base color at a variable that follows it, such as `--color-background: var(--color-tableBackground)`. The two would refer to each other and neither would work.
 
 ### Validation Rules
 

@@ -19,4 +19,18 @@ describe('ThemePage foundation behavior', () => {
       'translated:System default',
     ]);
   });
+
+  it('resolves the six built-in theme preview swatches', () => {
+    const rows = translateBuiltinThemeRows(name => name);
+    expect(rows.map(row => row.swatches)).toHaveLength(4);
+    expect(rows.every(row => row.swatches.length === 6)).toBe(true);
+    expect(rows[0].swatches).toEqual([
+      '#e8ecf0',
+      '#ffffff',
+      '#272630',
+      '#8719e0',
+      '#00795a',
+      '#d1162c',
+    ]);
+  });
 });

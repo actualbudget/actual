@@ -6,7 +6,9 @@ import { Menu } from '@actual-app/components/menu';
 import type { MenuItemObject } from '@actual-app/components/menu';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 
+import { getGoalDifference } from '#components/budget/util';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useFormat } from '#hooks/useFormat';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
@@ -28,6 +30,7 @@ export function useBalanceMenu({
 }: BalanceMenuActions) {
   const { t } = useTranslation();
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const format = useFormat();
 
   const carryover = useEnvelopeSheetValue(
     envelopeBudget.catCarryover(categoryId),
@@ -43,7 +46,11 @@ export function useBalanceMenu({
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
 
   const fundAmount =
-    isGoalTemplatesEnabled && onFundGoal && goal != null && longGoal !== 1
+    isGoalTemplatesEnabled &&
+    onFundGoal &&
+    goal != null &&
+    longGoal !== 1 &&
+    getGoalDifference(budgeted, goal, format.currency.decimalPlaces) < 0
       ? Math.min(goal - budgeted, toBudget)
       : 0;
 
