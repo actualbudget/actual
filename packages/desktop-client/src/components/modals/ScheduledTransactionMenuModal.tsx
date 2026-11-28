@@ -19,6 +19,7 @@ import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
 import { useLocale } from '#hooks/useLocale';
 import { useSchedules } from '#hooks/useSchedules';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { isNextScheduledDate } from '#util/schedule';
 
 type ScheduledTransactionMenuModalProps = Extract<
   ModalType,
@@ -55,6 +56,7 @@ export function ScheduledTransactionMenuModal({
 
   const canBeSkipped = scheduleIsRecurring(dateCond);
   const canBeCompleted = !scheduleIsRecurring(dateCond);
+  const skipsTappedDate = isNextScheduledDate(transactionId, [schedule]);
 
   return (
     <MobileSheet
@@ -92,7 +94,11 @@ export function ScheduledTransactionMenuModal({
         />
         {canBeSkipped && (
           <MobileSheetRow
-            label={t('Skip next scheduled date')}
+            label={
+              skipsTappedDate
+                ? t('Skip this scheduled date')
+                : t('Skip next scheduled date')
+            }
             onPress={() => onSkip(transactionId)}
           />
         )}

@@ -1,7 +1,7 @@
 import { enUS } from 'date-fns/locale';
 import i18next from 'i18next';
 
-import { getRecurringDescription } from '#util/schedule';
+import { getRecurringDescription, isNextScheduledDate } from '#util/schedule';
 
 // getRecurringDescription uses the full English sentence as the translation
 // key, so with no resources i18next echoes the key back with interpolation
@@ -11,6 +11,39 @@ void i18next.init({
   interpolation: {
     escapeValue: false,
   },
+});
+
+describe('isNextScheduledDate', () => {
+  const schedules = [
+    { id: 'rent', next_date: '2026-11-01' },
+    { id: 'gym', next_date: '2026-11-20' },
+  ];
+
+  it('is true for the row on the next date of its schedule', () => {
+    expect(isNextScheduledDate('preview/rent/2026-11-01', schedules)).toBe(
+      true,
+    );
+  });
+
+  it('is false for a later occurrence of the same schedule', () => {
+    expect(isNextScheduledDate('preview/rent/2026-12-01', schedules)).toBe(
+      false,
+    );
+  });
+
+  it('matches the date against the schedule of that row', () => {
+    expect(isNextScheduledDate('preview/gym/2026-11-01', schedules)).toBe(
+      false,
+    );
+  });
+
+  it('is false when the schedule is not loaded', () => {
+    expect(isNextScheduledDate('preview/rent/2026-11-01', [])).toBe(false);
+  });
+
+  it('is false for ids without a date', () => {
+    expect(isNextScheduledDate('preview/rent', schedules)).toBe(false);
+  });
 });
 
 describe('getRecurringDescription', () => {
