@@ -10,7 +10,8 @@ import { useFeatureFlag } from '#hooks/useFeatureFlag';
 export type BudgetMenuActions = {
   onCopyLastMonthAverage: () => void;
   onSetMonthsAverage: (numberOfMonths: number) => void;
-  onApplyBudgetTemplate: () => void;
+  // Left out for currency lines, which have no templates
+  onApplyBudgetTemplate?: () => void;
   onCopyUntilYearEnd: () => void;
 };
 
@@ -69,7 +70,7 @@ export function useBudgetMenu({
       name: 'copy-until-year-end',
       text: t('Copy until year end'),
     },
-    ...(isGoalTemplatesEnabled
+    ...(isGoalTemplatesEnabled && onApplyBudgetTemplate
       ? [
           {
             name: 'apply-single-category-template',

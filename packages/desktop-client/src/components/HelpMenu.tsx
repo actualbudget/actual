@@ -37,6 +37,9 @@ const getPageDocs = (page: string) => {
     case '/bank-sync':
     case '/settings/bank-sync':
       return 'https://actualbudget.org/docs/advanced/bank-sync';
+    case '/exchange-rates':
+    case '/settings/exchange-rates':
+      return 'https://actualbudget.org/docs/experimental/multi-currency';
     case '/settings/experimental':
       return 'https://actualbudget.org/docs/experimental';
     case '/settings':

@@ -8,6 +8,7 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
+  RuleConditionEntity,
 } from '@actual-app/core/types/models';
 import { useQuery } from '@tanstack/react-query';
 
@@ -22,14 +23,19 @@ import {
   useSaveCategoryMutation,
   useSortCategoriesMutation,
 } from '#budget';
+import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
+import { useCategoryCurrencies } from '#hooks/useCategoryCurrencies';
+import type { CategoryLine } from '#hooks/useCategoryCurrencies';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
+import { useMultiCurrency } from '#hooks/useMultiCurrency';
 import { useNavigate } from '#hooks/useNavigate';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
+import { getCurrencyLineAccountIds } from './currencyLineAccounts';
 import { AutoSizingBudgetTable } from './DynamicBudgetTable';
 import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
 import { EnvelopeBudgetProvider } from './envelope/EnvelopeBudgetContext';
@@ -54,6 +60,10 @@ export function Budget() {
   const [initialized, setInitialized] = useState(false);
   const { data: { grouped: categoryGroups } = { grouped: [] } } =
     useCategories();
+  const { isLoading: isLoadingCurrencyLines, getLines } =
+    useCategoryCurrencies();
+  const { data: accounts = [] } = useAccounts();
+  const { defaultCurrencyCode } = useMultiCurrency();
 
   // Re-runs whenever the bounds change so newly available months get warmed.
   const init = useEffectEvent(
@@ -126,8 +136,12 @@ export function Budget() {
     });
   };
 
-  const onShowActivity = (categoryId, month) => {
-    const filterConditions = [
+  const onShowActivity = (
+    categoryId: CategoryEntity['id'],
+    month: string,
+    line?: CategoryLine,
+  ) => {
+    const filterConditions: RuleConditionEntity[] = [
       { field: 'category', op: 'is', value: categoryId, type: 'id' },
       {
         field: 'date',
@@ -137,6 +151,22 @@ export function Budget() {
         type: 'date',
       },
     ];
+    // A currency line shows only the transactions it counts
+    if (line) {
+      filterConditions.push({
+        field: 'account',
+        op: 'oneOf',
+        value: getCurrencyLineAccountIds({
+          categoryId,
+          line,
+          lines: getLines(categoryId),
+          month,
+          accounts,
+          defaultCurrencyCode,
+        }),
+        type: 'id',
+      });
+    }
     void navigate('/accounts', {
       state: {
         goBack: true,
@@ -171,7 +201,7 @@ export function Budget() {
     applyBudgetAction.mutate({ month, type, args });
   };
 
-  if (!initialized || !bounds || !categoryGroups) {
+  if (!initialized || !bounds || !categoryGroups || isLoadingCurrencyLines) {
     return null;
   }
 
@@ -265,6 +295,10 @@ export type BudgetSummaryProps = {
 export type CategoryMonthProps = {
   month: string;
   category: CategoryEntity;
+  // A currency line of the category, budgeted in its own currency
+  line?: CategoryLine;
+  // The total of a category with currency lines, which is only shown
+  showTotal?: boolean;
   editing: boolean;
   isLast?: boolean;
   onEdit: (id: CategoryEntity['id'] | null, month?: string) => void;

@@ -6,6 +6,7 @@ import { MobileSheetBalanceHeader } from '#components/mobile/MobileSheetBalanceH
 import { MobileSheetMenuRows } from '#components/mobile/MobileSheetMenuRows';
 import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
 import { useCategory } from '#hooks/useCategory';
+import { useBudgetLine } from '#hooks/useCategoryCurrencies';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
@@ -21,7 +22,8 @@ export function EnvelopeBalanceMenuModal({
   onCover,
   onFundGoal,
 }: EnvelopeBalanceMenuModalProps) {
-  const { data: category } = useCategory(categoryId);
+  const { categoryId: ownerId, currencyCode } = useBudgetLine(categoryId);
+  const { data: category } = useCategory(ownerId);
   const { items, onMenuSelect } = useBalanceMenu({
     categoryId,
     onCarryover,
@@ -35,9 +37,15 @@ export function EnvelopeBalanceMenuModal({
   }
 
   return (
-    <MobileSheet name="envelope-balance-menu" title={category.name}>
+    <MobileSheet
+      name="envelope-balance-menu"
+      title={
+        currencyCode ? `${category.name} (${currencyCode})` : category.name
+      }
+    >
       <MobileSheetBalanceHeader
         label={<Trans>Balance</Trans>}
+        currencyCode={currencyCode}
         carryover={envelopeBudget.catCarryover(categoryId)}
         balance={envelopeBudget.catBalance(categoryId)}
         goal={envelopeBudget.catGoal(categoryId)}

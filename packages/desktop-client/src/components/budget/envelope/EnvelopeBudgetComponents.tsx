@@ -17,7 +17,9 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
+import { CategoryTotalMonth } from '#components/budget/CategoryTotalMonth';
 import { makeAmountGrey } from '#components/budget/util';
+import { ConvertedSpendingHint } from '#components/currency/ConvertedSpendingHint';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { Field, Row, SheetCell } from '#components/table';
@@ -192,9 +194,14 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   );
 });
 
+const EXPENSE_COLUMNS = ['budgeted', 'spent', 'balance'] as const;
+const INCOME_COLUMNS = ['spent'] as const;
+
 export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   month,
   category,
+  line,
+  showTotal,
   editing,
   onEdit,
   onBudgetAction,
@@ -256,7 +263,42 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       month,
     });
 
-  const showScheduleIndicator = schedule && scheduleStatus;
+  // A currency line of the category is budgeted in its own currency
+  const lineId = line?.id ?? category.id;
+  const lineCurrencyCode =
+    line && line.id !== category.id ? line.currencyCode : undefined;
+  const isCurrencyLine = lineCurrencyCode != null;
+  const formatLineAmount = lineCurrencyCode
+    ? (value: unknown) =>
+        format(value, 'financial', { currencyCode: lineCurrencyCode })
+    : undefined;
+
+  const showScheduleIndicator = !isCurrencyLine && schedule && scheduleStatus;
+
+  if (showTotal) {
+    return (
+      <CategoryTotalMonth
+        categoryId={category.id}
+        month={month}
+        columns={EXPENSE_COLUMNS}
+        bindings={{
+          budgeted: envelopeBudget.catBudgetedTotal(category.id),
+          spent: envelopeBudget.catSumAmountTotal(category.id),
+          balance: envelopeBudget.catBalanceTotal(category.id),
+        }}
+        onShowActivity={() => onShowActivity(category.id, month)}
+      />
+    );
+  }
+  if (line?.startMonth && month < line.startMonth) {
+    return (
+      <CategoryTotalMonth
+        categoryId={category.id}
+        month={month}
+        columns={EXPENSE_COLUMNS}
+      />
+    );
+  }
 
   return (
     <View
@@ -308,10 +350,12 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                 borderColor: theme.tableBorder,
               }}
             >
-              <NotesButton
-                id={`${category.id}-${month}`}
-                defaultColor={theme.pageTextLight}
-              />
+              {!isCurrencyLine && (
+                <NotesButton
+                  id={`${category.id}-${month}`}
+                  defaultColor={theme.pageTextLight}
+                />
+              )}
             </View>
             <View
               className={`hover-expand ${budgetMenuOpen ? 'force-visible' : ''}`}
@@ -354,7 +398,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                 <BudgetMenu
                   onCopyLastMonthAverage={() => {
                     onMenuAction(month, 'copy-single-last', {
-                      category: category.id,
+                      category: lineId,
                     });
                     showUndoNotification({
                       message: t(`Budget set to last month's budget.`),
@@ -370,7 +414,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     }
 
                     onMenuAction(month, `set-single-${numberOfMonths}-avg`, {
-                      category: category.id,
+                      category: lineId,
                     });
                     showUndoNotification({
                       message: t(
@@ -379,14 +423,22 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                       ),
                     });
                   }}
-                  onApplyBudgetTemplate={() => {
-                    onMenuAction(month, 'apply-single-category-template', {
-                      category: category.id,
-                    });
-                    showUndoNotification({
-                      message: t(`Budget template applied.`),
-                    });
-                  }}
+                  onApplyBudgetTemplate={
+                    isCurrencyLine
+                      ? undefined
+                      : () => {
+                          onMenuAction(
+                            month,
+                            'apply-single-category-template',
+                            {
+                              category: category.id,
+                            },
+                          );
+                          showUndoNotification({
+                            message: t(`Budget template applied.`),
+                          });
+                        }
+                  }
                 />
               </Popover>
             </View>
@@ -395,9 +447,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         <EnvelopeSheetCell
           name="budget"
           exposed={editing}
+          formatter={formatLineAmount}
           focused={editing}
           width="flex"
-          onExpose={() => onEdit(category.id, month)}
+          onExpose={() => onEdit(lineId, month)}
           style={{ ...(editing && { zIndex: 100 }), ...styles.tnum }}
           textAlign="right"
           valueStyle={{
@@ -411,10 +464,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             },
           }}
           valueProps={{
-            binding: envelopeBudget.catBudgeted(category.id),
+            binding: envelopeBudget.catBudgeted(lineId),
             type: 'financial',
             getValueStyle: makeAmountGrey,
-            formatExpr: format.forEdit,
+            formatExpr: value =>
+              format.forEdit(value, { currencyCode: lineCurrencyCode }),
             unformatExpr: format.fromEdit,
           }}
           inputProps={{
@@ -427,7 +481,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           }}
           onSave={(parsedIntegerAmount: number | null) => {
             onBudgetAction(month, 'budget-amount', {
-              category: category.id,
+              category: lineId,
               amount: parsedIntegerAmount ?? 0,
             });
           }}
@@ -446,6 +500,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             gap: 2,
           }}
         >
+          {!isCurrencyLine && (
+            <ConvertedSpendingHint category={category} month={month} />
+          )}
           {showScheduleIndicator && (
             <View title={description}>
               <Button
@@ -473,12 +530,13 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             </View>
           )}
           <EnvelopeCellValue
-            binding={envelopeBudget.catSumAmount(category.id)}
+            binding={envelopeBudget.catSumAmount(lineId)}
             type="financial"
           >
             {props => (
               <CellValueText
                 {...props}
+                formatter={formatLineAmount}
                 className={css({
                   cursor: 'pointer',
                   ':hover': { textDecoration: 'underline' },
@@ -518,11 +576,12 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           }}
         >
           <BalanceWithCarryover
-            carryover={envelopeBudget.catCarryover(category.id)}
-            balance={envelopeBudget.catBalance(category.id)}
-            goal={envelopeBudget.catGoal(category.id)}
-            budgeted={envelopeBudget.catBudgeted(category.id)}
-            longGoal={envelopeBudget.catLongGoal(category.id)}
+            formatter={formatLineAmount}
+            carryover={envelopeBudget.catCarryover(lineId)}
+            balance={envelopeBudget.catBalance(lineId)}
+            goal={envelopeBudget.catGoal(lineId)}
+            budgeted={envelopeBudget.catBudgeted(lineId)}
+            longGoal={envelopeBudget.catLongGoal(lineId)}
           />
         </Button>
 
@@ -539,7 +598,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           {...balancePosition}
         >
           <BalanceMovementMenu
-            categoryId={category.id}
+            categoryId={lineId}
             month={month}
             onBudgetAction={onBudgetAction}
             onClose={() => setBalanceMenuOpen(false)}
@@ -579,11 +638,14 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
 
 export function IncomeCategoryMonth({
   category,
+  line,
+  showTotal,
   isLast,
   month,
   onShowActivity,
   onBudgetAction,
 }: CategoryMonthProps) {
+  const format = useFormat();
   const incomeMenuTriggerRef = useRef(null);
   const [incomeMenuOpen, setIncomeMenuOpen] = useState(false);
   const [incomePosition, setIncomePosition] = useState({
@@ -602,6 +664,32 @@ export function IncomeCategoryMonth({
     });
     setIncomeMenuOpen(true);
   };
+
+  // A currency line of the category is received in its own currency
+  const lineId = line?.id ?? category.id;
+  const lineCurrencyCode =
+    line && line.id !== category.id ? line.currencyCode : undefined;
+
+  if (showTotal) {
+    return (
+      <CategoryTotalMonth
+        categoryId={category.id}
+        month={month}
+        columns={INCOME_COLUMNS}
+        bindings={{ spent: envelopeBudget.catSumAmountTotal(category.id) }}
+        onShowActivity={() => onShowActivity(category.id, month)}
+      />
+    );
+  }
+  if (line?.startMonth && month < line.startMonth) {
+    return (
+      <CategoryTotalMonth
+        categoryId={category.id}
+        month={month}
+        columns={INCOME_COLUMNS}
+      />
+    );
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -628,6 +716,9 @@ export function IncomeCategoryMonth({
             position: 'relative',
           }}
         >
+          {lineCurrencyCode == null && (
+            <ConvertedSpendingHint category={category} month={month} />
+          )}
           <Button
             variant="bare"
             onPress={() => {
@@ -651,11 +742,19 @@ export function IncomeCategoryMonth({
           >
             <BalanceWithCarryover
               isIncome
-              carryover={envelopeBudget.catCarryover(category.id)}
-              balance={envelopeBudget.catSumAmount(category.id)}
-              goal={envelopeBudget.catGoal(category.id)}
-              budgeted={envelopeBudget.catBudgeted(category.id)}
-              longGoal={envelopeBudget.catLongGoal(category.id)}
+              carryover={envelopeBudget.catCarryover(lineId)}
+              balance={envelopeBudget.catSumAmount(lineId)}
+              goal={envelopeBudget.catGoal(lineId)}
+              budgeted={envelopeBudget.catBudgeted(lineId)}
+              longGoal={envelopeBudget.catLongGoal(lineId)}
+              formatter={
+                lineCurrencyCode
+                  ? value =>
+                      format(value, 'financial', {
+                        currencyCode: lineCurrencyCode,
+                      })
+                  : undefined
+              }
             />
           </Button>
           <Popover
@@ -668,10 +767,13 @@ export function IncomeCategoryMonth({
             {...incomePosition}
           >
             <IncomeMenu
-              categoryId={category.id}
+              categoryId={lineId}
               month={month}
               onBudgetAction={onBudgetAction}
-              onShowActivity={onShowActivity}
+              // Transactions are those of the category
+              onShowActivity={(_, activityMonth) =>
+                onShowActivity(category.id, activityMonth)
+              }
               onClose={() => setIncomeMenuOpen(false)}
             />
           </Popover>

@@ -79,11 +79,22 @@ export const schema = {
     last_sync: f('string'),
     bank_sync_status: f('string'),
     account_group_id: f('id', { ref: 'account_groups' }),
+    currency: f('string'),
   },
   account_groups: {
     id: f('id'),
     name: f('string'),
     sort_order: f('float'),
+    tombstone: f('boolean'),
+  },
+  exchange_rates: {
+    id: f('id'),
+    from_currency: f('string', { required: true }),
+    to_currency: f('string', { required: true }),
+    rate: f('float', { required: true }),
+    date: f('date', { required: true }),
+    source: f('string'),
+    created_at: f('integer'),
     tombstone: f('boolean'),
   },
   categories: {
@@ -104,6 +115,13 @@ export const schema = {
     is_income: f('boolean'),
     hidden: f('boolean'),
     sort_order: f('float'),
+    tombstone: f('boolean'),
+  },
+  category_currencies: {
+    id: f('id'),
+    category: f('id', { ref: 'categories', required: true }),
+    currency: f('string', { required: true }),
+    start_month: f('integer', { required: true }),
     tombstone: f('boolean'),
   },
   cleanup_groups: {
@@ -299,6 +317,8 @@ export const schemaConfig: SchemaConfig = {
           return ['sort_order', 'id'];
         case 'dashboard_pages':
           return ['sort_order', 'id'];
+        case 'exchange_rates':
+          return [{ date: 'desc' }, 'from_currency', 'to_currency', 'id'];
         case 'schedules':
           return [{ $condition: { completed: true } }, 'next_date'];
         default:

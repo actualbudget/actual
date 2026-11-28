@@ -48,6 +48,7 @@ import { usePayees } from '#hooks/usePayees';
 import { useScrollListener } from '#hooks/useScrollListener';
 import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { useTransactionBatchActions } from '#hooks/useTransactionBatchActions';
+import { useIsCrossCurrencyTransfer } from '#hooks/useTransferAmountConverter';
 import { useUndo } from '#hooks/useUndo';
 import { setNotificationInset } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
@@ -362,6 +363,7 @@ function SelectedTransactionsFloatingActionBar({
   } = useCategoriesById();
 
   const dispatch = useDispatch();
+  const isCrossCurrencyTransfer = useIsCrossCurrencyTransfer();
   useEffect(() => {
     dispatch(
       setNotificationInset({ inset: { bottom: NOTIFICATION_BOTTOM_INSET } }),
@@ -393,8 +395,13 @@ function SelectedTransactionsFloatingActionBar({
       return false;
     }
     const [fromTrans, toTrans] = twoTransactions;
-    return validForTransfer(fromTrans, toTrans);
-  }, [twoTransactions]);
+    return validForTransfer(fromTrans, toTrans, {
+      isCrossCurrency: isCrossCurrencyTransfer(
+        fromTrans.account,
+        toTrans.account,
+      ),
+    });
+  }, [isCrossCurrencyTransfer, twoTransactions]);
 
   const canMerge = useMemo(() => {
     return Boolean(

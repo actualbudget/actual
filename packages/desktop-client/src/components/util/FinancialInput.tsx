@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { FocusEvent, MouseEvent } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -23,6 +23,10 @@ type FinancialInputProps = Omit<
   'value' | 'onUpdate' | 'onChangeValue' | 'onEnter'
 > & {
   value: IntegerAmount;
+  // The currency of the amount when it isn't the default one: it is then
+  // shown and typed with the decimal places of that currency, without its
+  // symbol, as the field's label names it
+  currencyCode?: string;
   onUpdate?: (value: IntegerAmount) => void;
   onChangeValue?: (value: IntegerAmount) => void;
   onEnter?: (value: IntegerAmount) => void;
@@ -31,6 +35,7 @@ type FinancialInputProps = Omit<
 export function FinancialInput({
   ref,
   value: integerValue,
+  currencyCode,
   onUpdate,
   onChangeValue,
   onBlur,
@@ -43,6 +48,10 @@ export function FinancialInput({
 }: FinancialInputProps) {
   const format = useFormat();
   const privacyMode = usePrivacyMode();
+  const formatOptions = useMemo(
+    () => (currencyCode ? { currencyCode, hideSymbol: true } : undefined),
+    [currencyCode],
+  );
   // Like PrivacyFilter, redaction is desktop-only for now
   const { isNarrowWidth } = useResponsive();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -52,16 +61,16 @@ export function FinancialInput({
   const isPointerDown = useRef(false);
   const shouldKeepSelection = useRef(false);
   const [internalValue, setInternalValue] = useState(() =>
-    format(integerValue, 'financial'),
+    format(integerValue, 'financial', formatOptions),
   );
   const [isFocused, setIsFocused] = useState(false);
   const isEdited = useRef(false);
 
   useEffect(() => {
     if (!isFocused) {
-      setInternalValue(format(integerValue, 'financial'));
+      setInternalValue(format(integerValue, 'financial', formatOptions));
     }
-  }, [integerValue, format, isFocused]);
+  }, [integerValue, format, formatOptions, isFocused]);
 
   // Highlight the whole value on focus so typing replaces it. Focusing
   // swaps the text to its edit form, which would collapse a selection
@@ -78,7 +87,7 @@ export function FinancialInput({
   const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
     setIsFocused(true);
     isEdited.current = false;
-    setInternalValue(format.forEdit(integerValue));
+    setInternalValue(format.forEdit(integerValue, { currencyCode }));
     // The selection itself is made in the layout effect above
     shouldKeepSelection.current = isPointerDown.current;
     onFocus?.(e);
@@ -113,7 +122,7 @@ export function FinancialInput({
     if (finalInteger !== integerValue) {
       onUpdate?.(finalInteger);
     }
-    setInternalValue(format(finalInteger, 'financial'));
+    setInternalValue(format(finalInteger, 'financial', formatOptions));
     onBlur?.(e);
   };
 
