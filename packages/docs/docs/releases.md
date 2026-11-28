@@ -1,5 +1,197 @@
 # Release Notes
 
+## 26.12.0
+
+Release date: 2026-12-01
+
+- TODO: Add release highlights
+
+**Docker Tag: 26.12.0**
+
+<!-- release-notes:auto-generated -->
+
+#### Features
+
+- [#9559](https://github.com/actualbudget/actual/pull/9559) Add the Amethyst theme to the custom theme catalog — thanks @geogabrielp
+- [#9347](https://github.com/actualbudget/actual/pull/9347) Add a Quarterly interval to custom reports — thanks @kareemhalabi
+- [#9547](https://github.com/actualbudget/actual/pull/9547) Add the Tokyo Night theme to the custom theme catalog — thanks @williamcorsel
+- [#9343](https://github.com/actualbudget/actual/pull/9343) Add server support for creating and revoking API keys for individual budgets — thanks @jfdoming
+- [#9345](https://github.com/actualbudget/actual/pull/9345) Create and revoke API keys for individual budgets from Security settings — thanks @jfdoming
+- [#9344](https://github.com/actualbudget/actual/pull/9344) Allow scripts to download and update selected budgets using a separately revocable API key — thanks @jfdoming
+- [#8878](https://github.com/actualbudget/actual/pull/8878) Add an "is between" option to date and amount filters. The filter is inclusive for both start and end values. — thanks @DavidGrinberg
+- [#9432](https://github.com/actualbudget/actual/pull/9432) Add one-off withdrawals to the Monte Carlo report so a lump sum such as a house deposit or pension tax-free cash can be taken at an age — thanks @MikesGlitch
+- [#9426](https://github.com/actualbudget/actual/pull/9426) Make Akahu bank sync (New Zealand banks) available to everyone without enabling an experimental feature — thanks @MatissJanis
+- [#9620](https://github.com/actualbudget/actual/pull/9620) Enable Banking bank sync for European banks is now available to everyone — thanks @MatissJanis
+
+#### Enhancements
+
+- [#9509](https://github.com/actualbudget/actual/pull/9509) Add a mobile Tags page for adding, editing, filtering and deleting tags — thanks @matt-fidd
+- [#9382](https://github.com/actualbudget/actual/pull/9382) Add haptic feedback to the keypad, swipe actions and pull to refresh in the iOS and Android apps — thanks @MatissJanis
+- [#9271](https://github.com/actualbudget/actual/pull/9271) Add a hidden setting to try the new browser storage engine, and move the API's browser build to it so pages using it no longer need cross-origin isolation headers — thanks @MikesGlitch
+- [#9260](https://github.com/actualbudget/actual/pull/9260) Add `applyCategoryTemplate` and `getCategoryTemplateAmount` to the API to budget a category from its templates — thanks @nowak-mariusz
+- [#8981](https://github.com/actualbudget/actual/pull/8981) Add support for managing dashboard pages and widgets through `@actual-app/api`. — thanks @andycarlberg
+- [#9485](https://github.com/actualbudget/actual/pull/9485) Allow API keys to sync SimpleFIN and Pluggy accounts using credentials configured for the budget — thanks @jfdoming
+- [#9486](https://github.com/actualbudget/actual/pull/9486) Add an option to allow API keys to sync shared bank connections — thanks @jfdoming
+- [#9293](https://github.com/actualbudget/actual/pull/9293) Automatically extend budget planning beyond 12 months, up to 5 years ahead, in Envelope and Tracking modes. — thanks @x-rous
+- [#9405](https://github.com/actualbudget/actual/pull/9405) Add an "Average of previous weeks" budget automation — thanks @tim-smart
+- [#9208](https://github.com/actualbudget/actual/pull/9208) Show the largest scheduled inflows and outflows behind a balance forecast, with links to review and edit each schedule. — thanks @samaluk
+- [#9207](https://github.com/actualbudget/actual/pull/9207) Add balance forecasts that start today, keep saved ranges moving forward, and label today or the current month on the chart. — thanks @samaluk
+- [#9517](https://github.com/actualbudget/actual/pull/9517) Make stacked dialogs faster by only blurring the background of the top dialog — thanks @RandomSpaceship
+- [#9297](https://github.com/actualbudget/actual/pull/9297) Show a small ring beside the balance of categories whose goal is not yet funded, which fills as the goal is funded, and stop coloring envelope income categories by goals left from a tracking budget — thanks @mattm4444
+- [#9197](https://github.com/actualbudget/actual/pull/9197) Show the horizontal axis labels on bar and line chart cards in the reports dashboard — thanks @RandomSpaceship
+- [#9209](https://github.com/actualbudget/actual/pull/9209) Compare up to four named balance forecast lines with separate account and transaction filters, and save them to your dashboard — thanks @samaluk
+- [#9218](https://github.com/actualbudget/actual/pull/9218) Move the actions on the payees, tags, rules and schedules pages into a toolbar above the list and give those pages and bank sync a consistent layout — thanks @matt-fidd
+- [#9438](https://github.com/actualbudget/actual/pull/9438) Allow mobile users to copy/paste into the transaction amount field. — thanks @rjinnette
+- [#9604](https://github.com/actualbudget/actual/pull/9604) Mobile: menus and dialogs now glide into place when the on-screen keyboard opens or closes, and no longer slide under the status bar at the top of the screen. — thanks @MatissJanis
+- [#9459](https://github.com/actualbudget/actual/pull/9459) implemented better payee name and bank transfer info parsing for Fineco bank — thanks @guglicap
+- [#9383](https://github.com/actualbudget/actual/pull/9383) Mobile apps: stop registering the web update mechanism, and hide the "new version available" notice and the self-hosting setup hint, since updates and setup work differently there — thanks @MatissJanis
+- [#9304](https://github.com/actualbudget/actual/pull/9304) Show a category's goal as soon as you save its budget automations, without changing the budgeted amount — thanks @mattm4444
+- [#9406](https://github.com/actualbudget/actual/pull/9406) Allow the Reports page to be hidden from the sidebar — thanks @RandomSpaceship
+- [#9121](https://github.com/actualbudget/actual/pull/9121) Improve how quickly the budget appears when opening it. — thanks @aelxxs
+- [#9320](https://github.com/actualbudget/actual/pull/9320) Monte carlo - Load the reports dashboard faster when it has a Monte Carlo card — thanks @MikesGlitch
+- [#9093](https://github.com/actualbudget/actual/pull/9093) Add a button to remove a tag from a transaction's notes when hovering the tag — thanks @rtwfroody
+- [#9409](https://github.com/actualbudget/actual/pull/9409) Reorder report dashboards by dragging them in the dashboard selector — thanks @RandomSpaceship
+- [#8862](https://github.com/actualbudget/actual/pull/8862) Budget schedules using a smarter forecast that stops adding to a category once it holds what its upcoming bills need — thanks @MikeBishop
+- [#9326](https://github.com/actualbudget/actual/pull/9326) Scroll to and highlight the other side of a transfer when opening it from the transfer arrow — thanks @rapastranac
+- [#9540](https://github.com/actualbudget/actual/pull/9540) Show the setting for trying the new browser storage engine in Experimental settings — thanks @MikesGlitch
+- [#9462](https://github.com/actualbudget/actual/pull/9462) Skip goal template targets whose month has passed instead of failing the whole template run, and stop `by` and `spend` targets from pulling money back out of a category that is already funded beyond them — thanks @e13h
+- [#9329](https://github.com/actualbudget/actual/pull/9329) Make the iOS and Android apps much smaller to download and install. — thanks @MatissJanis
+- [#9384](https://github.com/actualbudget/actual/pull/9384) Sync and re-check the server connection when the iOS and Android apps return to the foreground — thanks @MatissJanis
+- [#9633](https://github.com/actualbudget/actual/pull/9633) Add an accent color to themes. One color now drives buttons, links and selected rows, and custom themes can set it — thanks @matt-fidd
+- [#9573](https://github.com/actualbudget/actual/pull/9573) Check a budget moved to the new browser storage engine against the original before the original is removed, and offer a way back to the previous engine when a move fails — thanks @MikesGlitch
+
+#### Bugfixes
+
+- [#8791](https://github.com/actualbudget/actual/pull/8791) Fix an occasional API crash on shutdown while schedules are being processed — thanks @cakeni
+- [#9564](https://github.com/actualbudget/actual/pull/9564) Accept Quicken QIF transaction detail codes during import — thanks @sshnox
+- [#9466](https://github.com/actualbudget/actual/pull/9466) Fix recurring schedules without an assigned account not advancing after being paid — thanks @saiyam-jain-dev
+- [#9535](https://github.com/actualbudget/actual/pull/9535) GoCardless: use the merchant as the payee for Alior Bank credit card payments too, not only debit card payments — thanks @muhimu
+- [#9523](https://github.com/actualbudget/actual/pull/9523) Prevent the background artwork from flickering during updates. — thanks @lfrb
+- [#9331](https://github.com/actualbudget/actual/pull/9331) Fix Crossover report resetting to a blank slate on page refresh by awaiting category and account selection initialization — thanks @grzdev
+- [#9263](https://github.com/actualbudget/actual/pull/9263) Handle Date values when checking the current month or day. — thanks @fallintoplace
+- [#9226](https://github.com/actualbudget/actual/pull/9226) Fix the sync server not starting on systems with IPv6 disabled — thanks @grzdev
+- [#9374](https://github.com/actualbudget/actual/pull/9374) Prevent categories from becoming orphaned when updated with an invalid group ID. — thanks @emadleo13
+- [#9554](https://github.com/actualbudget/actual/pull/9554) Fix Akahu bank sync failing before 1pm New Zealand time and dropping transactions from the first hours of the day — thanks @EnesKartal
+- [#9602](https://github.com/actualbudget/actual/pull/9602) Fix the API's `deleteTransaction` resolving before the transaction is deleted — thanks @montjeffrey
+- [#9393](https://github.com/actualbudget/actual/pull/9393) Show a clear error with recovery steps when the API finds a budget that is out of sync with the server. — thanks @bubbletroubles
+- [#9410](https://github.com/actualbudget/actual/pull/9410) Fix automatic bank sync not running in the iOS and Android apps — thanks @MatissJanis
+- [#9470](https://github.com/actualbudget/actual/pull/9470) Fix the Budget Analysis report counting categories in hidden groups and leaving out overspending from the month before the selected period — thanks @tabedzki
+- [#9372](https://github.com/actualbudget/actual/pull/9372) Mention budgeted amounts in the delete category warning, not only transactions — thanks @vulinh1704
+- [#9625](https://github.com/actualbudget/actual/pull/9625) Fix End of month cleanup budgeting negative amounts when To Budget is negative — thanks @rapastranac
+- [#9471](https://github.com/actualbudget/actual/pull/9471) Fix accented characters appearing corrupted when opening exported CSV files in Excel — thanks @tabedzki
+- [#9541](https://github.com/actualbudget/actual/pull/9541) Respect date filters when calculating averages in custom transaction reports. — thanks @wunsir
+- [#9278](https://github.com/actualbudget/actual/pull/9278) Fix reports added on one device never showing up on your other devices, and bring back any that went missing — thanks @youngcw
+- [#9467](https://github.com/actualbudget/actual/pull/9467) Fix the category donut chart turning black when theme chart colors use hsl values — thanks @Edzard9
+- [#9456](https://github.com/actualbudget/actual/pull/9456) Fix deleted transactions coming back after every sync for some Enable Banking banks — thanks @MatissJanis
+- [#9549](https://github.com/actualbudget/actual/pull/9549) Fix Enable Banking importing pending transactions when that setting is turned off, and marking holds and scheduled payments as cleared — thanks @MatissJanis
+- [#9468](https://github.com/actualbudget/actual/pull/9468) Fix Enable Banking syncs that some banks rejected, or that failed when the bank could not report a balance — thanks @MatissJanis
+- [#9454](https://github.com/actualbudget/actual/pull/9454) Show a clear error when Enable Banking setup fails or its list of banks cannot be loaded — thanks @MatissJanis
+- [#9455](https://github.com/actualbudget/actual/pull/9455) Add dark and tinted iOS app icons and a dark-mode splash screen — thanks @bmuna
+- [#9479](https://github.com/actualbudget/actual/pull/9479) Fix exporting the budget and other files in the iOS and Android apps — thanks @MatissJanis
+- [#9592](https://github.com/actualbudget/actual/pull/9592) Keep popovers and dropdown lists clear of the iOS status bar and home indicator — thanks @NikolaKrtinic
+- [#9601](https://github.com/actualbudget/actual/pull/9601) Keep toast notifications above the mobile navigation bar and iOS bottom safe area. — thanks @EnesKartal
+- [#9529](https://github.com/actualbudget/actual/pull/9529) Fix wrong balances and crashes when linking Pluggy.ai or Akahu accounts — thanks @samjonath
+- [#9497](https://github.com/actualbudget/actual/pull/9497) Stop the search box from covering the add button on the tags, rules and schedules pages at narrow widths — thanks @matt-fidd
+- [#9588](https://github.com/actualbudget/actual/pull/9588) Fix the "Request Location" button not working in the iOS and Android apps — thanks @MatissJanis
+- [#9335](https://github.com/actualbudget/actual/pull/9335) Fix long payee names being cut off in the rule editor on mobile — thanks @vulinh1704
+- [#9590](https://github.com/actualbudget/actual/pull/9590) Fix the mobile selection bar covering the last transaction in the list — thanks @hskl18
+- [#9414](https://github.com/actualbudget/actual/pull/9414) Monte carlo - Stop the minimum spending floor raising a cheaper spending phase above its planned amount — thanks @MikesGlitch
+- [#9484](https://github.com/actualbudget/actual/pull/9484) Fix transaction edits not appearing immediately in other open tabs — thanks @emadleo13
+- [#9309](https://github.com/actualbudget/actual/pull/9309) Prevent invalid calculations from interrupting transaction amount editing. — thanks @doksanbes
+- [#9394](https://github.com/actualbudget/actual/pull/9394) Fix OpenID sign-in in the iOS and Android apps: the sign-in page now opens in the system browser and returns to the app when done — thanks @MatissJanis
+- [#9539](https://github.com/actualbudget/actual/pull/9539) Fix reconciling with hidden decimal places creating an adjustment for the hidden cents — thanks @samjonath
+- [#9576](https://github.com/actualbudget/actual/pull/9576) Fix the app getting stuck on loading when a budget that failed to open is opened again in the same tab — thanks @MikesGlitch
+- [#9402](https://github.com/actualbudget/actual/pull/9402) Fix custom reports showing unchecked or hidden categories when “Show empty rows” is enabled. — thanks @sraylanka
+- [#9566](https://github.com/actualbudget/actual/pull/9566) Fix reports resetting to their default settings when the on-screen keyboard opens on mobile devices — thanks @thomasjbarrett82
+- [#9308](https://github.com/actualbudget/actual/pull/9308) Fix downloading a report snapshot in Firefox — thanks @pendevster
+- [#9579](https://github.com/actualbudget/actual/pull/9579) Fix reports not loading without an internet connection — thanks @MatissJanis
+- [#9212](https://github.com/actualbudget/actual/pull/9212) Show the running balance when transactions are sorted by date with the oldest first — thanks @kikoval
+- [#9613](https://github.com/actualbudget/actual/pull/9613) Budget a schedule template whose schedule has no amount as 0 instead of failing with "Cannot read properties of null" — thanks @YasinzHyper
+- [#9617](https://github.com/actualbudget/actual/pull/9617) Don't let the service worker intercept Cloudflare Access (/cdn-cgi/) and other auth-proxy callback URLs — thanks @adnit
+- [#9501](https://github.com/actualbudget/actual/pull/9501) Fix undo not reverting the last change after opening a settings page — thanks @matt-fidd
+- [#9612](https://github.com/actualbudget/actual/pull/9612) Fix SimpleFIN opening balances when the bank sends amounts without exactly two decimal places — thanks @heychaewong
+- [#9461](https://github.com/actualbudget/actual/pull/9461) Fix HTTP_PROXY support for SimpleFIN connections — thanks @jfdoming
+- [#9351](https://github.com/actualbudget/actual/pull/9351) Fix SimpleFIN connection failures on recent nightly builds — thanks @jfdoming
+- [#9480](https://github.com/actualbudget/actual/pull/9480) Fix sync failing for budgets with a long history after importing them into a new server — thanks @danielkuhnen
+- [#9542](https://github.com/actualbudget/actual/pull/9542) Fixes Docker image builds for the sync server. — thanks @lfrb
+- [#9367](https://github.com/actualbudget/actual/pull/9367) Fix Tab skipping to the cleared column after picking a transaction date with the mouse — thanks @matt-fidd
+- [#9494](https://github.com/actualbudget/actual/pull/9494) Fix keyboard focus getting stuck on tables and show a focus outline when a table is focused — thanks @matt-fidd
+- [#9502](https://github.com/actualbudget/actual/pull/9502) Fix tags not updating after undoing a tag change — thanks @matt-fidd
+- [#9511](https://github.com/actualbudget/actual/pull/9511) Make zero and neutral amounts easier to read in all themes — thanks @matt-fidd
+- [#9483](https://github.com/actualbudget/actual/pull/9483) Fix menus and dialogs appearing offscreen on iPhone at higher zoom levels — thanks @jfdoming
+- [#9433](https://github.com/actualbudget/actual/pull/9433) Hide the "Warning" link in the top bar of the iOS and Android apps when the phone is rotated to landscape — thanks @MatissJanis
+- [#9401](https://github.com/actualbudget/actual/pull/9401) Use the current selected file for option-driven re-parses in the transaction import modal. — thanks @Hrushikesh-ramilla
+- [#9609](https://github.com/actualbudget/actual/pull/9609) Allow swiping from the screen edge to go back in the iOS app. — thanks @MatissJanis
+- [#9172](https://github.com/actualbudget/actual/pull/9172) Keep the search on mobile account transaction lists when opening a transaction and going back. — thanks @costajohnt
+- [#9360](https://github.com/actualbudget/actual/pull/9360) Keep the account search applied after showing or hiding reconciled transactions — thanks @boutchitos
+- [#9363](https://github.com/actualbudget/actual/pull/9363) Keep transactions and running balances after sorting by date while reconciled transactions are hidden — thanks @boutchitos
+- [#9387](https://github.com/actualbudget/actual/pull/9387) Fix Linux AppImage dock icon grouping by setting StartupWMClass to match the window class (`actual`). — thanks @junaidkhan80121
+- [#9328](https://github.com/actualbudget/actual/pull/9328) Keep the bank sync status pill below the notch in the iOS mobile app — thanks @MatissJanis
+- [#9369](https://github.com/actualbudget/actual/pull/9369) Fix transaction notes with line breaks being rewritten when the notes field is focused — thanks @YasinzHyper
+- [#9527](https://github.com/actualbudget/actual/pull/9527) Read comma decimal amounts in OFX imports instead of multiplying them by 100 — thanks @jayhemnani9910
+- [#9132](https://github.com/actualbudget/actual/pull/9132) Fix scheduled transactions that come back after you post them early. — thanks @kikoval
+- [#9173](https://github.com/actualbudget/actual/pull/9173) Keep skipped schedule dates when editing a schedule — thanks @SomSamantray
+- [#8905](https://github.com/actualbudget/actual/pull/8905) Prevent a device with an incorrect clock from breaking sync for everyone sharing the budget. — thanks @jsoberg
+- [#9545](https://github.com/actualbudget/actual/pull/9545) Open the desktop app's file picker in the folder you last picked a file from, instead of always starting in Downloads — thanks @rapastranac
+- [#8904](https://github.com/actualbudget/actual/pull/8904) Restore the sync clock when a batch of received changes fails to apply, so the failure no longer leaves the clock advanced — thanks @jsoberg
+- [#9434](https://github.com/actualbudget/actual/pull/9434) Fix the mobile bottom navigation bar staying hidden after scrolling on a settings page and going back — thanks @MatissJanis
+- [#9386](https://github.com/actualbudget/actual/pull/9386) Fix scheduled transactions failing to catch up after a temporary error without duplicating transactions already posted — thanks @tim-smart
+- [#9599](https://github.com/actualbudget/actual/pull/9599) Return to the iOS and Android apps automatically after linking a bank account — thanks @MatissJanis
+- [#9574](https://github.com/actualbudget/actual/pull/9574) Fix aggregation bug in Sankey chart for mixed deposits/payments for a category across several accounts — thanks @emiltb
+- [#9575](https://github.com/actualbudget/actual/pull/9575) Break transfer cycles into net transfer chains to prevent recursion error — thanks @emiltb
+- [#9316](https://github.com/actualbudget/actual/pull/9316) Fix schedule templates over-budgeting a category when the schedule's rule has a split with no category (e.g. a transfer) — thanks @e13h
+- [#9487](https://github.com/actualbudget/actual/pull/9487) Show the required server version for API key settings instead of a loading error on older servers — thanks @jfdoming
+- [#9299](https://github.com/actualbudget/actual/pull/9299) Show a clear message when SimpleFIN cannot be reached or is down for maintenance, instead of a generic internal error — thanks @A-RYAN-1
+- [#9490](https://github.com/actualbudget/actual/pull/9490) Stop completed schedules from linking to new transactions that match them — thanks @tabedzki
+- [#9313](https://github.com/actualbudget/actual/pull/9313) Fix amounts in currencies without decimals (yen, won, rial) being shown or saved at the wrong scale. Re-enter budget, rule and schedule amounts typed in these currencies before this fix; goal templates are unaffected, and running them again corrects the amounts they set. — thanks @rapastranac
+- [#9339](https://github.com/actualbudget/actual/pull/9339) Fix the server reporting that it started and then quietly exiting when its port is already in use or can't be opened. — thanks @tabedzki
+- [#9232](https://github.com/actualbudget/actual/pull/9232) Fix transaction search treating digits inside words like `35mm` as an amount — thanks @abakarovy
+- [#9368](https://github.com/actualbudget/actual/pull/9368) Include the whole last week in weekly custom reports with a static date range — thanks @YasinzHyper
+- [#9436](https://github.com/actualbudget/actual/pull/9436) Fix the budget file list being squished on mobile — thanks @MatissJanis
+
+#### Maintenance
+
+- [#9398](https://github.com/actualbudget/actual/pull/9398) Add podway to the Additional Installation Options list — thanks @velsa
+- [#9580](https://github.com/actualbudget/actual/pull/9580) Add Simafri to the Additional Installation Options list — thanks @simon-vasconcelos-lee
+- [#9591](https://github.com/actualbudget/actual/pull/9591) Add ZopDay to the Additional Installation Options list — thanks @muskanbandta23
+- [#9533](https://github.com/actualbudget/actual/pull/9533) Add an automated check that the iOS app still starts — thanks @MatissJanis
+- [#9269](https://github.com/actualbudget/actual/pull/9269) Add the official SQLite WebAssembly build as a storage engine for the browser, not yet enabled — thanks @MikesGlitch
+- [#9270](https://github.com/actualbudget/actual/pull/9270) Add the browser storage layer for the new SQLite engine (not yet enabled) — thanks @MikesGlitch
+- [#9519](https://github.com/actualbudget/actual/pull/9519) Allow AI tools to help write pull request descriptions, require proof screenshots or a video for app changes, and drop the "[AI]" and "[WIP]" title prefixes — thanks @MatissJanis
+- [#9600](https://github.com/actualbudget/actual/pull/9600) Add signed Android release builds — thanks @jfdoming
+- [#9603](https://github.com/actualbudget/actual/pull/9603) Build the iOS app with the latest Apple developer tools so it keeps being accepted by the App Store — thanks @MatissJanis
+- [#9512](https://github.com/actualbudget/actual/pull/9512) Make the bundle size check find builds reliably, skip waiting on the mobile build, and stop early when a build has failed — thanks @tabedzki
+- [#9520](https://github.com/actualbudget/actual/pull/9520) Count contributor points for work done in the `actual-gh-bot` repository too — thanks @MatissJanis
+- [#9627](https://github.com/actualbudget/actual/pull/9627) Make the design reference list the spacing and radius values the code exports — thanks @matt-fidd
+- [#9606](https://github.com/actualbudget/actual/pull/9606) Remove the docs advice against using the desktop app with a server — thanks @MikesGlitch
+- [#9425](https://github.com/actualbudget/actual/pull/9425) Docs: fix the broken MASH Ansible playbook link under additional installation options. — thanks @spatterIight
+- [#9610](https://github.com/actualbudget/actual/pull/9610) Fix systemd unit file path and enable command in build-from-source docs — thanks @Ron5474
+- [#9439](https://github.com/actualbudget/actual/pull/9439) Add a security policy explaining how to report vulnerabilities and that bank sync credentials set up by an admin are shared with all users on the server — thanks @MatissJanis
+- [#9622](https://github.com/actualbudget/actual/pull/9622) Remove an unsupported setting from the automated code review configuration — thanks @MatissJanis
+- [#9503](https://github.com/actualbudget/actual/pull/9503) Fix a flaky end-to-end test for range selection in the transaction table — thanks @matt-fidd
+- [#9465](https://github.com/actualbudget/actual/pull/9465) Fix the iOS app not launching when built with Xcode 27 — thanks @MatissJanis
+- [#9496](https://github.com/actualbudget/actual/pull/9496) Keep the iOS App Store description and screenshots in the repository and publish them automatically with each release; stop the clock and status icons from covering buttons on large-screen devices in the mobile app — thanks @MatissJanis
+- [#9628](https://github.com/actualbudget/actual/pull/9628) Apply the shared lint rules to the component library again — thanks @matt-fidd
+- [#9629](https://github.com/actualbudget/actual/pull/9629) Add lint rules that stop new hard-coded colors and misused theme tokens — thanks @matt-fidd
+- [#9546](https://github.com/actualbudget/actual/pull/9546) Speed up the docs site by lazy-loading images and trimming the search index — thanks @MikesGlitch
+- [#9522](https://github.com/actualbudget/actual/pull/9522) Migrate the sync-server database wrapper to TypeScript — thanks @YasinzHyper
+- [#9314](https://github.com/actualbudget/actual/pull/9314) Publish iOS app builds to TestFlight from CI on every master merge, release, or manual run — thanks @MatissJanis
+- [#9327](https://github.com/actualbudget/actual/pull/9327) Add a sandboxed Mac App Store build of the desktop app and publish it to TestFlight from CI — thanks @MatissJanis
+- [#9429](https://github.com/actualbudget/actual/pull/9429) Remove AUR actual-appimage from community install docs — thanks @MikesGlitch
+- [#9324](https://github.com/actualbudget/actual/pull/9324) Document that iOS publishing from CI needs an Admin App Store Connect key — thanks @MatissJanis
+- [#9358](https://github.com/actualbudget/actual/pull/9358) Move the donut chart's colour helpers and hover labels into their own files — thanks @RandomSpaceship
+- [#9643](https://github.com/actualbudget/actual/pull/9643) Make the iOS app test in CI more reliable by starting the simulator before the test and retrying on failure — thanks @MatissJanis
+- [#9669](https://github.com/actualbudget/actual/pull/9669) Add a feedback link to the experimental browser storage engine setting — thanks @MikesGlitch
+- [#9330](https://github.com/actualbudget/actual/pull/9330) Submit the iOS and Mac App Store builds for review automatically on each release, and send nightly TestFlight builds to the external beta testers group instead of uploading on every merge — thanks @MatissJanis
+- [#9626](https://github.com/actualbudget/actual/pull/9626) Upgrade oxlint and switch type-aware linting from tsgolint to tsrs to halve lint memory usage — thanks @MatissJanis
+- [#9510](https://github.com/actualbudget/actual/pull/9510) Add a contrast test for theme color pairs — thanks @matt-fidd
+- [#9499](https://github.com/actualbudget/actual/pull/9499) Use theme tokens in the command bar and chart colors instead of raw CSS variable names — thanks @matt-fidd
+- [#9498](https://github.com/actualbudget/actual/pull/9498) Remove unused theme colors and add two that were missing from the dark theme — thanks @matt-fidd
+- [#9508](https://github.com/actualbudget/actual/pull/9508) Define theme colors in a single source file instead of one CSS file per theme — thanks @matt-fidd
+- [#9411](https://github.com/actualbudget/actual/pull/9411) Upgrade the `akahu` bank sync client to 2.6.0 — thanks @MatissJanis
+- [#9450](https://github.com/actualbudget/actual/pull/9450) Upgrade dependencies to resolve security advisories — thanks @MatissJanis
+- [#9664](https://github.com/actualbudget/actual/pull/9664) Run yarn lock hash once — thanks @UnderKoen
+
 ## 26.11.0
 
 Release date: 2026-11-01
