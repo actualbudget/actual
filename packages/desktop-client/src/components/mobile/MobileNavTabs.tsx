@@ -18,6 +18,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { useDrag } from '@use-gesture/react';
 
+import { NEW_PAGE_STACK_STATE } from '#components/MobilePageStack';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useScrollListener } from '#hooks/useScrollListener';
 import { setNotificationInset } from '#notifications/notificationsSlice';
@@ -134,6 +135,8 @@ export function MobileNavTabs() {
       path: '/transactions/new',
       style: navTabStyle,
       Icon: SvgAdd,
+      // Opens on top of the current page, so closing it goes back there.
+      opensOnTop: true,
     },
     {
       name: t('Accounts'),
@@ -272,12 +275,22 @@ type NavTabProps = {
   Icon: ComponentType<NavTabIconProps>;
   style?: CSSProperties;
   onClick: ComponentProps<typeof NavLink>['onClick'];
+  opensOnTop?: boolean;
 };
 
-function NavTab({ Icon: TabIcon, name, path, style, onClick }: NavTabProps) {
+function NavTab({
+  Icon: TabIcon,
+  name,
+  path,
+  style,
+  onClick,
+  opensOnTop = false,
+}: NavTabProps) {
   return (
     <NavLink
       to={path}
+      // Switching tabs starts over, like a native tab bar.
+      state={opensOnTop ? undefined : NEW_PAGE_STACK_STATE}
       style={({ isActive }) => ({
         ...styles.noTapHighlight,
         alignItems: 'center',

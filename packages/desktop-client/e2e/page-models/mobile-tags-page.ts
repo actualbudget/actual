@@ -18,7 +18,9 @@ export class MobileTagsPage {
   constructor(page: Page) {
     this.page = page;
     this.heading = page.getByRole('heading', { name: 'Tags' });
-    this.searchBox = page.getByPlaceholder('Filter tags…');
+    this.searchBox = page
+      .getByPlaceholder('Filter tags…')
+      .filter({ visible: true });
     this.addButton = page.getByRole('button', { name: 'Add new tag' });
     this.tagsList = page.getByRole('grid', { name: 'Tags' });
     this.emptyMessage = page.getByText('No tags yet.');

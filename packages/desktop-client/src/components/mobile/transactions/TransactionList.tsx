@@ -57,6 +57,9 @@ import { ROW_HEIGHT, TransactionListItem } from './TransactionListItem';
 // The floating action bar's height and bottom offset, plus a small gap.
 const NOTIFICATION_BOTTOM_INSET = 75;
 
+// Height of the date headers between days of transactions.
+const SECTION_HEADER_HEIGHT = 24;
+
 type LoadingProps = {
   style?: CSSProperties;
   'aria-label': string;
@@ -171,8 +174,11 @@ export function TransactionList({
       <View style={{ flex: 1 }}>
         <Virtualizer
           layout={ListLayout}
+          // Exact sizes rather than estimates, so the layout never has to
+          // re-measure and shift rows under the user while they scroll.
           layoutOptions={{
-            estimatedRowHeight: ROW_HEIGHT,
+            rowHeight: ROW_HEIGHT,
+            headingHeight: SECTION_HEADER_HEIGHT,
             padding: 0,
           }}
         >
@@ -224,9 +230,10 @@ export function TransactionList({
                     backgroundColor: theme.pageBackground,
                     color: theme.tableHeaderText,
                     display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'center',
-                    paddingBottom: 4,
-                    paddingTop: 4,
+                    boxSizing: 'border-box',
+                    height: SECTION_HEADER_HEIGHT,
                     position: 'sticky',
                     top: '0',
                     width: '100%',
